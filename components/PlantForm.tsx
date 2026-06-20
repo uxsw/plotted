@@ -8,9 +8,34 @@ import type { Plant, PlantInsert, SunNeeds } from "@/lib/types";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const SUN_OPTIONS: SunNeeds[] = ["full sun", "partial shade", "full shade"];
+const MAX_PX = 800;
+const JPEG_QUALITY = 0.85;
 
 interface Props {
   plant?: Plant;
+}
+
+function resizeImage(file: File): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = document.createElement("img");
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const scale = Math.min(1, MAX_PX / Math.max(img.width, img.height));
+      const canvas = document.createElement("canvas");
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      canvas.toBlob(
+        (blob) => (blob ? resolve(blob) : reject(new Error("Canvas toBlob failed"))),
+        "image/jpeg",
+        JPEG_QUALITY
+      );
+    };
+    img.onerror = reject;
+    img.src = url;
+  });
 }
 
 export default function PlantForm({ plant }: Props) {
@@ -30,7 +55,6 @@ export default function PlantForm({ plant }: Props) {
   const [flowerFrom, setFlowerFrom] = useState(plant?.flowering_season_from?.toString() ?? "");
   const [flowerTo, setFlowerTo] = useState(plant?.flowering_season_to?.toString() ?? "");
 
-  // Month/year for date_planted
   const initialDate = plant?.date_planted ? new Date(plant.date_planted) : null;
   const [plantedMonth, setPlantedMonth] = useState(
     initialDate ? String(initialDate.getUTCMonth() + 1) : String(now.getMonth() + 1)
@@ -40,27 +64,43 @@ export default function PlantForm({ plant }: Props) {
   );
 
   const [photoPreview, setPhotoPreview] = useState<string | null>(plant?.photo_url ?? null);
-  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
 
-  function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
-    setPhotoFile(file);
-    setPhotoPreview(URL.createObjectURL(file));
+    try {
+      const blob = await resizeImage(file);
+      setPhotoBlob(blob);
+      setPhotoPreview(URL.createObjectURL(blob));
+    } catch {
+      setError("Could not process image. Please try another file.");
+    }
+  }
+
+  function handleDropZoneClick() {
+    fileRef.current?.click();
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    const file = e.dataTransfer.files?.[0];
+    if (!file) return;
+    const fakeEvent = { target: { files: e.dataTransfer.files } } as unknown as React.ChangeEvent<HTMLInputElement>;
+    handleFileChange(fakeEvent);
   }
 
   async function uploadPhoto(userId: string): Promise<string | null> {
-    if (!photoFile) return plant?.photo_url ?? null;
+    if (!photoBlob) return plant?.photo_url ?? null;
     setUploading(true);
     const supabase = createClient();
-    const ext = photoFile.name.split(".").pop();
-    const path = `${userId}/${Date.now()}.${ext}`;
+    const path = `${userId}/${Date.now()}.jpg`;
     const { error: uploadError } = await supabase.storage
       .from("plant-photos")
-      .upload(path, photoFile, { upsert: true });
+      .upload(path, photoBlob, { contentType: "image/jpeg", upsert: true });
     setUploading(false);
     if (uploadError) throw new Error(uploadError.message);
     const { data } = supabase.storage.from("plant-photos").getPublicUrl(path);
@@ -96,13 +136,13 @@ export default function PlantForm({ plant }: Props) {
       };
 
       if (isEdit) {
-        const { error } = await supabase.from("plants").update(payload).eq("id", plant.id);
+        const { error } = await supabase.from("plants").update(payload).eq("id", plant.id).eq("user_id", user.id);
         if (error) throw error;
         router.push(`/plants/${plant.id}`);
       } else {
         const { data, error } = await supabase
           .from("plants")
-          .insert({ ...payload, user_id: user.id })
+          .insert(payload)
           .select()
           .single();
         if (error) throw error;
@@ -121,20 +161,36 @@ export default function PlantForm({ plant }: Props) {
     <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow p-6 space-y-6 max-w-2xl">
       {error && <p className="text-sm text-red-600 bg-red-50 p-3 rounded">{error}</p>}
 
-      {/* Photo */}
+      {/* Photo upload */}
       <div>
         <label className="block text-sm font-medium text-gray-700 mb-2">Photo</label>
-        {photoPreview && (
-          <div className="relative w-full h-48 mb-2 rounded overflow-hidden">
-            <Image src={photoPreview} alt="Preview" fill className="object-cover" />
-          </div>
-        )}
+        <div
+          onClick={handleDropZoneClick}
+          onDrop={handleDrop}
+          onDragOver={(e) => e.preventDefault()}
+          className="border-2 border-dashed border-gray-300 rounded-lg overflow-hidden cursor-pointer hover:border-green-500 transition-colors"
+        >
+          {photoPreview ? (
+            <div className="relative w-full h-56">
+              <Image src={photoPreview} alt="Preview" fill className="object-cover" />
+              <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
+                <span className="text-white text-sm font-medium">Click to change photo</span>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-10 text-gray-400 gap-2">
+              <span className="text-3xl">📷</span>
+              <span className="text-sm">Click to upload a photo</span>
+              <span className="text-xs">or drag and drop</span>
+            </div>
+          )}
+        </div>
         <input
           type="file"
           accept="image/*"
           ref={fileRef}
           onChange={handleFileChange}
-          className="text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded file:border-0 file:bg-green-50 file:text-green-700 file:text-sm file:font-medium hover:file:bg-green-100"
+          className="hidden"
         />
       </div>
 
@@ -164,7 +220,6 @@ export default function PlantForm({ plant }: Props) {
           />
         </div>
 
-        {/* Date planted */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Month planted</label>
           <select
@@ -215,7 +270,6 @@ export default function PlantForm({ plant }: Props) {
           </select>
         </div>
 
-        {/* Flowering season */}
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Flowering from</label>
           <select
