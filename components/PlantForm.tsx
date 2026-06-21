@@ -3,10 +3,15 @@
 import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { createClient } from "@/lib/supabase/client";
 import type { Plant, PlantInsert, SunNeeds } from "@/lib/types";
 import { upsertPlant } from "@/app/actions/plants";
 import type { FieldErrors } from "@/lib/validation";
+import {
+  ACCEPTED_INPUT_TYPES,
+  ACCEPTED_INPUT_TYPES_LABEL,
+  MAX_ORIGINAL_SIZE,
+  MAX_ORIGINAL_SIZE_LABEL,
+} from "@/lib/upload";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const SUN_OPTIONS: SunNeeds[] = ["full sun", "partial shade", "full shade"];
@@ -77,6 +82,17 @@ export default function PlantForm({ plant }: Props) {
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
+    setError(null);
+
+    if (!(ACCEPTED_INPUT_TYPES as readonly string[]).includes(file.type)) {
+      setError(`Unsupported file type. Please select a ${ACCEPTED_INPUT_TYPES_LABEL} image.`);
+      return;
+    }
+    if (file.size > MAX_ORIGINAL_SIZE) {
+      setError(`Image is too large (max ${MAX_ORIGINAL_SIZE_LABEL}). Please choose a smaller file.`);
+      return;
+    }
+
     try {
       const blob = await resizeImage(file);
       setPhotoBlob(blob);
@@ -98,18 +114,19 @@ export default function PlantForm({ plant }: Props) {
     handleFileChange(fakeEvent);
   }
 
-  async function uploadPhoto(userId: string): Promise<string | null> {
+  async function uploadPhoto(): Promise<string | null> {
     if (!photoBlob) return plant?.photo_url ?? null;
     setUploading(true);
-    const supabase = createClient();
-    const path = `${userId}/${Date.now()}.jpg`;
-    const { error: uploadError } = await supabase.storage
-      .from("plant-photos")
-      .upload(path, photoBlob, { contentType: "image/jpeg", upsert: true });
-    setUploading(false);
-    if (uploadError) throw new Error(uploadError.message);
-    const { data } = supabase.storage.from("plant-photos").getPublicUrl(path);
-    return data.publicUrl;
+    try {
+      const formData = new FormData();
+      formData.append("file", photoBlob, "photo.jpg");
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.error ?? "Upload failed");
+      return json.url as string;
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -119,13 +136,7 @@ export default function PlantForm({ plant }: Props) {
     setSaving(true);
 
     try {
-      // Photo upload is client-side (needs browser Storage client + user.id for path).
-      // DB write goes through the server action where sanitization is applied.
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error("Not authenticated");
-
-      const photoUrl = await uploadPhoto(user.id);
+      const photoUrl = await uploadPhoto();
 
       const payload: PlantInsert = {
         common_name: commonName,
