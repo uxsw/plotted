@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import React, { ReactNode } from "react";
 
 interface CardProps {
   photoUrl?: string | null;
@@ -6,7 +6,7 @@ interface CardProps {
   placeholder?: ReactNode;
   badge?: ReactNode;
   title: string;
-  subtitle?: string;
+  subtitle?: React.ReactNode;
   tags?: ReactNode;
   footer?: ReactNode;
   onClick?: () => void;
