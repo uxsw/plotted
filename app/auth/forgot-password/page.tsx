@@ -32,7 +32,7 @@ export default function ForgotPasswordPage() {
         <div className="w-full max-w-sm bg-white rounded-lg shadow p-6 text-center space-y-3">
           <div className="text-3xl">✉️</div>
           <h2 className="text-lg font-semibold text-gray-800">Check your email</h2>
-          <p className="text-sm text-gray-600">If an account exists for <strong>{email}</strong>, you'll receive a reset link shortly.</p>
+          <p className="text-sm text-gray-600">If an account exists for <strong>{email}</strong>, you&apos;ll receive a reset link shortly.</p>
           <Link href="/auth/login" className="text-sm text-green-700 hover:underline">Back to sign in</Link>
         </div>
       </div>
