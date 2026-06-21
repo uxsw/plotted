@@ -6,6 +6,7 @@ import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import type { Plant, PlantInsert, SunNeeds } from "@/lib/types";
 import { upsertPlant } from "@/app/actions/plants";
+import type { FieldErrors } from "@/lib/validation";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const SUN_OPTIONS: SunNeeds[] = ["full sun", "partial shade", "full shade"];
@@ -70,6 +71,7 @@ export default function PlantForm({ plant }: Props) {
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [saving, setSaving] = useState(false);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -113,6 +115,7 @@ export default function PlantForm({ plant }: Props) {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
+    setFieldErrors({});
     setSaving(true);
 
     try {
@@ -143,6 +146,11 @@ export default function PlantForm({ plant }: Props) {
       };
 
       const result = await upsertPlant(isEdit ? plant.id : null, payload);
+      if ("fieldErrors" in result) {
+        setFieldErrors(result.fieldErrors);
+        setSaving(false);
+        return;
+      }
       if ("error" in result) throw new Error(result.error);
 
       router.push(`/plants/${result.id}`);
@@ -221,6 +229,7 @@ export default function PlantForm({ plant }: Props) {
             placeholder="e.g. Rosa"
             className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
           />
+          {fieldErrors.genus && <p className="text-xs text-red-600 mt-1">{fieldErrors.genus}</p>}
         </div>
 
         <div>
@@ -270,6 +279,7 @@ export default function PlantForm({ plant }: Props) {
               <option key={y} value={String(y)}>{y}</option>
             ))}
           </select>
+          {fieldErrors.date_planted && <p className="text-xs text-red-600 mt-1">{fieldErrors.date_planted}</p>}
         </div>
 
         <div>
@@ -309,6 +319,7 @@ export default function PlantForm({ plant }: Props) {
               <option key={m} value={String(i + 1)}>{m}</option>
             ))}
           </select>
+          {fieldErrors.flowering_season_from && <p className="text-xs text-red-600 mt-1">{fieldErrors.flowering_season_from}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Flowering to</label>
@@ -322,27 +333,30 @@ export default function PlantForm({ plant }: Props) {
               <option key={m} value={String(i + 1)}>{m}</option>
             ))}
           </select>
+          {fieldErrors.flowering_season_to && <p className="text-xs text-red-600 mt-1">{fieldErrors.flowering_season_to}</p>}
         </div>
 
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Height at maturity (cm)</label>
           <input
             type="number"
-            min={0}
+            min={1}
             value={heightCm}
             onChange={(e) => setHeightCm(e.target.value)}
             className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
           />
+          {fieldErrors.eventual_height_cm && <p className="text-xs text-red-600 mt-1">{fieldErrors.eventual_height_cm}</p>}
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Spread at maturity (cm)</label>
           <input
             type="number"
-            min={0}
+            min={1}
             value={spreadCm}
             onChange={(e) => setSpreadCm(e.target.value)}
             className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
           />
+          {fieldErrors.eventual_spread_cm && <p className="text-xs text-red-600 mt-1">{fieldErrors.eventual_spread_cm}</p>}
         </div>
 
         <div className="sm:col-span-2">

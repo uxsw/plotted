@@ -2,15 +2,15 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { sanitizePlantName, sanitizeGenus, sanitizeSpecies } from "@/lib/sanitize";
+import { validatePlantInput, hasFieldErrors, type FieldErrors } from "@/lib/validation";
 import type { PlantInsert } from "@/lib/types";
 
-type UpsertResult = { id: string } | { error: string };
+type UpsertResult = { id: string } | { error: string } | { fieldErrors: FieldErrors };
 
 /**
- * Create or update a plant row. Sanitization of all name fields happens here,
- * server-side, immediately before the DB write — regardless of what the client sent.
- *
- * Pass plantId=null to insert a new plant; pass an existing id to update.
+ * Create or update a plant row.
+ * Order of operations: sanitize → validate → write.
+ * Pass plantId=null to insert; pass an existing id to update.
  */
 export async function upsertPlant(
   plantId: string | null,
@@ -29,6 +29,9 @@ export async function upsertPlant(
     species: data.species ? sanitizeSpecies(data.species) : null,
     cultivar: data.cultivar ? sanitizePlantName(data.cultivar) : null,
   };
+
+  const fieldErrors = validatePlantInput(clean);
+  if (hasFieldErrors(fieldErrors)) return { fieldErrors };
 
   if (plantId) {
     const { error } = await supabase
