@@ -1,26 +1,33 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@theme {
+  --color-paper: #FAF6EC;
+  --color-paper-deep: #F2ECDB;
+  --color-ink: #2B2A24;
+  --color-ink-soft: #5B574A;
+  --color-moss: #4F6B4A;
+  --color-moss-deep: #34492F;
+  --color-moss-tint: #E2EADD;
+  --color-clay: #C2603C;
+  --color-clay-tint: #F3E1D7;
+  --color-sand: #E8DFC8;
+  --color-sand-line: #D9CCAC;
+  --color-gold: #C99A3D;
+  --color-gold-tint: #F5EDDA;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-display: var(--font-fraunces), serif;
+  --font-sans: var(--font-inter), sans-serif;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --radius: 10px;
+  --radius-lg: 14px;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: #FAF6EC;
+  color: #2B2A24;
+  font-family: var(--font-inter), sans-serif;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.08'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 300px 300px;
+  background-blend-mode: multiply;
 }
