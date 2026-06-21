@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/client";
 import type { Plant, PlantInsert, SunNeeds } from "@/lib/types";
+import { upsertPlant } from "@/app/actions/plants";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const SUN_OPTIONS: SunNeeds[] = ["full sun", "partial shade", "full shade"];
@@ -115,6 +116,8 @@ export default function PlantForm({ plant }: Props) {
     setSaving(true);
 
     try {
+      // Photo upload is client-side (needs browser Storage client + user.id for path).
+      // DB write goes through the server action where sanitization is applied.
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("Not authenticated");
@@ -122,10 +125,10 @@ export default function PlantForm({ plant }: Props) {
       const photoUrl = await uploadPhoto(user.id);
 
       const payload: PlantInsert = {
-        common_name: commonName.trim(),
-        genus: genus.trim(),
-        species: species.trim() || null,
-        cultivar: cultivar.trim() || null,
+        common_name: commonName,
+        genus,
+        species: species || null,
+        cultivar: cultivar || null,
         date_planted: `${plantedYear}-${plantedMonth.padStart(2, "0")}-01`,
         photo_url: photoUrl,
         location: location.trim() || null,
@@ -139,19 +142,10 @@ export default function PlantForm({ plant }: Props) {
         notes: notes.trim() || null,
       };
 
-      if (isEdit) {
-        const { error } = await supabase.from("plants").update(payload).eq("id", plant.id).eq("user_id", user.id);
-        if (error) throw error;
-        router.push(`/plants/${plant.id}`);
-      } else {
-        const { data, error } = await supabase
-          .from("plants")
-          .insert(payload)
-          .select()
-          .single();
-        if (error) throw error;
-        router.push(`/plants/${data.id}`);
-      }
+      const result = await upsertPlant(isEdit ? plant.id : null, payload);
+      if ("error" in result) throw new Error(result.error);
+
+      router.push(`/plants/${result.id}`);
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -209,6 +203,7 @@ export default function PlantForm({ plant }: Props) {
             required
             value={commonName}
             onChange={(e) => setCommonName(e.target.value)}
+            onBlur={(e) => setCommonName(e.target.value.trim())}
             className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>
@@ -222,6 +217,7 @@ export default function PlantForm({ plant }: Props) {
             required
             value={genus}
             onChange={(e) => setGenus(e.target.value)}
+            onBlur={(e) => setGenus(e.target.value.trim())}
             placeholder="e.g. Rosa"
             className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
           />
@@ -233,6 +229,7 @@ export default function PlantForm({ plant }: Props) {
             type="text"
             value={species}
             onChange={(e) => setSpecies(e.target.value)}
+            onBlur={(e) => setSpecies(e.target.value.trim())}
             placeholder="e.g. canina"
             className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
           />
@@ -244,6 +241,7 @@ export default function PlantForm({ plant }: Props) {
             type="text"
             value={cultivar}
             onChange={(e) => setCultivar(e.target.value)}
+            onBlur={(e) => setCultivar(e.target.value.trim())}
             placeholder="e.g. Royal Bumble"
             className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
           />
