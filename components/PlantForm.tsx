@@ -45,7 +45,9 @@ export default function PlantForm({ plant }: Props) {
 
   const now = new Date();
   const [commonName, setCommonName] = useState(plant?.common_name ?? "");
-  const [speciesName, setSpeciesName] = useState(plant?.species_name ?? "");
+  const [genus, setGenus] = useState(plant?.genus ?? "");
+  const [species, setSpecies] = useState(plant?.species ?? "");
+  const [cultivar, setCultivar] = useState(plant?.cultivar ?? "");
   const [location, setLocation] = useState(plant?.location ?? "");
   const [sunNeeds, setSunNeeds] = useState<SunNeeds | "">(plant?.sun_needs ?? "");
   const [purchasedFrom, setPurchasedFrom] = useState(plant?.purchased_from ?? "");
@@ -121,7 +123,9 @@ export default function PlantForm({ plant }: Props) {
 
       const payload: PlantInsert = {
         common_name: commonName.trim(),
-        species_name: speciesName.trim().toLowerCase() || null,
+        genus: genus.trim(),
+        species: species.trim() || null,
+        cultivar: cultivar.trim() || null,
         date_planted: `${plantedYear}-${plantedMonth.padStart(2, "0")}-01`,
         photo_url: photoUrl,
         location: location.trim() || null,
@@ -209,13 +213,38 @@ export default function PlantForm({ plant }: Props) {
           />
         </div>
 
-        <div className="sm:col-span-2">
-          <label className="block text-sm font-medium text-gray-700 mb-1">Species name</label>
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Genus <span className="text-red-500">*</span>
+          </label>
           <input
             type="text"
-            value={speciesName}
-            onChange={(e) => setSpeciesName(e.target.value)}
-            placeholder="e.g. rosa canina"
+            required
+            value={genus}
+            onChange={(e) => setGenus(e.target.value)}
+            placeholder="e.g. Rosa"
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Species</label>
+          <input
+            type="text"
+            value={species}
+            onChange={(e) => setSpecies(e.target.value)}
+            placeholder="e.g. canina"
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+        </div>
+
+        <div className="sm:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Cultivar</label>
+          <input
+            type="text"
+            value={cultivar}
+            onChange={(e) => setCultivar(e.target.value)}
+            placeholder="e.g. Royal Bumble"
             className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>

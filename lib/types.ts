@@ -5,7 +5,10 @@ export interface Plant {
   id: string;
   user_id: string;
   common_name: string;
-  species_name: string | null;
+  genus: string;
+  species: string | null;
+  cultivar: string | null;
+  search_vector?: string; // generated column — never written, rarely read
   date_planted: string | null; // ISO date, day always stored as 1
   photo_url: string | null;
   location: string | null;
@@ -21,4 +24,4 @@ export interface Plant {
   updated_at: string;
 }
 
-export type PlantInsert = Omit<Plant, "id" | "user_id" | "created_at" | "updated_at">;
+export type PlantInsert = Omit<Plant, "id" | "user_id" | "created_at" | "updated_at" | "search_vector">;

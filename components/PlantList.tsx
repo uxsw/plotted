@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { Plant } from "@/lib/types";
+import { ScientificName } from "@/lib/plantName";
 
 const MONTHS = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
@@ -32,7 +33,7 @@ export default function PlantList({ plants }: { plants: Plant[] }) {
 
   function toggleAll() {
     setSelected((prev) =>
-      prev.size === plants.length ? new Set() : new Set(plants.map((p) => p.id))
+      prev.size > 0 && prev.size === plants.length ? new Set() : new Set(plants.map((p) => p.id))
     );
   }
 
@@ -66,7 +67,7 @@ export default function PlantList({ plants }: { plants: Plant[] }) {
               <th className="px-4 py-3 w-8">
                 <input
                   type="checkbox"
-                  checked={selected.size === plants.length}
+                  checked={plants.length > 0 && selected.size === plants.length}
                   onChange={toggleAll}
                   className="rounded"
                 />
@@ -79,57 +80,67 @@ export default function PlantList({ plants }: { plants: Plant[] }) {
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {plants.map((plant) => (
-              <tr key={plant.id} className="hover:bg-gray-50">
-                <td className="px-4 py-3">
-                  <input
-                    type="checkbox"
-                    checked={selected.has(plant.id)}
-                    onChange={() => toggleOne(plant.id)}
-                    className="rounded"
-                  />
-                </td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center gap-3">
-                    {plant.photo_url ? (
-                      <Image
-                        src={plant.photo_url}
-                        alt={plant.common_name}
-                        width={36}
-                        height={36}
-                        className="w-9 h-9 rounded object-cover flex-shrink-0"
-                      />
-                    ) : (
-                      <div className="w-9 h-9 rounded bg-green-100 flex items-center justify-center flex-shrink-0 text-lg">🌿</div>
-                    )}
-                    <div>
-                      <Link
-                        href={`/plants/${plant.id}`}
-                        className="font-medium text-gray-900 hover:text-green-700 hover:underline"
-                      >
-                        {plant.common_name}
-                      </Link>
-                      {plant.species_name && (
-                        <p className="text-xs text-gray-400 italic">{plant.species_name}</p>
+            {plants.map((plant) => {
+              const title = plant.common_name || null;
+              const hasScientific = !!plant.genus;
+              return (
+                <tr key={plant.id} className="hover:bg-gray-50">
+                  <td className="px-4 py-3">
+                    <input
+                      type="checkbox"
+                      checked={selected.has(plant.id)}
+                      onChange={() => toggleOne(plant.id)}
+                      className="rounded"
+                    />
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      {plant.photo_url ? (
+                        <Image
+                          src={plant.photo_url}
+                          alt={plant.common_name || plant.genus}
+                          width={36}
+                          height={36}
+                          className="w-9 h-9 rounded object-cover flex-shrink-0"
+                        />
+                      ) : (
+                        <div className="w-9 h-9 rounded bg-green-100 flex items-center justify-center flex-shrink-0 text-lg">🌿</div>
                       )}
+                      <div>
+                        <Link
+                          href={`/plants/${plant.id}`}
+                          className="font-medium text-gray-900 hover:text-green-700 hover:underline"
+                        >
+                          {title ?? (
+                            hasScientific
+                              ? <ScientificName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} />
+                              : "Unnamed plant"
+                          )}
+                        </Link>
+                        {title && hasScientific && (
+                          <p className="text-xs text-gray-400 mt-0.5">
+                            <ScientificName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} />
+                          </p>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                </td>
-                <td className="px-4 py-3 text-gray-600 hidden sm:table-cell">{plant.location ?? "—"}</td>
-                <td className="px-4 py-3 text-gray-600 hidden md:table-cell">{datePlanted(plant.date_planted) ?? "—"}</td>
-                <td className="px-4 py-3 text-gray-600 hidden md:table-cell">
-                  {floweringRange(plant.flowering_season_from, plant.flowering_season_to) ?? "—"}
-                </td>
-                <td className="px-4 py-3 text-right">
-                  <Link
-                    href={`/plants/${plant.id}/edit`}
-                    className="text-xs text-gray-400 hover:text-green-700 hover:underline"
-                  >
-                    Edit
-                  </Link>
-                </td>
-              </tr>
-            ))}
+                  </td>
+                  <td className="px-4 py-3 text-gray-600 hidden sm:table-cell">{plant.location ?? "—"}</td>
+                  <td className="px-4 py-3 text-gray-600 hidden md:table-cell">{datePlanted(plant.date_planted) ?? "—"}</td>
+                  <td className="px-4 py-3 text-gray-600 hidden md:table-cell">
+                    {floweringRange(plant.flowering_season_from, plant.flowering_season_to) ?? "—"}
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <Link
+                      href={`/plants/${plant.id}/edit`}
+                      className="text-xs text-gray-400 hover:text-green-700 hover:underline"
+                    >
+                      Edit
+                    </Link>
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>

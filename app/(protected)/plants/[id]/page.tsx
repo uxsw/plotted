@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
 import DeletePlantButton from "@/components/DeletePlantButton";
+import { ScientificName, plantDisplayTitle } from "@/lib/plantName";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 
@@ -25,8 +26,10 @@ export default async function PlantDetailPage({ params }: { params: Promise<{ id
 
   if (!plant) notFound();
 
+  const title = plantDisplayTitle(plant);
+  const hasScientific = !!plant.genus;
+
   const fields: { label: string; value: string | null | undefined }[] = [
-    { label: "Species", value: plant.species_name },
     { label: "Date planted", value: datePlanted(plant.date_planted) },
     { label: "Location", value: plant.location },
     { label: "Sun needs", value: plant.sun_needs },
@@ -47,7 +50,7 @@ export default async function PlantDetailPage({ params }: { params: Promise<{ id
           >
             Edit
           </Link>
-          <DeletePlantButton id={plant.id} name={plant.common_name} />
+          <DeletePlantButton id={plant.id} name={title} />
         </div>
       </div>
 
@@ -56,7 +59,7 @@ export default async function PlantDetailPage({ params }: { params: Promise<{ id
           <div className="relative w-full h-64">
             <Image
               src={plant.photo_url}
-              alt={plant.common_name}
+              alt={title}
               fill
               className="object-cover"
             />
@@ -64,9 +67,17 @@ export default async function PlantDetailPage({ params }: { params: Promise<{ id
         )}
         <div className="p-6 space-y-4">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">{plant.common_name}</h1>
-            {plant.species_name && (
-              <p className="text-sm italic text-gray-500 mt-0.5">{plant.species_name}</p>
+            <h1 className="text-2xl font-bold text-gray-900">
+              {plant.common_name || (
+                hasScientific
+                  ? <ScientificName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} />
+                  : "Unnamed plant"
+              )}
+            </h1>
+            {plant.common_name && hasScientific && (
+              <p className="text-sm text-gray-500 mt-0.5">
+                <ScientificName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} />
+              </p>
             )}
           </div>
 
