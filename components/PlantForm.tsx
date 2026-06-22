@@ -159,7 +159,6 @@ export default function PlantForm({ plant }: Props) {
       const result = await upsertPlant(isEdit ? plant.id : null, payload);
       if ("fieldErrors" in result) {
         setFieldErrors(result.fieldErrors);
-        setSaving(false);
         return;
       }
       if ("error" in result) throw new Error(result.error);
@@ -168,6 +167,7 @@ export default function PlantForm({ plant }: Props) {
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
       setSaving(false);
     }
   }
