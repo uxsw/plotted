@@ -7,6 +7,44 @@ import { sanitizePlantName, sanitizeGenus, sanitizeSpecies } from "@/lib/sanitiz
 import { validatePlantInput, hasFieldErrors, type FieldErrors } from "@/lib/validation";
 import type { PlantInsert } from "@/lib/types";
 
+export async function updatePlantField(
+  plantId: string,
+  data: Partial<PlantInsert>
+): Promise<{ error: string } | void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const clean: Partial<PlantInsert> = { ...data };
+
+  if ("common_name" in data) {
+    clean.common_name = data.common_name ? sanitizePlantName(data.common_name) : "";
+  }
+  if ("species" in data) {
+    clean.species = data.species ? sanitizeSpecies(data.species) : null;
+    if (!clean.species) return { error: "Species is required." };
+  }
+  if ("cultivar" in data) {
+    clean.cultivar = data.cultivar ? sanitizePlantName(data.cultivar) : null;
+  }
+  if ("purchased_from" in data) {
+    clean.purchased_from = typeof data.purchased_from === "string" ? data.purchased_from.trim() || null : null;
+  }
+  if ("notes" in data) {
+    clean.notes = typeof data.notes === "string" ? data.notes.trim() || null : null;
+  }
+
+  const { error } = await supabase
+    .from("plants")
+    .update(clean)
+    .eq("id", plantId)
+    .eq("user_id", user.id);
+
+  if (error) return { error: error.message };
+  revalidatePath(`/plants/${plantId}`);
+  revalidatePath("/plants");
+}
+
 type UpsertError = { error: string } | { fieldErrors: FieldErrors };
 
 /**

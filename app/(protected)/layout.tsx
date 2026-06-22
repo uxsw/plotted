@@ -1,7 +1,7 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import LogoutButton from "@/components/LogoutButton";
+import UserMenu from "@/components/UserMenu";
 
 export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -15,10 +15,7 @@ export default async function ProtectedLayout({ children }: { children: React.Re
         <Link href="/" className="font-display font-medium text-lg text-moss">
           Plotted
         </Link>
-        <div className="flex items-center gap-4">
-          <span className="text-xs font-sans text-ink-soft">{user.email}</span>
-          <LogoutButton />
-        </div>
+        <UserMenu email={user.email ?? ""} />
       </nav>
       <main className="max-w-[500px] mx-auto px-4 py-8">{children}</main>
     </div>

@@ -14,7 +14,7 @@ const variantClasses: Record<Variant, string> = {
   secondary:
     "border border-moss text-moss bg-transparent hover:bg-moss-tint disabled:opacity-50 disabled:cursor-not-allowed",
   ghost:
-    "text-ink-soft bg-transparent hover:bg-sand disabled:opacity-50 disabled:cursor-not-allowed",
+    "text-ink-soft bg-transparent hover:bg-sand cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
