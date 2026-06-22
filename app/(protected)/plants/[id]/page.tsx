@@ -45,6 +45,12 @@ export default async function PlantDetailPage({ params }: { params: Promise<{ id
         <Link href="/plants" className="text-sm text-gray-500 hover:underline">← My Plants</Link>
         <div className="flex gap-3">
           <Link
+            href="/plants/new"
+            className="inline-flex items-center rounded border border-moss px-3 py-1.5 text-sm font-medium font-sans text-moss hover:bg-moss-tint transition-colors"
+          >
+            Add another
+          </Link>
+          <Link
             href={`/plants/${plant.id}/edit`}
             className="text-sm bg-white border border-gray-300 text-gray-700 px-3 py-1.5 rounded hover:bg-gray-50"
           >
