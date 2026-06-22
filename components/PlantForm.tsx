@@ -157,14 +157,12 @@ export default function PlantForm({ plant }: Props) {
       };
 
       const result = await upsertPlant(isEdit ? plant.id : null, payload);
+      if (!result) return; // redirect() handled navigation server-side
       if ("fieldErrors" in result) {
         setFieldErrors(result.fieldErrors);
         return;
       }
-      if ("error" in result) throw new Error(result.error);
-
-      router.push(`/plants/${result.id}`);
-      router.refresh();
+      throw new Error(result.error);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {

@@ -1,21 +1,24 @@
 "use server";
 
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { sanitizePlantName, sanitizeGenus, sanitizeSpecies } from "@/lib/sanitize";
 import { validatePlantInput, hasFieldErrors, type FieldErrors } from "@/lib/validation";
 import type { PlantInsert } from "@/lib/types";
 
-type UpsertResult = { id: string } | { error: string } | { fieldErrors: FieldErrors };
+type UpsertError = { error: string } | { fieldErrors: FieldErrors };
 
 /**
- * Create or update a plant row.
- * Order of operations: sanitize → validate → write.
+ * Create or update a plant row, then redirect to the detail page.
+ * Returns an error shape only on failure; on success, redirect() handles navigation.
+ * Order of operations: sanitize → validate → write → redirect.
  * Pass plantId=null to insert; pass an existing id to update.
  */
 export async function upsertPlant(
   plantId: string | null,
   data: PlantInsert
-): Promise<UpsertResult> {
+): Promise<UpsertError | void> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -40,7 +43,8 @@ export async function upsertPlant(
       .eq("id", plantId)
       .eq("user_id", user.id);
     if (error) return { error: error.message };
-    return { id: plantId };
+    revalidatePath("/plants");
+    redirect(`/plants/${plantId}`);
   } else {
     const { data: row, error } = await supabase
       .from("plants")
@@ -48,6 +52,7 @@ export async function upsertPlant(
       .select("id")
       .single();
     if (error) return { error: error.message };
-    return { id: row.id };
+    revalidatePath("/plants");
+    redirect(`/plants/${row.id}`);
   }
 }
