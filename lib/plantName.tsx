@@ -3,20 +3,19 @@ import type { Plant } from "@/lib/types";
 type NameParts = Pick<Plant, "genus" | "species" | "cultivar">;
 
 /**
- * Renders a botanical name with standard formatting:
- * genus and species in italics, cultivar in straight single quotes.
- * e.g. <em>Calamagrostis acutiflora</em> 'Karl Foerster'
+ * Renders species and cultivar in standard botanical formatting.
+ * Genus is intentionally omitted from display.
+ * e.g. <em>acutiflora</em> 'Karl Foerster'
  */
 export function ScientificName({
-  genus,
   species,
   cultivar,
   className,
-}: NameParts & { className?: string }) {
-  const italicPart = [genus, species].filter(Boolean).join(" ");
+}: Omit<NameParts, "genus"> & { genus?: string | null; className?: string }) {
+  if (!species && !cultivar) return null;
   return (
     <span className={className}>
-      <em>{italicPart}</em>
+      {species && <em>{species}</em>}
       {cultivar && ` '${cultivar}'`}
     </span>
   );
@@ -24,19 +23,19 @@ export function ScientificName({
 
 /**
  * Returns the plant's display title as a plain string.
- * Uses common_name if set; falls back to the scientific name string.
+ * Uses common_name if set; falls back to species/cultivar.
  */
 export function plantDisplayTitle(plant: Pick<Plant, "common_name" | "genus" | "species" | "cultivar">): string {
   if (plant.common_name) return plant.common_name;
-  const sci = [plant.genus, plant.species].filter(Boolean).join(" ");
-  return plant.cultivar ? `${sci} '${plant.cultivar}'` : sci;
+  if (plant.species && plant.cultivar) return `${plant.species} '${plant.cultivar}'`;
+  return plant.species ?? plant.cultivar ?? "Unnamed plant";
 }
 
 /**
- * Returns the full scientific name as a plain string (no italics).
+ * Returns species and cultivar as a plain string (no italics).
  * Useful for alt text, confirm dialogs, etc.
  */
-export function scientificNameString({ genus, species, cultivar }: NameParts): string {
-  const sci = [genus, species].filter(Boolean).join(" ");
-  return cultivar ? `${sci} '${cultivar}'` : sci;
+export function scientificNameString({ species, cultivar }: NameParts): string {
+  if (species && cultivar) return `${species} '${cultivar}'`;
+  return species ?? cultivar ?? "";
 }

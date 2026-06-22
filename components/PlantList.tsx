@@ -73,7 +73,6 @@ export default function PlantList({ plants }: { plants: Plant[] }) {
                 />
               </th>
               <th className="px-4 py-3 text-left font-medium text-gray-600">Plant</th>
-              <th className="px-4 py-3 text-left font-medium text-gray-600 hidden sm:table-cell">Location</th>
               <th className="px-4 py-3 text-left font-medium text-gray-600 hidden md:table-cell">Planted</th>
               <th className="px-4 py-3 text-left font-medium text-gray-600 hidden md:table-cell">Flowering</th>
               <th className="px-4 py-3 w-16"></th>
@@ -82,7 +81,7 @@ export default function PlantList({ plants }: { plants: Plant[] }) {
           <tbody className="divide-y divide-gray-100">
             {plants.map((plant) => {
               const title = plant.common_name || null;
-              const hasScientific = !!plant.genus;
+              const hasScientific = !!(plant.species || plant.cultivar);
               return (
                 <tr key={plant.id} className="hover:bg-gray-50">
                   <td className="px-4 py-3">
@@ -98,7 +97,7 @@ export default function PlantList({ plants }: { plants: Plant[] }) {
                       {plant.photo_url ? (
                         <Image
                           src={plant.photo_url}
-                          alt={plant.common_name || plant.genus}
+                          alt={plant.common_name || plant.species || "plant"}
                           width={36}
                           height={36}
                           className="w-9 h-9 rounded object-cover flex-shrink-0"
@@ -113,19 +112,18 @@ export default function PlantList({ plants }: { plants: Plant[] }) {
                         >
                           {title ?? (
                             hasScientific
-                              ? <ScientificName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} />
+                              ? <ScientificName species={plant.species} cultivar={plant.cultivar} />
                               : "Unnamed plant"
                           )}
                         </Link>
                         {title && hasScientific && (
                           <p className="text-xs text-gray-400 mt-0.5">
-                            <ScientificName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} />
+                            <ScientificName species={plant.species} cultivar={plant.cultivar} />
                           </p>
                         )}
                       </div>
                     </div>
                   </td>
-                  <td className="px-4 py-3 text-gray-600 hidden sm:table-cell">{plant.location ?? "—"}</td>
                   <td className="px-4 py-3 text-gray-600 hidden md:table-cell">{datePlanted(plant.date_planted) ?? "—"}</td>
                   <td className="px-4 py-3 text-gray-600 hidden md:table-cell">
                     {floweringRange(plant.flowering_season_from, plant.flowering_season_to) ?? "—"}

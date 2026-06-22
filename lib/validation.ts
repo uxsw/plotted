@@ -19,9 +19,9 @@ function isValidMonth(n: number | null | undefined): boolean {
 export function validatePlantInput(data: PlantInsert): FieldErrors {
   const errors: FieldErrors = {};
 
-  // genus — required after sanitization
-  if (!data.genus) {
-    errors.genus = "Genus is required.";
+  // species — required after sanitization
+  if (!data.species) {
+    errors.species = "Species is required.";
   }
 
   // date_planted — must be YYYY-MM-01 with a real month and sensible year

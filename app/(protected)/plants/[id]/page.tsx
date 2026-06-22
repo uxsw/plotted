@@ -27,11 +27,10 @@ export default async function PlantDetailPage({ params }: { params: Promise<{ id
   if (!plant) notFound();
 
   const title = plantDisplayTitle(plant);
-  const hasScientific = !!plant.genus;
+  const hasScientific = !!(plant.species || plant.cultivar);
 
   const fields: { label: string; value: string | null | undefined }[] = [
     { label: "Date planted", value: datePlanted(plant.date_planted) },
-    { label: "Location", value: plant.location },
     { label: "Sun needs", value: plant.sun_needs },
     { label: "Flowering season", value: floweringRange(plant.flowering_season_from, plant.flowering_season_to) },
     { label: "Height (mature)", value: plant.eventual_height_cm ? `${plant.eventual_height_cm} cm` : null },
@@ -76,13 +75,13 @@ export default async function PlantDetailPage({ params }: { params: Promise<{ id
             <h1 className="text-2xl font-bold text-gray-900">
               {plant.common_name || (
                 hasScientific
-                  ? <ScientificName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} />
+                  ? <ScientificName species={plant.species} cultivar={plant.cultivar} />
                   : "Unnamed plant"
               )}
             </h1>
             {plant.common_name && hasScientific && (
               <p className="text-sm text-gray-500 mt-0.5">
-                <ScientificName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} />
+                <ScientificName species={plant.species} cultivar={plant.cultivar} />
               </p>
             )}
           </div>

@@ -1,4 +1,4 @@
-export type SunNeeds = "full sun" | "partial shade" | "full shade";
+export type SunNeeds = "full sun" | "full sun / partial shade" | "partial shade" | "full shade";
 export type PlantStatus = "active" | "removed";
 
 export interface Plant {
@@ -11,7 +11,6 @@ export interface Plant {
   search_vector?: string; // generated column — never written, rarely read
   date_planted: string | null; // ISO date, day always stored as 1
   photo_url: string | null;
-  location: string | null;
   sun_needs: SunNeeds | null;
   flowering_season_from: number | null;
   flowering_season_to: number | null;

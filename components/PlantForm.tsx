@@ -14,7 +14,7 @@ import {
 } from "@/lib/upload";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
-const SUN_OPTIONS: SunNeeds[] = ["full sun", "partial shade", "full shade"];
+const SUN_OPTIONS: SunNeeds[] = ["full sun", "full sun / partial shade", "partial shade", "full shade"];
 const MAX_PX = 800;
 const JPEG_QUALITY = 0.85;
 
@@ -55,7 +55,6 @@ export default function PlantForm({ plant }: Props) {
   const [genus, setGenus] = useState(plant?.genus ?? "");
   const [species, setSpecies] = useState(plant?.species ?? "");
   const [cultivar, setCultivar] = useState(plant?.cultivar ?? "");
-  const [location, setLocation] = useState(plant?.location ?? "");
   const [sunNeeds, setSunNeeds] = useState<SunNeeds | "">(plant?.sun_needs ?? "");
   const [purchasedFrom, setPurchasedFrom] = useState(plant?.purchased_from ?? "");
   const [notes, setNotes] = useState(plant?.notes ?? "");
@@ -145,7 +144,6 @@ export default function PlantForm({ plant }: Props) {
         cultivar: cultivar || null,
         date_planted: `${plantedYear}-${plantedMonth.padStart(2, "0")}-01`,
         photo_url: photoUrl,
-        location: location.trim() || null,
         sun_needs: sunNeeds || null,
         flowering_season_from: flowerFrom ? parseInt(flowerFrom) : null,
         flowering_season_to: flowerTo ? parseInt(flowerTo) : null,
@@ -211,49 +209,23 @@ export default function PlantForm({ plant }: Props) {
 
       {/* Core fields */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="sm:col-span-2">
+        <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">
-            Common name <span className="text-red-500">*</span>
+            Species <span className="text-red-500">*</span>
           </label>
           <input
             type="text"
             required
-            value={commonName}
-            onChange={(e) => setCommonName(e.target.value)}
-            onBlur={(e) => setCommonName(e.target.value.trim())}
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-          />
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
-            Genus <span className="text-red-500">*</span>
-          </label>
-          <input
-            type="text"
-            required
-            value={genus}
-            onChange={(e) => setGenus(e.target.value)}
-            onBlur={(e) => setGenus(e.target.value.trim())}
-            placeholder="e.g. Rosa"
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-          />
-          {fieldErrors.genus && <p className="text-xs text-red-600 mt-1">{fieldErrors.genus}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Species</label>
-          <input
-            type="text"
             value={species}
             onChange={(e) => setSpecies(e.target.value)}
             onBlur={(e) => setSpecies(e.target.value.trim())}
             placeholder="e.g. canina"
             className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
           />
+          {fieldErrors.species && <p className="text-xs text-red-600 mt-1">{fieldErrors.species}</p>}
         </div>
 
-        <div className="sm:col-span-2">
+        <div>
           <label className="block text-sm font-medium text-gray-700 mb-1">Cultivar</label>
           <input
             type="text"
@@ -261,6 +233,17 @@ export default function PlantForm({ plant }: Props) {
             onChange={(e) => setCultivar(e.target.value)}
             onBlur={(e) => setCultivar(e.target.value.trim())}
             placeholder="e.g. Royal Bumble"
+            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+          />
+        </div>
+
+        <div className="sm:col-span-2">
+          <label className="block text-sm font-medium text-gray-700 mb-1">Common name</label>
+          <input
+            type="text"
+            value={commonName}
+            onChange={(e) => setCommonName(e.target.value)}
+            onBlur={(e) => setCommonName(e.target.value.trim())}
             className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
           />
         </div>
@@ -289,17 +272,6 @@ export default function PlantForm({ plant }: Props) {
             ))}
           </select>
           {fieldErrors.date_planted && <p className="text-xs text-red-600 mt-1">{fieldErrors.date_planted}</p>}
-        </div>
-
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-          <input
-            type="text"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
-            placeholder="e.g. back bed, patio pot"
-            className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-          />
         </div>
 
         <div>

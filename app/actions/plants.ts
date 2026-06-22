@@ -27,8 +27,8 @@ export async function upsertPlant(
 
   const clean: PlantInsert = {
     ...data,
-    common_name: sanitizePlantName(data.common_name),
-    genus: sanitizeGenus(data.genus),
+    common_name: data.common_name ? sanitizePlantName(data.common_name) : "",
+    genus: data.genus ? sanitizeGenus(data.genus) : "",
     species: data.species ? sanitizeSpecies(data.species) : null,
     cultivar: data.cultivar ? sanitizePlantName(data.cultivar) : null,
   };
