@@ -243,6 +243,7 @@ export default function PlantForm() {
         purchased_from: null,
         status: "active",
         notes: null,
+        common_names: [],
       };
 
       const result = await upsertPlant(null, payload);

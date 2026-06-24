@@ -19,6 +19,7 @@ export interface Plant {
   purchased_from: string | null;
   status: PlantStatus;
   notes: string | null;
+  common_names: string[];
   created_at: string;
   updated_at: string;
 }
