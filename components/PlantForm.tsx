@@ -82,7 +82,7 @@ function IconFullShade() {
   );
 }
 
-const SUN_ICONS = [<IconFullSun />, <IconSunPartialShade />, <IconPartialShade />, <IconFullShade />];
+const SUN_ICONS = [<IconFullSun key="full-sun" />, <IconSunPartialShade key="sun-partial" />, <IconPartialShade key="partial" />, <IconFullShade key="full-shade" />];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 

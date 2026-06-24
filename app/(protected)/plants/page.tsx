@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import PlantGrid from "@/components/PlantGrid";
-import { Button } from "@/components/ui/Button";
 
 export default async function PlantsPage() {
   const supabase = await createClient();

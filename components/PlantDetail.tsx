@@ -123,11 +123,6 @@ export default function PlantDetail({ plant: init }: { plant: Plant }) {
     commit({ [field]: v1.trim() || null } as Partial<PlantInsert>);
   }
 
-  function textKeyDown(e: React.KeyboardEvent, field: keyof PlantInsert) {
-    if (e.key === "Escape") { cancel(); return; }
-    if (e.key === "Enter") { e.preventDefault(); textSave(field); }
-  }
-
   function speciesSave() {
     if (!v1.trim()) { setErr("Species is required."); return; }
     commit({ species: v1.trim() });
