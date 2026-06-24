@@ -7,6 +7,7 @@ import { ScientificName, plantDisplayTitle } from "@/lib/plantName";
 import type { Plant, PlantInsert, SunNeeds } from "@/lib/types";
 import { updatePlantField } from "@/app/actions/plants";
 import DeletePlantButton from "@/components/DeletePlantButton";
+import { Button } from "@/components/ui/Button";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const SUN_OPTIONS: SunNeeds[] = ["full sun", "full sun / partial shade", "partial shade", "full shade"];
@@ -19,7 +20,7 @@ const INPUT_FLEX = `flex-1 min-w-0 ${INPUT}`;
 const PROMPT_CLS = "text-sm text-gray-400";
 const EDITABLE = "cursor-pointer rounded-[8px] transition-colors duration-[120ms] ease-in-out hover:bg-moss-tint/60 px-2 py-1.5 -ml-2 -mt-1.5";
 
-// Defined outside component so React doesn't treat them as new types each render
+// ─── Module-scope helpers ─────────────────────────────────────────────────────
 
 function Field({ label, wide, children }: { label: string; wide?: boolean; children: React.ReactNode }) {
   return (
@@ -75,7 +76,287 @@ function SaveCancel({ onSave, onCancel }: { onSave: () => void; onCancel: () => 
   );
 }
 
-export default function PlantDetail({ plant: init }: { plant: Plant }) {
+function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
+  return (
+    <span className="group inline-flex items-center gap-1.5 bg-moss-tint text-ink rounded-full px-[10px] py-[4px] text-[13px] font-sans">
+      {label}
+      <button
+        type="button"
+        onClick={onRemove}
+        aria-label={`Remove ${label}`}
+        className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 text-ink-soft hover:text-ink transition-opacity leading-none"
+      >
+        <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
+          <line x1="1" y1="1" x2="9" y2="9" />
+          <line x1="9" y1="1" x2="1" y2="9" />
+        </svg>
+      </button>
+    </span>
+  );
+}
+
+function CommonNamesSection({
+  plantId,
+  initialNames,
+  aiLookupEnabled,
+  onNamesChange,
+}: {
+  plantId: string;
+  initialNames: string[];
+  aiLookupEnabled: boolean;
+  onNamesChange: (names: string[]) => void;
+}) {
+  const [savedNames, setSavedNames] = useState<string[]>(initialNames);
+  const [phase, setPhase] = useState<"idle" | "loading" | "results" | "empty" | "error">("idle");
+  const [lookupResults, setLookupResults] = useState<string[]>([]);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [savingLookup, setSavingLookup] = useState(false);
+  const [addingName, setAddingName] = useState(false);
+  const [newName, setNewName] = useState("");
+  const [patchError, setPatchError] = useState<string | null>(null);
+  const addContainerRef = useRef<HTMLDivElement>(null);
+
+  if (!aiLookupEnabled) return null;
+
+  const hasSaved = savedNames.length > 0;
+
+  async function patch(names: string[]) {
+    const res = await fetch(`/api/plants/${plantId}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ common_names: names }),
+    });
+    if (!res.ok) throw new Error("Save failed");
+    setSavedNames(names);
+    onNamesChange(names);
+  }
+
+  async function runLookup() {
+    setPhase("loading");
+    setPatchError(null);
+    try {
+      const res = await fetch(`/api/plants/${plantId}/lookup-common-names`, { method: "POST" });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Lookup failed");
+      const names: string[] = data.commonNames;
+      if (names.length === 0) {
+        setPhase("empty");
+      } else {
+        setLookupResults(names);
+        setSelected(new Set());
+        setPhase("results");
+      }
+    } catch {
+      setPhase("error");
+    }
+  }
+
+  async function saveSelected() {
+    setSavingLookup(true);
+    try {
+      const toAdd = Array.from(selected).filter(n => !savedNames.includes(n));
+      await patch([...savedNames, ...toAdd]);
+      setPhase("idle");
+      setLookupResults([]);
+      setSelected(new Set());
+    } catch {
+      setPatchError("Save failed. Please try again.");
+    } finally {
+      setSavingLookup(false);
+    }
+  }
+
+  async function removeName(name: string) {
+    setPatchError(null);
+    try {
+      await patch(savedNames.filter(n => n !== name));
+    } catch {
+      setPatchError("Remove failed. Please try again.");
+    }
+  }
+
+  async function saveNewName() {
+    const trimmed = newName.trim();
+    if (!trimmed) { setAddingName(false); setNewName(""); return; }
+    try {
+      await patch([...savedNames, trimmed]);
+      setNewName("");
+      setAddingName(false);
+    } catch {
+      setPatchError("Save failed. Please try again.");
+    }
+  }
+
+  function cancelNewName() {
+    setAddingName(false);
+    setNewName("");
+  }
+
+  function toggleChip(name: string) {
+    setSelected(prev => {
+      const next = new Set(prev);
+      if (next.has(name)) next.delete(name); else next.add(name);
+      return next;
+    });
+  }
+
+  return (
+    <div className="sm:col-span-2">
+      <div className="flex items-center justify-between mb-2">
+        <dt className="font-display italic text-[15px] font-normal text-ink-soft">Common names</dt>
+        <div className="flex items-center gap-2">
+          {phase === "results" && (
+            <button
+              type="button"
+              onClick={() => setSelected(new Set(lookupResults))}
+              className="font-display italic text-[13px] text-moss hover:underline"
+            >
+              Select all
+            </button>
+          )}
+          {hasSaved && phase === "idle" && (
+            <button
+              type="button"
+              onClick={runLookup}
+              className="text-ink-soft hover:text-ink transition-colors"
+              aria-label="Refresh common names"
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M12.5 7A5.5 5.5 0 1 1 7 1.5" />
+                <polyline points="12.5,1.5 12.5,5 9,5" />
+              </svg>
+            </button>
+          )}
+          {hasSaved && phase === "loading" && (
+            <span className="font-display italic text-[13px] text-ink-soft">Looking up…</span>
+          )}
+        </div>
+      </div>
+
+      <dd className="space-y-3">
+        {/* Saved chips */}
+        {hasSaved && (
+          <div className="flex flex-wrap gap-2">
+            {savedNames.map(name => (
+              <Chip key={name} label={name} onRemove={() => removeName(name)} />
+            ))}
+          </div>
+        )}
+
+        {/* Lookup results (selectable chips) */}
+        {phase === "results" && (
+          <div className="space-y-3">
+            <div className="flex flex-wrap gap-2">
+              {lookupResults.map(name => (
+                <button
+                  key={name}
+                  type="button"
+                  onClick={() => toggleChip(name)}
+                  className={[
+                    "inline-flex items-center rounded-full px-[10px] py-[4px] text-[13px] font-sans transition-colors",
+                    selected.has(name) ? "bg-moss text-paper" : "bg-moss-tint text-ink",
+                  ].join(" ")}
+                >
+                  {name}
+                </button>
+              ))}
+            </div>
+            <Button
+              type="button"
+              onClick={saveSelected}
+              disabled={selected.size === 0 || savingLookup}
+            >
+              {savingLookup ? "Saving…" : "Save selected"}
+            </Button>
+          </div>
+        )}
+
+        {/* State 1 idle — no saved names */}
+        {!hasSaved && phase === "idle" && (
+          <Button type="button" variant="secondary" onClick={runLookup}>
+            Get common names
+          </Button>
+        )}
+
+        {/* State 1 loading */}
+        {!hasSaved && phase === "loading" && (
+          <Button type="button" variant="secondary" disabled>
+            Looking up…
+          </Button>
+        )}
+
+        {/* Empty result */}
+        {phase === "empty" && (
+          <div className="space-y-1">
+            <p className="font-display italic text-[14px] text-ink-soft">No common names found for this plant</p>
+            <button type="button" onClick={runLookup} className="font-display italic text-[13px] text-moss hover:underline block">
+              try again
+            </button>
+          </div>
+        )}
+
+        {/* Lookup error */}
+        {phase === "error" && (
+          <>
+            <p className="font-display italic text-[14px] text-[#C2603C]">Lookup failed — please try again</p>
+            <button type="button" onClick={runLookup} className="font-display italic text-[13px] text-moss hover:underline block mt-1">
+              try again
+            </button>
+          </>
+        )}
+
+        {/* Patch error */}
+        {patchError && (
+          <p className="font-display italic text-[14px] text-[#C2603C]">{patchError}</p>
+        )}
+
+        {/* Manual name entry */}
+        {addingName ? (
+          <div ref={addContainerRef} className="flex items-center gap-2">
+            <div className="flex-1 relative">
+              <input
+                autoFocus
+                type="text"
+                value={newName}
+                onChange={e => setNewName(e.target.value)}
+                onBlur={e => {
+                  if (addContainerRef.current?.contains(e.relatedTarget as Node)) return;
+                  cancelNewName();
+                }}
+                onKeyDown={e => {
+                  if (e.key === "Escape") cancelNewName();
+                  if (e.key === "Enter") { e.preventDefault(); saveNewName(); }
+                }}
+                placeholder="e.g. Foxglove"
+                className="w-full bg-transparent border-0 outline-none font-display italic text-[15px] text-ink pb-3 pt-[10px]"
+              />
+              <div className="absolute bottom-0 left-0 right-0 h-px bg-sand-line" />
+            </div>
+            <SaveCancel onSave={saveNewName} onCancel={cancelNewName} />
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => { setPatchError(null); setAddingName(true); }}
+            className="font-display italic text-[13px] text-moss hover:underline block"
+          >
+            + Add name
+          </button>
+        )}
+      </dd>
+    </div>
+  );
+}
+
+// ─── Main component ───────────────────────────────────────────────────────────
+
+export default function PlantDetail({
+  plant: init,
+  aiLookupEnabled,
+}: {
+  plant: Plant;
+  aiLookupEnabled: boolean;
+}) {
   const [plant, setPlant] = useState(init);
   const [editing, setEditing] = useState<string | null>(null);
   const [v1, setV1] = useState("");
@@ -230,28 +511,13 @@ export default function PlantDetail({ plant: init }: { plant: Plant }) {
               )}
             </Field>
 
-            {/* Common name */}
-            <Field label="Common name" wide>
-              {editing === "common_name" ? (
-                <>
-                  <div ref={containerRef} className="flex items-center gap-2">
-                    <input autoFocus type="text" value={v1}
-                      onChange={e => setV1(e.target.value)}
-                      onBlur={blurCancel}
-                      onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); textSave("common_name"); } }}
-                      className={INPUT_FLEX} />
-                    <SaveCancel onSave={() => textSave("common_name")} onCancel={cancel} />
-                  </div>
-                  {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
-                </>
-              ) : (
-                <Tap
-                  value={plant.common_name}
-                  placeholder="+ Add common name"
-                  onClick={() => open("common_name", plant.common_name ?? "")}
-                />
-              )}
-            </Field>
+            {/* Common names — AI-powered section */}
+            <CommonNamesSection
+              plantId={plant.id}
+              initialNames={plant.common_names ?? []}
+              aiLookupEnabled={aiLookupEnabled}
+              onNamesChange={names => setPlant(p => ({ ...p, common_names: names }))}
+            />
 
             {/* Sun needs */}
             <Field label="Sun needs">
