@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { ScientificName, plantDisplayTitle } from "@/lib/plantName";
@@ -13,11 +13,14 @@ const SUN_OPTIONS: SunNeeds[] = ["full sun", "full sun / partial shade", "partia
 const now = new Date();
 const YEAR_OPTIONS = Array.from({ length: 30 }, (_, i) => now.getFullYear() - i);
 
-const INPUT = "w-full border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500";
+const INPUT = "border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500";
+const INPUT_W = `w-full ${INPUT}`;
+const INPUT_FLEX = `flex-1 min-w-0 ${INPUT}`;
 const PROMPT_CLS = "text-sm text-gray-400";
 const EDITABLE = "cursor-pointer rounded-[8px] transition-colors duration-[120ms] ease-in-out hover:bg-moss-tint/60 px-2 py-1.5 -ml-2 -mt-1.5";
 
 // Defined outside component so React doesn't treat them as new types each render
+
 function Field({ label, wide, children }: { label: string; wide?: boolean; children: React.ReactNode }) {
   return (
     <div className={wide ? "sm:col-span-2" : ""}>
@@ -42,12 +45,48 @@ function Tap({ value, placeholder, onClick }: {
   );
 }
 
+function SaveCancel({ onSave, onCancel }: { onSave: () => void; onCancel: () => void }) {
+  return (
+    <div className="flex items-center gap-1 shrink-0">
+      <button
+        type="button"
+        onMouseDown={e => e.preventDefault()}
+        onClick={onSave}
+        aria-label="Save"
+        className="flex items-center justify-center w-8 h-8 rounded text-moss hover:bg-moss-tint transition-colors"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+          <polyline points="2,8 6,12 14,4" />
+        </svg>
+      </button>
+      <button
+        type="button"
+        onMouseDown={e => e.preventDefault()}
+        onClick={onCancel}
+        aria-label="Cancel"
+        className="flex items-center justify-center w-8 h-8 rounded text-ink-soft hover:bg-sand-line/40 transition-colors"
+      >
+        <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+          <line x1="2" y1="2" x2="12" y2="12" />
+          <line x1="12" y1="2" x2="2" y2="12" />
+        </svg>
+      </button>
+    </div>
+  );
+}
+
 export default function PlantDetail({ plant: init }: { plant: Plant }) {
   const [plant, setPlant] = useState(init);
   const [editing, setEditing] = useState<string | null>(null);
   const [v1, setV1] = useState("");
   const [v2, setV2] = useState("");
   const [err, setErr] = useState<string | null>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  function blurCancel(e: React.FocusEvent) {
+    if (containerRef.current?.contains(e.relatedTarget as Node)) return;
+    cancel();
+  }
 
   const title = plantDisplayTitle(plant);
   const hasScientific = !!(plant.species || plant.cultivar);
@@ -78,12 +117,6 @@ export default function PlantDetail({ plant: init }: { plant: Plant }) {
 
   function esc(e: React.KeyboardEvent) {
     if (e.key === "Escape") cancel();
-  }
-
-  function groupBlur(save: () => void) {
-    return (e: React.FocusEvent<HTMLDivElement>) => {
-      if (!e.currentTarget.contains(e.relatedTarget as Node)) save();
-    };
   }
 
   function textSave(field: keyof PlantInsert) {
@@ -140,7 +173,6 @@ export default function PlantDetail({ plant: init }: { plant: Plant }) {
         )}
 
         <div className="p-6 space-y-4">
-          {/* Derived title — updates as fields change */}
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
               {plant.common_name || (hasScientific
@@ -161,11 +193,14 @@ export default function PlantDetail({ plant: init }: { plant: Plant }) {
             <Field label="Species">
               {editing === "species" ? (
                 <>
-                  <input autoFocus type="text" value={v1}
-                    onChange={e => setV1(e.target.value)}
-                    onBlur={speciesSave}
-                    onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); speciesSave(); } }}
-                    className={INPUT} />
+                  <div ref={containerRef} className="flex items-center gap-2">
+                    <input autoFocus type="text" value={v1}
+                      onChange={e => setV1(e.target.value)}
+                      onBlur={blurCancel}
+                      onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); speciesSave(); } }}
+                      className={INPUT_FLEX} />
+                    <SaveCancel onSave={speciesSave} onCancel={cancel} />
+                  </div>
                   {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
                 </>
               ) : (
@@ -181,11 +216,14 @@ export default function PlantDetail({ plant: init }: { plant: Plant }) {
             <Field label="Cultivar">
               {editing === "cultivar" ? (
                 <>
-                  <input autoFocus type="text" value={v1}
-                    onChange={e => setV1(e.target.value)}
-                    onBlur={() => textSave("cultivar")}
-                    onKeyDown={e => textKeyDown(e, "cultivar")}
-                    className={INPUT} />
+                  <div ref={containerRef} className="flex items-center gap-2">
+                    <input autoFocus type="text" value={v1}
+                      onChange={e => setV1(e.target.value)}
+                      onBlur={blurCancel}
+                      onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); textSave("cultivar"); } }}
+                      className={INPUT_FLEX} />
+                    <SaveCancel onSave={() => textSave("cultivar")} onCancel={cancel} />
+                  </div>
                   {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
                 </>
               ) : (
@@ -201,11 +239,14 @@ export default function PlantDetail({ plant: init }: { plant: Plant }) {
             <Field label="Common name" wide>
               {editing === "common_name" ? (
                 <>
-                  <input autoFocus type="text" value={v1}
-                    onChange={e => setV1(e.target.value)}
-                    onBlur={() => textSave("common_name")}
-                    onKeyDown={e => textKeyDown(e, "common_name")}
-                    className={INPUT} />
+                  <div ref={containerRef} className="flex items-center gap-2">
+                    <input autoFocus type="text" value={v1}
+                      onChange={e => setV1(e.target.value)}
+                      onBlur={blurCancel}
+                      onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); textSave("common_name"); } }}
+                      className={INPUT_FLEX} />
+                    <SaveCancel onSave={() => textSave("common_name")} onCancel={cancel} />
+                  </div>
                   {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
                 </>
               ) : (
@@ -221,13 +262,17 @@ export default function PlantDetail({ plant: init }: { plant: Plant }) {
             <Field label="Sun needs">
               {editing === "sun_needs" ? (
                 <>
-                  <select autoFocus value={v1}
-                    onChange={e => { const val = e.target.value; setV1(val); commit({ sun_needs: (val as SunNeeds) || null }); }}
-                    onKeyDown={esc}
-                    className={INPUT}>
-                    <option value="">— select —</option>
-                    {SUN_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                  </select>
+                  <div ref={containerRef} className="flex items-center gap-2">
+                    <select autoFocus value={v1}
+                      onChange={e => setV1(e.target.value)}
+                      onBlur={blurCancel}
+                      onKeyDown={esc}
+                      className={INPUT_FLEX}>
+                      <option value="">— select —</option>
+                      {SUN_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                    </select>
+                    <SaveCancel onSave={() => commit({ sun_needs: (v1 as SunNeeds) || null })} onCancel={cancel} />
+                  </div>
                   {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
                 </>
               ) : (
@@ -242,19 +287,23 @@ export default function PlantDetail({ plant: init }: { plant: Plant }) {
             {/* Date planted */}
             <Field label="Date planted">
               {editing === "date_planted" ? (
-                <div className="flex gap-2"
-                  onBlur={groupBlur(() => {
-                    commit({ date_planted: v2 && v1 ? `${v2}-${v1.padStart(2, "0")}-01` : null });
-                  })}
-                >
-                  <select autoFocus value={v1} onChange={e => setV1(e.target.value)} onKeyDown={esc} className={INPUT}>
-                    {MONTHS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
-                  </select>
-                  <select value={v2} onChange={e => setV2(e.target.value)} onKeyDown={esc} className={INPUT}>
-                    {YEAR_OPTIONS.map(y => <option key={y} value={String(y)}>{y}</option>)}
-                  </select>
-                  {err && <p className="text-xs text-red-600 mt-1 sm:col-span-2">{err}</p>}
-                </div>
+                <>
+                  <div ref={containerRef} className="flex items-center gap-2">
+                    <div className="flex gap-2 flex-1 min-w-0">
+                      <select autoFocus value={v1} onChange={e => setV1(e.target.value)} onBlur={blurCancel} onKeyDown={esc} className={INPUT}>
+                        {MONTHS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
+                      </select>
+                      <select value={v2} onChange={e => setV2(e.target.value)} onBlur={blurCancel} onKeyDown={esc} className={INPUT}>
+                        {YEAR_OPTIONS.map(y => <option key={y} value={String(y)}>{y}</option>)}
+                      </select>
+                    </div>
+                    <SaveCancel
+                      onSave={() => commit({ date_planted: v2 && v1 ? `${v2}-${v1.padStart(2, "0")}-01` : null })}
+                      onCancel={cancel}
+                    />
+                  </div>
+                  {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                </>
               ) : (
                 <Tap
                   value={datePlantedDisplay()}
@@ -270,22 +319,25 @@ export default function PlantDetail({ plant: init }: { plant: Plant }) {
             {/* Flowering season */}
             <Field label="Flowering season" wide>
               {editing === "flowering_season" ? (
-                <div className="flex gap-2"
-                  onBlur={groupBlur(() => commit({
-                    flowering_season_from: v1 ? parseInt(v1) : null,
-                    flowering_season_to: v2 ? parseInt(v2) : null,
-                  }))}
-                >
-                  <select autoFocus value={v1} onChange={e => setV1(e.target.value)} onKeyDown={esc} className={INPUT}>
-                    <option value="">— from —</option>
-                    {MONTHS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
-                  </select>
-                  <select value={v2} onChange={e => setV2(e.target.value)} onKeyDown={esc} className={INPUT}>
-                    <option value="">— to —</option>
-                    {MONTHS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
-                  </select>
+                <>
+                  <div ref={containerRef} className="flex items-center gap-2">
+                    <div className="flex gap-2 flex-1 min-w-0">
+                      <select autoFocus value={v1} onChange={e => setV1(e.target.value)} onBlur={blurCancel} onKeyDown={esc} className={INPUT}>
+                        <option value="">— from —</option>
+                        {MONTHS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
+                      </select>
+                      <select value={v2} onChange={e => setV2(e.target.value)} onBlur={blurCancel} onKeyDown={esc} className={INPUT}>
+                        <option value="">— to —</option>
+                        {MONTHS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
+                      </select>
+                    </div>
+                    <SaveCancel
+                      onSave={() => commit({ flowering_season_from: v1 ? parseInt(v1) : null, flowering_season_to: v2 ? parseInt(v2) : null })}
+                      onCancel={cancel}
+                    />
+                  </div>
                   {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
-                </div>
+                </>
               ) : (
                 <Tap
                   value={flowerDisplay()}
@@ -303,11 +355,14 @@ export default function PlantDetail({ plant: init }: { plant: Plant }) {
             <Field label="Height (mature)">
               {editing === "eventual_height_cm" ? (
                 <>
-                  <input autoFocus type="number" min={1} value={v1}
-                    onChange={e => setV1(e.target.value)}
-                    onBlur={() => numSave("eventual_height_cm")}
-                    onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); numSave("eventual_height_cm"); } }}
-                    className={INPUT} />
+                  <div ref={containerRef} className="flex items-center gap-2">
+                    <input autoFocus type="number" min={1} value={v1}
+                      onChange={e => setV1(e.target.value)}
+                      onBlur={blurCancel}
+                      onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); numSave("eventual_height_cm"); } }}
+                      className={INPUT_FLEX} />
+                    <SaveCancel onSave={() => numSave("eventual_height_cm")} onCancel={cancel} />
+                  </div>
                   {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
                 </>
               ) : (
@@ -323,11 +378,14 @@ export default function PlantDetail({ plant: init }: { plant: Plant }) {
             <Field label="Spread (mature)">
               {editing === "eventual_spread_cm" ? (
                 <>
-                  <input autoFocus type="number" min={1} value={v1}
-                    onChange={e => setV1(e.target.value)}
-                    onBlur={() => numSave("eventual_spread_cm")}
-                    onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); numSave("eventual_spread_cm"); } }}
-                    className={INPUT} />
+                  <div ref={containerRef} className="flex items-center gap-2">
+                    <input autoFocus type="number" min={1} value={v1}
+                      onChange={e => setV1(e.target.value)}
+                      onBlur={blurCancel}
+                      onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); numSave("eventual_spread_cm"); } }}
+                      className={INPUT_FLEX} />
+                    <SaveCancel onSave={() => numSave("eventual_spread_cm")} onCancel={cancel} />
+                  </div>
                   {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
                 </>
               ) : (
@@ -343,12 +401,15 @@ export default function PlantDetail({ plant: init }: { plant: Plant }) {
             <Field label="Purchased from" wide>
               {editing === "purchased_from" ? (
                 <>
-                  <input autoFocus type="text" value={v1}
-                    onChange={e => setV1(e.target.value)}
-                    onBlur={() => textSave("purchased_from")}
-                    onKeyDown={e => textKeyDown(e, "purchased_from")}
-                    placeholder="Nursery or shop name"
-                    className={INPUT} />
+                  <div ref={containerRef} className="flex items-center gap-2">
+                    <input autoFocus type="text" value={v1}
+                      onChange={e => setV1(e.target.value)}
+                      onBlur={blurCancel}
+                      onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); textSave("purchased_from"); } }}
+                      placeholder="Nursery or shop name"
+                      className={INPUT_FLEX} />
+                    <SaveCancel onSave={() => textSave("purchased_from")} onCancel={cancel} />
+                  </div>
                   {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
                 </>
               ) : (
@@ -366,14 +427,17 @@ export default function PlantDetail({ plant: init }: { plant: Plant }) {
           <div className="pt-3 border-t border-gray-100">
             <p className="text-sm font-medium text-gray-500 mb-1">Notes</p>
             {editing === "notes" ? (
-              <>
+              <div ref={containerRef}>
                 <textarea autoFocus rows={4} value={v1}
                   onChange={e => setV1(e.target.value)}
-                  onBlur={() => commit({ notes: v1.trim() || null })}
+                  onBlur={blurCancel}
                   onKeyDown={esc}
-                  className={INPUT + " resize-y"} />
+                  className={`${INPUT_W} resize-y`} />
+                <div className="flex justify-end mt-1">
+                  <SaveCancel onSave={() => commit({ notes: v1.trim() || null })} onCancel={cancel} />
+                </div>
                 {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
-              </>
+              </div>
             ) : (
               <button type="button" onClick={() => open("notes", plant.notes ?? "")} className={`text-left w-full ${EDITABLE}`}>
                 {plant.notes
