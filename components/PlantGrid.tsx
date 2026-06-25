@@ -9,8 +9,6 @@ import { Tag } from "@/components/ui/Tag";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 
-type SortKey = "date" | "name";
-
 const MONTH_ABBR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const CURRENT_MONTH = new Date().getMonth() + 1; // 1–12
 
@@ -32,15 +30,6 @@ function formatSeason(from: number, to: number): string {
   return `${MONTH_ABBR[from - 1]}–${MONTH_ABBR[to - 1]}`;
 }
 
-function sortPlants(plants: Plant[], by: SortKey): Plant[] {
-  return [...plants].sort((a, b) => {
-    if (by === "name") return plantDisplayTitle(a).localeCompare(plantDisplayTitle(b));
-    if (!a.date_planted && !b.date_planted) return 0;
-    if (!a.date_planted) return 1;
-    if (!b.date_planted) return -1;
-    return b.date_planted.localeCompare(a.date_planted);
-  });
-}
 
 function wrapMonth(m: number): number {
   if (m < 1) return m + 12;
@@ -211,7 +200,6 @@ function Highlight({ text, query }: { text: string; query: string }) {
 // ─── Main component ───────────────────────────────────────────────────────────
 
 export default function PlantGrid({ plants }: { plants: Plant[] }) {
-  const [sortBy, setSortBy] = useState<SortKey>("date");
   const [query, setQuery] = useState("");
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [highlighted, setHighlighted] = useState(-1);
@@ -236,7 +224,6 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
     [plants, query, activeFilter]
   );
 
-  const sorted = useMemo(() => sortPlants(filtered, sortBy), [filtered, sortBy]);
 
   // Close dropdown / popover on outside click
   useEffect(() => {
@@ -323,9 +310,9 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
   }
 
   const resultLabel =
-    sorted.length === 0 ? "no plants match" :
-    sorted.length === 1 ? "1 plant" :
-    `${sorted.length} plants`;
+    filtered.length === 0 ? "no plants match" :
+    filtered.length === 1 ? "1 plant" :
+    `${filtered.length} plants`;
 
   return (
     <div className="flex flex-col gap-4">
@@ -471,37 +458,12 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
       {/* Result count */}
       <p className="font-display italic text-[13px] text-ink-soft -mt-1">{resultLabel}</p>
 
-      {/* Sort toggle */}
-      <div className="flex items-center gap-1 self-end -mt-1">
-        <span className="text-xs font-sans text-ink-soft mr-2">Sort by</span>
-        <div className="flex rounded border border-sand-line overflow-hidden">
-          <button
-            onClick={() => setSortBy("date")}
-            className={[
-              "px-3 py-1.5 text-xs font-sans font-medium transition-colors",
-              sortBy === "date" ? "bg-moss text-white" : "bg-paper text-ink-soft hover:bg-sand",
-            ].join(" ")}
-          >
-            Date planted
-          </button>
-          <button
-            onClick={() => setSortBy("name")}
-            className={[
-              "px-3 py-1.5 text-xs font-sans font-medium transition-colors border-l border-sand-line",
-              sortBy === "name" ? "bg-moss text-white" : "bg-paper text-ink-soft hover:bg-sand",
-            ].join(" ")}
-          >
-            Name
-          </button>
-        </div>
-      </div>
-
       {/* Plant grid or no-results message */}
-      {sorted.length === 0 ? (
+      {filtered.length === 0 ? (
         <p className="font-display italic text-[15px] text-ink-soft text-center py-16">no plants match</p>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
-          {sorted.map((plant) => {
+          {filtered.map((plant) => {
             const title = plantDisplayTitle(plant);
             const hasCommonName = !!plant.common_name;
             const hasSeason = plant.flowering_season_from !== null && plant.flowering_season_to !== null;
