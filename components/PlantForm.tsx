@@ -162,7 +162,6 @@ export default function PlantForm() {
 
   const [species, setSpecies] = useState("");
   const [cultivar, setCultivar] = useState("");
-  const [commonName, setCommonName] = useState("");
   const [sunNeeds, setSunNeeds] = useState<SunNeeds | "">("");
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
@@ -229,7 +228,7 @@ export default function PlantForm() {
       const photoUrl = await uploadPhoto();
 
       const payload: PlantInsert = {
-        common_name: commonName,
+        common_name: "",
         genus: "",
         species: species || null,
         cultivar: cultivar || null,
@@ -315,20 +314,6 @@ export default function PlantForm() {
             onFocus={() => setFocusedField("cultivar")}
             onBlur={(e) => { setFocusedField(null); setCultivar(e.target.value.trim()); }}
             className={`${inputCls} font-display italic text-[18px]`}
-          />
-        </UnderlineField>
-      </div>
-
-      {/* Common name — 20px gap */}
-      <div className="mt-5">
-        <UnderlineField label="common name" focused={focusedField === "common_name"}>
-          <input
-            type="text"
-            value={commonName}
-            onChange={(e) => setCommonName(e.target.value)}
-            onFocus={() => setFocusedField("common_name")}
-            onBlur={(e) => { setFocusedField(null); setCommonName(e.target.value.trim()); }}
-            className={`${inputCls} font-sans text-[18px]`}
           />
         </UnderlineField>
       </div>
