@@ -53,6 +53,9 @@ function UnderlineField({ label, focused, children }: {
 export default function PlantForm() {
   const fileRef = useRef<HTMLInputElement>(null);
 
+  const now = new Date();
+  const defaultDatePlanted = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-01`;
+
   const [species, setSpecies] = useState("");
   const [cultivar, setCultivar] = useState("");
   const [focusedField, setFocusedField] = useState<string | null>(null);
@@ -124,7 +127,7 @@ export default function PlantForm() {
         genus: "",
         species: species || null,
         cultivar: cultivar || null,
-        date_planted: null,
+        date_planted: defaultDatePlanted,
         photo_url: photoUrl,
         sun_needs: null,
         flowering_season_from: null,
