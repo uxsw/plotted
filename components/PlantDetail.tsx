@@ -8,6 +8,13 @@ import type { Plant, PlantInsert, SunNeeds } from "@/lib/types";
 import { updatePlantField } from "@/app/actions/plants";
 import DeletePlantButton from "@/components/DeletePlantButton";
 import { Button } from "@/components/ui/Button";
+import {
+  ACCEPTED_INPUT_TYPES,
+  ACCEPTED_INPUT_TYPES_LABEL,
+  MAX_ORIGINAL_SIZE,
+  MAX_ORIGINAL_SIZE_LABEL,
+} from "@/lib/upload";
+import { resizeImage } from "@/lib/resize";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const SUN_OPTIONS: SunNeeds[] = ["full sun", "full sun / partial shade", "partial shade", "full shade"];
@@ -19,6 +26,25 @@ const INPUT_W = `w-full ${INPUT}`;
 const INPUT_FLEX = `flex-1 min-w-0 ${INPUT}`;
 const PROMPT_CLS = "text-sm text-gray-400";
 const EDITABLE = "cursor-pointer rounded-[8px] transition-colors duration-[120ms] ease-in-out hover:bg-moss-tint/60 px-2 py-1.5 -ml-2 -mt-1.5";
+
+// ─── Icons ────────────────────────────────────────────────────────────────────
+
+function CameraIcon() {
+  return (
+    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+      <circle cx="12" cy="13" r="4" />
+    </svg>
+  );
+}
+
+function SproutIcon() {
+  return (
+    <svg width="36" height="36" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M24 8c-4 0-8 4-8 8s4 8 8 8c0 4-2 8-8 12h16c-6-4-8-8-8-12 4 0 8-4 8-8s-4-8-8-8z" />
+    </svg>
+  );
+}
 
 // ─── Module-scope helpers ─────────────────────────────────────────────────────
 
@@ -287,6 +313,9 @@ export default function PlantDetail({
   const [v2, setV2] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const [photoUploading, setPhotoUploading] = useState(false);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const photoFileRef = useRef<HTMLInputElement>(null);
 
   function blurCancel(e: React.FocusEvent) {
     if (containerRef.current?.contains(e.relatedTarget as Node)) return;
@@ -322,6 +351,55 @@ export default function PlantDetail({
 
   function esc(e: React.KeyboardEvent) {
     if (e.key === "Escape") cancel();
+  }
+
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    // Reset so the same file can be re-selected after an error
+    e.target.value = "";
+
+    setPhotoError(null);
+
+    if (!(ACCEPTED_INPUT_TYPES as readonly string[]).includes(file.type)) {
+      setPhotoError(`Unsupported file type. Please select a ${ACCEPTED_INPUT_TYPES_LABEL} image.`);
+      return;
+    }
+    if (file.size > MAX_ORIGINAL_SIZE) {
+      setPhotoError(`Image is too large (max ${MAX_ORIGINAL_SIZE_LABEL}). Please choose a smaller file.`);
+      return;
+    }
+
+    setPhotoUploading(true);
+    try {
+      const blob = await resizeImage(file);
+
+      const formData = new FormData();
+      formData.append("file", blob, "photo.jpg");
+      const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
+      const uploadData = await uploadRes.json();
+      if (!uploadRes.ok) throw new Error(uploadData.error ?? "Upload failed");
+      const newUrl: string = uploadData.url;
+
+      const result = await updatePlantField(plant.id, { photo_url: newUrl });
+      if (result?.error) throw new Error(result.error);
+
+      // Delete old file only after new upload + DB save succeeded
+      const oldUrl = plant.photo_url;
+      if (oldUrl) {
+        fetch("/api/upload", {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: oldUrl }),
+        }).catch(() => console.error("Failed to delete old photo from storage"));
+      }
+
+      setPlant(p => ({ ...p, photo_url: newUrl }));
+    } catch (err) {
+      setPhotoError(err instanceof Error ? err.message : "Upload failed. Please try again.");
+    } finally {
+      setPhotoUploading(false);
+    }
   }
 
   function textSave(field: keyof PlantInsert) {
@@ -366,13 +444,42 @@ export default function PlantDetail({
       </div>
 
       <div className="bg-white rounded-lg shadow overflow-hidden">
-        {plant.photo_url && (
-          <div className="relative w-full h-64">
-            <Image src={plant.photo_url} alt={title} fill className="object-cover" />
-          </div>
-        )}
+        {/* Photo zone — click to add/replace photo */}
+        <div
+          className="group relative w-full h-64 cursor-pointer"
+          onClick={() => photoFileRef.current?.click()}
+        >
+          {plant.photo_url ? (
+            <>
+              <Image src={plant.photo_url} alt={title} fill className="object-cover" />
+              <div className="absolute inset-0 bg-moss-tint/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none text-moss-deep">
+                <CameraIcon />
+              </div>
+            </>
+          ) : (
+            <div className="w-full h-full bg-moss-tint flex flex-col items-center justify-center gap-2 text-moss-deep/70 group-hover:brightness-95 transition-all">
+              <SproutIcon />
+              <span className="font-display italic text-[15px]">add a photo</span>
+            </div>
+          )}
+          {photoUploading && (
+            <div className="absolute inset-0 bg-white/60 flex items-center justify-center pointer-events-none">
+              <div className="w-6 h-6 border-2 border-moss border-t-transparent rounded-full animate-spin" />
+            </div>
+          )}
+        </div>
+        <input
+          ref={photoFileRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handlePhotoChange}
+        />
 
         <div className="p-6 space-y-4">
+          {photoError && (
+            <p className="font-display italic text-[14px] text-[#C2603C]">{photoError}</p>
+          )}
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
               {plant.common_name || (hasScientific
