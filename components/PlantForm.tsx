@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import Image from "next/image";
-import type { PlantInsert, SunNeeds } from "@/lib/types";
+import type { PlantInsert } from "@/lib/types";
 import { upsertPlant } from "@/app/actions/plants";
 import type { FieldErrors } from "@/lib/validation";
 import { Button } from "@/components/ui/Button";
@@ -13,7 +13,6 @@ import {
   MAX_ORIGINAL_SIZE_LABEL,
 } from "@/lib/upload";
 
-const SUN_OPTIONS: SunNeeds[] = ["full sun", "full sun / partial shade", "partial shade", "full shade"];
 const MAX_PX = 800;
 const JPEG_QUALITY = 0.85;
 
@@ -27,62 +26,6 @@ function SproutIcon() {
     </svg>
   );
 }
-
-function IconFullSun() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor"
-      strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="3.5" />
-      <line x1="11" y1="1.5" x2="11" y2="4.5" />
-      <line x1="11" y1="17.5" x2="11" y2="20.5" />
-      <line x1="1.5" y1="11" x2="4.5" y2="11" />
-      <line x1="17.5" y1="11" x2="20.5" y2="11" />
-      <line x1="4.6" y1="4.6" x2="6.6" y2="6.6" />
-      <line x1="15.4" y1="15.4" x2="17.4" y2="17.4" />
-      <line x1="17.4" y1="4.6" x2="15.4" y2="6.6" />
-      <line x1="4.6" y1="17.4" x2="6.6" y2="15.4" />
-    </svg>
-  );
-}
-
-function IconSunPartialShade() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor"
-      strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="9" cy="11" r="3" />
-      <line x1="9" y1="2" x2="9" y2="4.5" />
-      <line x1="1.5" y1="11" x2="4" y2="11" />
-      <line x1="3.4" y1="4.4" x2="5.2" y2="6.2" />
-      <line x1="3.4" y1="17.6" x2="5.2" y2="15.8" />
-      <line x1="9" y1="20" x2="9" y2="17.5" />
-      <path d="M14 7 Q20 11 14 15" />
-    </svg>
-  );
-}
-
-function IconPartialShade() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor"
-      strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M3 13 Q3 3 11 3 Q19 3 19 13" />
-      <circle cx="11" cy="17" r="2" />
-    </svg>
-  );
-}
-
-function IconFullShade() {
-  return (
-    <svg width="22" height="22" viewBox="0 0 22 22" fill="none" stroke="currentColor"
-      strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M2 12 Q2 2 11 2 Q20 2 20 12" />
-      <line x1="2" y1="12" x2="20" y2="12" />
-      <line x1="11" y1="12" x2="11" y2="19" />
-      <line x1="8" y1="19" x2="14" y2="19" />
-    </svg>
-  );
-}
-
-const SUN_ICONS = [<IconFullSun key="full-sun" />, <IconSunPartialShade key="sun-partial" />, <IconPartialShade key="partial" />, <IconFullShade key="full-shade" />];
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -102,31 +45,6 @@ function UnderlineField({ label, focused, children }: {
         <div className={`absolute bottom-0 left-0 right-0 h-[2px] bg-moss transition-transform duration-200 ease-out origin-left ${focused ? "scale-x-100" : "scale-x-0"}`} />
       </div>
     </div>
-  );
-}
-
-function SunTile({ option, icon, selected, onSelect }: {
-  option: string;
-  icon: React.ReactNode;
-  selected: boolean;
-  onSelect: () => void;
-}) {
-  return (
-    <button
-      type="button"
-      onClick={onSelect}
-      className={[
-        "flex flex-col items-center gap-2 rounded-[12px] py-[14px] px-2 cursor-pointer transition-colors duration-150",
-        selected
-          ? "border-2 border-moss bg-moss-tint"
-          : "border-[1.5px] border-sand-line bg-white",
-      ].join(" ")}
-    >
-      <span className={selected ? "text-moss" : "text-ink-soft"}>{icon}</span>
-      <span className={`text-[11px] font-medium font-sans leading-tight text-center ${selected ? "text-moss-deep" : "text-ink-soft"}`}>
-        {option}
-      </span>
-    </button>
   );
 }
 
@@ -162,7 +80,6 @@ export default function PlantForm() {
 
   const [species, setSpecies] = useState("");
   const [cultivar, setCultivar] = useState("");
-  const [sunNeeds, setSunNeeds] = useState<SunNeeds | "">("");
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -234,7 +151,7 @@ export default function PlantForm() {
         cultivar: cultivar || null,
         date_planted: null,
         photo_url: photoUrl,
-        sun_needs: sunNeeds || null,
+        sun_needs: null,
         flowering_season_from: null,
         flowering_season_to: null,
         eventual_height_cm: null,
@@ -316,22 +233,6 @@ export default function PlantForm() {
             className={`${inputCls} font-display italic text-[18px]`}
           />
         </UnderlineField>
-      </div>
-
-      {/* Sun needs — 20px gap */}
-      <div className="mt-5">
-        <p className="font-display italic text-[15px] font-normal text-ink-soft mb-3">sun needs</p>
-        <div className="grid grid-cols-2 gap-3">
-          {SUN_OPTIONS.map((option, i) => (
-            <SunTile
-              key={option}
-              option={option}
-              icon={SUN_ICONS[i]}
-              selected={sunNeeds === option}
-              onSelect={() => setSunNeeds(sunNeeds === option ? "" : option)}
-            />
-          ))}
-        </div>
       </div>
 
       {/* Submit */}
