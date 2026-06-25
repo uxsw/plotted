@@ -107,16 +107,11 @@ function CommonNamesSection({
   onNamesChange: (names: string[]) => void;
 }) {
   const [savedNames, setSavedNames] = useState<string[]>(initialNames);
-  const [phase, setPhase] = useState<"idle" | "loading" | "results" | "empty" | "error">("idle");
-  const [lookupResults, setLookupResults] = useState<string[]>([]);
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [savingLookup, setSavingLookup] = useState(false);
+  const [phase, setPhase] = useState<"idle" | "loading" | "empty" | "error">("idle");
   const [addingName, setAddingName] = useState(false);
   const [newName, setNewName] = useState("");
   const [patchError, setPatchError] = useState<string | null>(null);
   const addContainerRef = useRef<HTMLDivElement>(null);
-
-  if (!aiLookupEnabled) return null;
 
   const hasSaved = savedNames.length > 0;
 
@@ -135,34 +130,18 @@ function CommonNamesSection({
     setPhase("loading");
     setPatchError(null);
     try {
-      const res = await fetch(`/api/plants/${plantId}/lookup-common-names`, { method: "POST" });
+      const res = await fetch(`/api/plants/${plantId}/lookup`, { method: "POST" });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Lookup failed");
-      const names: string[] = data.commonNames;
+      const names: string[] = Array.isArray(data.common_names) ? data.common_names : [];
       if (names.length === 0) {
         setPhase("empty");
       } else {
-        setLookupResults(names);
-        setSelected(new Set());
-        setPhase("results");
+        await patch(names);
+        setPhase("idle");
       }
     } catch {
       setPhase("error");
-    }
-  }
-
-  async function saveSelected() {
-    setSavingLookup(true);
-    try {
-      const toAdd = Array.from(selected).filter(n => !savedNames.includes(n));
-      await patch([...savedNames, ...toAdd]);
-      setPhase("idle");
-      setLookupResults([]);
-      setSelected(new Set());
-    } catch {
-      setPatchError("Save failed. Please try again.");
-    } finally {
-      setSavingLookup(false);
     }
   }
 
@@ -192,45 +171,30 @@ function CommonNamesSection({
     setNewName("");
   }
 
-  function toggleChip(name: string) {
-    setSelected(prev => {
-      const next = new Set(prev);
-      if (next.has(name)) next.delete(name); else next.add(name);
-      return next;
-    });
-  }
-
   return (
     <div className="sm:col-span-2">
       <div className="flex items-center justify-between mb-2">
         <dt className="font-display italic text-[15px] font-normal text-ink-soft">Common names</dt>
-        <div className="flex items-center gap-2">
-          {phase === "results" && (
-            <button
-              type="button"
-              onClick={() => setSelected(new Set(lookupResults))}
-              className="font-display italic text-[13px] text-moss hover:underline"
-            >
-              Select all
-            </button>
-          )}
-          {hasSaved && phase === "idle" && (
-            <button
-              type="button"
-              onClick={runLookup}
-              className="text-ink-soft hover:text-ink transition-colors"
-              aria-label="Refresh common names"
-            >
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                <path d="M12.5 7A5.5 5.5 0 1 1 7 1.5" />
-                <polyline points="12.5,1.5 12.5,5 9,5" />
-              </svg>
-            </button>
-          )}
-          {hasSaved && phase === "loading" && (
-            <span className="font-display italic text-[13px] text-ink-soft">Looking up…</span>
-          )}
-        </div>
+        {aiLookupEnabled && (
+          <div className="flex items-center gap-2">
+            {hasSaved && phase !== "loading" && (
+              <button
+                type="button"
+                onClick={runLookup}
+                className="text-ink-soft hover:text-ink transition-colors"
+                aria-label="Refresh common names"
+              >
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d="M12.5 7A5.5 5.5 0 1 1 7 1.5" />
+                  <polyline points="12.5,1.5 12.5,5 9,5" />
+                </svg>
+              </button>
+            )}
+            {hasSaved && phase === "loading" && (
+              <span className="font-display italic text-[13px] text-ink-soft">Looking up…</span>
+            )}
+          </div>
+        )}
       </div>
 
       <dd className="space-y-3">
@@ -243,42 +207,12 @@ function CommonNamesSection({
           </div>
         )}
 
-        {/* Lookup results (selectable chips) */}
-        {phase === "results" && (
-          <div className="space-y-3">
-            <div className="flex flex-wrap gap-2">
-              {lookupResults.map(name => (
-                <button
-                  key={name}
-                  type="button"
-                  onClick={() => toggleChip(name)}
-                  className={[
-                    "inline-flex items-center rounded-full px-[10px] py-[4px] text-[13px] font-sans transition-colors",
-                    selected.has(name) ? "bg-moss text-paper" : "bg-moss-tint text-ink",
-                  ].join(" ")}
-                >
-                  {name}
-                </button>
-              ))}
-            </div>
-            <Button
-              type="button"
-              onClick={saveSelected}
-              disabled={selected.size === 0 || savingLookup}
-            >
-              {savingLookup ? "Saving…" : "Save selected"}
-            </Button>
-          </div>
-        )}
-
-        {/* State 1 idle — no saved names */}
-        {!hasSaved && phase === "idle" && (
+        {/* No saved names — lookup button or loading */}
+        {!hasSaved && aiLookupEnabled && phase !== "loading" && (
           <Button type="button" variant="secondary" onClick={runLookup}>
             Get common names
           </Button>
         )}
-
-        {/* State 1 loading */}
         {!hasSaved && phase === "loading" && (
           <Button type="button" variant="secondary" disabled>
             Looking up…
@@ -287,22 +221,12 @@ function CommonNamesSection({
 
         {/* Empty result */}
         {phase === "empty" && (
-          <div className="space-y-1">
-            <p className="font-display italic text-[14px] text-ink-soft">No common names found for this plant</p>
-            <button type="button" onClick={runLookup} className="font-display italic text-[13px] text-moss hover:underline block">
-              try again
-            </button>
-          </div>
+          <p className="font-display italic text-[14px] text-ink-soft">No common names found for this plant</p>
         )}
 
         {/* Lookup error */}
         {phase === "error" && (
-          <>
-            <p className="font-display italic text-[14px] text-[#C2603C]">Lookup failed — please try again</p>
-            <button type="button" onClick={runLookup} className="font-display italic text-[13px] text-moss hover:underline block mt-1">
-              try again
-            </button>
-          </>
+          <p className="font-display italic text-[14px] text-[#C2603C]">Lookup failed — please try again</p>
         )}
 
         {/* Patch error */}

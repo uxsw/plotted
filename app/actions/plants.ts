@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { sanitizePlantName, sanitizeGenus, sanitizeSpecies } from "@/lib/sanitize";
 import { validatePlantInput, hasFieldErrors, type FieldErrors } from "@/lib/validation";
 import type { PlantInsert } from "@/lib/types";
+import { performLookup } from "@/lib/plant-lookup";
 
 export async function updatePlantField(
   plantId: string,
@@ -90,6 +91,33 @@ export async function upsertPlant(
       .select("id")
       .single();
     if (error) return { error: error.message };
+
+    if (clean.species) {
+      const { data: flags } = await supabase
+        .from("user_flags")
+        .select("ai_lookup_enabled")
+        .eq("user_id", user.id)
+        .single();
+
+      if (flags?.ai_lookup_enabled) {
+        try {
+          const result = await performLookup(clean.species, clean.cultivar ?? null);
+          const updates: Record<string, unknown> = {};
+          if (result.common_names.length > 0) updates.common_names = result.common_names;
+          if (result.sun_needs) updates.sun_needs = result.sun_needs;
+          if (result.flowering_season_from) updates.flowering_season_from = result.flowering_season_from;
+          if (result.flowering_season_to) updates.flowering_season_to = result.flowering_season_to;
+          if (result.eventual_height_cm) updates.eventual_height_cm = result.eventual_height_cm;
+          if (result.eventual_spread_cm) updates.eventual_spread_cm = result.eventual_spread_cm;
+          if (Object.keys(updates).length > 0) {
+            await supabase.from("plants").update(updates).eq("id", row.id);
+          }
+        } catch (err) {
+          console.error("AI lookup failed on plant creation:", err);
+        }
+      }
+    }
+
     revalidatePath("/plants");
     redirect(`/plants/${row.id}`);
   }
