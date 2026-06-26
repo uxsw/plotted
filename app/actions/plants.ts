@@ -5,7 +5,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { sanitizePlantName, sanitizeGenus, sanitizeSpecies } from "@/lib/sanitize";
 import { validatePlantInput, hasFieldErrors, type FieldErrors } from "@/lib/validation";
-import type { PlantInsert } from "@/lib/types";
+import type { PlantInsert, SunNeeds } from "@/lib/types";
 import { performLookup } from "@/lib/plant-lookup";
 
 export async function updatePlantField(
@@ -27,9 +27,11 @@ export async function updatePlantField(
   }
   if ("purchased_from" in data) {
     clean.purchased_from = typeof data.purchased_from === "string" ? data.purchased_from.trim() || null : null;
+    if (clean.purchased_from && clean.purchased_from.length > 500) return { error: "Purchased from must be 500 characters or fewer." };
   }
   if ("notes" in data) {
     clean.notes = typeof data.notes === "string" ? data.notes.trim() || null : null;
+    if (clean.notes && clean.notes.length > 5000) return { error: "Notes must be 5000 characters or fewer." };
   }
 
   const { error } = await supabase
@@ -98,13 +100,16 @@ export async function upsertPlant(
       if (flags?.ai_lookup_enabled) {
         try {
           const result = await performLookup(clean.species, clean.cultivar ?? null);
+          const VALID_SUN_NEEDS: SunNeeds[] = ["full sun", "full sun / partial shade", "partial shade", "full shade"];
+          const validMonth = (v: number | null) => v !== null && Number.isInteger(v) && v >= 1 && v <= 12;
+          const validCm = (v: number | null) => v !== null && Number.isInteger(v) && v > 0;
           const updates: Record<string, unknown> = {};
           if (result.common_names.length > 0) updates.common_names = result.common_names;
-          if (result.sun_needs) updates.sun_needs = result.sun_needs;
-          if (result.flowering_season_from) updates.flowering_season_from = result.flowering_season_from;
-          if (result.flowering_season_to) updates.flowering_season_to = result.flowering_season_to;
-          if (result.eventual_height_cm) updates.eventual_height_cm = result.eventual_height_cm;
-          if (result.eventual_spread_cm) updates.eventual_spread_cm = result.eventual_spread_cm;
+          if (result.sun_needs && (VALID_SUN_NEEDS as string[]).includes(result.sun_needs)) updates.sun_needs = result.sun_needs;
+          if (validMonth(result.flowering_season_from)) updates.flowering_season_from = result.flowering_season_from;
+          if (validMonth(result.flowering_season_to)) updates.flowering_season_to = result.flowering_season_to;
+          if (validCm(result.eventual_height_cm)) updates.eventual_height_cm = result.eventual_height_cm;
+          if (validCm(result.eventual_spread_cm)) updates.eventual_spread_cm = result.eventual_spread_cm;
           if (Object.keys(updates).length > 0) {
             await supabase.from("plants").update(updates).eq("id", row.id);
           }

@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Plotted — Design Language</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,340;0,9..144,440;0,9..144,560;0,9..144,650;1,9..144,440;1,9..144,560&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#FAF6EC;
+    --paper-deep:#F2ECDB;
+    --ink:#2B2A24;
+    --ink-soft:#5B574A;
+    --moss:#4F6B4A;
+    --moss-deep:#34492F;
+    --moss-tint:#E2EADD;
+    --clay:#C2603C;
+    --clay-tint:#F3E1D7;
+    --sand:#E8DFC8;
+    --sand-line:#D9CCAC;
+    --gold:#C99A3D;
+    --radius:14px;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background-color:var(--paper);
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 1.4 0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.16'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-blend-mode:multiply;
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:64px 32px 120px;}
+  .eyebrow{
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--moss-deep);
+    margin:0 0 10px;
+  }
+  h1.title{
+    font-family:'Fraunces',serif;
+    font-optical-sizing:auto;
+    font-weight:560;
+    font-size:54px;
+    line-height:1.05;
+    letter-spacing:-0.01em;
+    margin:0 0 6px;
+  }
+  .title em{
+    font-style:italic;
+    font-weight:440;
+    color:var(--moss-deep);
+  }
+  .sub{
+    font-size:16px;
+    color:var(--ink-soft);
+    max-width:46ch;
+    line-height:1.55;
+    margin:0;
+  }
+  .divider{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    margin:56px 0 28px;
+  }
+  .divider svg{flex:none;}
+  .divider .line{height:1px;background:var(--sand-line);flex:1;}
+  .divider .label{
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-weight:440;
+    font-size:20px;
+    color:var(--moss-deep);
+    white-space:nowrap;
+  }
+
+  /* palette */
+  .swatches{display:flex;gap:14px;flex-wrap:wrap;}
+  .swatch{width:128px;}
+  .swatch .chip{
+    height:84px;
+    border-radius:12px;
+    border:1px solid rgba(0,0,0,0.06);
+    margin-bottom:8px;
+  }
+  .swatch .name{font-size:13px;font-weight:600;}
+  .swatch .hex{font-size:12px;color:var(--ink-soft);font-variant-numeric:tabular-nums;}
+
+  /* type scale */
+  .type-row{
+    display:flex;
+    align-items:baseline;
+    justify-content:space-between;
+    gap:24px;
+    padding:18px 0;
+    border-bottom:1px solid var(--sand-line);
+  }
+  .type-row:last-child{border-bottom:none;}
+  .type-row .sample{font-family:'Fraunces',serif;font-weight:500;}
+  .type-row .sample.body{font-family:'Inter',sans-serif;font-weight:400;}
+  .type-row .sample.util{
+    font-family:'Inter',sans-serif;
+    font-weight:600;
+    text-transform:uppercase;
+    letter-spacing:0.12em;
+  }
+  .type-row .meta{
+    font-size:12px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+    font-variant-numeric:tabular-nums;
+  }
+
+  /* buttons */
+  .row{display:flex;gap:14px;flex-wrap:wrap;align-items:center;}
+  button{
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    font-weight:600;
+    border-radius:10px;
+    padding:12px 22px;
+    cursor:pointer;
+    border:1px solid transparent;
+    display:inline-flex;
+    align-items:center;
+    gap:8px;
+  }
+  .btn-primary{background:var(--moss);color:var(--paper);}
+  .btn-primary:hover{background:var(--moss-deep);}
+  .btn-secondary{background:transparent;color:var(--moss-deep);border-color:var(--moss);}
+  .btn-secondary:hover{background:var(--moss-tint);}
+  .btn-ghost{background:transparent;color:var(--ink-soft);}
+  .btn-ghost:hover{color:var(--ink);background:var(--sand);}
+
+  /* inputs */
+  .field{display:flex;flex-direction:column;gap:7px;width:260px;}
+  label.flabel{
+    font-size:12px;
+    font-weight:600;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+  }
+  input[type=text], select{
+    font-family:'Inter',sans-serif;
+    font-size:15px;
+    color:var(--ink);
+    background:#fff;
+    border:1px solid var(--sand-line);
+    border-radius:10px;
+    padding:11px 14px;
+    outline:none;
+  }
+  input[type=text]:focus, select:focus{
+    border-color:var(--moss);
+    box-shadow:0 0 0 3px var(--moss-tint);
+  }
+
+  /* card */
+  .card{
+    background:#fff;
+    border:1px solid var(--sand-line);
+    border-radius:var(--radius);
+    padding:18px;
+    width:280px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .card .art{
+    height:150px;
+    border-radius:10px;
+    background:var(--moss-tint);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .card .badge{
+    position:absolute;
+    top:10px;
+    right:10px;
+    width:34px;height:34px;
+    border-radius:50%;
+    background:var(--paper);
+    border:1px solid var(--sand-line);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .card .name{
+    font-family:'Fraunces',serif;
+    font-weight:560;
+    font-size:21px;
+    margin:0;
+  }
+  .card .latin{
+    font-family:'Fraunces',serif;
+    font-style:italic;
+    font-weight:440;
+    font-size:14px;
+    color:var(--ink-soft);
+    margin:0;
+  }
+  .tags{display:flex;gap:8px;flex-wrap:wrap;}
+  .tag{
+    font-size:11.5px;
+    font-weight:600;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    padding:5px 10px;
+    border-radius:100px;
+    display:inline-flex;
+    align-items:center;
+    gap:5px;
+  }
+  .tag.sun{background:var(--gold);color:#fff;background:#FBEFD8;color:#8A6418;}
+  .tag.season{background:var(--clay-tint);color:#8C3F23;}
+
+  /* empty state */
+  .empty{
+    border:1.5px dashed var(--sand-line);
+    border-radius:18px;
+    padding:56px 32px;
+    text-align:center;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:18px;
+    background:var(--paper-deep);
+  }
+  .empty h3{
+    font-family:'Fraunces',serif;
+    font-weight:560;
+    font-size:24px;
+    margin:0;
+  }
+  .empty p{
+    font-size:14.5px;
+    color:var(--ink-soft);
+    max-width:34ch;
+    margin:0;
+    line-height:1.5;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <p class="eyebrow">Plotted — Design Language v1</p>
+  <h1 class="title">Botanical, <em>hand-kept</em>, quietly precise.</h1>
+  <p class="sub">A garden portfolio that reads like a field notebook — warm paper, a characterful serif for names, and sketched line-work standing in for photography.</p>
+
+  <!-- palette -->
+  <div class="divider">
+    <svg width="22" height="22" viewBox="0 0 22 22"><path d="M11 2c4 4 7 7.2 7 11a7 7 0 1 1-14 0c0-3.8 3-7 7-11Z" fill="none" stroke="#4F6B4A" stroke-width="1.6" stroke-linejoin="round"/></svg>
+    <span class="label">Palette</span>
+    <div class="line"></div>
+  </div>
+  <div class="swatches">
+    <div class="swatch"><div class="chip" style="background:#FAF6EC"></div><div class="name">Paper</div><div class="hex">#FAF6EC</div></div>
+    <div class="swatch"><div class="chip" style="background:#2B2A24"></div><div class="name" style="color:#fff;background:#2B2A24;border-radius:6px;padding:0 4px;display:inline-block">Ink</div><div class="hex">#2B2A24</div></div>
+    <div class="swatch"><div class="chip" style="background:#4F6B4A"></div><div class="name">Moss</div><div class="hex">#4F6B4A</div></div>
+    <div class="swatch"><div class="chip" style="background:#34492F"></div><div class="name">Moss deep</div><div class="hex">#34492F</div></div>
+    <div class="swatch"><div class="chip" style="background:#C2603C"></div><div class="name">Clay</div><div class="hex">#C2603C</div></div>
+    <div class="swatch"><div class="chip" style="background:#E8DFC8"></div><div class="name">Sand</div><div class="hex">#E8DFC8</div></div>
+  </div>
+
+  <!-- type -->
+  <div class="divider">
+    <svg width="20" height="20" viewBox="0 0 20 20"><path d="M4 16 L8 5 L12 16 M5.5 12 H10.5" fill="none" stroke="#4F6B4A" stroke-width="1.6" stroke-linecap="round"/></svg>
+    <span class="label">Type scale</span>
+    <div class="line"></div>
+  </div>
+  <div class="type-row"><div class="sample" style="font-size:40px;font-weight:560;">Calamagrostis</div><div class="meta">Fraunces 560 / 40px</div></div>
+  <div class="type-row"><div class="sample" style="font-size:22px;font-style:italic;font-weight:440;color:var(--ink-soft)">× acutiflora 'Karl Foerster'</div><div class="meta">Fraunces italic 440 / 22px</div></div>
+  <div class="type-row"><div class="sample body" style="font-size:16px;">Planted March 2024, full sun, north border.</div><div class="meta">Inter 400 / 16px</div></div>
+  <div class="type-row"><div class="sample util" style="font-size:12px;color:var(--ink-soft)">Flowering season · Jul–Sep</div><div class="meta">Inter 600 caps / 12px</div></div>
+
+  <!-- buttons + inputs -->
+  <div class="divider">
+    <svg width="20" height="20" viewBox="0 0 20 20"><rect x="3" y="6" width="14" height="9" rx="3" fill="none" stroke="#4F6B4A" stroke-width="1.6"/></svg>
+    <span class="label">Controls</span>
+    <div class="line"></div>
+  </div>
+  <div class="row" style="margin-bottom:28px;">
+    <button class="btn-primary">Add a plant</button>
+    <button class="btn-secondary">Save changes</button>
+    <button class="btn-ghost">Cancel</button>
+  </div>
+  <div class="row">
+    <div class="field">
+      <label class="flabel">Common name</label>
+      <input type="text" placeholder="e.g. Feather reed grass">
+    </div>
+    <div class="field">
+      <label class="flabel">Sun needs</label>
+      <select>
+        <option>Full sun</option>
+        <option>Partial shade</option>
+        <option>Full shade</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- card -->
+  <div class="divider">
+    <svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 3c2.5 2 2.5 4.5 0 6-2.5-1.5-2.5-4 0-6Z M10 9v8" fill="none" stroke="#4F6B4A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <span class="label">Plant card</span>
+    <div class="line"></div>
+  </div>
+  <div class="card">
+    <div class="art">
+      <svg width="64" height="64" viewBox="0 0 64 64">
+        <path d="M32 50 C31 36 30 28 32 14" stroke="#4F6B4A" stroke-width="2" fill="none" stroke-linecap="round"/>
+        <path d="M32 30c-7-2-11-9-10-16 7 0 13 5 14 12" stroke="#4F6B4A" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M32 38c8-1 13-7 13-14-8-1-15 4-16 11" stroke="#4F6B4A" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <div class="badge">
+        <svg width="16" height="16" viewBox="0 0 16 16"><circle cx="8" cy="8" r="3.4" fill="none" stroke="#C99A3D" stroke-width="1.4"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.4 1.4M11.6 11.6L13 13M13 3l-1.4 1.4M4.4 11.6L3 13" stroke="#C99A3D" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </div>
+    </div>
+    <div>
+      <p class="name">Feather reed grass</p>
+      <p class="latin">Calamagrostis × acutiflora 'Karl Foerster'</p>
+    </div>
+    <div class="tags">
+      <span class="tag sun">☀ Full sun</span>
+      <span class="tag season">Jul – Sep</span>
+    </div>
+  </div>
+
+  <!-- empty state -->
+  <div class="divider">
+    <svg width="20" height="20" viewBox="0 0 20 20"><path d="M4 4l12 12M16 4 4 16" stroke="#4F6B4A" stroke-width="1.5" stroke-linecap="round" opacity="0"/><circle cx="10" cy="10" r="6.5" fill="none" stroke="#4F6B4A" stroke-width="1.5" stroke-dasharray="2.4 3"/></svg>
+    <span class="label">Empty state</span>
+    <div class="line"></div>
+  </div>
+  <div class="empty">
+    <svg width="72" height="72" viewBox="0 0 72 72">
+      <ellipse cx="36" cy="62" rx="22" ry="3" fill="#E8DFC8"/>
+      <path d="M36 60c-1-16-2-26 0-40" stroke="#4F6B4A" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <path d="M36 36c-8-2-13-10-11-18 8 0 15 6 16 14" stroke="#4F6B4A" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <path d="M36 44c9-1 15-8 14-16-9-1-17 5-18 12" stroke="#4F6B4A" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <circle cx="36" cy="20" r="2" fill="#C99A3D"/>
+    </svg>
+    <h3>Nothing planted yet</h3>
+    <p>Your garden portfolio starts here. Add your first plant to begin keeping record of it.</p>
+    <button class="btn-primary">Add a plant</button>
+  </div>
+
+</div>
+</body>
+</html>
