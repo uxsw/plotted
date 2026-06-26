@@ -241,7 +241,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
   }, []);
 
   function selectItem(item: AutocompleteItem) {
-    setQuery(item.primaryText);
+    setQuery(item.plant.species ?? item.plant.cultivar ?? "");
     setDropdownOpen(false);
     setHighlighted(-1);
     inputRef.current?.focus();
