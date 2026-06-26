@@ -465,7 +465,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
         <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
           {filtered.map((plant) => {
             const title = plantDisplayTitle(plant);
-            const hasCommonName = !!plant.common_name;
+            const hasCommonName = !!plant.common_names?.length;
             const hasSeason = plant.flowering_season_from !== null && plant.flowering_season_to !== null;
             return (
               <Card

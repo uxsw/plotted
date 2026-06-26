@@ -23,10 +23,10 @@ export function ScientificName({
 
 /**
  * Returns the plant's display title as a plain string.
- * Uses common_name if set; falls back to species/cultivar.
+ * Uses first common name if set; falls back to species/cultivar.
  */
-export function plantDisplayTitle(plant: Pick<Plant, "common_name" | "genus" | "species" | "cultivar">): string {
-  if (plant.common_name) return plant.common_name;
+export function plantDisplayTitle(plant: Pick<Plant, "common_names" | "genus" | "species" | "cultivar">): string {
+  if (plant.common_names?.length) return plant.common_names[0];
   if (plant.species && plant.cultivar) return `${plant.species} '${plant.cultivar}'`;
   return plant.species ?? plant.cultivar ?? "Unnamed plant";
 }

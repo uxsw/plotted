@@ -80,7 +80,7 @@ export default function PlantList({ plants }: { plants: Plant[] }) {
           </thead>
           <tbody className="divide-y divide-gray-100">
             {plants.map((plant) => {
-              const title = plant.common_name || null;
+              const title = plant.common_names?.[0] ?? null;
               const hasScientific = !!(plant.species || plant.cultivar);
               return (
                 <tr key={plant.id} className="hover:bg-gray-50">
@@ -97,7 +97,7 @@ export default function PlantList({ plants }: { plants: Plant[] }) {
                       {plant.photo_url ? (
                         <Image
                           src={plant.photo_url}
-                          alt={plant.common_name || plant.species || "plant"}
+                          alt={plant.common_names?.[0] || plant.species || "plant"}
                           width={36}
                           height={36}
                           className="w-9 h-9 rounded object-cover flex-shrink-0"

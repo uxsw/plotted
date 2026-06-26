@@ -123,7 +123,6 @@ export default function PlantForm() {
       const photoUrl = await uploadPhoto();
 
       const payload: PlantInsert = {
-        common_name: "",
         genus: "",
         species: species || null,
         cultivar: cultivar || null,

@@ -1,0 +1,1 @@
+ALTER TABLE plants DROP COLUMN IF EXISTS common_name;

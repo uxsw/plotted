@@ -4,7 +4,6 @@ export type PlantStatus = "active" | "removed";
 export interface Plant {
   id: string;
   user_id: string;
-  common_name: string;
   genus: string;
   species: string | null;
   cultivar: string | null;

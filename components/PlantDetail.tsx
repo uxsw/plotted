@@ -482,12 +482,12 @@ export default function PlantDetail({
           )}
           <div>
             <h1 className="text-2xl font-bold text-gray-900">
-              {plant.common_name || (hasScientific
+              {plant.common_names?.[0] || (hasScientific
                 ? <ScientificName species={plant.species} cultivar={plant.cultivar} />
                 : "Unnamed plant"
               )}
             </h1>
-            {plant.common_name && hasScientific && (
+            {plant.common_names?.[0] && hasScientific && (
               <p className="text-sm text-gray-500 mt-0.5">
                 <ScientificName species={plant.species} cultivar={plant.cultivar} />
               </p>
