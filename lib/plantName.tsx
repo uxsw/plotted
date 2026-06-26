@@ -32,6 +32,16 @@ export function plantDisplayTitle(plant: Pick<Plant, "common_names" | "genus" | 
 }
 
 /**
+ * Returns the primary label for an autocomplete dropdown item.
+ * Format: "species – 'Cultivar'" if cultivar present, otherwise just "species".
+ * Falls back to cultivar alone if no species.
+ */
+export function autocompleteTitle({ species, cultivar }: NameParts): string {
+  if (species && cultivar) return `${species} – '${cultivar}'`;
+  return species ?? cultivar ?? "";
+}
+
+/**
  * Returns species and cultivar as a plain string (no italics).
  * Useful for alt text, confirm dialogs, etc.
  */

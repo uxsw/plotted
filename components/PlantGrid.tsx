@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { Plant } from "@/lib/types";
-import { plantDisplayTitle, ScientificName } from "@/lib/plantName";
+import { plantDisplayTitle, ScientificName, autocompleteTitle } from "@/lib/plantName";
 import { Card } from "@/components/ui/Card";
 import { Tag } from "@/components/ui/Tag";
 import { Button } from "@/components/ui/Button";
@@ -80,7 +80,7 @@ function getAutocompleteItems(plants: Plant[], query: string): AutocompleteItem[
     if (!onSpecies && !onCultivar && !matchedCommon) continue;
     items.push({
       plant,
-      primaryText: plant.species ?? plant.cultivar ?? "",
+      primaryText: autocompleteTitle(plant),
       secondaryText: matchedCommon ?? plant.common_names?.[0] ?? null,
       matchedOn: matchedCommon ? "common" : onSpecies ? "species" : "cultivar",
     });
