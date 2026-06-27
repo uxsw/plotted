@@ -24,6 +24,8 @@ jobs:
 
       - run: npm run lint
 
+      - run: npm test
+
       - run: npm run build
         env:
           # Build requires these to be present; dummy values are fine for a
