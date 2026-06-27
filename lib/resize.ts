@@ -1,5 +1,5 @@
 const MAX_PX = 800;
-const JPEG_QUALITY = 0.85;
+const JPEG_QUALITY = 0.80;
 
 export function resizeImage(file: File): Promise<Blob> {
   return new Promise((resolve, reject) => {

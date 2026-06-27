@@ -463,7 +463,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
         <p className="font-display italic text-[15px] text-ink-soft text-center py-16">no plants match</p>
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
-          {filtered.map((plant) => {
+          {filtered.map((plant, index) => {
             const title = plantDisplayTitle(plant);
             const hasCommonName = !!plant.common_names?.length;
             const hasSeason = plant.flowering_season_from !== null && plant.flowering_season_to !== null;
@@ -472,6 +472,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
                 key={plant.id}
                 photoUrl={plant.photo_url}
                 photoAlt={title}
+                priority={index === 0}
                 title={title}
                 subtitle={
                   hasCommonName ? (

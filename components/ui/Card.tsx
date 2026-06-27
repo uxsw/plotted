@@ -12,6 +12,7 @@ interface CardProps {
   footer?: ReactNode;
   onClick?: () => void;
   className?: string;
+  priority?: boolean;
 }
 
 function Card({
@@ -25,6 +26,7 @@ function Card({
   footer,
   onClick,
   className = "",
+  priority = false,
 }: CardProps) {
   const Tag = onClick ? "button" : "div";
 
@@ -48,6 +50,7 @@ function Card({
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover"
+            priority={priority}
           />
         ) : placeholder ? (
           <div className="absolute inset-0 flex items-center justify-center">
