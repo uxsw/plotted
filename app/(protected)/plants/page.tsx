@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import PlantGrid from "@/components/PlantGrid";
+import ErrorBoundary from "@/components/ErrorBoundary";
 
 export default async function PlantsPage() {
   const supabase = await createClient();
@@ -29,7 +30,9 @@ export default async function PlantsPage() {
           + Add plant
         </Link>
       </div>
-      <PlantGrid plants={plants ?? []} />
+      <ErrorBoundary>
+        <PlantGrid plants={plants ?? []} />
+      </ErrorBoundary>
     </div>
   );
 }
