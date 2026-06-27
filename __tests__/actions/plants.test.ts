@@ -47,13 +47,12 @@ function setupBasicSupabase() {
     }),
   });
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   vi.mocked(createClient).mockResolvedValue({
     auth: {
       getUser: vi.fn().mockResolvedValue({ data: { user: { id: "user-123" } } }),
     },
     from: vi.fn().mockReturnValue({ update: mockUpdate }),
-  } as any);
+  } as unknown as Awaited<ReturnType<typeof createClient>>);
 }
 
 // Builds a supabase client mock sufficient for the upsertPlant AI-lookup path.
@@ -73,7 +72,6 @@ function setupAISupabase(): { capturedAIUpdate: () => Record<string, unknown> | 
     }),
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   vi.mocked(createClient).mockResolvedValue({
     auth: {
       getUser: vi.fn().mockResolvedValue({ data: { user: { id: "user-123" } } }),
@@ -90,7 +88,7 @@ function setupAISupabase(): { capturedAIUpdate: () => Record<string, unknown> | 
       }
       return plantsTable;
     }),
-  } as any);
+  } as unknown as Awaited<ReturnType<typeof createClient>>);
 
   return { capturedAIUpdate: () => captured };
 }
