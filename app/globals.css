@@ -22,6 +22,25 @@
   --radius-lg: 14px;
 }
 
+@keyframes sway {
+  0%, 100% { transform: rotate(-2deg); transform-origin: 50% 100%; }
+  50%       { transform: rotate(2.5deg); transform-origin: 50% 100%; }
+}
+@keyframes sway-slow {
+  0%, 100% { transform: rotate(1.5deg); transform-origin: 50% 100%; }
+  50%       { transform: rotate(-2deg); transform-origin: 50% 100%; }
+}
+@keyframes droop {
+  0%, 100% { transform: rotate(-8deg); transform-origin: 0% 0%; }
+  50%       { transform: rotate(-5deg); transform-origin: 0% 0%; }
+}
+.plant-sway      { animation: sway      5s   ease-in-out infinite; }
+.plant-sway-slow { animation: sway-slow 6.5s ease-in-out infinite; }
+.leaf-droop      { animation: droop     4.5s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .plant-sway, .plant-sway-slow, .leaf-droop { animation: none; }
+}
+
 body {
   background-color: #FAF6EC;
   color: #2B2A24;
