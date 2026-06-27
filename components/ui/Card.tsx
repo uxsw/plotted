@@ -1,4 +1,5 @@
 import React, { ReactNode } from "react";
+import Image from "next/image";
 
 interface CardProps {
   photoUrl?: string | null;
@@ -41,11 +42,12 @@ function Card({
       {/* Image area */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-paper-deep">
         {photoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={photoUrl}
             alt={photoAlt ?? title}
-            className="absolute inset-0 w-full h-full object-cover"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover"
           />
         ) : placeholder ? (
           <div className="absolute inset-0 flex items-center justify-center">
