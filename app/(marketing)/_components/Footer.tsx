@@ -6,8 +6,7 @@ export default function Footer() {
     <div style={{ borderTop: `1px solid ${T.hl}` }}>
       <div className={WRAP}>
         <div
-          style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}
-          className="py-[44px] max-[860px]:flex-col max-[860px]:items-start max-[860px]:gap-[28px] max-[860px]:py-[36px]"
+          className="flex items-center justify-between py-[44px] max-tablet:flex-col max-tablet:items-start max-tablet:gap-[28px] max-tablet:py-[36px]"
         >
           {/* Wordmark + tagline */}
           <div>

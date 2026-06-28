@@ -6,15 +6,14 @@ export default function Hero() {
   return (
     <div className={WRAP}>
       <div
-        style={{ display: "grid", gridTemplateColumns: "1.15fr 0.85fr", gap: 72, alignItems: "center" }}
-        className="pt-[90px] pb-[96px] max-[860px]:grid-cols-1 max-[860px]:gap-[40px] max-[860px]:pt-[48px] max-[860px]:pb-[60px]"
+        className="grid grid-cols-[1.15fr_0.85fr] gap-[72px] items-center pt-[90px] pb-[96px] max-tablet:grid-cols-1 max-tablet:gap-[40px] max-tablet:pt-[48px] max-tablet:pb-[60px]"
       >
         {/* Left — copy */}
         <div>
           <Eyebrow text="Private beta" mb={30} />
           <h1
             style={{ fontFamily: T.d, fontStyle: "italic", fontWeight: 400, letterSpacing: "-0.02em", color: T.ink, margin: "0 0 30px", lineHeight: 1.02 }}
-            className="text-[76px] max-[860px]:text-[clamp(42px,11vw,64px)] max-[480px]:text-[clamp(34px,9.6vw,46px)] max-[480px]:leading-[1.05]"
+            className="text-[76px] max-tablet:text-[clamp(42px,11vw,64px)] max-mobile:text-[clamp(34px,9.6vw,46px)] max-mobile:leading-[1.05]"
           >
             Your whole<br />garden, quietly<br />in order.
           </h1>

@@ -21,4 +21,4 @@ export const T = {
 } as const;
 
 /** Shared max-width container classes */
-export const WRAP = "max-w-[1120px] mx-auto px-12 max-[860px]:px-6 max-[480px]:px-[18px]";
+export const WRAP = "max-w-[1120px] mx-auto px-12 max-tablet:px-6 max-mobile:px-[18px]";

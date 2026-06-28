@@ -22,11 +22,10 @@ export default function Ethos() {
     <div className={WRAP}>
       <div
         style={{ borderTop: `1px solid ${T.hl}` }}
-        className="pt-[104px] pb-[96px] max-[860px]:pt-[68px] max-[860px]:pb-[60px]"
+        className="pt-[104px] pb-[96px] max-tablet:pt-[68px] max-tablet:pb-[60px]"
       >
         <div
-          style={{ display: "grid", gridTemplateColumns: "0.85fr 1.15fr", gap: 72, alignItems: "start" }}
-          className="max-[860px]:grid-cols-1 max-[860px]:gap-[44px]"
+          className="grid grid-cols-[0.85fr_1.15fr] gap-[72px] items-start max-tablet:grid-cols-1 max-tablet:gap-[44px]"
         >
           {/* Left — portrait plate */}
           <FadeIn>
@@ -54,7 +53,7 @@ export default function Ethos() {
               <Eyebrow text="Our approach" />
               <h2
                 style={{ fontFamily: T.d, fontStyle: "italic", fontWeight: 400, letterSpacing: "-0.02em", color: T.ink, margin: "0 0 44px", lineHeight: 1.08 }}
-                className="text-[52px] max-[860px]:text-[clamp(32px,7.6vw,48px)] max-[480px]:text-[clamp(29px,8.4vw,40px)]"
+                className="text-[52px] max-tablet:text-[clamp(32px,7.6vw,48px)] max-mobile:text-[clamp(29px,8.4vw,40px)]"
               >
                 Thoughtfully made, quietly useful.
               </h2>

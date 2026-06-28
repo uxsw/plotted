@@ -91,7 +91,7 @@ function Phone({ s }: { s: DS }) {
   return (
     <div
       style={{ position: "relative", width: 330, background: T.ink, borderRadius: 46, padding: 12, boxShadow: "0 40px 70px -28px rgba(44,49,34,0.55)" }}
-      className="max-[480px]:!w-[min(300px,90vw)]"
+      className="max-mobile:!w-[min(300px,90vw)]"
     >
       {/* Screen */}
       <div style={{ position: "relative", background: T.paper, borderRadius: 35, height: 606, overflow: "hidden", display: "flex", flexDirection: "column" }}>
@@ -273,8 +273,7 @@ export default function Demo() {
       <div className={WRAP}>
         <div
           ref={containerRef}
-          style={{ display: "grid", gridTemplateColumns: "0.95fr 1.05fr", gap: 80, alignItems: "center" }}
-          className="py-[104px] max-[860px]:grid-cols-1 max-[860px]:gap-[52px] max-[860px]:py-[68px]"
+          className="grid grid-cols-[0.95fr_1.05fr] gap-[80px] items-center py-[104px] max-tablet:grid-cols-1 max-tablet:gap-[52px] max-tablet:py-[68px]"
         >
           {/* Phone */}
           <div className="flex justify-center">
@@ -286,7 +285,7 @@ export default function Demo() {
             <Eyebrow text="See it in use" />
             <h2
               style={{ fontFamily: T.d, fontStyle: "italic", fontWeight: 400, letterSpacing: "-0.02em", color: T.ink, margin: "0 0 24px", lineHeight: 1.06 }}
-              className="text-[50px] max-[860px]:text-[clamp(32px,7.6vw,48px)] max-[480px]:text-[clamp(29px,8.4vw,40px)]"
+              className="text-[50px] max-tablet:text-[clamp(32px,7.6vw,48px)] max-mobile:text-[clamp(29px,8.4vw,40px)]"
             >
               Your garden,<br />in your pocket.
             </h2>

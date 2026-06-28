@@ -17,6 +17,10 @@
 
   --font-display: var(--font-fraunces), serif;
   --font-sans: var(--font-inter), sans-serif;
+  --font-mono: var(--font-spline-mono), monospace;
+
+  --breakpoint-tablet: 860px;
+  --breakpoint-mobile: 480px;
 
   --radius: 10px;
   --radius-lg: 14px;

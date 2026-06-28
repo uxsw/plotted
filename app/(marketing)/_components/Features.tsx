@@ -10,13 +10,13 @@ export default function Features() {
       {/* ── Product explanation ─────────────────────────────── */}
       <div
         style={{ borderTop: `1px solid ${T.hl}` }}
-        className="pt-[104px] pb-[96px] max-[860px]:pt-[68px] max-[860px]:pb-[60px]"
+        className="pt-[104px] pb-[96px] max-tablet:pt-[68px] max-tablet:pb-[60px]"
       >
         <FadeIn>
           <Eyebrow text="What is Plotted" />
           <h2
             style={{ fontFamily: T.d, fontStyle: "italic", fontWeight: 400, letterSpacing: "-0.02em", color: T.ink, margin: "0 0 56px", maxWidth: 780, lineHeight: 1.08 }}
-            className="text-[52px] max-[860px]:text-[clamp(32px,7.6vw,48px)] max-[480px]:text-[clamp(29px,8.4vw,40px)]"
+            className="text-[52px] max-tablet:text-[clamp(32px,7.6vw,48px)] max-mobile:text-[clamp(29px,8.4vw,40px)]"
           >
             A considered home for everything you grow.
           </h2>
@@ -24,8 +24,8 @@ export default function Features() {
 
         <FadeIn delay={0.1}>
           <div
-            style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 64, maxWidth: 880 }}
-            className="max-[860px]:grid-cols-1 max-[860px]:gap-[36px]"
+            style={{ maxWidth: 880 }}
+            className="grid grid-cols-2 gap-[64px] max-tablet:grid-cols-1 max-tablet:gap-[36px]"
           >
             <p style={{ fontFamily: T.s, fontSize: 18, lineHeight: 1.68, color: T.body, margin: 0 }}>
               Most of what we know about our own gardens lives in our heads — or scattered across plant
@@ -61,14 +61,14 @@ export default function Features() {
       {/* ── How it works ────────────────────────────────────── */}
       <div
         style={{ borderTop: `1px solid ${T.hl}` }}
-        className="pt-[104px] pb-[96px] max-[860px]:pt-[68px] max-[860px]:pb-[60px]"
+        className="pt-[104px] pb-[96px] max-tablet:pt-[68px] max-tablet:pb-[60px]"
       >
         <FadeIn>
           <div style={{ maxWidth: 720 }}>
             <Eyebrow text="How it works" />
             <h2
               style={{ fontFamily: T.d, fontStyle: "italic", fontWeight: 400, letterSpacing: "-0.02em", color: T.ink, margin: "0 0 22px", lineHeight: 1.08 }}
-              className="text-[52px] max-[860px]:text-[clamp(32px,7.6vw,48px)] max-[480px]:text-[clamp(29px,8.4vw,40px)]"
+              className="text-[52px] max-tablet:text-[clamp(32px,7.6vw,48px)] max-mobile:text-[clamp(29px,8.4vw,40px)]"
             >
               Name a plant. Plotted does the rest.
             </h2>
@@ -79,8 +79,7 @@ export default function Features() {
         </FadeIn>
 
         <div
-          style={{ display: "grid", gridTemplateColumns: "repeat(3,1fr)", gap: 24, alignItems: "stretch" }}
-          className="mt-16 max-[860px]:grid-cols-1 max-[860px]:gap-[18px] max-[860px]:mt-11"
+          className="grid grid-cols-3 gap-[24px] items-stretch mt-16 max-tablet:grid-cols-1 max-tablet:gap-[18px] max-tablet:mt-11"
         >
           {/* Card 01 */}
           <FadeIn style={{ height: "100%" }}>
