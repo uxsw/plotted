@@ -32,7 +32,7 @@ export async function updateSession(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const isAuthPage = pathname.startsWith("/auth");
   const isDesignCheck = pathname.startsWith("/design-check");
-  const isMarketing = pathname === "/";
+  const isMarketing = pathname === "/" || pathname === "/privacy";
   const isProtected =
     !isAuthPage && !isDesignCheck && !isMarketing && !pathname.startsWith("/_next");
 

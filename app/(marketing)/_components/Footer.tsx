@@ -26,6 +26,9 @@ export default function Footer() {
             <Link href="#request" style={{ textDecoration: "none", fontFamily: T.s, fontSize: 13.5, color: T.body }}>
               Request access
             </Link>
+            <Link href="/privacy" style={{ textDecoration: "none", fontFamily: T.s, fontSize: 13.5, color: T.meta }}>
+              Privacy Policy
+            </Link>
             <span style={{ fontFamily: T.s, fontSize: 13, color: T.meta }}>
               © {new Date().getFullYear()} Plotted
             </span>
