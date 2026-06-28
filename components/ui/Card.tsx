@@ -1,5 +1,6 @@
 import React, { ReactNode } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 interface CardProps {
   photoUrl?: string | null;
@@ -10,6 +11,7 @@ interface CardProps {
   subtitle?: React.ReactNode;
   tags?: ReactNode;
   footer?: ReactNode;
+  href?: string;
   onClick?: () => void;
   className?: string;
   priority?: boolean;
@@ -24,23 +26,23 @@ function Card({
   subtitle,
   tags,
   footer,
+  href,
   onClick,
   className = "",
   priority = false,
 }: CardProps) {
-  const Tag = onClick ? "button" : "div";
+  const interactive = !!(href || onClick);
+  const sharedClassName = [
+    "flex flex-col rounded-lg overflow-hidden",
+    "border border-sand-line bg-paper",
+    "transition-shadow duration-150",
+    interactive ? "cursor-pointer hover:shadow-md text-left w-full" : "",
+    interactive ? "active:scale-[0.98] active:opacity-75 transition-transform duration-75" : "",
+    className,
+  ].join(" ");
 
-  return (
-    <Tag
-      onClick={onClick}
-      className={[
-        "flex flex-col rounded-lg overflow-hidden",
-        "border border-sand-line bg-paper",
-        "transition-shadow duration-150",
-        onClick ? "cursor-pointer hover:shadow-md text-left w-full" : "",
-        className,
-      ].join(" ")}
-    >
+  const content = (
+    <>
       {/* Image area */}
       <div className="relative aspect-[4/3] w-full overflow-hidden bg-paper-deep">
         {photoUrl ? (
@@ -86,7 +88,29 @@ function Card({
           {footer}
         </div>
       )}
-    </Tag>
+    </>
+  );
+
+  if (href) {
+    return (
+      <Link href={href} className={sharedClassName}>
+        {content}
+      </Link>
+    );
+  }
+
+  if (onClick) {
+    return (
+      <button onClick={onClick} className={sharedClassName}>
+        {content}
+      </button>
+    );
+  }
+
+  return (
+    <div className={sharedClassName}>
+      {content}
+    </div>
   );
 }
 

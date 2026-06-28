@@ -489,7 +489,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
                     {plant.sun_needs && <Tag color="sun">{plant.sun_needs}</Tag>}
                   </>
                 }
-                onClick={() => router.push(`/plants/${plant.id}`)}
+                href={`/plants/${plant.id}`}
               />
             );
           })}
