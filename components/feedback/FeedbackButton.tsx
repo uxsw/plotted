@@ -14,6 +14,7 @@ export default function FeedbackButton() {
         onClick={() => setOpen(true)}
         aria-label="Send feedback"
         className={[
+          "cursor-pointer",
           "fixed bottom-6 right-6 z-50",
           "flex items-center gap-2 px-4 py-2.5",
           "rounded-full bg-moss text-white text-sm font-sans font-medium",

@@ -26,6 +26,10 @@
   --radius-lg: 14px;
 }
 
+button, [role="button"] {
+  cursor: pointer;
+}
+
 @keyframes sway {
   0%, 100% { transform: rotate(-2deg); transform-origin: 50% 100%; }
   50%       { transform: rotate(2.5deg); transform-origin: 50% 100%; }

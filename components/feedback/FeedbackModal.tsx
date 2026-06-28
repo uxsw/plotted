@@ -12,8 +12,7 @@ interface Props {
 
 const TYPES: { value: FeedbackType; label: string }[] = [
   { value: "bug", label: "Bug" },
-  { value: "ux", label: "Something feels off" },
-  { value: "other", label: "Other" },
+  { value: "other", label: "Feedback" },
 ];
 
 export default function FeedbackModal({ onClose }: Props) {
@@ -82,6 +81,15 @@ export default function FeedbackModal({ onClose }: Props) {
 }
 
 function SuccessState({ referenceCode, onClose }: { referenceCode: string; onClose: () => void }) {
+  const [copied, setCopied] = useState(false);
+
+  function handleCopy() {
+    navigator.clipboard.writeText(referenceCode).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  }
+
   return (
     <>
       <div className="flex flex-col gap-1">
@@ -89,13 +97,30 @@ function SuccessState({ referenceCode, onClose }: { referenceCode: string; onClo
         <p className="text-sm font-sans text-ink-soft">Your report has been received.</p>
       </div>
 
-      <div className="rounded-[10px] bg-moss-tint border border-moss/20 px-5 py-4 flex flex-col items-center gap-1 text-center">
+      <div className="rounded-[10px] bg-moss-tint border border-moss/20 px-5 py-4 flex flex-col items-center gap-2 text-center">
         <span className="text-xs font-sans font-semibold uppercase tracking-wider text-moss-deep" style={{ fontVariant: "small-caps" }}>
           Reference code
         </span>
-        <span className="font-mono text-2xl font-semibold text-moss-deep tracking-widest">
-          {referenceCode}
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="font-mono text-2xl font-semibold text-moss-deep tracking-widest">
+            {referenceCode}
+          </span>
+          {copied ? (
+            <span className="text-xs font-sans text-moss font-medium">Copied!</span>
+          ) : (
+            <button
+              type="button"
+              onClick={handleCopy}
+              aria-label="Copy reference code"
+              className="text-moss-deep/60 hover:text-moss-deep transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss rounded"
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <rect x="5" y="5" width="8" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>
+                <path d="M3 11V3.5A1.5 1.5 0 0 1 4.5 2H10" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round"/>
+              </svg>
+            </button>
+          )}
+        </div>
       </div>
 
       <p className="text-xs font-sans text-ink-soft leading-relaxed">
