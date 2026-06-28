@@ -33,8 +33,15 @@ export async function updateSession(request: NextRequest) {
   const isAuthPage = pathname.startsWith("/auth");
   const isDesignCheck = pathname.startsWith("/design-check");
   const isMarketing = pathname === "/" || pathname === "/privacy";
+  const isStatic =
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/icons") ||
+    pathname === "/robots.txt" ||
+    pathname === "/sitemap.xml" ||
+    pathname === "/favicon.ico";
+
   const isProtected =
-    !isAuthPage && !isDesignCheck && !isMarketing && !pathname.startsWith("/_next");
+    !isAuthPage && !isDesignCheck && !isMarketing && !isStatic;
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone();
