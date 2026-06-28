@@ -72,11 +72,11 @@ export default function PrivacyPage() {
 
           <Section title="How long we keep your data">
             <p>
-              We keep your data for as long as your account is active. If you'd like your account and data deleted, contact{" "}
+              We keep your data for as long as your account is active. If you&apos;d like your account and data deleted, contact{" "}
               <a href="mailto:john@johncowen.co.uk" style={{ color: T.moss, textDecoration: "underline" }}>
                 john@johncowen.co.uk
               </a>{" "}
-              and we'll action it promptly.
+              and we&apos;ll action it promptly.
             </p>
           </Section>
 
@@ -104,7 +104,7 @@ export default function PrivacyPage() {
 
           <Section title="Changes to this policy" last>
             <p>
-              As Plotted develops, this policy may be updated. We'll let you know of any significant changes.
+              As Plotted develops, this policy may be updated. We&apos;ll let you know of any significant changes.
             </p>
           </Section>
         </div>
