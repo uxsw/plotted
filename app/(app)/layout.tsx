@@ -3,11 +3,11 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import UserMenu from "@/components/UserMenu";
 
-export default async function ProtectedLayout({ children }: { children: React.ReactNode }) {
+export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  if (!user) redirect("/auth/login");
+  if (!user) redirect("/");
 
   return (
     <div className="min-h-screen bg-paper">

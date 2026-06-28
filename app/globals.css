@@ -41,6 +41,23 @@
   .plant-sway, .plant-sway-slow, .leaf-droop { animation: none; }
 }
 
+@keyframes mkt-blink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+@keyframes mkt-pulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.8); }
+  50%       { opacity: 1; transform: scale(1.15); }
+}
+.mkt-caret { animation: mkt-blink 1s steps(1) infinite; }
+.mkt-dot   { animation: mkt-pulse 1.4s ease-in-out infinite; }
+.mkt-dot-1 { animation: mkt-pulse 1s ease-in-out 0s   infinite; }
+.mkt-dot-2 { animation: mkt-pulse 1s ease-in-out 0.2s infinite; }
+.mkt-dot-3 { animation: mkt-pulse 1s ease-in-out 0.4s infinite; }
+@media (prefers-reduced-motion: reduce) {
+  .mkt-caret, .mkt-dot, .mkt-dot-1, .mkt-dot-2, .mkt-dot-3 { animation: none; }
+}
+
 body {
   background-color: #FAF6EC;
   color: #2B2A24;

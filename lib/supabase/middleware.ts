@@ -29,20 +29,22 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isAuthPage = request.nextUrl.pathname.startsWith("/auth");
-  const isDesignCheck = request.nextUrl.pathname.startsWith("/design-check");
+  const { pathname } = request.nextUrl;
+  const isAuthPage = pathname.startsWith("/auth");
+  const isDesignCheck = pathname.startsWith("/design-check");
+  const isMarketing = pathname === "/";
   const isProtected =
-    !isAuthPage && !isDesignCheck && !request.nextUrl.pathname.startsWith("/_next");
+    !isAuthPage && !isDesignCheck && !isMarketing && !pathname.startsWith("/_next");
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
+    url.pathname = "/";
     return NextResponse.redirect(url);
   }
 
-  if (user && request.nextUrl.pathname === "/auth/login") {
+  if (user && pathname === "/auth/login") {
     const url = request.nextUrl.clone();
-    url.pathname = "/";
+    url.pathname = "/plants";
     return NextResponse.redirect(url);
   }
 
