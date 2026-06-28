@@ -159,7 +159,7 @@ function FormState({
     <form onSubmit={onSubmit} className="flex flex-col gap-5">
       <div className="flex flex-col gap-1">
         <h2 className="font-display text-xl font-semibold text-ink">Send feedback</h2>
-        <p className="text-sm font-sans text-ink-soft">Tell us what's wrong or what could be better.</p>
+        <p className="text-sm font-sans text-ink-soft">Tell us what&apos;s wrong or what could be better.</p>
       </div>
 
       {/* Segmented control */}
