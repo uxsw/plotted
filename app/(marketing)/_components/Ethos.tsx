@@ -1,6 +1,7 @@
 import { T, WRAP } from "./tokens";
 import FadeIn from "./FadeIn";
 import Eyebrow from "./Eyebrow";
+import Image from "next/image";
 
 const PRINCIPLES = [
   {
@@ -29,20 +30,20 @@ export default function Ethos() {
         >
           {/* Left — portrait plate */}
           <FadeIn>
-            <div style={{ aspectRatio: "3/4", border: `1px solid rgba(60,70,45,0.3)`, padding: 9, background: T.paper }}>
-              <div style={{
-                width: "100%", height: "100%",
-                background: T.stripeDk,
-                border: `1px solid rgba(60,70,45,0.18)`,
-                display: "flex", alignItems: "center", justifyContent: "center",
-              }}>
-                <span style={{ fontFamily: T.m, fontSize: 12, color: T.moss, textAlign: "center", lineHeight: 1.7 }}>
-                  ETHOS PHOTO · 3:4<br />close-up / detail
-                </span>
+            <div style={{ border: `1px solid rgba(60,70,45,0.3)`, padding: 9, background: T.paper }}>
+              <div style={{ position: "relative", width: "100%", aspectRatio: "3/4" }}>
+                <Image
+                  src="/garden-hero-3.jpg"
+                  alt="Bottom of the garden - summer evening haze"
+                  fill
+                  style={{ objectFit: "cover" }}
+                  sizes="(max-width: 850px) 100vw, 45vw"
+                  priority
+                />
               </div>
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 11, fontFamily: T.d, fontStyle: "italic", fontSize: 13.5, color: "#7A7A63" }}>
-              <span>Pl. 03 — Seed heads, October</span>
+              <span>Pl. 03 — Summer evening looking across the field</span>
               <span style={{ fontFamily: T.m, fontStyle: "normal", fontSize: 11 }}>003</span>
             </div>
           </FadeIn>

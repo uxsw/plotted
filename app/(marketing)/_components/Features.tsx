@@ -1,6 +1,7 @@
 import { T, WRAP } from "./tokens";
 import Eyebrow from "./Eyebrow";
 import FadeIn from "./FadeIn";
+import Image from "next/image";
 
 const CHIPS = ["Foxglove", "Part shade", "Jun – Sep"];
 
@@ -41,18 +42,19 @@ export default function Features() {
 
         <FadeIn delay={0.15}>
           <div style={{ marginTop: 72 }}>
-            <div style={{
-              aspectRatio: "16/6.5",
-              border: `1px solid rgba(60,70,45,0.22)`,
-              background: T.stripeDk,
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <span style={{ fontFamily: T.m, fontSize: 12, color: T.moss }}>
-                PRODUCT PHOTO · 16:6.5 · a planted border in warm light
-              </span>
+            <div style={{ border: `1px solid rgba(60,70,45,0.3)`, padding: 9, background: T.paper }}>
+              <div style={{ position: "relative", width: "100%", aspectRatio: "16/9" }}>
+                <Image
+                  src="/garden-hero-2.jpg"
+                  alt="Garden in late evening summer"
+                  fill
+                  style={{ objectFit: "cover" }}
+                  sizes="100vw"
+                />
+              </div>
             </div>
             <div style={{ fontFamily: T.d, fontStyle: "italic", fontSize: 13.5, color: "#7A7A63", marginTop: 11 }}>
-              Pl. 02 — A mixed border, late summer
+              Pl. 02 — The garden in late summer
             </div>
           </div>
         </FadeIn>

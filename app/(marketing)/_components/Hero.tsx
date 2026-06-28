@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { T, WRAP } from "./tokens";
 import Eyebrow from "./Eyebrow";
+import Image from "next/image";
 
 export default function Hero() {
   return (
@@ -40,19 +41,19 @@ export default function Hero() {
         {/* Right — portrait plate */}
         <div>
           <div style={{ aspectRatio: "3/4", border: `1px solid rgba(60,70,45,0.3)`, padding: 9, background: T.paper }}>
-            <div style={{
-              width: "100%", height: "100%",
-              background: T.stripe,
-              border: `1px solid rgba(60,70,45,0.18)`,
-              display: "flex", alignItems: "center", justifyContent: "center",
-            }}>
-              <span style={{ fontFamily: T.m, fontSize: 12, color: T.moss, textAlign: "center", lineHeight: 1.7 }}>
-                HERO PHOTO · 3:4<br />garden photograph
-              </span>
+            <div style={{ position: "relative", width: "100%", height: "100%" }}>
+              <Image
+                src="/garden-hero-1.jpg"
+                alt="Euphorbia and Cotinus plants in May sunshine"
+                fill
+                style={{ objectFit: "cover" }}
+                sizes="(max-width: 850px) 100vw, 45vw"
+                priority
+              />
             </div>
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 11, fontFamily: T.d, fontStyle: "italic", fontSize: 13.5, color: "#7A7A63" }}>
-            <span>Pl. 01 — The border in June</span>
+            <span>Pl. 01 — Euphorbia and Cotinus in May</span>
             <span style={{ fontFamily: T.m, fontStyle: "normal", fontSize: 11 }}>001</span>
           </div>
         </div>
