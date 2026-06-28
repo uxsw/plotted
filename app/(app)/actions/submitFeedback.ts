@@ -1,7 +1,7 @@
 "use server";
 
 import { headers } from "next/headers";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createServiceClient } from "@/lib/supabase/server";
 
 type FeedbackType = "bug" | "ux" | "other";
 
@@ -23,9 +23,7 @@ export async function submitFeedback(
   payload: FeedbackPayload
 ): Promise<FeedbackSuccess | FeedbackError> {
   const supabase = await createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
   if (!user) return { error: "Not authenticated" };
 
@@ -43,7 +41,9 @@ export async function submitFeedback(
   const headersList = await headers();
   const user_agent = headersList.get("user-agent") ?? undefined;
 
-  const { data, error } = await supabase
+  const serviceClient = createServiceClient();
+
+  const { data, error } = await serviceClient
     .from("feedback")
     .insert({
       user_id: user.id,
