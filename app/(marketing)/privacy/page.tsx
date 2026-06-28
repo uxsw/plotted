@@ -6,8 +6,8 @@ export const metadata = {
 
 export default function PrivacyPage() {
   return (
-    <main style={{ background: T.paper, minHeight: "100vh" }}>
-      <div className={WRAP} style={{ paddingTop: 80, paddingBottom: 100 }}>
+    <main>
+      <div className={WRAP} style={{ paddingTop: 64, paddingBottom: 100 }}>
         <div style={{ maxWidth: 680 }}>
           <h1
             style={{
@@ -132,11 +132,11 @@ function Section({
     >
       <h2
         style={{
-          fontFamily: "var(--font-fraunces),serif",
+          fontFamily: T.d,
           fontWeight: 500,
           fontSize: 22,
           letterSpacing: "-0.01em",
-          color: "#2C3122",
+          color: T.ink,
           marginBottom: 16,
         }}
       >
@@ -144,10 +144,10 @@ function Section({
       </h2>
       <div
         style={{
-          fontFamily: "var(--font-inter),sans-serif",
+          fontFamily: T.s,
           fontSize: 15.5,
           lineHeight: 1.75,
-          color: "#4A5038",
+          color: T.body,
         }}
       >
         {children}

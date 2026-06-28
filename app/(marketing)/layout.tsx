@@ -1,7 +1,13 @@
+import MarketingHeader from "@/components/marketing/MarketingHeader";
+import MarketingFooter from "@/components/marketing/MarketingFooter";
+import { T } from "./_components/tokens";
+
 export default function MarketingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div style={{ background: "#F4EEE1", color: "#2C3122", overflowX: "hidden" }}>
+    <div style={{ background: T.paper, color: T.ink, overflowX: "hidden" }}>
+      <MarketingHeader />
       {children}
+      <MarketingFooter />
     </div>
   );
 }
