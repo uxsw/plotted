@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import UserMenu from "@/components/UserMenu";
+import FeedbackButton from "@/components/feedback/FeedbackButton";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -18,6 +19,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <UserMenu email={user.email ?? ""} />
       </nav>
       <main className="max-w-[500px] mx-auto px-4 py-8">{children}</main>
+      <FeedbackButton />
     </div>
   );
 }
