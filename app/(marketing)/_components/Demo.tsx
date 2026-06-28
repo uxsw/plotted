@@ -3,21 +3,22 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import { T, WRAP } from "./tokens";
 import Eyebrow from "./Eyebrow";
+import Image from "next/image";
 
 type Sun = "full" | "part" | "shade";
-type Plant = { key: string; name: string; meta: string; sun: Sun; bloom: boolean };
+type Plant = { key: string; name: string; meta: string; sun: Sun; bloom: boolean; image: string };
 
 const PLANTS: Plant[] = [
-  { key: "rosa",  name: "Rosa 'Gertrude Jekyll'", meta: "Climbing rose · Full sun",  sun: "full",  bloom: true  },
-  { key: "salv",  name: "Salvia nemorosa",        meta: "Perennial · Full sun",       sun: "full",  bloom: false },
-  { key: "lav",   name: "Lavandula",              meta: "Shrub · Full sun",           sun: "full",  bloom: true  },
-  { key: "ger",   name: "Geranium 'Rozanne'",     meta: "Perennial · Part shade",     sun: "part",  bloom: true  },
-  { key: "alch",  name: "Alchemilla mollis",      meta: "Perennial · Part shade",     sun: "part",  bloom: false },
-  { key: "hosta", name: "Hosta 'Frances'",        meta: "Foliage · Shade",            sun: "shade", bloom: false },
+  { key: "geum",  name: "Geum 'Mrs Bradshaw'", meta: "Avens · Full sun",  sun: "full",  bloom: true,  image: "/demo-thumb-geum.jpg"      },
+  { key: "thyme",  name: "Thyme 'Creeping red'",        meta: "Full sun",       sun: "full",  bloom: false, image: "/demo-thumb-thyme.jpg"    },
+  { key: "cola",   name: "Artemisa Arbrotanum",              meta: "Cola plant · Full sun/partial shade",           sun: "full",  bloom: true,  image: "/demo-thumb-cola.jpg" },
+  { key: "fern",   name: "Dryopteris 'Jurassic gold'",     meta: "Fern · Part shade",     sun: "part",  bloom: true,  image: "/demo-thumb-fern.jpg"  },
+  { key: "fire",  name: "Lysimachia ciliata 'Firecracker'",      meta: "Part shade",     sun: "part",  bloom: false, image: "/demo-thumb-firecracker.jpg"},
+  { key: "hosta", name: "Hosta 'Frances'",        meta: "Foliage · Shade",            sun: "shade", bloom: false, image: "/demo-thumb-hosta.jpg"     },
 ];
 
 const DIGITALIS: Plant = {
-  key: "dig", name: "Digitalis purpurea", meta: "Foxglove · Part shade", sun: "part", bloom: true,
+  key: "dig", name: "Digitalis purpurea", meta: "Foxglove · Part shade", sun: "part", bloom: true, image: "/demo-thumb-digitalis.jpg",
 };
 
 const LOOKUP: { label: string; value: string }[] = [
@@ -56,8 +57,14 @@ function Tile({ plant, dimmed, isNew }: { plant: Plant; dimmed: boolean; isNew?:
     }}>
       <div style={{
         position: "relative", aspectRatio: "1", borderRadius: 3, overflow: "hidden",
-        background: "repeating-linear-gradient(135deg,#E0D3B5 0 10px,#EADFC6 10px 20px)",
       }}>
+        <Image
+          src={plant.image}
+          alt={plant.name}
+          fill
+          style={{ objectFit: "cover" }}
+          sizes="80px"
+        />
         {plant.bloom && (
           <span style={{
             position: "absolute", top: 7, right: 7, width: 8, height: 8, borderRadius: 999,
