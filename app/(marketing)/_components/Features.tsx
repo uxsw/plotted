@@ -50,6 +50,7 @@ export default function Features() {
                   fill
                   style={{ objectFit: "cover" }}
                   sizes="100vw"
+                  quality={60}
                 />
               </div>
             </div>

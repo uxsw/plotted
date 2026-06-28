@@ -47,7 +47,8 @@ export default function Hero() {
                 alt="Euphorbia and Cotinus plants in May sunshine"
                 fill
                 style={{ objectFit: "cover" }}
-                sizes="(max-width: 850px) 100vw, 45vw"
+                sizes="(max-width: 850px) 100vw, 40vw"
+                quality={60}
                 priority
               />
             </div>

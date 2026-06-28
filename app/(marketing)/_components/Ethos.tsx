@@ -37,8 +37,9 @@ export default function Ethos() {
                   alt="Bottom of the garden - summer evening haze"
                   fill
                   style={{ objectFit: "cover" }}
-                  sizes="(max-width: 850px) 100vw, 45vw"
+                  sizes="(max-width: 850px) 100vw, 40vw"
                   priority
+                  quality={60}
                 />
               </div>
             </div>
