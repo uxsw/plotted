@@ -31,6 +31,29 @@ function formatSeason(from: number, to: number): string {
   return `${MONTH_ABBR[from - 1]}–${MONTH_ABBR[to - 1]}`;
 }
 
+function getSeasonBand(from: number, to: number): "winter" | "spring" | "early-summer" | "summer" | "autumn" {
+  let mid: number;
+  if (from <= to) {
+    mid = Math.round((from + to) / 2);
+  } else {
+    const span = (to + 12 - from);
+    mid = ((from + Math.round(span / 2) - 1) % 12) + 1;
+  }
+  if (mid === 12 || mid <= 2) return "winter";
+  if (mid <= 5) return "spring";
+  if (mid === 6) return "early-summer";
+  if (mid <= 8) return "summer";
+  return "autumn";
+}
+
+const SEASON_STYLES = {
+  "winter":       { background: "#D8E4ED", color: "#3D6278" },
+  "spring":       { background: "#D4E8D0", color: "#3A6438" },
+  "early-summer": { background: "#E8EDCC", color: "#4E5818" },
+  "summer":       { background: "#EDE0B8", color: "#664A10" },
+  "autumn":       { background: "#EDD4BE", color: "#663818" },
+} as const;
+
 
 function wrapMonth(m: number): number {
   if (m < 1) return m + 12;
@@ -478,9 +501,18 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
                 sunBadge={plant.sun_needs ? <SunBadge value={plant.sun_needs} /> : undefined}
                 tags={
                   hasSeason ? (
-                    <Tag color="season">
-                      {formatSeason(plant.flowering_season_from!, plant.flowering_season_to!)}
-                    </Tag>
+                    (() => {
+                      const band = getSeasonBand(plant.flowering_season_from!, plant.flowering_season_to!);
+                      const style = SEASON_STYLES[band];
+                      return (
+                        <span
+                          style={{ background: style.background, color: style.color }}
+                          className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium font-sans leading-none"
+                        >
+                          {formatSeason(plant.flowering_season_from!, plant.flowering_season_to!)}
+                        </span>
+                      );
+                    })()
                   ) : undefined
                 }
                 href={`/plants/${plant.id}`}
