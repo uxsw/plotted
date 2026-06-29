@@ -74,7 +74,7 @@ function Card({
           {title}
         </h3>
         {subtitle && (
-          <p className="font-sans text-sm text-ink-soft leading-snug">
+          <p className="font-sans text-xs text-ink-soft leading-snug">
             {subtitle}
           </p>
         )}

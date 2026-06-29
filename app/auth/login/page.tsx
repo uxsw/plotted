@@ -140,9 +140,6 @@ export default function LoginPage() {
             <Link href="/auth/forgot-password" className="font-display italic text-[14px] text-moss hover:underline">
               forgot password?
             </Link>
-            <Link href="/auth/signup" className="font-display italic text-[14px] text-moss hover:underline">
-              create account
-            </Link>
           </div>
         </form>
 
