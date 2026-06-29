@@ -30,7 +30,7 @@ export default function UserMenu({ email }: { email: string }) {
   async function handleLogout() {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/auth/login");
+    router.push("/");
     router.refresh();
   }
 
