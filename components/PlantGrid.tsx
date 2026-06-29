@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import type { Plant } from "@/lib/types";
 import { scientificNameString, ScientificName, autocompleteTitle } from "@/lib/plantName";
 import { Card } from "@/components/ui/Card";
+import { SunBadge } from "@/components/ui/SunBadge";
 import { Tag } from "@/components/ui/Tag";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -474,15 +475,13 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
                 priority={index === 0}
                 title={<ScientificName species={plant.species} cultivar={plant.cultivar} />}
                 subtitle={plant.common_names?.[0]}
+                sunBadge={plant.sun_needs ? <SunBadge value={plant.sun_needs} /> : undefined}
                 tags={
-                  <>
-                    {hasSeason && (
-                      <Tag color="season">
-                        {formatSeason(plant.flowering_season_from!, plant.flowering_season_to!)}
-                      </Tag>
-                    )}
-                    {plant.sun_needs && <Tag color="sun">{plant.sun_needs}</Tag>}
-                  </>
+                  hasSeason ? (
+                    <Tag color="season">
+                      {formatSeason(plant.flowering_season_from!, plant.flowering_season_to!)}
+                    </Tag>
+                  ) : undefined
                 }
                 href={`/plants/${plant.id}`}
               />

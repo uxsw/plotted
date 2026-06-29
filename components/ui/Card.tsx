@@ -7,6 +7,7 @@ interface CardProps {
   photoAlt?: string;
   placeholder?: ReactNode;
   badge?: ReactNode;
+  sunBadge?: ReactNode;
   title: React.ReactNode;
   subtitle?: React.ReactNode;
   tags?: ReactNode;
@@ -22,6 +23,7 @@ function Card({
   photoAlt,
   placeholder,
   badge,
+  sunBadge,
   title,
   subtitle,
   tags,
@@ -62,6 +64,9 @@ function Card({
           <div className="absolute inset-0 flex items-center justify-center">
             <DefaultPlaceholder />
           </div>
+        )}
+        {sunBadge && (
+          <div className="absolute top-2 left-2">{sunBadge}</div>
         )}
         {badge && (
           <div className="absolute top-2 right-2">{badge}</div>
