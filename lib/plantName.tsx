@@ -15,8 +15,8 @@ export function ScientificName({
   if (!species && !cultivar) return null;
   return (
     <span className={className}>
-      {species && <em>{species}</em>}
-      {cultivar && ` '${cultivar}'`}
+      {species && <span>{species[0].toUpperCase() + species.slice(1)}</span>}
+      {cultivar && <> <em>&apos;{cultivar}&apos;</em></>}
     </span>
   );
 }

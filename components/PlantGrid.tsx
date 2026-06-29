@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { Plant } from "@/lib/types";
-import { plantDisplayTitle, ScientificName, autocompleteTitle } from "@/lib/plantName";
+import { scientificNameString, autocompleteTitle } from "@/lib/plantName";
 import { Card } from "@/components/ui/Card";
 import { Tag } from "@/components/ui/Tag";
 import { Button } from "@/components/ui/Button";
@@ -464,21 +464,16 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
       ) : (
         <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
           {filtered.map((plant, index) => {
-            const title = plantDisplayTitle(plant);
-            const hasCommonName = !!plant.common_names?.length;
+            const sciName = scientificNameString(plant);
             const hasSeason = plant.flowering_season_from !== null && plant.flowering_season_to !== null;
             return (
               <Card
                 key={plant.id}
                 photoUrl={plant.photo_url}
-                photoAlt={title}
+                photoAlt={sciName}
                 priority={index === 0}
-                title={title}
-                subtitle={
-                  hasCommonName ? (
-                    <ScientificName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} />
-                  ) : undefined
-                }
+                title={sciName}
+                subtitle={plant.common_names?.[0]}
                 tags={
                   <>
                     {hasSeason && (
