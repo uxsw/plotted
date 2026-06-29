@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import type { Plant } from "@/lib/types";
-import { scientificNameString, autocompleteTitle } from "@/lib/plantName";
+import { scientificNameString, ScientificName, autocompleteTitle } from "@/lib/plantName";
 import { Card } from "@/components/ui/Card";
 import { Tag } from "@/components/ui/Tag";
 import { Button } from "@/components/ui/Button";
@@ -472,7 +472,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
                 photoUrl={plant.photo_url}
                 photoAlt={sciName}
                 priority={index === 0}
-                title={sciName}
+                title={<ScientificName species={plant.species} cultivar={plant.cultivar} />}
                 subtitle={plant.common_names?.[0]}
                 tags={
                   <>

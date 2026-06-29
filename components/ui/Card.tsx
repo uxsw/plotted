@@ -7,7 +7,7 @@ interface CardProps {
   photoAlt?: string;
   placeholder?: ReactNode;
   badge?: ReactNode;
-  title: string;
+  title: React.ReactNode;
   subtitle?: React.ReactNode;
   tags?: ReactNode;
   footer?: ReactNode;
@@ -48,7 +48,7 @@ function Card({
         {photoUrl ? (
           <Image
             src={photoUrl}
-            alt={photoAlt ?? title}
+            alt={photoAlt ?? ""}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover"
