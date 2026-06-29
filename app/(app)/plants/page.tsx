@@ -1,4 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "My Garden | Plotted",
+};
 import { createClient } from "@/lib/supabase/server";
 import PlantGrid from "@/components/PlantGrid";
 import ErrorBoundary from "@/components/ErrorBoundary";

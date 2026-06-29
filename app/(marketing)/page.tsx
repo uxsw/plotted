@@ -1,4 +1,9 @@
+import type { Metadata } from "next";
 import { redirect } from "next/navigation";
+
+export const metadata: Metadata = {
+  title: "Plotted",
+};
 import { createClient } from "@/lib/supabase/server";
 import Hero from "./_components/Hero";
 import Features from "./_components/Features";

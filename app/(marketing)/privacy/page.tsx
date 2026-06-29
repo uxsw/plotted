@@ -1,7 +1,9 @@
 import { T, WRAP } from "../_components/tokens";
 
-export const metadata = {
-  title: "Privacy Policy — Plotted",
+import type { Metadata } from "next";
+
+export const metadata: Metadata = {
+  title: "Privacy Policy | Plotted",
 };
 
 export default function PrivacyPage() {

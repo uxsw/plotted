@@ -1,4 +1,9 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "Add Plant | Plotted",
+};
 import PlantForm from "@/components/PlantForm";
 
 export default function NewPlantPage() {
