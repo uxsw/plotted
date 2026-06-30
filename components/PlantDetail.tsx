@@ -5,6 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { plantDisplayTitle } from "@/lib/plantName";
 import { PlantName } from "@/components/plants/PlantName";
+import { SunBadgePill } from "@/components/ui/SunBadge";
+import { FloweringSeasonBadge } from "@/components/ui/FloweringSeasonBadge";
 import type { Plant, PlantInsert, SunNeeds } from "@/lib/types";
 import { updatePlantField } from "@/app/actions/plants";
 import DeletePlantButton from "@/components/DeletePlantButton";
@@ -493,6 +495,15 @@ export default function PlantDetail({
             commonNames={plant.common_names}
             variant="detail"
           />
+
+          {(plant.sun_needs || (plant.flowering_season_from !== null && plant.flowering_season_to !== null)) && (
+            <div className="flex flex-wrap gap-2">
+              {plant.sun_needs && <SunBadgePill value={plant.sun_needs} />}
+              {plant.flowering_season_from !== null && plant.flowering_season_to !== null && (
+                <FloweringSeasonBadge from={plant.flowering_season_from} to={plant.flowering_season_to} />
+              )}
+            </div>
+          )}
 
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
 

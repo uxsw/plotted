@@ -86,3 +86,22 @@ export function SunBadge({ value }: { value: string }) {
     </div>
   );
 }
+
+export function SunBadgePill({ value }: { value: string }) {
+  if (!(value in SUN_CONFIG)) return null;
+  const { bg, stroke, icon } = SUN_CONFIG[value as SunNeeds];
+  const label = value[0].toUpperCase() + value.slice(1);
+
+  return (
+    <span
+      style={{ backgroundColor: bg, color: stroke }}
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium font-sans leading-none"
+    >
+      {icon === "sun" && <SunIconSvg stroke={stroke} />}
+      {icon === "sun-cloud" && <SunCloudIconSvg stroke={stroke} />}
+      {icon === "cloud" && <CloudIconSvg stroke={stroke} />}
+      {icon === "moon" && <MoonIconSvg stroke={stroke} />}
+      {label}
+    </span>
+  );
+}
