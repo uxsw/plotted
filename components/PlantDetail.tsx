@@ -70,6 +70,16 @@ function SpreadArrowIcon() {
   );
 }
 
+function SeedlingIcon() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M12 22V12" />
+      <path d="M12 12C12 8 9 5 5 5c0 4 3 7 7 7z" />
+      <path d="M12 12C12 8 15 5 19 5c0 4-3 7-7 7z" />
+    </svg>
+  );
+}
+
 const SECTION_LABEL = "text-xs font-semibold font-sans uppercase tracking-wider text-ink-soft";
 
 function SproutIcon() {
@@ -640,7 +650,48 @@ export default function PlantDetail({
             </div>
           </section>
 
-          {/* ── Remaining fields (sun needs, dates, purchased from) ───────── */}
+          {/* ── In your garden ───────────────────────────────────────────── */}
+          <section>
+            <p className={`${SECTION_LABEL} mb-3`}>In your garden</p>
+            <div className="bg-paper-deep rounded-lg px-4 py-4 flex items-center gap-4">
+              <div className="w-9 h-9 rounded-full bg-sand-line/60 flex items-center justify-center shrink-0 text-ink-soft">
+                <SeedlingIcon />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Planted</p>
+                {editing === "date_planted" ? (
+                  <>
+                    <div ref={containerRef} className="flex items-center gap-2">
+                      <div className="flex gap-2 flex-1 min-w-0">
+                        <select autoFocus value={v1} onChange={e => setV1(e.target.value)} onBlur={blurCancel} onKeyDown={esc} className={INPUT}>
+                          {MONTHS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
+                        </select>
+                        <select value={v2} onChange={e => setV2(e.target.value)} onBlur={blurCancel} onKeyDown={esc} className={INPUT}>
+                          {YEAR_OPTIONS.map(y => <option key={y} value={String(y)}>{y}</option>)}
+                        </select>
+                      </div>
+                      <SaveCancel
+                        onSave={() => commit({ date_planted: v2 && v1 ? `${v2}-${v1.padStart(2, "0")}-01` : null })}
+                        onCancel={cancel}
+                      />
+                    </div>
+                    {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                  </>
+                ) : (
+                  <Tap
+                    value={datePlantedDisplay()}
+                    placeholder="+ Add date planted"
+                    onClick={() => {
+                      const d = plant.date_planted ? new Date(plant.date_planted) : now;
+                      open("date_planted", String(d.getUTCMonth() + 1), String(d.getUTCFullYear()));
+                    }}
+                  />
+                )}
+              </div>
+            </div>
+          </section>
+
+          {/* ── Remaining fields (sun needs, flowering season, purchased from) */}
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
 
             {/* Sun needs */}
@@ -665,38 +716,6 @@ export default function PlantDetail({
                   value={plant.sun_needs}
                   placeholder="+ Add sun needs"
                   onClick={() => open("sun_needs", plant.sun_needs ?? "")}
-                />
-              )}
-            </Field>
-
-            {/* Date planted */}
-            <Field label="Date planted">
-              {editing === "date_planted" ? (
-                <>
-                  <div ref={containerRef} className="flex items-center gap-2">
-                    <div className="flex gap-2 flex-1 min-w-0">
-                      <select autoFocus value={v1} onChange={e => setV1(e.target.value)} onBlur={blurCancel} onKeyDown={esc} className={INPUT}>
-                        {MONTHS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
-                      </select>
-                      <select value={v2} onChange={e => setV2(e.target.value)} onBlur={blurCancel} onKeyDown={esc} className={INPUT}>
-                        {YEAR_OPTIONS.map(y => <option key={y} value={String(y)}>{y}</option>)}
-                      </select>
-                    </div>
-                    <SaveCancel
-                      onSave={() => commit({ date_planted: v2 && v1 ? `${v2}-${v1.padStart(2, "0")}-01` : null })}
-                      onCancel={cancel}
-                    />
-                  </div>
-                  {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
-                </>
-              ) : (
-                <Tap
-                  value={datePlantedDisplay()}
-                  placeholder="+ Add date planted"
-                  onClick={() => {
-                    const d = plant.date_planted ? new Date(plant.date_planted) : now;
-                    open("date_planted", String(d.getUTCMonth() + 1), String(d.getUTCFullYear()));
-                  }}
                 />
               )}
             </Field>
