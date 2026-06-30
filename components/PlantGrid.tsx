@@ -480,7 +480,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
       )}
 
       {/* Result count */}
-      <p className="font-display italic text-[13px] text-ink-soft -mt-1">{resultLabel}</p>
+      <p className="font-sans text-xs text-ink-soft -mt-1">{resultLabel}</p>
 
       {/* Plant grid or no-results message */}
       {filtered.length === 0 ? (
