@@ -443,10 +443,10 @@ export default function PlantDetail({
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div>
         {/* Photo zone — click to add/replace photo */}
         <div
-          className="group relative w-full h-64 cursor-pointer"
+          className="group relative w-full aspect-[4/3] cursor-pointer rounded-lg overflow-hidden"
           onClick={() => photoFileRef.current?.click()}
         >
           {plant.photo_url ? (
@@ -476,7 +476,7 @@ export default function PlantDetail({
           onChange={handlePhotoChange}
         />
 
-        <div className="p-6 space-y-4">
+        <div className="p-2 md:p-4 space-y-4">
           {photoError && (
             <p className="font-display italic text-[14px] text-[#C2603C]">{photoError}</p>
           )}
