@@ -269,7 +269,7 @@ function CommonNamesSection({
           <button
             type="button"
             onClick={() => { setPatchError(null); setAddingName(true); }}
-            className="font-display italic text-[13px] text-moss hover:underline block"
+            className="font-sans text-sm text-gray-400 hover:text-gray-600 transition-colors block"
           >
             + Add name
           </button>
