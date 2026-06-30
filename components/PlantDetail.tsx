@@ -3,7 +3,8 @@
 import { useState, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ScientificName, plantDisplayTitle } from "@/lib/plantName";
+import { plantDisplayTitle } from "@/lib/plantName";
+import { PlantName } from "@/components/plants/PlantName";
 import type { Plant, PlantInsert, SunNeeds } from "@/lib/types";
 import { updatePlantField } from "@/app/actions/plants";
 import DeletePlantButton from "@/components/DeletePlantButton";
@@ -323,7 +324,6 @@ export default function PlantDetail({
   }
 
   const title = plantDisplayTitle(plant);
-  const hasScientific = !!(plant.species || plant.cultivar);
 
   function open(field: string, val1: string, val2 = "") {
     setEditing(field);
@@ -480,19 +480,12 @@ export default function PlantDetail({
           {photoError && (
             <p className="font-display italic text-[14px] text-[#C2603C]">{photoError}</p>
           )}
-          <div>
-            <h1 className="text-2xl font-bold text-gray-900">
-              {plant.common_names?.[0] || (hasScientific
-                ? <ScientificName species={plant.species} cultivar={plant.cultivar} />
-                : "Unnamed plant"
-              )}
-            </h1>
-            {plant.common_names?.[0] && hasScientific && (
-              <p className="text-sm text-gray-500 mt-0.5">
-                <ScientificName species={plant.species} cultivar={plant.cultivar} />
-              </p>
-            )}
-          </div>
+          <PlantName
+            species={plant.species}
+            cultivar={plant.cultivar}
+            commonNames={plant.common_names}
+            variant="detail"
+          />
 
           <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
 
