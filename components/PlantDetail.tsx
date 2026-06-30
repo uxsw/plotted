@@ -431,13 +431,13 @@ export default function PlantDetail({
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
-        <Link href="/plants" className="text-sm text-gray-500 hover:underline">← My Plants</Link>
+        <Link href="/plants" className="inline-flex items-center gap-1.5 -ml-2 px-2 py-1.5 rounded-md text-sm text-moss-700 no-underline transition-colors duration-150 hover:bg-sand-line focus-visible:bg-sand-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss-400">← My Plants</Link>
         <div className="flex gap-3">
           <Link
             href="/plants/new"
-            className="inline-flex items-center rounded border border-moss px-3 py-1.5 text-sm font-medium font-sans text-moss hover:bg-moss-tint transition-colors"
+            className="inline-flex items-center justify-center rounded px-4 py-2 text-sm font-medium font-sans bg-moss text-white hover:bg-moss-deep transition-colors"
           >
-            Add another
+            + Add another
           </Link>
           <DeletePlantButton id={plant.id} name={title} />
         </div>
