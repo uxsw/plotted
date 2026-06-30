@@ -2,7 +2,7 @@
 
 import { ButtonHTMLAttributes, forwardRef } from "react";
 
-type Variant = "primary" | "secondary" | "ghost";
+type Variant = "primary" | "secondary" | "ghost" | "danger";
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
@@ -15,6 +15,8 @@ const variantClasses: Record<Variant, string> = {
     "border border-moss text-moss bg-transparent hover:bg-moss-tint disabled:opacity-50 disabled:cursor-not-allowed",
   ghost:
     "text-ink-soft bg-transparent hover:bg-sand cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
+  danger:
+    "bg-clay text-white hover:bg-clay-deep disabled:opacity-50 disabled:cursor-not-allowed",
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
