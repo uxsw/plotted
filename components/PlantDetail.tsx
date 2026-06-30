@@ -105,13 +105,13 @@ function SaveCancel({ onSave, onCancel }: { onSave: () => void; onCancel: () => 
 
 function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
-    <span className="group inline-flex items-center gap-1.5 bg-moss-tint text-ink rounded-full px-[10px] py-[4px] text-[13px] font-sans">
+    <span className="inline-flex items-center gap-1.5 bg-moss-tint hover:bg-moss-tint/70 text-ink rounded-full px-[10px] py-[4px] text-[13px] font-sans transition-colors duration-[120ms]">
       {label}
       <button
         type="button"
         onClick={onRemove}
         aria-label={`Remove ${label}`}
-        className="opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 text-ink-soft hover:text-ink transition-opacity leading-none"
+        className="text-ink-soft hover:text-ink transition-colors leading-none"
       >
         <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
           <line x1="1" y1="1" x2="9" y2="9" />
