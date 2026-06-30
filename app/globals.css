@@ -24,7 +24,7 @@
   --breakpoint-mobile: 480px;
 
   --radius: 10px;
-  --radius-lg: 14px;
+  --radius-lg: 8px;
 }
 
 button, [role="button"] {
