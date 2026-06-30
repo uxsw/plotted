@@ -39,6 +39,15 @@ function CameraIcon() {
   );
 }
 
+function PlusIcon() {
+  return (
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <line x1="8" y1="2" x2="8" y2="14" />
+      <line x1="2" y1="8" x2="14" y2="8" />
+    </svg>
+  );
+}
+
 function SproutIcon() {
   return (
     <svg width="36" height="36" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -442,6 +451,24 @@ export default function PlantDetail({
               <span className="font-display italic text-[15px]">add a photo</span>
             </div>
           )}
+
+          {/* Photo count pill — bottom-left, only when a photo exists */}
+          {plant.photo_url && (
+            <span className="absolute bottom-2.5 left-2.5 flex items-center rounded-full bg-black/50 px-2.5 py-1 text-[11px] font-sans font-medium text-white leading-none pointer-events-none">
+              1 photo
+            </span>
+          )}
+
+          {/* Add photo button — top-right */}
+          <button
+            type="button"
+            aria-label="Add photo"
+            onClick={e => { e.stopPropagation(); photoFileRef.current?.click(); }}
+            className="absolute top-2.5 right-2.5 flex items-center justify-center w-8 h-8 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+          >
+            <PlusIcon />
+          </button>
+
           {photoUploading && (
             <div className="absolute inset-0 bg-white/60 flex items-center justify-center pointer-events-none">
               <div className="w-6 h-6 border-2 border-moss border-t-transparent rounded-full animate-spin" />
