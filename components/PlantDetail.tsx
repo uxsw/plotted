@@ -515,15 +515,17 @@ export default function PlantDetail({
           {photoError && (
             <p className="font-display italic text-[14px] text-[#C2603C]">{photoError}</p>
           )}
-          <PlantName
-            species={plant.species}
-            cultivar={plant.cultivar}
-            commonNames={plant.common_names}
-            variant="detail"
-          />
+          <div className="mb-3">
+            <PlantName
+              species={plant.species}
+              cultivar={plant.cultivar}
+              commonNames={plant.common_names}
+              variant="detail"
+            />
+          </div>
 
           {(plant.sun_needs || (plant.flowering_season_from !== null && plant.flowering_season_to !== null)) && (
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-2 mb-3">
               {plant.sun_needs && <SunBadgePill value={plant.sun_needs} />}
               {plant.flowering_season_from !== null && plant.flowering_season_to !== null && (
                 <FloweringSeasonBadge from={plant.flowering_season_from} to={plant.flowering_season_to} />
@@ -535,8 +537,12 @@ export default function PlantDetail({
           <section>
             <p className={`${SECTION_LABEL} mb-3`}>Identity</p>
             <div className="bg-paper-deep rounded-[10px] overflow-hidden">
-              {/* Species + Cultivar — two columns, vertical hairline divider */}
-              <div className="grid grid-cols-2 divide-x divide-paper-line border-b border-paper-line">
+              {/* Species + Cultivar — two columns, reflows to stacked while either is being edited */}
+              <div className={`grid border-b border-paper-line ${
+                editing === "species" || editing === "cultivar"
+                  ? "grid-cols-1 divide-y divide-paper-line"
+                  : "grid-cols-2 divide-x divide-paper-line"
+              }`}>
                 <div className="px-4 py-3 min-w-0">
                   <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Species</p>
                   {editing === "species" ? (
@@ -583,17 +589,15 @@ export default function PlantDetail({
                 </div>
               </div>
 
-              {/* Common names — full width row, chips lifted on paper */}
+              {/* Common names — full width row, directly on panel background */}
               <div className="px-4 py-3">
-                <p className="text-[11px] font-sans font-medium text-ink-soft mb-1.5">Common names</p>
-                <div className="bg-paper rounded-md px-3 py-2.5">
-                  <CommonNamesSection
-                    plantId={plant.id}
-                    initialNames={plant.common_names ?? []}
-                    aiLookupEnabled={aiLookupEnabled}
-                    onNamesChange={names => setPlant(p => ({ ...p, common_names: names }))}
-                  />
-                </div>
+                <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Common names</p>
+                <CommonNamesSection
+                  plantId={plant.id}
+                  initialNames={plant.common_names ?? []}
+                  aiLookupEnabled={aiLookupEnabled}
+                  onNamesChange={names => setPlant(p => ({ ...p, common_names: names }))}
+                />
               </div>
             </div>
           </section>
