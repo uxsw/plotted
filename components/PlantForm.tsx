@@ -133,7 +133,6 @@ export default function PlantForm() {
         flowering_season_to: null,
         eventual_height_cm: null,
         eventual_spread_cm: null,
-        purchased_from: null,
         status: "active",
         notes: null,
         common_names: [],

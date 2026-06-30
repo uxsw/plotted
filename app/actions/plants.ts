@@ -25,10 +25,6 @@ export async function updatePlantField(
   if ("cultivar" in data) {
     clean.cultivar = data.cultivar ? sanitizePlantName(data.cultivar) : null;
   }
-  if ("purchased_from" in data) {
-    clean.purchased_from = typeof data.purchased_from === "string" ? data.purchased_from.trim() || null : null;
-    if (clean.purchased_from && clean.purchased_from.length > 500) return { error: "Purchased from must be 500 characters or fewer." };
-  }
   if ("notes" in data) {
     clean.notes = typeof data.notes === "string" ? data.notes.trim() || null : null;
     if (clean.notes && clean.notes.length > 5000) return { error: "Notes must be 5000 characters or fewer." };

@@ -23,7 +23,6 @@ const BASE_PLANT: PlantInsert = {
   flowering_season_to: null,
   eventual_height_cm: null,
   eventual_spread_cm: null,
-  purchased_from: null,
   status: "active",
   notes: null,
   common_names: [],
@@ -96,24 +95,6 @@ function setupAISupabase(): { capturedAIUpdate: () => Record<string, unknown> | 
 // ─── updatePlantField ─────────────────────────────────────────────────────────
 
 describe("updatePlantField", () => {
-  describe("purchased_from length limits", () => {
-    it("accepts exactly 500 characters", async () => {
-      setupBasicSupabase();
-      const result = await updatePlantField("plant-1", {
-        purchased_from: "a".repeat(500),
-      });
-      expect(result).toBeUndefined();
-    });
-
-    it("rejects 501 characters", async () => {
-      setupBasicSupabase();
-      const result = await updatePlantField("plant-1", {
-        purchased_from: "a".repeat(501),
-      });
-      expect(result).toEqual({ error: expect.stringContaining("500") });
-    });
-  });
-
   describe("notes length limits", () => {
     it("accepts exactly 5000 characters", async () => {
       setupBasicSupabase();

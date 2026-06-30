@@ -15,7 +15,6 @@ export interface Plant {
   flowering_season_to: number | null;
   eventual_height_cm: number | null;
   eventual_spread_cm: number | null;
-  purchased_from: string | null;
   status: PlantStatus;
   notes: string | null;
   common_names: string[];
