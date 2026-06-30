@@ -16,6 +16,7 @@ interface CardProps {
   onClick?: () => void;
   className?: string;
   priority?: boolean;
+  variant?: "default" | "flat";
 }
 
 function Card({
@@ -32,12 +33,14 @@ function Card({
   onClick,
   className = "",
   priority = false,
+  variant = "default",
 }: CardProps) {
   const interactive = !!(href || onClick);
   const sharedClassName = [
     "flex flex-col rounded-lg overflow-hidden",
-    "border border-sand-line bg-paper",
-    "transition-shadow duration-150",
+    variant === "flat"
+      ? ""
+      : "border border-sand-line bg-paper transition-shadow duration-150",
     interactive ? "cursor-pointer hover:shadow-md text-left w-full" : "",
     interactive ? "active:scale-[0.98] active:opacity-75 transition-transform duration-75" : "",
     className,
