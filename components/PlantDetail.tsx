@@ -50,6 +50,28 @@ function PlusIcon() {
   );
 }
 
+function HeightArrowIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="7" y1="1" x2="7" y2="13" />
+      <polyline points="4,4 7,1 10,4" />
+      <polyline points="4,10 7,13 10,10" />
+    </svg>
+  );
+}
+
+function SpreadArrowIcon() {
+  return (
+    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <line x1="1" y1="7" x2="13" y2="7" />
+      <polyline points="4,4 1,7 4,10" />
+      <polyline points="10,4 13,7 10,10" />
+    </svg>
+  );
+}
+
+const SECTION_LABEL = "text-xs font-semibold font-sans uppercase tracking-wider text-ink-soft";
+
 function SproutIcon() {
   return (
     <svg width="36" height="36" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -210,82 +232,76 @@ function CommonNamesSection({
   }
 
   return (
-    <div className="sm:col-span-2">
-      <div className="mb-2">
-        <dt className="text-gray-500 font-medium text-sm">Common names</dt>
-      </div>
+    <div className="space-y-3">
+      {/* Saved chips */}
+      {hasSaved && (
+        <div className="flex flex-wrap gap-2">
+          {savedNames.map(name => (
+            <Chip key={name} label={name} onRemove={() => removeName(name)} />
+          ))}
+        </div>
+      )}
 
-      <dd className="space-y-3">
-        {/* Saved chips */}
-        {hasSaved && (
-          <div className="flex flex-wrap gap-2">
-            {savedNames.map(name => (
-              <Chip key={name} label={name} onRemove={() => removeName(name)} />
-            ))}
+      {/* No saved names — lookup button or loading */}
+      {!hasSaved && aiLookupEnabled && phase !== "loading" && (
+        <Button type="button" variant="secondary" onClick={runLookup}>
+          Get common names
+        </Button>
+      )}
+      {!hasSaved && phase === "loading" && (
+        <Button type="button" variant="secondary" disabled>
+          Looking up…
+        </Button>
+      )}
+
+      {/* Empty result */}
+      {phase === "empty" && (
+        <p className="font-display italic text-[14px] text-ink-soft">No common names found for this plant</p>
+      )}
+
+      {/* Lookup error */}
+      {phase === "error" && (
+        <p className="font-display italic text-[14px] text-[#C2603C]">Lookup failed — please try again</p>
+      )}
+
+      {/* Patch error */}
+      {patchError && (
+        <p className="font-display italic text-[14px] text-[#C2603C]">{patchError}</p>
+      )}
+
+      {/* Manual name entry */}
+      {addingName ? (
+        <div ref={addContainerRef} className="flex items-center gap-2">
+          <div className="flex-1 relative">
+            <input
+              autoFocus
+              type="text"
+              value={newName}
+              onChange={e => setNewName(e.target.value)}
+              onBlur={e => {
+                if (addContainerRef.current?.contains(e.relatedTarget as Node)) return;
+                cancelNewName();
+              }}
+              onKeyDown={e => {
+                if (e.key === "Escape") cancelNewName();
+                if (e.key === "Enter") { e.preventDefault(); saveNewName(); }
+              }}
+              placeholder="e.g. Foxglove"
+              className="w-full bg-transparent border-0 outline-none font-display italic text-[15px] text-ink pb-3 pt-[10px]"
+            />
+            <div className="absolute bottom-0 left-0 right-0 h-px bg-sand-line" />
           </div>
-        )}
-
-        {/* No saved names — lookup button or loading */}
-        {!hasSaved && aiLookupEnabled && phase !== "loading" && (
-          <Button type="button" variant="secondary" onClick={runLookup}>
-            Get common names
-          </Button>
-        )}
-        {!hasSaved && phase === "loading" && (
-          <Button type="button" variant="secondary" disabled>
-            Looking up…
-          </Button>
-        )}
-
-        {/* Empty result */}
-        {phase === "empty" && (
-          <p className="font-display italic text-[14px] text-ink-soft">No common names found for this plant</p>
-        )}
-
-        {/* Lookup error */}
-        {phase === "error" && (
-          <p className="font-display italic text-[14px] text-[#C2603C]">Lookup failed — please try again</p>
-        )}
-
-        {/* Patch error */}
-        {patchError && (
-          <p className="font-display italic text-[14px] text-[#C2603C]">{patchError}</p>
-        )}
-
-        {/* Manual name entry */}
-        {addingName ? (
-          <div ref={addContainerRef} className="flex items-center gap-2">
-            <div className="flex-1 relative">
-              <input
-                autoFocus
-                type="text"
-                value={newName}
-                onChange={e => setNewName(e.target.value)}
-                onBlur={e => {
-                  if (addContainerRef.current?.contains(e.relatedTarget as Node)) return;
-                  cancelNewName();
-                }}
-                onKeyDown={e => {
-                  if (e.key === "Escape") cancelNewName();
-                  if (e.key === "Enter") { e.preventDefault(); saveNewName(); }
-                }}
-                placeholder="e.g. Foxglove"
-                className="w-full bg-transparent border-0 outline-none font-display italic text-[15px] text-ink pb-3 pt-[10px]"
-              />
-              <div className="absolute bottom-0 left-0 right-0 h-px bg-sand-line" />
-            </div>
-            <SaveCancel onSave={saveNewName} onCancel={cancelNewName} />
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={() => { setPatchError(null); setAddingName(true); }}
-            className="font-sans text-sm text-gray-400 hover:text-gray-600 transition-colors block"
-          >
-            + Add name
-          </button>
-        )}
-      </dd>
+          <SaveCancel onSave={saveNewName} onCancel={cancelNewName} />
+        </div>
+      ) : (
+        <button
+          type="button"
+          onClick={() => { setPatchError(null); setAddingName(true); }}
+          className="font-sans text-sm text-gray-400 hover:text-gray-600 transition-colors block"
+        >
+          + Add name
+        </button>
+      )}
     </div>
   );
 }
@@ -485,7 +501,7 @@ export default function PlantDetail({
           onChange={handlePhotoChange}
         />
 
-        <div className="p-2 md:p-4 space-y-4">
+        <div className="p-2 md:p-4 space-y-8">
           {photoError && (
             <p className="font-display italic text-[14px] text-[#C2603C]">{photoError}</p>
           )}
@@ -505,61 +521,127 @@ export default function PlantDetail({
             </div>
           )}
 
-          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+          {/* ── Identity ─────────────────────────────────────────────────── */}
+          <section>
+            <p className={`${SECTION_LABEL} mb-3`}>Identity</p>
+            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
+              <Field label="Species">
+                {editing === "species" ? (
+                  <>
+                    <div ref={containerRef} className="flex items-center gap-2">
+                      <input autoFocus type="text" value={v1}
+                        onChange={e => setV1(e.target.value)}
+                        onBlur={blurCancel}
+                        onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); speciesSave(); } }}
+                        className={INPUT_FLEX} />
+                      <SaveCancel onSave={speciesSave} onCancel={cancel} />
+                    </div>
+                    {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                  </>
+                ) : (
+                  <Tap
+                    value={plant.species ? <em>{plant.species}</em> : null}
+                    placeholder="+ Add species"
+                    onClick={() => open("species", plant.species ?? "")}
+                  />
+                )}
+              </Field>
+              <Field label="Cultivar">
+                {editing === "cultivar" ? (
+                  <>
+                    <div ref={containerRef} className="flex items-center gap-2">
+                      <input autoFocus type="text" value={v1}
+                        onChange={e => setV1(e.target.value)}
+                        onBlur={blurCancel}
+                        onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); textSave("cultivar"); } }}
+                        className={INPUT_FLEX} />
+                      <SaveCancel onSave={() => textSave("cultivar")} onCancel={cancel} />
+                    </div>
+                    {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                  </>
+                ) : (
+                  <Tap
+                    value={plant.cultivar}
+                    placeholder="+ Add cultivar"
+                    onClick={() => open("cultivar", plant.cultivar ?? "")}
+                  />
+                )}
+              </Field>
+            </dl>
+          </section>
 
-            {/* Species */}
-            <Field label="Species">
-              {editing === "species" ? (
-                <>
-                  <div ref={containerRef} className="flex items-center gap-2">
-                    <input autoFocus type="text" value={v1}
-                      onChange={e => setV1(e.target.value)}
-                      onBlur={blurCancel}
-                      onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); speciesSave(); } }}
-                      className={INPUT_FLEX} />
-                    <SaveCancel onSave={speciesSave} onCancel={cancel} />
-                  </div>
-                  {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
-                </>
-              ) : (
-                <Tap
-                  value={plant.species ? <em>{plant.species}</em> : null}
-                  placeholder="+ Add species"
-                  onClick={() => open("species", plant.species ?? "")}
-                />
-              )}
-            </Field>
-
-            {/* Cultivar */}
-            <Field label="Cultivar">
-              {editing === "cultivar" ? (
-                <>
-                  <div ref={containerRef} className="flex items-center gap-2">
-                    <input autoFocus type="text" value={v1}
-                      onChange={e => setV1(e.target.value)}
-                      onBlur={blurCancel}
-                      onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); textSave("cultivar"); } }}
-                      className={INPUT_FLEX} />
-                    <SaveCancel onSave={() => textSave("cultivar")} onCancel={cancel} />
-                  </div>
-                  {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
-                </>
-              ) : (
-                <Tap
-                  value={plant.cultivar}
-                  placeholder="+ Add cultivar"
-                  onClick={() => open("cultivar", plant.cultivar ?? "")}
-                />
-              )}
-            </Field>
-
-            {/* Common names — AI-powered section */}
+          {/* ── Common names ─────────────────────────────────────────────── */}
+          <section>
+            <p className={`${SECTION_LABEL} mb-3`}>Common names</p>
             <CommonNamesSection
               plantId={plant.id}
               initialNames={plant.common_names ?? []}
               aiLookupEnabled={aiLookupEnabled}
               onNamesChange={names => setPlant(p => ({ ...p, common_names: names }))}
             />
+          </section>
+
+          {/* ── Growing conditions ───────────────────────────────────────── */}
+          <section>
+            <p className={`${SECTION_LABEL} mb-3`}>Growing conditions</p>
+            <div className="bg-paper-deep rounded-lg overflow-hidden">
+              {/* Height */}
+              <div className="flex items-start gap-3 px-4 py-3 border-b border-sand-line">
+                <span className="mt-[3px] text-ink-soft shrink-0"><HeightArrowIcon /></span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Height (mature)</p>
+                  {editing === "eventual_height_cm" ? (
+                    <>
+                      <div ref={containerRef} className="flex items-center gap-2">
+                        <input autoFocus type="number" min={1} value={v1}
+                          onChange={e => setV1(e.target.value)}
+                          onBlur={blurCancel}
+                          onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); numSave("eventual_height_cm"); } }}
+                          className={INPUT_FLEX} />
+                        <SaveCancel onSave={() => numSave("eventual_height_cm")} onCancel={cancel} />
+                      </div>
+                      {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                    </>
+                  ) : (
+                    <Tap
+                      value={plant.eventual_height_cm ? `${plant.eventual_height_cm} cm` : null}
+                      placeholder="+ Add height"
+                      onClick={() => open("eventual_height_cm", plant.eventual_height_cm?.toString() ?? "")}
+                    />
+                  )}
+                </div>
+              </div>
+              {/* Spread */}
+              <div className="flex items-start gap-3 px-4 py-3">
+                <span className="mt-[3px] text-ink-soft shrink-0"><SpreadArrowIcon /></span>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Spread (mature)</p>
+                  {editing === "eventual_spread_cm" ? (
+                    <>
+                      <div ref={containerRef} className="flex items-center gap-2">
+                        <input autoFocus type="number" min={1} value={v1}
+                          onChange={e => setV1(e.target.value)}
+                          onBlur={blurCancel}
+                          onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); numSave("eventual_spread_cm"); } }}
+                          className={INPUT_FLEX} />
+                        <SaveCancel onSave={() => numSave("eventual_spread_cm")} onCancel={cancel} />
+                      </div>
+                      {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                    </>
+                  ) : (
+                    <Tap
+                      value={plant.eventual_spread_cm ? `${plant.eventual_spread_cm} cm` : null}
+                      placeholder="+ Add spread"
+                      onClick={() => open("eventual_spread_cm", plant.eventual_spread_cm?.toString() ?? "")}
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+          </section>
+
+          {/* ── Remaining fields (sun needs, dates, purchased from) ───────── */}
+          <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
 
             {/* Sun needs */}
             <Field label="Sun needs">
@@ -650,52 +732,6 @@ export default function PlantDetail({
                     plant.flowering_season_from ? String(plant.flowering_season_from) : "",
                     plant.flowering_season_to ? String(plant.flowering_season_to) : ""
                   )}
-                />
-              )}
-            </Field>
-
-            {/* Height */}
-            <Field label="Height (mature)">
-              {editing === "eventual_height_cm" ? (
-                <>
-                  <div ref={containerRef} className="flex items-center gap-2">
-                    <input autoFocus type="number" min={1} value={v1}
-                      onChange={e => setV1(e.target.value)}
-                      onBlur={blurCancel}
-                      onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); numSave("eventual_height_cm"); } }}
-                      className={INPUT_FLEX} />
-                    <SaveCancel onSave={() => numSave("eventual_height_cm")} onCancel={cancel} />
-                  </div>
-                  {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
-                </>
-              ) : (
-                <Tap
-                  value={plant.eventual_height_cm ? `${plant.eventual_height_cm} cm` : null}
-                  placeholder="+ Add height"
-                  onClick={() => open("eventual_height_cm", plant.eventual_height_cm?.toString() ?? "")}
-                />
-              )}
-            </Field>
-
-            {/* Spread */}
-            <Field label="Spread (mature)">
-              {editing === "eventual_spread_cm" ? (
-                <>
-                  <div ref={containerRef} className="flex items-center gap-2">
-                    <input autoFocus type="number" min={1} value={v1}
-                      onChange={e => setV1(e.target.value)}
-                      onBlur={blurCancel}
-                      onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); numSave("eventual_spread_cm"); } }}
-                      className={INPUT_FLEX} />
-                    <SaveCancel onSave={() => numSave("eventual_spread_cm")} onCancel={cancel} />
-                  </div>
-                  {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
-                </>
-              ) : (
-                <Tap
-                  value={plant.eventual_spread_cm ? `${plant.eventual_spread_cm} cm` : null}
-                  placeholder="+ Add spread"
-                  onClick={() => open("eventual_spread_cm", plant.eventual_spread_cm?.toString() ?? "")}
                 />
               )}
             </Field>
