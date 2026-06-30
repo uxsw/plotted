@@ -200,28 +200,8 @@ function CommonNamesSection({
 
   return (
     <div className="sm:col-span-2">
-      <div className="flex items-center justify-between mb-2">
-        <dt className="font-display italic text-[15px] font-normal text-ink-soft">Common names</dt>
-        {aiLookupEnabled && (
-          <div className="flex items-center gap-2">
-            {hasSaved && phase !== "loading" && (
-              <button
-                type="button"
-                onClick={runLookup}
-                className="text-ink-soft hover:text-ink transition-colors"
-                aria-label="Refresh common names"
-              >
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M12.5 7A5.5 5.5 0 1 1 7 1.5" />
-                  <polyline points="12.5,1.5 12.5,5 9,5" />
-                </svg>
-              </button>
-            )}
-            {hasSaved && phase === "loading" && (
-              <span className="font-display italic text-[13px] text-ink-soft">Looking up…</span>
-            )}
-          </div>
-        )}
+      <div className="mb-2">
+        <dt className="text-gray-500 font-medium text-sm">Common names</dt>
       </div>
 
       <dd className="space-y-3">
