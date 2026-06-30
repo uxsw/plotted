@@ -534,61 +534,68 @@ export default function PlantDetail({
           {/* ── Identity ─────────────────────────────────────────────────── */}
           <section>
             <p className={`${SECTION_LABEL} mb-3`}>Identity</p>
-            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4">
-              <Field label="Species">
-                {editing === "species" ? (
-                  <>
-                    <div ref={containerRef} className="flex items-center gap-2">
-                      <input autoFocus type="text" value={v1}
-                        onChange={e => setV1(e.target.value)}
-                        onBlur={blurCancel}
-                        onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); speciesSave(); } }}
-                        className={INPUT_FLEX} />
-                      <SaveCancel onSave={speciesSave} onCancel={cancel} />
-                    </div>
-                    {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
-                  </>
-                ) : (
-                  <Tap
-                    value={plant.species ? <em>{plant.species}</em> : null}
-                    placeholder="+ Add species"
-                    onClick={() => open("species", plant.species ?? "")}
-                  />
-                )}
-              </Field>
-              <Field label="Cultivar">
-                {editing === "cultivar" ? (
-                  <>
-                    <div ref={containerRef} className="flex items-center gap-2">
-                      <input autoFocus type="text" value={v1}
-                        onChange={e => setV1(e.target.value)}
-                        onBlur={blurCancel}
-                        onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); textSave("cultivar"); } }}
-                        className={INPUT_FLEX} />
-                      <SaveCancel onSave={() => textSave("cultivar")} onCancel={cancel} />
-                    </div>
-                    {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
-                  </>
-                ) : (
-                  <Tap
-                    value={plant.cultivar}
-                    placeholder="+ Add cultivar"
-                    onClick={() => open("cultivar", plant.cultivar ?? "")}
-                  />
-                )}
-              </Field>
-            </dl>
-          </section>
+            <div className="bg-paper-deep rounded-[10px] overflow-hidden">
+              {/* Species + Cultivar — two columns, vertical hairline divider */}
+              <div className="grid grid-cols-2 divide-x divide-paper-line border-b border-paper-line">
+                <div className="px-4 py-3 min-w-0">
+                  <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Species</p>
+                  {editing === "species" ? (
+                    <>
+                      <div ref={containerRef} className="flex items-center gap-2">
+                        <input autoFocus type="text" value={v1}
+                          onChange={e => setV1(e.target.value)}
+                          onBlur={blurCancel}
+                          onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); speciesSave(); } }}
+                          className={INPUT_FLEX} />
+                        <SaveCancel onSave={speciesSave} onCancel={cancel} />
+                      </div>
+                      {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                    </>
+                  ) : (
+                    <Tap
+                      value={plant.species ? <em>{plant.species}</em> : null}
+                      placeholder="+ Add species"
+                      onClick={() => open("species", plant.species ?? "")}
+                    />
+                  )}
+                </div>
+                <div className="px-4 py-3 min-w-0">
+                  <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Cultivar</p>
+                  {editing === "cultivar" ? (
+                    <>
+                      <div ref={containerRef} className="flex items-center gap-2">
+                        <input autoFocus type="text" value={v1}
+                          onChange={e => setV1(e.target.value)}
+                          onBlur={blurCancel}
+                          onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); textSave("cultivar"); } }}
+                          className={INPUT_FLEX} />
+                        <SaveCancel onSave={() => textSave("cultivar")} onCancel={cancel} />
+                      </div>
+                      {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                    </>
+                  ) : (
+                    <Tap
+                      value={plant.cultivar}
+                      placeholder="+ Add cultivar"
+                      onClick={() => open("cultivar", plant.cultivar ?? "")}
+                    />
+                  )}
+                </div>
+              </div>
 
-          {/* ── Common names ─────────────────────────────────────────────── */}
-          <section>
-            <p className={`${SECTION_LABEL} mb-3`}>Common names</p>
-            <CommonNamesSection
-              plantId={plant.id}
-              initialNames={plant.common_names ?? []}
-              aiLookupEnabled={aiLookupEnabled}
-              onNamesChange={names => setPlant(p => ({ ...p, common_names: names }))}
-            />
+              {/* Common names — full width row, chips lifted on paper */}
+              <div className="px-4 py-3">
+                <p className="text-[11px] font-sans font-medium text-ink-soft mb-1.5">Common names</p>
+                <div className="bg-paper rounded-md px-3 py-2.5">
+                  <CommonNamesSection
+                    plantId={plant.id}
+                    initialNames={plant.common_names ?? []}
+                    aiLookupEnabled={aiLookupEnabled}
+                    onNamesChange={names => setPlant(p => ({ ...p, common_names: names }))}
+                  />
+                </div>
+              </div>
+            </div>
           </section>
 
           {/* ── Growing conditions ───────────────────────────────────────── */}
