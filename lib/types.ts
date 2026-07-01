@@ -23,3 +23,46 @@ export interface Plant {
 }
 
 export type PlantInsert = Omit<Plant, "id" | "user_id" | "created_at" | "updated_at" | "search_vector">;
+
+export type SchemeSpace = "small" | "medium" | "large";
+export type SchemeTier = "back" | "mid" | "ground";
+
+export interface Scheme {
+  id: string;
+  user_id: string;
+  name: string;
+  space: SchemeSpace;
+  successional: boolean;
+  edible: boolean;
+  narrative_intro: string;
+  narrative_body: string;
+  featured_plant_latin: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SchemeSourcePlant {
+  id: string;
+  scheme_id: string;
+  plant_id: string | null;
+  sort_order: number;
+}
+
+export interface SchemeSuggestion {
+  id: string;
+  scheme_id: string;
+  common_name: string;
+  latin_name: string;
+  tier: SchemeTier;
+  height_cm: number | null;
+  flowering_months: number[] | null;
+  why: string;
+  wildlife_value: boolean;
+  drought_tolerant: boolean;
+  edible: boolean;
+  british_native: boolean;
+  wikimedia_image_url: string | null;
+  wikimedia_attribution: string | null;
+  saved: boolean;
+  sort_order: number;
+}
