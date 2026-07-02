@@ -42,8 +42,8 @@ export default async function SchemesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="font-display font-medium text-2xl text-ink">Planting schemes</h1>
+      <div className="flex flex-col items-start gap-3">
+        <h1 className="font-display italic text-4xl text-ink">Planting schemes</h1>
         {schemes.length > 0 && (
           <Link
             href="/schemes/new"
