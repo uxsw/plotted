@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { performFloweringLookup } from "@/lib/plant-lookup";
-import { fetchWikimediaImage } from "@/lib/wikimedia";
+import { fetchWikimediaImages } from "@/lib/wikimedia";
 import {
   generateScheme,
   generateSchemeName,
@@ -62,6 +62,7 @@ export async function POST(request: NextRequest) {
   }
 
   // Pre-flight enrichment: backfill flowering season for plants missing it, in parallel.
+  const enrichmentStart = Date.now();
   const enriched = await Promise.all(
     plantRows.map(async (p) => {
       if (p.flowering_season_from && p.flowering_season_to) return p;
@@ -77,6 +78,7 @@ export async function POST(request: NextRequest) {
       }
     })
   );
+  console.log(`[schemes/generate] enrichment: ${Date.now() - enrichmentStart}ms`);
 
   const sourcePlants: SourcePlantInput[] = enriched.map((p) => ({
     genus: p.genus,
@@ -90,19 +92,22 @@ export async function POST(request: NextRequest) {
   }));
 
   let generated;
+  const aiStart = Date.now();
   try {
     generated = await generateScheme(sourcePlants, { space, successional, edible });
   } catch (err) {
     console.error("Scheme generation failed:", err);
     return NextResponse.json({ error: "Generation failed" }, { status: 502 });
   }
+  console.log(`[schemes/generate] AI call: ${Date.now() - aiStart}ms (${generated.suggestions.length} suggestions)`);
 
-  const images = await Promise.all(
-    generated.suggestions.map((s) => fetchWikimediaImage(s.latin_name))
-  );
+  const wikimediaStart = Date.now();
+  const images = await fetchWikimediaImages(generated.suggestions.map((s) => s.latin_name));
+  console.log(`[schemes/generate] wikimedia fetch: ${Date.now() - wikimediaStart}ms`);
 
   const name = generateSchemeName(generated.suggestions);
 
+  const dbStart = Date.now();
   const { data: scheme, error: schemeError } = await supabase
     .from("schemes")
     .insert({
@@ -153,6 +158,7 @@ export async function POST(request: NextRequest) {
   if (suggestionsError) {
     return NextResponse.json({ error: suggestionsError.message }, { status: 500 });
   }
+  console.log(`[schemes/generate] db writes: ${Date.now() - dbStart}ms`);
 
   return NextResponse.json({ scheme_id: scheme.id });
 }

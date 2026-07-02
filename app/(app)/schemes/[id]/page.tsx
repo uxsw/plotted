@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { fetchWikimediaImage, type WikimediaImage } from "@/lib/wikimedia";
+import { fetchWikimediaImages, type WikimediaImage } from "@/lib/wikimedia";
 import SchemeResults from "@/components/SchemeResults";
 
 export async function generateMetadata(
@@ -37,7 +37,7 @@ export default async function SchemeResultsPage({ params }: { params: Promise<{ 
       .order("sort_order"),
   ]);
 
-  // Hero image: fetch all source plants' Wikimedia images in parallel, then take
+  // Hero image: fetch all source plants' Wikimedia images (staggered), then take
   // the first (by sort_order) that resolved — preferring the first source plant
   // but falling back gracefully if it has no usable image.
   const latinNames = (sourcePlants ?? [])
@@ -48,7 +48,7 @@ export default async function SchemeResultsPage({ params }: { params: Promise<{ 
     })
     .filter((name): name is string => !!name);
 
-  const heroCandidates = await Promise.all(latinNames.map((name) => fetchWikimediaImage(name)));
+  const heroCandidates = await fetchWikimediaImages(latinNames);
   const heroImage: WikimediaImage | null = heroCandidates.find((img) => img !== null) ?? null;
 
   return (

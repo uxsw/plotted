@@ -128,7 +128,7 @@ Return a JSON object with exactly this structure:
   "suggestions": [
     {
       "common_name": "string — use the most widely recognised, user-friendly common name",
-      "latin_name": "string — accurate binomial, suitable for Wikimedia Commons image lookup",
+      "latin_name": "string — accurate species-level binomial where possible, avoiding cultivar names, to support reliable image lookup",
       "tier": "back | mid | ground",
       "height_cm": number,
       "flowering_months": [array of month numbers 1-12],
@@ -184,6 +184,10 @@ export async function generateScheme(
     max_tokens: 4096,
     messages: [{ role: "user", content: prompt }],
   });
+
+  console.log(
+    `[scheme-generation] tokens: input=${message.usage.input_tokens} output=${message.usage.output_tokens} stop_reason=${message.stop_reason}`
+  );
 
   const rawText = message.content[0].type === "text" ? message.content[0].text.trim() : "";
   const text = rawText.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
