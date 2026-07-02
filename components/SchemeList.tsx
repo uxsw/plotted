@@ -29,14 +29,14 @@ function formatDate(iso: string): string {
 function ThumbnailStack({ photos }: { photos: string[] }) {
   const shown = photos.slice(0, 4);
   return (
-    <div className="flex -space-x-3">
+    <div className="flex -space-x-4">
       {shown.map((url, i) => (
         <div
           key={i}
-          className="relative w-12 h-12 rounded-full overflow-hidden border-2 border-paper"
+          className="relative w-14 h-14 rounded-full overflow-hidden border-2 border-paper shadow-sm"
           style={{ zIndex: shown.length - i }}
         >
-          <Image src={url} alt="" fill sizes="48px" className="object-cover" />
+          <Image src={url} alt="" fill sizes="56px" className="object-cover" />
         </div>
       ))}
     </div>
@@ -108,7 +108,19 @@ function SchemeCard({
 
   const cardBody = (
     <>
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-paper-deep">
+      <div className="relative h-[190px] w-full overflow-hidden bg-paper-deep">
+        {scheme.source_plant_photos[0] && (
+          <>
+            <Image
+              src={scheme.source_plant_photos[0]}
+              alt=""
+              fill
+              sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+              className="object-cover scale-110 blur-md"
+            />
+            <div className="absolute inset-0 bg-paper/55" />
+          </>
+        )}
         <div className="absolute inset-0 flex items-center justify-center">
           {scheme.source_plant_photos.length > 0 ? (
             <ThumbnailStack photos={scheme.source_plant_photos} />
