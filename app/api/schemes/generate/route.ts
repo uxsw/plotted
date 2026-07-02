@@ -4,7 +4,6 @@ import { performFloweringLookup } from "@/lib/plant-lookup";
 import { fetchWikimediaImages } from "@/lib/wikimedia";
 import {
   generateScheme,
-  generateSchemeName,
   type SourcePlantInput,
 } from "@/lib/scheme-generation";
 import type { SchemeSpace } from "@/lib/types";
@@ -105,13 +104,12 @@ export async function POST(request: NextRequest) {
   const images = await fetchWikimediaImages(generated.suggestions.map((s) => s.latin_name));
   console.log(`[schemes/generate] wikimedia fetch: ${Date.now() - wikimediaStart}ms`);
 
-  const name = generateSchemeName(generated.suggestions);
-
   const dbStart = Date.now();
   const { data: scheme, error: schemeError } = await supabase
     .from("schemes")
     .insert({
-      name,
+      name: generated.name,
+      summary: generated.summary,
       space,
       successional,
       edible,

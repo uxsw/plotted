@@ -31,6 +31,7 @@ export interface Scheme {
   id: string;
   user_id: string;
   name: string;
+  summary: string | null;
   space: SchemeSpace;
   successional: boolean;
   edible: boolean;

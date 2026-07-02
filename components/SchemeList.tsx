@@ -1,14 +1,18 @@
 "use client";
 
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { Card } from "@/components/ui/Card";
+import Link from "next/link";
+import * as Popover from "@radix-ui/react-popover";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
+import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 
 export type SchemeSummary = {
   id: string;
   name: string;
+  summary: string | null;
   created_at: string;
   suggestion_count: number;
   source_plant_photos: string[];
@@ -39,8 +43,187 @@ function ThumbnailStack({ photos }: { photos: string[] }) {
   );
 }
 
-export default function SchemeList({ schemes }: { schemes: SchemeSummary[] }) {
+function MoreIcon() {
+  return (
+    <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+      <circle cx="8" cy="3" r="1.4" />
+      <circle cx="8" cy="8" r="1.4" />
+      <circle cx="8" cy="13" r="1.4" />
+    </svg>
+  );
+}
+
+function SchemeCard({
+  scheme,
+  onRenamed,
+  onDeleted,
+}: {
+  scheme: SchemeSummary;
+  onRenamed: (id: string, name: string) => void;
+  onDeleted: (id: string) => void;
+}) {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [renaming, setRenaming] = useState(false);
+  const [nameValue, setNameValue] = useState(scheme.name);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function commitRename() {
+    const trimmed = nameValue.trim();
+    if (!trimmed || trimmed === scheme.name) {
+      setNameValue(scheme.name);
+      setRenaming(false);
+      return;
+    }
+    setRenaming(false);
+    setError(null);
+    try {
+      const res = await fetch(`/api/schemes/${scheme.id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name: trimmed }),
+      });
+      if (!res.ok) throw new Error();
+      onRenamed(scheme.id, trimmed);
+    } catch {
+      setNameValue(scheme.name);
+      setError("Could not rename — please try again.");
+    }
+  }
+
+  async function doDelete() {
+    setDeleteOpen(false);
+    setDeleting(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/schemes/${scheme.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      onDeleted(scheme.id);
+    } catch {
+      setError("Could not delete — please try again.");
+      setDeleting(false);
+    }
+  }
+
+  const cardBody = (
+    <>
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-paper-deep">
+        <div className="absolute inset-0 flex items-center justify-center">
+          {scheme.source_plant_photos.length > 0 ? (
+            <ThumbnailStack photos={scheme.source_plant_photos} />
+          ) : (
+            <div className="w-16 h-16 text-sand-line">
+              <SchemeIllustration />
+            </div>
+          )}
+        </div>
+      </div>
+      <div className="flex flex-col gap-1.5 p-4 flex-1">
+        {renaming ? (
+          <input
+            autoFocus
+            value={nameValue}
+            onChange={(e) => setNameValue(e.target.value)}
+            onFocus={(e) => e.target.select()}
+            onBlur={commitRename}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") { e.preventDefault(); commitRename(); }
+              if (e.key === "Escape") { setNameValue(scheme.name); setRenaming(false); }
+            }}
+            className="font-display font-medium text-base text-ink leading-snug bg-transparent border-b border-moss outline-none w-full"
+          />
+        ) : (
+          <h3 className="font-display font-medium text-base text-ink leading-snug">{nameValue}</h3>
+        )}
+        <p className="font-sans text-xs text-ink-soft leading-snug">{formatDate(scheme.created_at)}</p>
+        {scheme.summary && (
+          <p className="font-sans text-xs text-ink-soft leading-snug">{scheme.summary}</p>
+        )}
+        <div className="flex flex-wrap gap-1.5 mt-1">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium font-sans leading-none bg-moss-tint text-moss-deep">
+            {scheme.suggestion_count} suggestion{scheme.suggestion_count === 1 ? "" : "s"}
+          </span>
+        </div>
+      </div>
+    </>
+  );
+
+  return (
+    <div className={`relative flex flex-col rounded-lg overflow-hidden border border-sand-line bg-paper transition-shadow duration-150 ${deleting ? "opacity-50 pointer-events-none" : ""}`}>
+      {renaming ? (
+        <div className="flex flex-col flex-1">{cardBody}</div>
+      ) : (
+        <Link
+          href={`/schemes/${scheme.id}`}
+          className="flex flex-col flex-1 text-left hover:shadow-md active:scale-[0.98] active:opacity-75 transition-transform duration-75"
+        >
+          {cardBody}
+        </Link>
+      )}
+
+      <div className="absolute top-2 right-2 z-10">
+        <Popover.Root open={menuOpen} onOpenChange={setMenuOpen}>
+          <Popover.Trigger asChild>
+            <button
+              type="button"
+              aria-label="Scheme options"
+              className="w-7 h-7 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            >
+              <MoreIcon />
+            </button>
+          </Popover.Trigger>
+          <Popover.Portal>
+            <Popover.Content
+              align="end"
+              sideOffset={6}
+              className="z-50 min-w-[140px] rounded-lg border border-sand-line bg-paper p-1 shadow-md flex flex-col focus:outline-none"
+            >
+              <button
+                type="button"
+                onClick={() => { setMenuOpen(false); setRenaming(true); }}
+                className="text-left px-3 py-2 rounded text-sm font-sans text-ink hover:bg-moss-tint transition-colors"
+              >
+                Rename
+              </button>
+              <button
+                type="button"
+                onClick={() => { setMenuOpen(false); setDeleteOpen(true); }}
+                className="text-left px-3 py-2 rounded text-sm font-sans text-clay hover:bg-clay-tint transition-colors"
+              >
+                Delete
+              </button>
+            </Popover.Content>
+          </Popover.Portal>
+        </Popover.Root>
+      </div>
+
+      {error && <p className="px-4 pb-3 text-xs text-clay">{error}</p>}
+
+      <ConfirmDialog
+        isOpen={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={doDelete}
+        title="Delete this scheme?"
+        message={`"${scheme.name}" will be permanently removed, including its suggestions. This can't be undone.`}
+        confirmLabel="Delete"
+        variant="danger"
+      />
+    </div>
+  );
+}
+
+export default function SchemeList({ schemes: initialSchemes }: { schemes: SchemeSummary[] }) {
   const router = useRouter();
+  const [schemes, setSchemes] = useState(initialSchemes);
+
+  function handleRenamed(id: string, name: string) {
+    setSchemes((cur) => cur.map((s) => (s.id === id ? { ...s, name } : s)));
+  }
+
+  function handleDeleted(id: string) {
+    setSchemes((cur) => cur.filter((s) => s.id !== id));
+  }
 
   if (schemes.length === 0) {
     return (
@@ -60,22 +243,7 @@ export default function SchemeList({ schemes }: { schemes: SchemeSummary[] }) {
   return (
     <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
       {schemes.map((scheme) => (
-        <Card
-          key={scheme.id}
-          href={`/schemes/${scheme.id}`}
-          placeholder={
-            scheme.source_plant_photos.length > 0 ? (
-              <ThumbnailStack photos={scheme.source_plant_photos} />
-            ) : undefined
-          }
-          title={scheme.name}
-          subtitle={formatDate(scheme.created_at)}
-          tags={
-            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium font-sans leading-none bg-moss-tint text-moss-deep">
-              {scheme.suggestion_count} suggestion{scheme.suggestion_count === 1 ? "" : "s"}
-            </span>
-          }
-        />
+        <SchemeCard key={scheme.id} scheme={scheme} onRenamed={handleRenamed} onDeleted={handleDeleted} />
       ))}
     </div>
   );

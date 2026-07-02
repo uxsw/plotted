@@ -52,6 +52,8 @@ export type ParsedSuggestion = {
 };
 
 export type SchemeGenerationResult = {
+  name: string;
+  summary: string | null;
   narrative_intro: string;
   narrative_body: string;
   featured_plant_latin: string | null;
@@ -122,6 +124,8 @@ Preferences:
 
 Return a JSON object with exactly this structure:
 {
+  "name": "A characterful, memorable name for this planting scheme (e.g. \\"The Mediterranean Succession\\", \\"A Winter-to-Summer Border\\"). Should feel editorial, not date-stamped. 2–6 words.",
+  "summary": "A single sentence (max 20 words) distilling the scheme's planting character and main benefit. Written in the same warm tone as the narrative.",
   "narrative_intro": "A single opening paragraph. Characterise the existing planting warmly and identify the main opportunity or challenge the suggestions will address. This paragraph appears before the first image in the app, so it should work as a compelling standalone hook.",
   "narrative_body": "Two paragraphs. Explain the strategy behind the suggestions and what the additions achieve together. Where natural, reference one of the suggested plants by name to create a bridge to the suggestion cards below.",
   "featured_plant": "The latin name of whichever suggested plant you consider most visually striking or characterful — used to source a pull image for the narrative body.",
@@ -209,7 +213,12 @@ export async function generateScheme(
       ? r.featured_plant
       : null;
 
+  const name = typeof r.name === "string" && r.name.trim() ? r.name.trim() : generateSchemeName(suggestions);
+  const summary = typeof r.summary === "string" && r.summary.trim() ? r.summary.trim() : null;
+
   return {
+    name,
+    summary,
     narrative_intro: r.narrative_intro,
     narrative_body: r.narrative_body,
     featured_plant_latin: featuredPlantLatin,
@@ -239,8 +248,11 @@ function dominantCharacteristic(suggestions: ParsedSuggestion[]): string {
   return "planting scheme";
 }
 
-/** Auto-generated scheme name: "[Season] [dominant characteristic] · [Month Year]". */
-export function generateSchemeName(suggestions: ParsedSuggestion[], now = new Date()): string {
+/**
+ * Fallback scheme name — "[Season] [dominant characteristic] · [Month Year]" —
+ * used only if the AI response omits a usable "name" field.
+ */
+function generateSchemeName(suggestions: ParsedSuggestion[], now = new Date()): string {
   const month = now.getMonth() + 1;
   const season = SEASON_FOR_MONTH[month];
   const characteristic = dominantCharacteristic(suggestions);

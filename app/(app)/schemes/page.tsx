@@ -13,7 +13,7 @@ export default async function SchemesPage() {
     .from("schemes")
     .select(
       `
-      id, name, created_at,
+      id, name, summary, created_at,
       scheme_source_plants ( plant_id, plants ( photo_url ) ),
       scheme_suggestions ( saved )
     `
@@ -31,6 +31,7 @@ export default async function SchemesPage() {
   const schemes: SchemeSummary[] = (data ?? []).map((scheme) => ({
     id: scheme.id,
     name: scheme.name,
+    summary: scheme.summary,
     created_at: scheme.created_at,
     suggestion_count: scheme.scheme_suggestions.filter((s) => s.saved).length,
     source_plant_photos: scheme.scheme_source_plants
