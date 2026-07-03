@@ -28,12 +28,14 @@ export default async function PlantsPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="font-display font-medium text-2xl text-ink">My plants</h1>
-        <Link
-          href="/plants/new"
-          className="inline-flex items-center justify-center rounded px-4 py-2 text-sm font-medium font-sans bg-moss text-white hover:bg-moss-deep transition-colors"
-        >
-          + Add plant
-        </Link>
+        {(plants ?? []).length > 0 && (
+          <Link
+            href="/plants/new"
+            className="inline-flex items-center justify-center rounded px-4 py-2 text-sm font-medium font-sans bg-moss text-white hover:bg-moss-deep transition-colors"
+          >
+            + Add plant
+          </Link>
+        )}
       </div>
       <ErrorBoundary>
         <PlantGrid plants={plants ?? []} />

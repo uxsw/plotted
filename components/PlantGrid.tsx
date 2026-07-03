@@ -8,8 +8,7 @@ import { PlantName } from "@/components/plants/PlantName";
 import { Card } from "@/components/ui/Card";
 import { SunBadge } from "@/components/ui/SunBadge";
 import { Tag } from "@/components/ui/Tag";
-import { Button } from "@/components/ui/Button";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { PlaceholderPlantCard } from "@/components/ui/PlaceholderPlantCard";
 import { MONTH_ABBR, SEASON_STYLES, getSeasonBand, formatSeason } from "@/components/ui/FloweringSeasonBadge";
 
 const CURRENT_MONTH = new Date().getMonth() + 1; // 1–12
@@ -293,16 +292,28 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
 
   if (plants.length === 0) {
     return (
-      <EmptyState
-        illustration={<GardenIllustration />}
-        heading="Nothing planted yet"
-        body="Add your first plant to start building your garden portfolio."
-        action={
-          <Button variant="primary" onClick={() => router.push("/plants/new")}>
-            Add a plant
-          </Button>
-        }
-      />
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+        <button
+          type="button"
+          onClick={() => router.push("/plants/new")}
+          className="flex flex-col rounded-lg overflow-hidden border border-sand-line bg-paper cursor-pointer hover:shadow-md text-left w-full active:scale-[0.98] active:opacity-75 transition-transform duration-75"
+        >
+          <div className="aspect-[4/3] w-full flex items-center justify-center bg-paper-deep">
+            <PlusIcon />
+          </div>
+          <div className="flex flex-col gap-1.5 p-4 flex-1">
+            <h3 className="font-display font-medium text-base text-ink leading-snug">
+              Add your first plant
+            </h3>
+            <p className="font-sans text-xs text-ink-soft leading-snug">
+              Start building your garden portfolio.
+            </p>
+          </div>
+        </button>
+        <PlaceholderPlantCard opacity={0.5} />
+        <PlaceholderPlantCard opacity={0.35} />
+        <PlaceholderPlantCard opacity={0.2} />
+      </div>
     );
   }
 
@@ -498,14 +509,17 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
   );
 }
 
-function GardenIllustration() {
+function PlusIcon() {
   return (
-    <svg viewBox="0 0 96 96" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
-      <path
-        d="M48 80V44M48 44C48 44 38 36 30 24M48 44C48 44 58 36 66 24M48 44C48 44 42 52 38 62M48 44C48 44 54 52 58 62"
-        stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"
-      />
-      <path d="M28 80h40" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <svg
+      className="w-8 h-8 text-moss"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      aria-hidden="true"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
     </svg>
   );
 }
