@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { fetchWikimediaImages, type WikimediaImage } from "@/lib/wikimedia";
 import SchemeResults from "@/components/SchemeResults";
 
 export async function generateMetadata(
@@ -26,7 +25,7 @@ export default async function SchemeResultsPage({ params }: { params: Promise<{ 
   const [{ data: sourcePlants }, { data: suggestions }] = await Promise.all([
     supabase
       .from("scheme_source_plants")
-      .select("sort_order, plants ( genus, species, cultivar )")
+      .select("sort_order, plants ( photo_url )")
       .eq("scheme_id", id)
       .order("sort_order"),
     supabase
@@ -37,19 +36,14 @@ export default async function SchemeResultsPage({ params }: { params: Promise<{ 
       .order("sort_order"),
   ]);
 
-  // Hero image: fetch all source plants' Wikimedia images (staggered), then take
-  // the first (by sort_order) that resolved — preferring the first source plant
-  // but falling back gracefully if it has no usable image.
-  const latinNames = (sourcePlants ?? [])
-    .map((sp) => {
-      const plant = Array.isArray(sp.plants) ? sp.plants[0] : sp.plants;
-      if (!plant) return null;
-      return [plant.genus, plant.species, plant.cultivar].filter(Boolean).join(" ") || null;
-    })
-    .filter((name): name is string => !!name);
-
-  const heroCandidates = await fetchWikimediaImages(latinNames);
-  const heroImage: WikimediaImage | null = heroCandidates.find((img) => img !== null) ?? null;
+  // Hero image: the first source plant (by sort_order) that has its own uploaded photo.
+  const heroImage: string | null =
+    (sourcePlants ?? [])
+      .map((sp) => {
+        const plant = Array.isArray(sp.plants) ? sp.plants[0] : sp.plants;
+        return plant?.photo_url ?? null;
+      })
+      .find((url): url is string => !!url) ?? null;
 
   return (
     <SchemeResults

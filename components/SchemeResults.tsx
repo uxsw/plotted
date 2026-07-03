@@ -6,9 +6,6 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { MONTH_ABBR } from "@/components/ui/FloweringSeasonBadge";
 import type { Scheme, SchemeSuggestion, SchemeTier } from "@/lib/types";
-import type { WikimediaImage } from "@/lib/wikimedia";
-
-const EDITABLE = "cursor-pointer rounded-[8px] transition-colors duration-[120ms] ease-in-out hover:bg-moss-tint/60 px-2 py-1.5 -ml-2 -mt-1.5";
 
 const TIER_ORDER: SchemeTier[] = ["back", "mid", "ground"];
 const TIER_LABELS: Record<SchemeTier, string> = {
@@ -105,7 +102,7 @@ function EditableName({ schemeId, initialName }: { schemeId: string; initialName
           if (e.key === "Enter") { e.preventDefault(); commit(); }
           if (e.key === "Escape") { setValue(saved); setEditing(false); }
         }}
-        className="w-full font-display font-medium text-2xl text-ink bg-transparent border-b border-moss outline-none px-2 py-1.5 -ml-2"
+        className="w-full font-display italic font-semibold text-[30px] leading-tight text-white bg-transparent border-b border-white/70 outline-none px-2 py-1.5 -ml-2"
       />
     );
   }
@@ -114,7 +111,7 @@ function EditableName({ schemeId, initialName }: { schemeId: string; initialName
     <button
       type="button"
       onClick={() => setEditing(true)}
-      className={`text-left w-full font-display font-medium text-2xl text-ink ${EDITABLE}`}
+      className="text-left w-full font-display italic font-semibold text-[30px] leading-tight text-white cursor-pointer rounded-[8px] transition-colors duration-[120ms] ease-in-out hover:bg-white/10 px-2 py-1.5 -ml-2 -mt-1.5"
     >
       {value}
     </button>
@@ -192,7 +189,7 @@ export default function SchemeResults({
 }: {
   scheme: Scheme;
   suggestions: SchemeSuggestion[];
-  heroImage: WikimediaImage | null;
+  heroImage: string | null;
 }) {
   const [suggestions, setSuggestions] = useState(initialSuggestions);
   const [dismissError, setDismissError] = useState<string | null>(null);
@@ -225,27 +222,53 @@ export default function SchemeResults({
     .filter((group) => group.items.length > 0);
 
   return (
-    <div className="flex flex-col gap-6">
-      <Link href="/schemes" className="font-sans text-sm text-ink-soft hover:text-ink transition-colors w-fit">
-        ← Planting schemes
-      </Link>
+    <>
+      <div
+        className="relative -mt-8"
+        style={{
+          width: "100vw",
+          marginLeft: "calc(50% - 50vw)",
+          marginRight: "calc(50% - 50vw)",
+          height: "55vh",
+        }}
+      >
+        {heroImage ? (
+          <Image
+            src={heroImage}
+            alt=""
+            fill
+            sizes="100vw"
+            className="object-cover object-center"
+            priority
+          />
+        ) : (
+          <div className="absolute inset-0 bg-moss" />
+        )}
+        <div
+          className="absolute inset-0"
+          style={{ background: "linear-gradient(to top, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0) 60%)" }}
+        />
 
-      <EditableName schemeId={scheme.id} initialName={scheme.name} />
+        <Link
+          href="/schemes"
+          className="absolute top-4 left-4 z-10 font-sans text-sm text-white/90 hover:text-white transition-colors"
+        >
+          ← Planting schemes
+        </Link>
 
-      <p className="font-display text-[17px] text-ink leading-relaxed">{scheme.narrative_intro}</p>
+        <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col gap-1">
+          <EditableName schemeId={scheme.id} initialName={scheme.name} />
+          {scheme.summary && (
+            <p className="font-sans text-[15px] text-white/80 leading-snug">{scheme.summary}</p>
+          )}
+        </div>
+      </div>
 
-      {heroImage && (
-        <figure className="flex flex-col gap-1">
-          <div className="relative aspect-[16/10] w-full rounded-lg overflow-hidden bg-paper-deep">
-            <Image src={heroImage.url} alt="" fill sizes="500px" className="object-cover" priority />
-          </div>
-          <Attribution url={heroImage.attribution} />
-        </figure>
-      )}
-
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-6 mt-6">
+      <div className="flex flex-col gap-4 max-w-[680px] mx-auto">
+        <p className="font-display text-[17px] text-ink leading-relaxed">{scheme.narrative_intro}</p>
         {narrativeBodyParagraphs.map((para, i) => (
-          <p key={i} className="font-sans text-sm text-ink leading-relaxed">{para}</p>
+          <p key={i} className="font-sans text-[17px] leading-[1.75] text-ink">{para}</p>
         ))}
       </div>
 
@@ -274,6 +297,7 @@ export default function SchemeResults({
           </div>
         ))}
       </div>
-    </div>
+      </div>
+    </>
   );
 }
