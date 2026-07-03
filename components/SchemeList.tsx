@@ -5,9 +5,8 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import * as Popover from "@radix-ui/react-popover";
-import { Button } from "@/components/ui/Button";
-import { EmptyState } from "@/components/ui/EmptyState";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { PlaceholderSchemeCard } from "@/components/ui/PlaceholderSchemeCard";
 
 export type SchemeSummary = {
   id: string;
@@ -236,16 +235,27 @@ export default function SchemeList({ schemes: initialSchemes }: { schemes: Schem
 
   if (schemes.length === 0) {
     return (
-      <EmptyState
-        illustration={<SchemeIllustration />}
-        heading="No planting schemes yet"
-        body="Select a few plants from your garden and let Plotted suggest companions to fill the gaps."
-        action={
-          <Button variant="primary" onClick={() => router.push("/schemes/new")}>
-            Create your first scheme
-          </Button>
-        }
-      />
+      <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+        <button
+          type="button"
+          onClick={() => router.push("/schemes/new")}
+          className="flex flex-col rounded-lg overflow-hidden border border-clay bg-paper cursor-pointer hover:shadow-md text-left w-full active:scale-[0.98] active:opacity-75 transition-transform duration-75"
+        >
+          <div className="h-[190px] w-full flex items-center justify-center bg-clay-tint">
+            <PlusIcon />
+          </div>
+          <div className="flex flex-col gap-1.5 p-4 flex-1">
+            <h3 className="font-display font-medium text-base text-ink leading-snug">
+              Create your first scheme
+            </h3>
+            <p className="font-sans text-xs text-ink-soft leading-snug">
+              Pick a few plants, get companion suggestions.
+            </p>
+          </div>
+        </button>
+        <PlaceholderSchemeCard opacity={0.5} />
+        <PlaceholderSchemeCard opacity={0.3} />
+      </div>
     );
   }
 
@@ -255,6 +265,21 @@ export default function SchemeList({ schemes: initialSchemes }: { schemes: Schem
         <SchemeCard key={scheme.id} scheme={scheme} onRenamed={handleRenamed} onDeleted={handleDeleted} />
       ))}
     </div>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg
+      className="w-8 h-8 text-clay"
+      fill="none"
+      viewBox="0 0 24 24"
+      stroke="currentColor"
+      strokeWidth={1.5}
+      aria-hidden="true"
+    >
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+    </svg>
   );
 }
 

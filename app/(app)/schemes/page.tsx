@@ -47,7 +47,7 @@ export default async function SchemesPage() {
         {schemes.length > 0 && (
           <Link
             href="/schemes/new"
-            className="inline-flex items-center justify-center rounded px-4 py-2 text-sm font-medium font-sans bg-moss text-white hover:bg-moss-deep transition-colors"
+            className="inline-flex items-center justify-center rounded px-4 py-2 text-sm font-medium font-sans bg-clay text-white hover:bg-clay-deep transition-colors"
           >
             + Create new scheme
           </Link>
