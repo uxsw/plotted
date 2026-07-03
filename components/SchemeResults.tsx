@@ -102,19 +102,18 @@ function EditableName({ schemeId, initialName }: { schemeId: string; initialName
           if (e.key === "Enter") { e.preventDefault(); commit(); }
           if (e.key === "Escape") { setValue(saved); setEditing(false); }
         }}
-        className="w-full font-display italic font-semibold text-[30px] leading-tight text-white bg-transparent border-b border-white/70 outline-none px-2 py-1.5 -ml-2"
+        className="w-full font-display italic font-semibold text-[48px] leading-[1.2] text-white bg-transparent border-b border-white/70 outline-none px-2 py-1.5 -ml-2"
       />
     );
   }
 
   return (
-    <button
-      type="button"
+    <h2
       onClick={() => setEditing(true)}
-      className="text-left w-full font-display italic font-semibold text-[30px] leading-tight text-white cursor-pointer rounded-[8px] transition-colors duration-[120ms] ease-in-out hover:bg-white/10 px-2 py-1.5 -ml-2 -mt-1.5"
+      className="w-full font-display italic font-semibold text-[48px] leading-[1.2] text-balance text-white"
     >
       {value}
-    </button>
+    </h2>
   );
 }
 
@@ -256,10 +255,17 @@ export default function SchemeResults({
           ← Planting schemes
         </Link>
 
-        <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col gap-1">
+        <div
+          className="absolute bottom-0 left-0 right-0 z-0 p-4"
+          style={{ backdropFilter: "blur(2px)", WebkitBackdropFilter: "blur(2px)" }}
+        >
+          <div
+            className="absolute inset-0 -z-10"
+            style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%)" }}
+          />
           <EditableName schemeId={scheme.id} initialName={scheme.name} />
           {scheme.summary && (
-            <p className="font-sans text-[15px] text-white/80 leading-snug">{scheme.summary}</p>
+            <p className="font-sans text-[18px] leading-[1.2] text-balance text-white/80">{scheme.summary}</p>
           )}
         </div>
       </div>
