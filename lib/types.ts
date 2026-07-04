@@ -23,7 +23,7 @@ export interface Plant {
   updated_at: string;
 }
 
-export type PlantInsert = Omit<Plant, "id" | "user_id" | "created_at" | "updated_at" | "search_vector">;
+export type PlantInsert = Omit<Plant, "id" | "user_id" | "created_at" | "updated_at" | "search_vector" | "lookup_status">;
 
 export type SchemeSpace = "small" | "medium" | "large";
 export type SchemeTier = "back" | "mid" | "ground";
