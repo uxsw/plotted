@@ -86,6 +86,7 @@ export async function upsertPlant(
       .single();
     if (error) return { error: error.message };
 
+    let lookup_status: "skipped" | "success" | "not_found" | "error" = "skipped";
     if (clean.species) {
       const { data: flags } = await supabase
         .from("user_flags")
@@ -106,13 +107,18 @@ export async function upsertPlant(
           if (validMonth(result.flowering_season_to)) updates.flowering_season_to = result.flowering_season_to;
           if (validCm(result.eventual_height_cm)) updates.eventual_height_cm = result.eventual_height_cm;
           if (validCm(result.eventual_spread_cm)) updates.eventual_spread_cm = result.eventual_spread_cm;
-          if (Object.keys(updates).length > 0) {
-            await supabase.from("plants").update(updates).eq("id", row.id);
-          }
+          lookup_status = "success";
+          await supabase.from("plants").update({ ...updates, lookup_status }).eq("id", row.id);
         } catch (err) {
           console.error("AI lookup failed on plant creation:", err);
+          lookup_status = "error";
+          await supabase.from("plants").update({ lookup_status }).eq("id", row.id);
         }
+      } else {
+        await supabase.from("plants").update({ lookup_status }).eq("id", row.id);
       }
+    } else {
+      await supabase.from("plants").update({ lookup_status }).eq("id", row.id);
     }
 
     revalidatePath("/plants");

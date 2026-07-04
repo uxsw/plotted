@@ -18,6 +18,7 @@ export interface Plant {
   status: PlantStatus;
   notes: string | null;
   common_names: string[];
+  lookup_status: "skipped" | "success" | "not_found" | "error" | null;
   created_at: string;
   updated_at: string;
 }
