@@ -27,8 +27,8 @@ const YEAR_OPTIONS = Array.from({ length: 30 }, (_, i) => now.getFullYear() - i)
 const INPUT = "border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500";
 const INPUT_W = `w-full ${INPUT}`;
 const INPUT_FLEX = `flex-1 min-w-0 ${INPUT}`;
-const PROMPT_CLS = "text-sm text-gray-400";
-const EDITABLE = "cursor-pointer rounded-[8px] transition-colors duration-[120ms] ease-in-out hover:bg-moss-tint/60 px-2 py-1.5 -ml-2 -mt-1.5";
+const PROMPT_CLS = "text-sm text-ink-soft";
+const EDITABLE = "cursor-pointer rounded-[8px] transition-colors duration-[120ms] ease-in-out hover:bg-paper px-2 py-1.5 -ml-2 -mt-1.5";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -419,7 +419,7 @@ export default function PlantDetail({
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
-        <Link href="/plants" className="inline-flex items-center gap-1.5 -ml-2 px-2 py-1.5 rounded-md text-sm text-moss-700 no-underline transition-colors duration-150 hover:bg-sand-line focus-visible:bg-sand-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss-400">← My Plants</Link>
+        <Link href="/plants" className="inline-flex items-center gap-1.5 -ml-2 px-2 py-1.5 rounded-md text-sm text-moss-700 no-underline transition-colors duration-150 hover:bg-paper-deep focus-visible:bg-sand-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss-400">← My Plants</Link>
         <div className="flex gap-3">
           <Link
             href="/plants/new"
