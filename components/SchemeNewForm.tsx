@@ -112,13 +112,17 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
 
   if (plants.length === 0) {
     return (
-      <div className="flex flex-col items-center text-center gap-3 py-16">
+      <div className="flex flex-col items-center text-center gap-3 py-16 px-6 rounded-lg bg-clay-tint/50">
+        <div className="text-clay">
+          <SproutIcon />
+        </div>
+        <h2 className="font-display font-medium text-lg text-ink">Add a plant to get started</h2>
         <p className="font-sans text-sm text-ink-soft max-w-xs">
-          Add a few plants to your garden first — then Plotted can suggest companions for them.
+          Companion suggestions are based on what&apos;s already growing in your garden. Add a plant or two, and Plotted will show you what pairs well alongside them.
         </p>
         <Link
           href="/plants/new"
-          className="inline-flex items-center justify-center rounded px-4 py-2 text-sm font-medium font-sans bg-moss text-white hover:bg-moss-deep transition-colors"
+          className="inline-flex items-center justify-center rounded px-4 py-2 text-sm font-medium font-sans bg-clay text-white hover:bg-clay-deep transition-colors"
         >
           + Add a plant
         </Link>
