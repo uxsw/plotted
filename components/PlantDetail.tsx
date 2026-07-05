@@ -302,14 +302,13 @@ export default function PlantDetail({
   const [photoError, setPhotoError] = useState<string | null>(null);
   const photoFileRef = useRef<HTMLInputElement>(null);
   const [retrying, setRetrying] = useState(false);
-  const [noticeSeen, setNoticeSeen] = useState(init.lookup_notice_seen_at !== null);
+  const noticeSeen = init.lookup_notice_seen_at !== null;
 
   useEffect(() => {
     if (!noticeSeen && (init.lookup_status === "success" || init.lookup_status === "not_found")) {
       markLookupNoticeSeen(init.id);
-      setNoticeSeen(true);
     }
-  }, []);
+  }, [init.id, init.lookup_status, noticeSeen]);
 
   function blurCancel(e: React.FocusEvent) {
     if (containerRef.current?.contains(e.relatedTarget as Node)) return;
@@ -442,7 +441,6 @@ export default function PlantDetail({
       }));
       if (data.lookup_status === "success" || data.lookup_status === "not_found") {
         markLookupNoticeSeen(plant.id);
-        setNoticeSeen(false);
       }
     } catch {
       setPlant(p => ({ ...p, lookup_status: "error" }));

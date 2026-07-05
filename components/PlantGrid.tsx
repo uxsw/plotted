@@ -7,9 +7,8 @@ import { scientificNameString, autocompleteTitle } from "@/lib/plantName";
 import { PlantName } from "@/components/plants/PlantName";
 import { Card } from "@/components/ui/Card";
 import { SunBadge } from "@/components/ui/SunBadge";
-import { Tag } from "@/components/ui/Tag";
 import { PlaceholderPlantCard } from "@/components/ui/PlaceholderPlantCard";
-import { MONTH_ABBR, SEASON_STYLES, getSeasonBand, formatSeason } from "@/components/ui/FloweringSeasonBadge";
+import { SEASON_STYLES, getSeasonBand, formatSeason } from "@/components/ui/FloweringSeasonBadge";
 
 const CURRENT_MONTH = new Date().getMonth() + 1; // 1–12
 
