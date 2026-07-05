@@ -17,7 +17,7 @@ export default function DesignCheckPage() {
       <div className="max-w-3xl mx-auto space-y-16">
 
         <header>
-          <h1 className="font-display text-3xl font-medium text-ink">Design Check</h1>
+          <h1 className="font-display text-3xl font-medium text-ink">Plotted Design Reference</h1>
           <p className="font-sans text-sm text-ink-soft mt-1">
             Component primitives — visual review against design reference.
           </p>
