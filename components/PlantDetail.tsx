@@ -302,16 +302,12 @@ export default function PlantDetail({
   const [photoError, setPhotoError] = useState<string | null>(null);
   const photoFileRef = useRef<HTMLInputElement>(null);
   const [retrying, setRetrying] = useState(false);
-
-  const showLookupNotice = useRef(
-    (init.lookup_status === "success" || init.lookup_status === "not_found") &&
-      init.lookup_notice_seen_at === null
-  );
+  const [noticeSeen, setNoticeSeen] = useState(init.lookup_notice_seen_at !== null);
 
   useEffect(() => {
-    if (showLookupNotice.current) {
+    if (!noticeSeen && (init.lookup_status === "success" || init.lookup_status === "not_found")) {
       markLookupNoticeSeen(init.id);
-      setPlant(p => ({ ...p, lookup_notice_seen_at: new Date().toISOString() }));
+      setNoticeSeen(true);
     }
   }, []);
 
@@ -444,6 +440,10 @@ export default function PlantDetail({
         eventual_height_cm: data.eventual_height_cm ?? p.eventual_height_cm,
         eventual_spread_cm: data.eventual_spread_cm ?? p.eventual_spread_cm,
       }));
+      if (data.lookup_status === "success" || data.lookup_status === "not_found") {
+        markLookupNoticeSeen(plant.id);
+        setNoticeSeen(false);
+      }
     } catch {
       setPlant(p => ({ ...p, lookup_status: "error" }));
     } finally {
@@ -466,12 +466,12 @@ export default function PlantDetail({
         </div>
       </div>
 
-      {showLookupNotice.current && plant.lookup_status === "success" && (
+      {!noticeSeen && plant.lookup_status === "success" && (
         <p className="font-display italic text-[14px] text-ink-soft">
           Some details were filled in automatically — worth a quick check for accuracy.
         </p>
       )}
-      {showLookupNotice.current && plant.lookup_status === "not_found" && (
+      {!noticeSeen && plant.lookup_status === "not_found" && (
         <p className="font-display italic text-[14px] text-ink-soft">
           We couldn&apos;t find a match for &lsquo;{plant.species}&rsquo; — check the spelling, or fill in details yourself below.
         </p>
