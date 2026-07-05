@@ -14,16 +14,6 @@ export async function POST(
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const { data: flags } = await supabase
-    .from("user_flags")
-    .select("ai_lookup_enabled")
-    .eq("user_id", user.id)
-    .single();
-
-  if (!flags?.ai_lookup_enabled) {
-    return NextResponse.json({ error: "Feature not available" }, { status: 403 });
-  }
-
   const { data: plant } = await supabase
     .from("plants")
     .select("species, cultivar")

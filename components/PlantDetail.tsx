@@ -139,12 +139,10 @@ function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
 function CommonNamesSection({
   plantId,
   initialNames,
-  aiLookupEnabled,
   onNamesChange,
 }: {
   plantId: string;
   initialNames: string[];
-  aiLookupEnabled: boolean;
   onNamesChange: (names: string[]) => void;
 }) {
   const [savedNames, setSavedNames] = useState<string[]>(initialNames);
@@ -224,7 +222,7 @@ function CommonNamesSection({
       )}
 
       {/* No saved names — lookup button or loading */}
-      {!hasSaved && aiLookupEnabled && phase !== "loading" && (
+      {!hasSaved && phase !== "loading" && (
         <Button type="button" variant="secondary" onClick={runLookup}>
           Get common names
         </Button>
@@ -291,10 +289,8 @@ function CommonNamesSection({
 
 export default function PlantDetail({
   plant: init,
-  aiLookupEnabled,
 }: {
   plant: Plant;
-  aiLookupEnabled: boolean;
 }) {
   const [plant, setPlant] = useState(init);
   const [editing, setEditing] = useState<string | null>(null);
@@ -566,7 +562,6 @@ export default function PlantDetail({
                 <CommonNamesSection
                   plantId={plant.id}
                   initialNames={plant.common_names ?? []}
-                  aiLookupEnabled={aiLookupEnabled}
                   onNamesChange={names => setPlant(p => ({ ...p, common_names: names }))}
                 />
               </div>

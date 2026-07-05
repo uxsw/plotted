@@ -7,6 +7,7 @@ import { sanitizePlantName, sanitizeGenus, sanitizeSpecies } from "@/lib/sanitiz
 import { validatePlantInput, hasFieldErrors, type FieldErrors } from "@/lib/validation";
 import type { PlantInsert, SunNeeds } from "@/lib/types";
 import { performLookup } from "@/lib/plant-lookup";
+import Anthropic from "@anthropic-ai/sdk";
 
 export async function updatePlantField(
   plantId: string,
@@ -88,33 +89,40 @@ export async function upsertPlant(
 
     let lookup_status: "skipped" | "success" | "not_found" | "error" = "skipped";
     if (clean.species) {
-      const { data: flags } = await supabase
-        .from("user_flags")
-        .select("ai_lookup_enabled")
-        .eq("user_id", user.id)
-        .single();
-
-      if (flags?.ai_lookup_enabled) {
-        try {
-          const result = await performLookup(clean.species, clean.cultivar ?? null);
-          const VALID_SUN_NEEDS: SunNeeds[] = ["full sun", "full sun / partial shade", "partial shade", "full shade"];
-          const validMonth = (v: number | null) => v !== null && Number.isInteger(v) && v >= 1 && v <= 12;
-          const validCm = (v: number | null) => v !== null && Number.isInteger(v) && v > 0;
-          const updates: Record<string, unknown> = {};
-          if (result.common_names.length > 0) updates.common_names = result.common_names;
-          if (result.sun_needs && (VALID_SUN_NEEDS as string[]).includes(result.sun_needs)) updates.sun_needs = result.sun_needs;
-          if (validMonth(result.flowering_season_from)) updates.flowering_season_from = result.flowering_season_from;
-          if (validMonth(result.flowering_season_to)) updates.flowering_season_to = result.flowering_season_to;
-          if (validCm(result.eventual_height_cm)) updates.eventual_height_cm = result.eventual_height_cm;
-          if (validCm(result.eventual_spread_cm)) updates.eventual_spread_cm = result.eventual_spread_cm;
-          lookup_status = "success";
-          await supabase.from("plants").update({ ...updates, lookup_status }).eq("id", row.id);
-        } catch (err) {
+      try {
+        const result = await performLookup(clean.species, clean.cultivar ?? null);
+        const VALID_SUN_NEEDS: SunNeeds[] = ["full sun", "full sun / partial shade", "partial shade", "full shade"];
+        const validMonth = (v: number | null) => v !== null && Number.isInteger(v) && v >= 1 && v <= 12;
+        const validCm = (v: number | null) => v !== null && Number.isInteger(v) && v > 0;
+        const updates: Record<string, unknown> = {};
+        if (result.common_names.length > 0) updates.common_names = result.common_names;
+        if (result.sun_needs && (VALID_SUN_NEEDS as string[]).includes(result.sun_needs)) updates.sun_needs = result.sun_needs;
+        if (validMonth(result.flowering_season_from)) updates.flowering_season_from = result.flowering_season_from;
+        if (validMonth(result.flowering_season_to)) updates.flowering_season_to = result.flowering_season_to;
+        if (validCm(result.eventual_height_cm)) updates.eventual_height_cm = result.eventual_height_cm;
+        if (validCm(result.eventual_spread_cm)) updates.eventual_spread_cm = result.eventual_spread_cm;
+        const allEmpty =
+          result.common_names.length === 0 &&
+          result.sun_needs == null &&
+          result.flowering_season_from == null &&
+          result.flowering_season_to == null &&
+          result.eventual_height_cm == null &&
+          result.eventual_spread_cm == null;
+        lookup_status = allEmpty ? "not_found" : "success";
+        await supabase.from("plants").update({ ...updates, lookup_status }).eq("id", row.id);
+      } catch (err) {
+        const isBillingError =
+          err instanceof Anthropic.APIError &&
+          ((err.status === 429) ||
+            (err.status === 400 &&
+              typeof err.message === "string" &&
+              err.message.toLowerCase().includes("credit")));
+        if (isBillingError) {
+          console.error("AI lookup failed — possible billing/quota issue:", err);
+        } else {
           console.error("AI lookup failed on plant creation:", err);
-          lookup_status = "error";
-          await supabase.from("plants").update({ lookup_status }).eq("id", row.id);
         }
-      } else {
+        lookup_status = "error";
         await supabase.from("plants").update({ lookup_status }).eq("id", row.id);
       }
     } else {

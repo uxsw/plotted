@@ -75,18 +75,7 @@ function setupAISupabase(): { capturedAIUpdate: () => Record<string, unknown> | 
     auth: {
       getUser: vi.fn().mockResolvedValue({ data: { user: { id: "user-123" } } }),
     },
-    from: vi.fn().mockImplementation((table: string) => {
-      if (table === "user_flags") {
-        return {
-          select: vi.fn().mockReturnValue({
-            eq: vi.fn().mockReturnValue({
-              single: vi.fn().mockResolvedValue({ data: { ai_lookup_enabled: true } }),
-            }),
-          }),
-        };
-      }
-      return plantsTable;
-    }),
+    from: vi.fn().mockReturnValue(plantsTable),
   } as unknown as Awaited<ReturnType<typeof createClient>>);
 
   return { capturedAIUpdate: () => captured };
@@ -131,7 +120,7 @@ describe("upsertPlant – AI lookup validation", () => {
         sun_needs: "full moonlight",
       });
       await upsertPlant(null, BASE_PLANT);
-      expect(capturedAIUpdate()).toBeNull();
+      expect(capturedAIUpdate()).not.toHaveProperty("sun_needs");
     });
 
     it("writes a valid value to DB", async () => {
@@ -151,7 +140,7 @@ describe("upsertPlant – AI lookup validation", () => {
         flowering_season_from: 13,
       });
       await upsertPlant(null, BASE_PLANT);
-      expect(capturedAIUpdate()).toBeNull();
+      expect(capturedAIUpdate()).not.toHaveProperty("flowering_season_from");
     });
 
     it("includes valid value 6", async () => {
@@ -171,7 +160,7 @@ describe("upsertPlant – AI lookup validation", () => {
         eventual_height_cm: -5,
       });
       await upsertPlant(null, BASE_PLANT);
-      expect(capturedAIUpdate()).toBeNull();
+      expect(capturedAIUpdate()).not.toHaveProperty("eventual_height_cm");
     });
 
     it("includes valid value 100", async () => {
