@@ -118,3 +118,14 @@ export async function upsertPlant(
     redirect(`/plants/${row.id}`);
   }
 }
+
+export async function markLookupNoticeSeen(plantId: string): Promise<void> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  await supabase
+    .from("plants")
+    .update({ lookup_notice_seen_at: new Date().toISOString() })
+    .eq("id", plantId)
+    .eq("user_id", user.id);
+}

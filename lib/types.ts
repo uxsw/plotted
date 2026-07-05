@@ -19,11 +19,12 @@ export interface Plant {
   notes: string | null;
   common_names: string[];
   lookup_status: "skipped" | "success" | "not_found" | "error" | null;
+  lookup_notice_seen_at: string | null;
   created_at: string;
   updated_at: string;
 }
 
-export type PlantInsert = Omit<Plant, "id" | "user_id" | "created_at" | "updated_at" | "search_vector" | "lookup_status">;
+export type PlantInsert = Omit<Plant, "id" | "user_id" | "created_at" | "updated_at" | "search_vector" | "lookup_status" | "lookup_notice_seen_at">;
 
 export type SchemeSpace = "small" | "medium" | "large";
 export type SchemeTier = "back" | "mid" | "ground";

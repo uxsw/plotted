@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { plantDisplayTitle } from "@/lib/plantName";
@@ -8,7 +8,7 @@ import { PlantName } from "@/components/plants/PlantName";
 import { SunBadgePill } from "@/components/ui/SunBadge";
 import { FloweringSeasonBadge } from "@/components/ui/FloweringSeasonBadge";
 import type { Plant, PlantInsert, SunNeeds } from "@/lib/types";
-import { updatePlantField } from "@/app/actions/plants";
+import { updatePlantField, markLookupNoticeSeen } from "@/app/actions/plants";
 import DeletePlantButton from "@/components/DeletePlantButton";
 import { Button } from "@/components/ui/Button";
 import {
@@ -303,6 +303,18 @@ export default function PlantDetail({
   const photoFileRef = useRef<HTMLInputElement>(null);
   const [retrying, setRetrying] = useState(false);
 
+  const showLookupNotice = useRef(
+    (init.lookup_status === "success" || init.lookup_status === "not_found") &&
+      init.lookup_notice_seen_at === null
+  );
+
+  useEffect(() => {
+    if (showLookupNotice.current) {
+      markLookupNoticeSeen(init.id);
+      setPlant(p => ({ ...p, lookup_notice_seen_at: new Date().toISOString() }));
+    }
+  }, []);
+
   function blurCancel(e: React.FocusEvent) {
     if (containerRef.current?.contains(e.relatedTarget as Node)) return;
     cancel();
@@ -417,7 +429,10 @@ export default function PlantDetail({
     setRetrying(true);
     try {
       const res = await fetch(`/api/plants/${plant.id}/lookup`, { method: "POST" });
-      if (!res.ok) return;
+      if (!res.ok) {
+        setPlant(p => ({ ...p, lookup_status: "error" }));
+        return;
+      }
       const data = await res.json();
       setPlant(p => ({
         ...p,
@@ -429,6 +444,8 @@ export default function PlantDetail({
         eventual_height_cm: data.eventual_height_cm ?? p.eventual_height_cm,
         eventual_spread_cm: data.eventual_spread_cm ?? p.eventual_spread_cm,
       }));
+    } catch {
+      setPlant(p => ({ ...p, lookup_status: "error" }));
     } finally {
       setRetrying(false);
     }
@@ -449,12 +466,12 @@ export default function PlantDetail({
         </div>
       </div>
 
-      {plant.lookup_status === "success" && (
+      {showLookupNotice.current && plant.lookup_status === "success" && (
         <p className="font-display italic text-[14px] text-ink-soft">
           Some details were filled in automatically — worth a quick check for accuracy.
         </p>
       )}
-      {plant.lookup_status === "not_found" && (
+      {showLookupNotice.current && plant.lookup_status === "not_found" && (
         <p className="font-display italic text-[14px] text-ink-soft">
           We couldn&apos;t find a match for &lsquo;{plant.species}&rsquo; — check the spelling, or fill in details yourself below.
         </p>
