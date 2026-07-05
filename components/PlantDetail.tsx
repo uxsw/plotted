@@ -466,16 +466,6 @@ export default function PlantDetail({
         </div>
       </div>
 
-      {!noticeSeen && plant.lookup_status === "success" && (
-        <p className="font-display italic text-[14px] text-ink-soft">
-          Some details were filled in automatically — worth a quick check for accuracy.
-        </p>
-      )}
-      {!noticeSeen && plant.lookup_status === "not_found" && (
-        <p className="font-display italic text-[14px] text-ink-soft">
-          We couldn&apos;t find a match for &lsquo;{plant.species}&rsquo; — check the spelling, or fill in details yourself below.
-        </p>
-      )}
       {plant.lookup_status === "error" && (
         <div className="flex items-center gap-3">
           <p className="font-display italic text-[14px] text-[#C2603C]">
@@ -547,6 +537,14 @@ export default function PlantDetail({
         <div className="p-2 md:p-4 space-y-8">
           {photoError && (
             <p className="font-display italic text-[14px] text-[#C2603C]">{photoError}</p>
+          )}
+          {!noticeSeen && (plant.lookup_status === "success" || plant.lookup_status === "not_found") && (
+            <div className="flex items-center gap-3 bg-gold-tint border border-gold/40 rounded-[10px] px-4 py-3 text-[13px] font-sans text-ink">
+              {plant.lookup_status === "success"
+                ? "Some details were filled in automatically — worth a quick check for accuracy."
+                : <>We couldn&apos;t find a match for &lsquo;{plant.species}&rsquo; — check the spelling, or fill in details yourself below.</>
+              }
+            </div>
           )}
           <div className="mb-3">
             <PlantName
