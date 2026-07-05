@@ -92,7 +92,7 @@ export async function upsertPlant(
     if (clean.species) {
       try {
         const result = await performLookup(clean.species, clean.cultivar ?? null);
-        const { updates, lookup_status: ls } = applyLookupResult(result);
+        const { updates, lookup_status: ls } = applyLookupResult(result, { species: clean.species, cultivar: clean.cultivar ?? null });
         lookup_status = ls;
         await supabase.from("plants").update({ ...updates, lookup_status }).eq("id", row.id);
       } catch (err) {

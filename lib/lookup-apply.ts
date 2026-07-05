@@ -1,11 +1,15 @@
 import type { LookupResult } from "@/lib/plant-lookup";
 import type { SunNeeds } from "@/lib/types";
+import { sanitizePlantName, sanitizeSpecies } from "@/lib/sanitize";
 
 const VALID_SUN_NEEDS: SunNeeds[] = ["full sun", "full sun / partial shade", "partial shade", "full shade"];
 const validMonth = (v: number | null) => v !== null && Number.isInteger(v) && v >= 1 && v <= 12;
 const validCm = (v: number | null) => v !== null && Number.isInteger(v) && v > 0;
 
-export function applyLookupResult(result: LookupResult): {
+export function applyLookupResult(
+  result: LookupResult,
+  searched: { species: string; cultivar: string | null }
+): {
   updates: Record<string, unknown>;
   lookup_status: "success" | "not_found";
 } {
@@ -16,6 +20,20 @@ export function applyLookupResult(result: LookupResult): {
   if (validMonth(result.flowering_season_to)) updates.flowering_season_to = result.flowering_season_to;
   if (validCm(result.eventual_height_cm)) updates.eventual_height_cm = result.eventual_height_cm;
   if (validCm(result.eventual_spread_cm)) updates.eventual_spread_cm = result.eventual_spread_cm;
+
+  if (
+    result.corrected_species &&
+    result.corrected_species.toLowerCase() !== searched.species.toLowerCase()
+  ) {
+    updates.species = sanitizeSpecies(result.corrected_species);
+  }
+
+  if (
+    result.corrected_cultivar &&
+    result.corrected_cultivar.toLowerCase() !== (searched.cultivar ?? "").toLowerCase()
+  ) {
+    updates.cultivar = sanitizePlantName(result.corrected_cultivar);
+  }
 
   const allEmpty =
     result.common_names.length === 0 &&

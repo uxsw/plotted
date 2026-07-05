@@ -16,6 +16,8 @@ export type LookupResult = {
   flowering_season_to: number | null;
   eventual_height_cm: number | null;
   eventual_spread_cm: number | null;
+  corrected_species: string | null;
+  corrected_cultivar: string | null;
 };
 
 export function validMonth(v: unknown): number | null {
@@ -41,6 +43,8 @@ Given a plant's scientific species name and optional cultivar, return the follow
 Species: ${species}
 Cultivar: ${cultivar ?? ""} (may be empty — if so, base values on the species)
 
+Treat both the species and cultivar as search terms that may contain misspellings. Return corrected spellings where you are confident.
+
 Return ONLY a valid JSON object, no preamble, no markdown, no explanation.
 
 {
@@ -49,7 +53,9 @@ Return ONLY a valid JSON object, no preamble, no markdown, no explanation.
   "flowering_season_from": null,
   "flowering_season_to": null,
   "eventual_height_cm": null,
-  "eventual_spread_cm": null
+  "eventual_spread_cm": null,
+  "corrected_species": null,
+  "corrected_cultivar": null
 }
 
 Field notes:
@@ -58,7 +64,9 @@ Field notes:
 - flowering_season_from: month number 1–12 for typical UK flowering start. Null if unknown or doesn't flower.
 - flowering_season_to: month number 1–12 for typical UK flowering end. Null if unknown or doesn't flower.
 - eventual_height_cm: mature height in cm as a whole integer. Null if unknown.
-- eventual_spread_cm: mature spread in cm as a whole integer. Null if unknown.`,
+- eventual_spread_cm: mature spread in cm as a whole integer. Null if unknown.
+- corrected_species: if the species input appears to be a misspelling of a real species epithet you recognise for this genus (e.g. "alium" → "allium"), return the corrected lowercase epithet. Return null if already correct or you are not confident.
+- corrected_cultivar: if the cultivar input appears to be a misspelling of a real cultivar name, return the corrected name using conventional capitalisation (e.g. "Golden King", not "golden king"). Return null if already correct, empty, or you are not confident.`,
       },
     ],
   });
@@ -91,6 +99,16 @@ Field notes:
     return Math.round(v);
   }
 
+  const corrected_species =
+    typeof r.corrected_species === "string" && r.corrected_species.trim() !== ""
+      ? r.corrected_species.trim()
+      : null;
+
+  const corrected_cultivar =
+    typeof r.corrected_cultivar === "string" && r.corrected_cultivar.trim() !== ""
+      ? r.corrected_cultivar.trim()
+      : null;
+
   return {
     common_names,
     sun_needs,
@@ -98,6 +116,8 @@ Field notes:
     flowering_season_to: validMonth(r.flowering_season_to),
     eventual_height_cm: validCm(r.eventual_height_cm),
     eventual_spread_cm: validCm(r.eventual_spread_cm),
+    corrected_species,
+    corrected_cultivar,
   };
 }
 

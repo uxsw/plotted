@@ -38,9 +38,9 @@ export async function POST(
 
   try {
     const result = await performLookup(plant.species, plant.cultivar ?? null);
-    const { updates, lookup_status } = applyLookupResult(result);
+    const { updates, lookup_status } = applyLookupResult(result, { species: plant.species, cultivar: plant.cultivar ?? null });
     await supabase.from("plants").update({ ...updates, lookup_status }).eq("id", id);
-    return NextResponse.json({ ...result, lookup_status });
+    return NextResponse.json({ ...result, ...updates, lookup_status });
   } catch {
     await supabase.from("plants").update({ lookup_status: "error" }).eq("id", id);
     return NextResponse.json({ error: "Lookup failed" }, { status: 500 });

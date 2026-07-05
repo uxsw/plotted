@@ -35,6 +35,8 @@ const BASE_LOOKUP: LookupResult = {
   flowering_season_to: null,
   eventual_height_cm: null,
   eventual_spread_cm: null,
+  corrected_species: null,
+  corrected_cultivar: null,
 };
 
 // Builds a supabase client mock sufficient for updatePlantField:
