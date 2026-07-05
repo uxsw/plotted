@@ -301,6 +301,7 @@ export default function PlantDetail({
   const [photoUploading, setPhotoUploading] = useState(false);
   const [photoError, setPhotoError] = useState<string | null>(null);
   const photoFileRef = useRef<HTMLInputElement>(null);
+  const [retrying, setRetrying] = useState(false);
 
   function blurCancel(e: React.FocusEvent) {
     if (containerRef.current?.contains(e.relatedTarget as Node)) return;
@@ -412,6 +413,27 @@ export default function PlantDetail({
     return MONTHS[(f ?? t)! - 1];
   }
 
+  async function retryLookup() {
+    setRetrying(true);
+    try {
+      const res = await fetch(`/api/plants/${plant.id}/lookup`, { method: "POST" });
+      if (!res.ok) return;
+      const data = await res.json();
+      setPlant(p => ({
+        ...p,
+        lookup_status: data.lookup_status ?? p.lookup_status,
+        common_names: data.common_names ?? p.common_names,
+        sun_needs: data.sun_needs ?? p.sun_needs,
+        flowering_season_from: data.flowering_season_from ?? p.flowering_season_from,
+        flowering_season_to: data.flowering_season_to ?? p.flowering_season_to,
+        eventual_height_cm: data.eventual_height_cm ?? p.eventual_height_cm,
+        eventual_spread_cm: data.eventual_spread_cm ?? p.eventual_spread_cm,
+      }));
+    } finally {
+      setRetrying(false);
+    }
+  }
+
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
@@ -426,6 +448,33 @@ export default function PlantDetail({
           <DeletePlantButton id={plant.id} name={title} />
         </div>
       </div>
+
+      {plant.lookup_status === "success" && (
+        <p className="font-display italic text-[14px] text-ink-soft">
+          Some details were filled in automatically — worth a quick check for accuracy.
+        </p>
+      )}
+      {plant.lookup_status === "not_found" && (
+        <p className="font-display italic text-[14px] text-ink-soft">
+          We couldn&apos;t find a match for &lsquo;{plant.species}&rsquo; — check the spelling, or fill in details yourself below.
+        </p>
+      )}
+      {plant.lookup_status === "error" && (
+        <div className="flex items-center gap-3">
+          <p className="font-display italic text-[14px] text-[#C2603C]">
+            Something went wrong looking this up.
+          </p>
+          <Button
+            type="button"
+            variant="secondary"
+            className="text-xs px-3 py-1"
+            onClick={retryLookup}
+            disabled={retrying}
+          >
+            {retrying ? "Retrying…" : "Retry"}
+          </Button>
+        </div>
+      )}
 
       <div>
         {/* Photo zone — click to add/replace photo */}

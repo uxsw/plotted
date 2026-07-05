@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { performLookup } from "@/lib/plant-lookup";
+import { applyLookupResult } from "@/lib/lookup-apply";
 
 export async function POST(
   _request: NextRequest,
@@ -37,8 +38,11 @@ export async function POST(
 
   try {
     const result = await performLookup(plant.species, plant.cultivar ?? null);
-    return NextResponse.json(result);
+    const { updates, lookup_status } = applyLookupResult(result);
+    await supabase.from("plants").update({ ...updates, lookup_status }).eq("id", id);
+    return NextResponse.json({ ...result, lookup_status });
   } catch {
+    await supabase.from("plants").update({ lookup_status: "error" }).eq("id", id);
     return NextResponse.json({ error: "Lookup failed" }, { status: 500 });
   }
 }

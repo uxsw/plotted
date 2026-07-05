@@ -5,8 +5,9 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { sanitizePlantName, sanitizeGenus, sanitizeSpecies } from "@/lib/sanitize";
 import { validatePlantInput, hasFieldErrors, type FieldErrors } from "@/lib/validation";
-import type { PlantInsert, SunNeeds } from "@/lib/types";
+import type { PlantInsert } from "@/lib/types";
 import { performLookup } from "@/lib/plant-lookup";
+import { applyLookupResult } from "@/lib/lookup-apply";
 import Anthropic from "@anthropic-ai/sdk";
 
 export async function updatePlantField(
@@ -91,24 +92,8 @@ export async function upsertPlant(
     if (clean.species) {
       try {
         const result = await performLookup(clean.species, clean.cultivar ?? null);
-        const VALID_SUN_NEEDS: SunNeeds[] = ["full sun", "full sun / partial shade", "partial shade", "full shade"];
-        const validMonth = (v: number | null) => v !== null && Number.isInteger(v) && v >= 1 && v <= 12;
-        const validCm = (v: number | null) => v !== null && Number.isInteger(v) && v > 0;
-        const updates: Record<string, unknown> = {};
-        if (result.common_names.length > 0) updates.common_names = result.common_names;
-        if (result.sun_needs && (VALID_SUN_NEEDS as string[]).includes(result.sun_needs)) updates.sun_needs = result.sun_needs;
-        if (validMonth(result.flowering_season_from)) updates.flowering_season_from = result.flowering_season_from;
-        if (validMonth(result.flowering_season_to)) updates.flowering_season_to = result.flowering_season_to;
-        if (validCm(result.eventual_height_cm)) updates.eventual_height_cm = result.eventual_height_cm;
-        if (validCm(result.eventual_spread_cm)) updates.eventual_spread_cm = result.eventual_spread_cm;
-        const allEmpty =
-          result.common_names.length === 0 &&
-          result.sun_needs == null &&
-          result.flowering_season_from == null &&
-          result.flowering_season_to == null &&
-          result.eventual_height_cm == null &&
-          result.eventual_spread_cm == null;
-        lookup_status = allEmpty ? "not_found" : "success";
+        const { updates, lookup_status: ls } = applyLookupResult(result);
+        lookup_status = ls;
         await supabase.from("plants").update({ ...updates, lookup_status }).eq("id", row.id);
       } catch (err) {
         const isBillingError =
