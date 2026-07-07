@@ -36,6 +36,14 @@ function CheckIcon() {
   );
 }
 
+function XSmallIcon() {
+  return (
+    <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+      <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
+    </svg>
+  );
+}
+
 function GenerationLoading() {
   return (
     <div className="flex flex-col items-center justify-center text-center gap-6 min-h-[70vh]">
@@ -131,6 +139,10 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
   }
 
   if (step === "select") {
+    const selectedPlants = selectedIds
+      .map((id) => plants.find((p) => p.id === id))
+      .filter(Boolean) as PickerPlant[];
+
     return (
       <div className="flex flex-col gap-4">
         <div>
@@ -141,7 +153,10 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
           </p>
         </div>
 
-        <div className="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 snap-x snap-mandatory">
+        <div
+          className="flex gap-3 overflow-x-auto pb-3 -mx-4 snap-x snap-mandatory"
+          style={{ paddingLeft: 24, paddingRight: 24 }}
+        >
           {plants.map((plant) => {
             const selected = selectedIds.includes(plant.id);
             const disabled = !selected && selectedIds.length >= MAX_PLANTS;
@@ -153,33 +168,74 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
                 disabled={disabled}
                 aria-pressed={selected}
                 className={[
-                  "relative shrink-0 w-24 h-24 rounded-xl overflow-hidden snap-start border-2 transition-all duration-150",
+                  "relative shrink-0 rounded-xl overflow-hidden snap-center border-2 transition-all duration-150",
                   selected ? "border-moss ring-2 ring-moss ring-offset-2 ring-offset-paper" : "border-sand-line",
                   disabled ? "opacity-40 cursor-not-allowed" : "",
                 ].join(" ")}
+                style={{ width: "min(60vw, 280px)", height: "min(60vw, 280px)" }}
               >
                 {plant.photo_url ? (
-                  <Image src={plant.photo_url} alt="" fill sizes="96px" className="object-cover" />
+                  <Image src={plant.photo_url} alt="" fill sizes="min(60vw, 280px)" className="object-cover" />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-moss-tint text-moss-deep/60">
                     <SproutIcon />
                   </div>
                 )}
                 {selected && (
-                  <div className="absolute inset-0 bg-moss/20 flex items-start justify-end p-1.5">
-                    <span className="w-5 h-5 rounded-full bg-moss text-white flex items-center justify-center">
+                  <div className="absolute inset-0 bg-moss/20 flex items-start justify-end p-2">
+                    <span className="w-6 h-6 rounded-full bg-moss text-white flex items-center justify-center">
                       <CheckIcon />
                     </span>
                   </div>
                 )}
-                <div className="absolute bottom-0 left-0 right-0 bg-black/50 px-1.5 py-1">
-                  <span className="text-[11px] text-white font-sans truncate block">
+                <div className="absolute bottom-0 left-0 right-0 bg-black/50 px-2 py-1.5">
+                  <span className="text-[12px] text-white font-sans block">
                     {plantDisplayTitle(plant)}
                   </span>
                 </div>
               </button>
             );
           })}
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <span className="font-sans text-xs font-semibold text-ink-soft">
+            Selected ({selectedIds.length}/5)
+          </span>
+          <div className="flex gap-[10px] overflow-x-auto pb-1">
+            {Array.from({ length: MAX_PLANTS }).map((_, i) => {
+              const plant = selectedPlants[i];
+              if (plant) {
+                return (
+                  <div key={plant.id} className="relative shrink-0 w-[84px] h-[84px]">
+                    <div className="absolute inset-0 rounded-xl overflow-hidden">
+                      {plant.photo_url ? (
+                        <Image src={plant.photo_url} alt={plantDisplayTitle(plant)} fill sizes="84px" className="object-cover" />
+                      ) : (
+                        <div className="w-full h-full flex items-center justify-center bg-moss-tint text-moss-deep/60">
+                          <SproutIcon />
+                        </div>
+                      )}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => toggleSelect(plant.id)}
+                      aria-label={`Remove ${plantDisplayTitle(plant)}`}
+                      className="absolute -top-[6px] -right-[6px] w-[22px] h-[22px] rounded-full bg-paper border border-sand-line flex items-center justify-center text-ink-soft hover:text-ink hover:border-ink-soft transition-colors"
+                    >
+                      <XSmallIcon />
+                    </button>
+                  </div>
+                );
+              }
+              return (
+                <div
+                  key={i}
+                  className="shrink-0 w-[84px] h-[84px] rounded-xl border-[1.5px] border-dashed border-sand-line"
+                />
+              );
+            })}
+          </div>
         </div>
 
         <div className="sticky bottom-4 z-10 pt-2">
