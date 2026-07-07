@@ -33,6 +33,7 @@ export async function updateSession(request: NextRequest) {
   const isAuthPage = pathname.startsWith("/auth");
   const isDesignCheck = pathname.startsWith("/design-check");
   const isMarketing = pathname === "/" || pathname === "/privacy";
+  const isApi = pathname.startsWith("/api");
   const isStatic =
     pathname.startsWith("/_next") ||
     pathname.startsWith("/icons") ||
@@ -41,7 +42,7 @@ export async function updateSession(request: NextRequest) {
     pathname === "/favicon.ico";
 
   const isProtected =
-    !isAuthPage && !isDesignCheck && !isMarketing && !isStatic;
+    !isAuthPage && !isDesignCheck && !isMarketing && !isApi && !isStatic;
 
   if (isProtected && !user) {
     const url = request.nextUrl.clone();
