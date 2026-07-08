@@ -28,17 +28,19 @@ export type PlantInsert = Omit<Plant, "id" | "user_id" | "created_at" | "updated
 
 export type SchemeSpace = "small" | "medium" | "large";
 export type SchemeTier = "back" | "mid" | "ground";
+export type SchemeStatus = "generating" | "complete" | "failed";
 
 export interface Scheme {
   id: string;
   user_id: string;
-  name: string;
+  status: SchemeStatus;
+  name: string | null;
   summary: string | null;
   space: SchemeSpace;
   successional: boolean;
   edible: boolean;
-  narrative_intro: string;
-  narrative_body: string;
+  narrative_intro: string | null;
+  narrative_body: string | null;
   featured_plant_latin: string | null;
   ai_notice_seen_at: string | null;
   created_at: string;

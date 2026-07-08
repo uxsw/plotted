@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import SchemeResults from "@/components/SchemeResults";
 
@@ -11,7 +11,7 @@ export async function generateMetadata(
   const { data: scheme } = await supabase.from("schemes").select("name").eq("id", id).single();
 
   return {
-    title: scheme ? `${scheme.name} | Plotted` : "Planting Scheme | Plotted",
+    title: scheme?.name ? `${scheme.name} | Plotted` : "Planting Scheme | Plotted",
   };
 }
 
@@ -21,6 +21,7 @@ export default async function SchemeResultsPage({ params }: { params: Promise<{ 
 
   const { data: scheme } = await supabase.from("schemes").select("*").eq("id", id).single();
   if (!scheme) notFound();
+  if (scheme.status !== "complete") redirect("/schemes");
 
   const [{ data: sourcePlants }, { data: suggestions }] = await Promise.all([
     supabase

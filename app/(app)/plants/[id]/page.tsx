@@ -11,6 +11,7 @@ export async function generateMetadata(
     .from("plants")
     .select("genus, species, cultivar")
     .eq("id", id)
+    .eq("status", "active")
     .single();
 
   const displayName = [plant?.genus, plant?.species, plant?.cultivar].filter(Boolean).join(" ") || null;
@@ -26,7 +27,7 @@ export default async function PlantDetailPage({ params }: { params: Promise<{ id
   const supabase = await createClient();
 
   const [{ data: plant }] = await Promise.all([
-    supabase.from("plants").select("*").eq("id", id).single(),
+    supabase.from("plants").select("*").eq("id", id).eq("status", "active").single(),
     supabase.auth.getUser(),
   ]);
 
