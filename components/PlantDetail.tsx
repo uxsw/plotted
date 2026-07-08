@@ -11,6 +11,7 @@ import type { Plant, PlantInsert, SunNeeds } from "@/lib/types";
 import { updatePlantField, markLookupNoticeSeen } from "@/app/actions/plants";
 import DeletePlantButton from "@/components/DeletePlantButton";
 import { Button } from "@/components/ui/Button";
+import { AiNoticePanel } from "@/components/ui/AiNoticePanel";
 import {
   ACCEPTED_INPUT_TYPES,
   ACCEPTED_INPUT_TYPES_LABEL,
@@ -539,12 +540,12 @@ export default function PlantDetail({
             <p className="font-display italic text-[14px] text-[#C2603C]">{photoError}</p>
           )}
           {!noticeSeen && (plant.lookup_status === "success" || plant.lookup_status === "not_found") && (
-            <div className="flex items-center gap-3 bg-gold-tint border border-gold/40 rounded-[10px] px-4 py-3 text-[13px] font-sans text-ink">
+            <AiNoticePanel>
               {plant.lookup_status === "success"
                 ? "Some details were filled in automatically — worth a quick check for accuracy."
                 : <>We couldn&apos;t find a match for &lsquo;{plant.species}&rsquo; — check the spelling, or fill in details yourself below.</>
               }
-            </div>
+            </AiNoticePanel>
           )}
           <div className="mb-3">
             <PlantName

@@ -40,6 +40,7 @@ export interface Scheme {
   narrative_intro: string;
   narrative_body: string;
   featured_plant_latin: string | null;
+  ai_notice_seen_at: string | null;
   created_at: string;
   updated_at: string;
 }
