@@ -13,11 +13,12 @@ export default async function SchemesPage() {
     .from("schemes")
     .select(
       `
-      id, name, summary, created_at,
+      id, status, name, summary, created_at,
       scheme_source_plants ( plant_id, plants ( photo_url ) ),
       scheme_suggestions ( saved )
     `
     )
+    .in("status", ["complete", "failed"])
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -30,6 +31,7 @@ export default async function SchemesPage() {
 
   const schemes: SchemeSummary[] = (data ?? []).map((scheme) => ({
     id: scheme.id,
+    status: scheme.status as "complete" | "failed",
     name: scheme.name,
     summary: scheme.summary,
     created_at: scheme.created_at,

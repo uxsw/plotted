@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,7 +10,8 @@ import { PlaceholderSchemeCard } from "@/components/ui/PlaceholderSchemeCard";
 
 export type SchemeSummary = {
   id: string;
-  name: string;
+  status: "complete" | "failed";
+  name: string | null;
   summary: string | null;
   created_at: string;
   suggestion_count: number;
@@ -57,7 +58,7 @@ function SchemeCard({
   onRenamed,
   onDeleted,
 }: {
-  scheme: SchemeSummary;
+  scheme: SchemeSummary & { name: string };
   onRenamed: (id: string, name: string) => void;
   onDeleted: (id: string) => void;
 }) {
@@ -221,9 +222,115 @@ function SchemeCard({
   );
 }
 
+function FailedSchemeCard({
+  scheme,
+  onDeleted,
+}: {
+  scheme: SchemeSummary;
+  onDeleted: (id: string) => void;
+}) {
+  const router = useRouter();
+  const [retrying, setRetrying] = useState(false);
+  const [retryError, setRetryError] = useState<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  async function doRetry() {
+    setRetrying(true);
+    setRetryError(null);
+    try {
+      const res = await fetch(`/api/schemes/${scheme.id}/retry`, { method: "POST" });
+      if (!res.ok) throw new Error();
+      router.refresh();
+    } catch {
+      setRetryError("Couldn't retry — please try again.");
+      setRetrying(false);
+    }
+  }
+
+  async function doDelete() {
+    setDeleteOpen(false);
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/schemes/${scheme.id}`, { method: "DELETE" });
+      if (!res.ok) throw new Error();
+      onDeleted(scheme.id);
+    } catch {
+      setDeleting(false);
+    }
+  }
+
+  return (
+    <div
+      className={`relative flex flex-col rounded-lg overflow-hidden border border-sand-line bg-paper transition-opacity duration-150 ${deleting ? "opacity-50 pointer-events-none" : ""}`}
+    >
+      <div className="relative h-[190px] w-full overflow-hidden bg-paper-deep">
+        {scheme.source_plant_photos[0] && (
+          <Image
+            src={scheme.source_plant_photos[0]}
+            alt=""
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover scale-110 blur-md"
+          />
+        )}
+        <div className="absolute inset-0 flex items-center justify-center">
+          {scheme.source_plant_photos.length > 0 ? (
+            <ThumbnailStack photos={scheme.source_plant_photos} />
+          ) : (
+            <div className="w-16 h-16 text-sand-line">
+              <SchemeIllustration />
+            </div>
+          )}
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3 p-4 flex-1">
+        <p className="font-sans text-sm text-ink-soft leading-snug">
+          {retrying ? "Trying again…" : "This scheme couldn't be generated."}
+        </p>
+        {retryError && <p className="font-sans text-xs text-clay">{retryError}</p>}
+        {!retrying && (
+          <button
+            type="button"
+            onClick={doRetry}
+            className="self-start inline-flex items-center justify-center rounded px-3 py-1.5 text-xs font-medium font-sans bg-moss text-white hover:bg-moss-deep transition-colors"
+          >
+            Try again
+          </button>
+        )}
+        <p className="font-sans text-xs text-ink-soft">{formatDate(scheme.created_at)}</p>
+      </div>
+
+      <button
+        type="button"
+        aria-label="Dismiss this failed scheme"
+        onClick={() => setDeleteOpen(true)}
+        className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white text-base leading-none"
+      >
+        ×
+      </button>
+
+      <ConfirmDialog
+        isOpen={deleteOpen}
+        onClose={() => setDeleteOpen(false)}
+        onConfirm={doDelete}
+        title="Dismiss this failed scheme?"
+        message="This failed attempt will be removed, including the original plant selection. This can't be undone."
+        confirmLabel="Dismiss"
+        variant="danger"
+      />
+    </div>
+  );
+}
+
 export default function SchemeList({ schemes: initialSchemes }: { schemes: SchemeSummary[] }) {
   const router = useRouter();
   const [schemes, setSchemes] = useState(initialSchemes);
+
+  useEffect(() => {
+    setSchemes(initialSchemes);
+  }, [initialSchemes]);
 
   function handleRenamed(id: string, name: string) {
     setSchemes((cur) => cur.map((s) => (s.id === id ? { ...s, name } : s)));
@@ -261,9 +368,18 @@ export default function SchemeList({ schemes: initialSchemes }: { schemes: Schem
 
   return (
     <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
-      {schemes.map((scheme) => (
-        <SchemeCard key={scheme.id} scheme={scheme} onRenamed={handleRenamed} onDeleted={handleDeleted} />
-      ))}
+      {schemes.map((scheme) =>
+        scheme.status === "failed" ? (
+          <FailedSchemeCard key={scheme.id} scheme={scheme} onDeleted={handleDeleted} />
+        ) : (
+          <SchemeCard
+            key={scheme.id}
+            scheme={scheme as SchemeSummary & { name: string }}
+            onRenamed={handleRenamed}
+            onDeleted={handleDeleted}
+          />
+        )
+      )}
     </div>
   );
 }
