@@ -43,9 +43,8 @@ export function toSourcePlantInputs(plants: PlantRow[]): SourcePlantInput[] {
 
 type RunResult = { ok: true } | { ok: false; error: string; httpStatus: number };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function runAndPersistGeneration(
-  supabase: SupabaseClient<any>,
+  supabase: SupabaseClient,
   schemeId: string,
   sourcePlants: SourcePlantInput[],
   prefs: SchemePreferences

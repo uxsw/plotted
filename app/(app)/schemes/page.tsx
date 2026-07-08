@@ -55,7 +55,7 @@ export default async function SchemesPage() {
           </Link>
         )}
       </div>
-      <SchemeList schemes={schemes} />
+      <SchemeList key={schemes.map((s) => `${s.id}:${s.status}`).join(",")} schemes={schemes} />
     </div>
   );
 }

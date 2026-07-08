@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -327,10 +327,6 @@ function FailedSchemeCard({
 export default function SchemeList({ schemes: initialSchemes }: { schemes: SchemeSummary[] }) {
   const router = useRouter();
   const [schemes, setSchemes] = useState(initialSchemes);
-
-  useEffect(() => {
-    setSchemes(initialSchemes);
-  }, [initialSchemes]);
 
   function handleRenamed(id: string, name: string) {
     setSchemes((cur) => cur.map((s) => (s.id === id ? { ...s, name } : s)));
