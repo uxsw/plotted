@@ -85,7 +85,6 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
   const [successional, setSuccessional] = useState(true);
   const [edible, setEdible] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   function toggleSelect(id: string) {
     setSelectedIds((prev) => {
@@ -98,7 +97,6 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
   async function handleGenerate() {
     if (!space) return;
     setSubmitting(true);
-    setError(null);
     try {
       const res = await fetch("/api/schemes/generate", {
         method: "POST",
@@ -108,9 +106,8 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Generation failed");
       router.push(`/schemes/${json.scheme_id}`);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
-      setSubmitting(false);
+    } catch {
+      router.push("/schemes");
     }
   }
 
@@ -305,8 +302,6 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
           label="Include edible and kitchen garden plants"
         />
       </div>
-
-      {error && <p className="text-sm text-clay">{error}</p>}
 
       <div className="sticky bottom-4 z-10">
         <Button
