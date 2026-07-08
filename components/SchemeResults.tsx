@@ -214,6 +214,7 @@ export default function SchemeResults({
     ? suggestions.find((s) => s.latin_name === scheme.featured_plant_latin)
     : undefined;
 
+  // safe: app/(app)/schemes/[id]/page.tsx redirects non-complete schemes before this renders
   const narrativeBodyParagraphs = scheme.narrative_body!.split(/\n{2,}/).filter(Boolean);
 
   const tiers = TIER_ORDER
@@ -263,6 +264,7 @@ export default function SchemeResults({
             className="absolute inset-0 -z-10"
             style={{ background: "linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.4) 100%)" }}
           />
+          {/* safe: app/(app)/schemes/[id]/page.tsx redirects non-complete schemes before this renders */}
           <EditableName schemeId={scheme.id} initialName={scheme.name!} />
           {scheme.summary && (
             <p className="font-sans text-[18px] leading-[1.2] text-balance text-white/80">{scheme.summary}</p>

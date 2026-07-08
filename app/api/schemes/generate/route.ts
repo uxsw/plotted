@@ -45,7 +45,8 @@ export async function POST(request: NextRequest) {
     .from("plants")
     .select("id, genus, species, cultivar, common_names, sun_needs, flowering_season_from, flowering_season_to, eventual_height_cm")
     .in("id", plantIds)
-    .eq("user_id", user.id);
+    .eq("user_id", user.id)
+    .eq("status", "active");
 
   if (plantsError) {
     return NextResponse.json({ error: plantsError.message }, { status: 500 });

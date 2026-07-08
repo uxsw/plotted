@@ -19,6 +19,7 @@ export async function POST(
     .from("plants")
     .select("species, cultivar")
     .eq("id", id)
+    .eq("status", "active")
     .single();
 
   if (!plant) {

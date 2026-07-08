@@ -35,7 +35,7 @@ export default function DeletePlantButton({ id, name }: { id: string; name: stri
     setError(null);
     setOpen(false);
     const supabase = createClient();
-    const { error } = await supabase.from("plants").delete().eq("id", id);
+    const { error } = await supabase.from("plants").update({ status: "removed" }).eq("id", id);
     if (error) {
       setError("Could not delete plant. Please try again.");
       return;
