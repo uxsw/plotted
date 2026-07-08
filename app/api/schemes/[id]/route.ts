@@ -73,14 +73,20 @@ export async function PATCH(
     return NextResponse.json({ error: "name must be between 1 and 200 characters" }, { status: 400 });
   }
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("schemes")
     .update({ name: trimmed })
     .eq("id", id)
-    .eq("user_id", user.id);
+    .eq("user_id", user.id)
+    .eq("status", "complete")
+    .select("id");
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
+  }
+
+  if (!updated || updated.length === 0) {
+    return NextResponse.json({ error: "Scheme not found or cannot be renamed" }, { status: 409 });
   }
 
   return NextResponse.json({ ok: true });
