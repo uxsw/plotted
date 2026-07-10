@@ -6,7 +6,9 @@ import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { MONTH_ABBR } from "@/components/ui/FloweringSeasonBadge";
 import { AiNoticePanel } from "@/components/ui/AiNoticePanel";
+import { FeatureNoticePanel } from "@/components/ui/FeatureNoticePanel";
 import { markSchemeAiNoticeSeen } from "@/app/actions/schemes";
+import { markShoppingListNoticeSeen } from "@/app/actions/shopping-list";
 import type { Scheme, SchemeSuggestion, SchemeTier } from "@/lib/types";
 
 const TIER_ORDER: SchemeTier[] = ["back", "mid", "ground"];
@@ -32,11 +34,20 @@ function formatMonths(months: number[] | null): string | null {
   return months.map((m) => MONTH_ABBR[m - 1]).join(", ");
 }
 
-function XIcon() {
+function CartIcon() {
   return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-      <line x1="1.5" y1="1.5" x2="10.5" y2="10.5" />
-      <line x1="10.5" y1="1.5" x2="1.5" y2="10.5" />
+    <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M1 1.5h1.8l1.4 6.5h6.1l1.4-4.8H4.2" />
+      <circle cx="5.8" cy="11.8" r="0.9" fill="currentColor" stroke="none" />
+      <circle cx="9.8" cy="11.8" r="0.9" fill="currentColor" stroke="none" />
+    </svg>
+  );
+}
+
+function CheckIcon() {
+  return (
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d="M2 6.5l2.5 2.5 5.5-5.5" />
     </svg>
   );
 }
@@ -119,7 +130,15 @@ function EditableName({ schemeId, initialName }: { schemeId: string; initialName
   );
 }
 
-function SuggestionCard({ suggestion, onDismiss }: { suggestion: SchemeSuggestion; onDismiss: (id: string) => void }) {
+function SuggestionCard({
+  suggestion,
+  added,
+  onAdd,
+}: {
+  suggestion: SchemeSuggestion;
+  added: boolean;
+  onAdd: (suggestion: SchemeSuggestion) => void;
+}) {
   const badges = BADGE_CONFIG.filter((b) => suggestion[b.key]);
   const monthsLabel = formatMonths(suggestion.flowering_months);
 
@@ -147,11 +166,11 @@ function SuggestionCard({ suggestion, onDismiss }: { suggestion: SchemeSuggestio
         )}
         <button
           type="button"
-          onClick={() => onDismiss(suggestion.id)}
-          aria-label={`Dismiss ${suggestion.common_name}`}
+          onClick={() => !added && onAdd(suggestion)}
+          aria-label={added ? `${suggestion.common_name} added to shopping list` : `Add ${suggestion.common_name} to shopping list`}
           className="absolute top-1.5 right-1.5 flex items-center justify-center w-6 h-6 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
         >
-          <XIcon />
+          {added ? <CheckIcon /> : <CartIcon />}
         </button>
       </div>
       <div className="flex flex-col gap-1 p-3">
@@ -187,35 +206,56 @@ export default function SchemeResults({
   scheme,
   suggestions: initialSuggestions,
   heroImage,
+  shoppingListNoticeSeen,
 }: {
   scheme: Scheme;
   suggestions: SchemeSuggestion[];
   heroImage: string | null;
+  shoppingListNoticeSeen: boolean;
 }) {
-  const [suggestions, setSuggestions] = useState(initialSuggestions);
-  const [dismissError, setDismissError] = useState<string | null>(null);
-  const noticeSeen = scheme.ai_notice_seen_at !== null;
+  const [suggestions] = useState(initialSuggestions);
+  const [addedIds, setAddedIds] = useState<Set<string>>(new Set());
+  const [addError, setAddError] = useState<string | null>(null);
+  const aiNoticeSeen = scheme.ai_notice_seen_at !== null;
 
   useEffect(() => {
-    if (!noticeSeen) {
+    if (!aiNoticeSeen) {
       markSchemeAiNoticeSeen(scheme.id);
     }
-  }, [scheme.id, noticeSeen]);
+  }, [scheme.id, aiNoticeSeen]);
 
-  async function handleDismiss(id: string) {
-    const previous = suggestions;
-    setDismissError(null);
-    setSuggestions((cur) => cur.filter((s) => s.id !== id));
+  useEffect(() => {
+    if (!shoppingListNoticeSeen) {
+      markShoppingListNoticeSeen();
+    }
+  }, [shoppingListNoticeSeen]);
+
+  async function handleAdd(suggestion: SchemeSuggestion) {
+    setAddedIds((prev) => new Set(prev).add(suggestion.id));
+    setAddError(null);
     try {
-      const res = await fetch(`/api/schemes/${scheme.id}/suggestions/${id}`, {
-        method: "PATCH",
+      const res = await fetch("/api/shopping-list", {
+        method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ saved: false }),
+        body: JSON.stringify({
+          schemeId: scheme.id,
+          species: suggestion.latin_name,
+          commonNames: [suggestion.common_name],
+          wikimediaImageUrl: suggestion.wikimedia_image_url,
+          wikimediaAttribution: suggestion.wikimedia_attribution,
+        }),
       });
-      if (!res.ok) throw new Error();
-    } catch {
-      setSuggestions(previous);
-      setDismissError("Couldn't dismiss that suggestion — please try again.");
+      if (!res.ok) {
+        const data: { error?: string } = await res.json().catch(() => ({}));
+        throw new Error(data.error ?? "Couldn't add to shopping list — please try again.");
+      }
+    } catch (err) {
+      setAddedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(suggestion.id);
+        return next;
+      });
+      setAddError(err instanceof Error ? err.message : "Couldn't add to shopping list — please try again.");
     }
   }
 
@@ -282,10 +322,15 @@ export default function SchemeResults({
       </div>
 
       <div className="flex flex-col gap-6 mt-6">
-      {!noticeSeen && (
+      {!aiNoticeSeen && (
         <AiNoticePanel>
           This scheme was generated by AI — worth a check on plant pairings and timing before relying on it.
         </AiNoticePanel>
+      )}
+      {!shoppingListNoticeSeen && (
+        <FeatureNoticePanel>
+          Tap the cart icon to add plants to your shopping list.
+        </FeatureNoticePanel>
       )}
       <div className="flex flex-col gap-4 max-w-[680px] mx-auto">
         <p className="font-display text-[17px] text-ink leading-relaxed">{scheme.narrative_intro}</p>
@@ -303,7 +348,7 @@ export default function SchemeResults({
         </figure>
       )}
 
-      {dismissError && <p className="text-sm text-clay">{dismissError}</p>}
+      {addError && <p className="text-sm text-clay">{addError}</p>}
 
       <div className="flex flex-col gap-6">
         {tiers.map(({ tier, items }) => (
@@ -312,7 +357,7 @@ export default function SchemeResults({
             <div className="grid grid-cols-2 gap-3">
               <AnimatePresence initial={false}>
                 {items.map((s) => (
-                  <SuggestionCard key={s.id} suggestion={s} onDismiss={handleDismiss} />
+                  <SuggestionCard key={s.id} suggestion={s} added={addedIds.has(s.id)} onAdd={handleAdd} />
                 ))}
               </AnimatePresence>
             </div>

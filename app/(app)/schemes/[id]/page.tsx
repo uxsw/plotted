@@ -23,7 +23,7 @@ export default async function SchemeResultsPage({ params }: { params: Promise<{ 
   if (!scheme) notFound();
   if (scheme.status !== "complete") redirect("/schemes");
 
-  const [{ data: sourcePlants }, { data: suggestions }] = await Promise.all([
+  const [{ data: sourcePlants }, { data: suggestions }, { data: userFlags }] = await Promise.all([
     supabase
       .from("scheme_source_plants")
       .select("sort_order, plants ( photo_url )")
@@ -35,6 +35,10 @@ export default async function SchemeResultsPage({ params }: { params: Promise<{ 
       .eq("scheme_id", id)
       .eq("saved", true)
       .order("sort_order"),
+    supabase
+      .from("user_flags")
+      .select("shopping_list_notice_seen_at")
+      .maybeSingle(),
   ]);
 
   // Hero image: the first source plant (by sort_order) that has its own uploaded photo.
@@ -51,6 +55,7 @@ export default async function SchemeResultsPage({ params }: { params: Promise<{ 
       scheme={scheme}
       suggestions={suggestions ?? []}
       heroImage={heroImage}
+      shoppingListNoticeSeen={userFlags?.shopping_list_notice_seen_at != null}
     />
   );
 }

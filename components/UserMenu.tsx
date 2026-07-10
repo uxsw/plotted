@@ -1,6 +1,7 @@
 "use client";
 
 import * as Popover from "@radix-ui/react-popover";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
@@ -54,6 +55,14 @@ export default function UserMenu({ email }: { email: string }) {
           className="z-50 min-w-[200px] rounded-lg border border-sand-line bg-paper p-3 shadow-md flex flex-col gap-3 focus:outline-none"
         >
           <p className="text-xs font-sans text-ink-soft px-1 truncate">{email}</p>
+          <Popover.Close asChild>
+            <Link
+              href="/shopping-list"
+              className="inline-flex items-center justify-start gap-2 w-full rounded px-4 py-2 text-sm font-medium font-sans transition-colors duration-150 text-ink-soft bg-transparent hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+            >
+              Shopping list
+            </Link>
+          </Popover.Close>
           <Button variant="ghost" className="w-full justify-start" onClick={handleLogout}>
             Log out
           </Button>
