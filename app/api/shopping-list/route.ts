@@ -40,10 +40,10 @@ export async function POST(request: NextRequest) {
   }
 
   // Snapshot the image into storage. If wikimediaImageUrl is absent (suggestion
-  // had no Wikimedia image) we store an empty path and the shopping list page
-  // renders a placeholder. If the fetch/upload fails we surface an error rather
-  // than inserting a row with no thumbnail.
-  let thumbnailStoragePath = "";
+  // had no Wikimedia image) we store NULL and the shopping list page renders a
+  // placeholder. If the fetch/upload fails we surface an error rather than
+  // inserting a row with no thumbnail.
+  let thumbnailStoragePath: string | null = null;
 
   if (wikimediaImageUrl) {
     let imageBuffer: ArrayBuffer;

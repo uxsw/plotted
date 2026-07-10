@@ -329,8 +329,7 @@ export default function SchemeResults({
       )}
       {!shoppingListNoticeSeen && (
         <FeatureNoticePanel>
-          {/* COPY FLAGGED FOR REVIEW */}
-          Tap the cart icon on any plant to add it to your shopping list — find it waiting when you&apos;re ready to buy.
+          Tap the cart icon to add plants to your shopping list.
         </FeatureNoticePanel>
       )}
       <div className="flex flex-col gap-4 max-w-[680px] mx-auto">
