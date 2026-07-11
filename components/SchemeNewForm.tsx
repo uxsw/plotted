@@ -105,7 +105,7 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Generation failed");
-      router.push(`/schemes/${json.scheme_id}`);
+      router.push(`/schemes/${json.scheme_id}/generating`);
     } catch {
       router.push("/schemes");
     }
