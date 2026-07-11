@@ -44,38 +44,6 @@ function XSmallIcon() {
   );
 }
 
-function GenerationLoading() {
-  return (
-    <div className="flex flex-col items-center justify-center text-center gap-6 min-h-[70vh]">
-      <svg width="120" height="150" viewBox="0 0 140 180" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <rect x="38" y="108" width="64" height="10" rx="5" fill="#C4742A" />
-        <path d="M44 118 L96 118 L90 168 L50 168 Z" fill="#C4522A" />
-        <ellipse cx="70" cy="118" rx="28" ry="6" fill="#3A2E1E" opacity="0.55" />
-        <g className="plant-sway">
-          <rect x="67" y="54" width="5" height="58" rx="2.5" fill="#2E5239" />
-          <ellipse cx="44" cy="88" rx="22" ry="10" fill="#4A7051" stroke="#2E5239" strokeOpacity="0.4" transform="rotate(-38 44 88)" className="leaf-droop" />
-          <g className="plant-sway-slow">
-            <ellipse cx="98" cy="72" rx="24" ry="10" fill="#4A7051" stroke="#2E5239" strokeOpacity="0.4" transform="rotate(32 98 72)" />
-          </g>
-          <ellipse cx="62" cy="52" rx="14" ry="7" fill="#4A7051" opacity="0.85" transform="rotate(-18 62 52)" className="leaf-droop" />
-        </g>
-      </svg>
-
-      <div className="flex flex-col items-center gap-2">
-        <h2 className="font-display font-medium text-xl text-ink">Growing your scheme…</h2>
-        <p className="font-sans text-sm text-ink-soft max-w-xs">
-          We&apos;re pairing your plants with companions suited to your space. This usually takes 5–10 seconds.
-        </p>
-      </div>
-
-      <span className="flex gap-1.5" aria-hidden="true">
-        <span className="mkt-dot-1 w-2 h-2 rounded-full bg-moss inline-block" />
-        <span className="mkt-dot-2 w-2 h-2 rounded-full bg-moss inline-block" />
-        <span className="mkt-dot-3 w-2 h-2 rounded-full bg-moss inline-block" />
-      </span>
-    </div>
-  );
-}
 
 export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
   const router = useRouter();
@@ -105,14 +73,10 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error ?? "Generation failed");
-      router.push(`/schemes/${json.scheme_id}`);
+      router.push(`/schemes/${json.scheme_id}/generating`);
     } catch {
       router.push("/schemes");
     }
-  }
-
-  if (submitting) {
-    return <GenerationLoading />;
   }
 
   if (plants.length === 0) {
@@ -307,10 +271,19 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
         <Button
           variant="primary"
           className="w-full justify-center"
-          disabled={!space}
+          disabled={!space || submitting}
           onClick={handleGenerate}
         >
-          Generate scheme
+          {submitting ? (
+            <span className="flex items-center gap-2">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="animate-spin" aria-hidden="true">
+                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+              </svg>
+              Generating…
+            </span>
+          ) : (
+            "Generate scheme"
+          )}
         </Button>
       </div>
     </div>

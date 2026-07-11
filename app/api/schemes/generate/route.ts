@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import type { SchemeSpace } from "@/lib/types";
 import { enrichPlants, toSourcePlantInputs, runAndPersistGeneration } from "@/app/api/schemes/_lib";
@@ -79,16 +79,14 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: sourcePlantsError.message }, { status: 500 });
   }
 
-  const enrichmentStart = Date.now();
-  const enriched = await enrichPlants(plantRows);
-  console.log(`[schemes/generate] enrichment: ${Date.now() - enrichmentStart}ms`);
+  after(
+    enrichPlants(plantRows).then((enriched) => {
+      const sourcePlants = toSourcePlantInputs(enriched);
+      return runAndPersistGeneration(supabase, scheme.id, sourcePlants, { space, successional, edible });
+    }).then(
+      (result) => { if (!result.ok) console.error(`[schemes/generate] generation failed for ${scheme.id}:`, result.error); }
+    )
+  );
 
-  const sourcePlants = toSourcePlantInputs(enriched);
-  const result = await runAndPersistGeneration(supabase, scheme.id, sourcePlants, { space, successional, edible });
-
-  if (!result.ok) {
-    return NextResponse.json({ error: result.error }, { status: result.httpStatus });
-  }
-
-  return NextResponse.json({ scheme_id: scheme.id });
+  return NextResponse.json({ scheme_id: scheme.id, status: "generating" });
 }
