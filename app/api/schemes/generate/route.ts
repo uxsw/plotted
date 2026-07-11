@@ -79,14 +79,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: sourcePlantsError.message }, { status: 500 });
   }
 
-  const enrichmentStart = Date.now();
-  const enriched = await enrichPlants(plantRows);
-  console.log(`[schemes/generate] enrichment: ${Date.now() - enrichmentStart}ms`);
-
-  const sourcePlants = toSourcePlantInputs(enriched);
-
   after(
-    runAndPersistGeneration(supabase, scheme.id, sourcePlants, { space, successional, edible }).then(
+    enrichPlants(plantRows).then((enriched) => {
+      const sourcePlants = toSourcePlantInputs(enriched);
+      return runAndPersistGeneration(supabase, scheme.id, sourcePlants, { space, successional, edible });
+    }).then(
       (result) => { if (!result.ok) console.error(`[schemes/generate] generation failed for ${scheme.id}:`, result.error); }
     )
   );
