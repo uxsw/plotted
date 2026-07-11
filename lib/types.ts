@@ -10,6 +10,8 @@ export interface Plant {
   search_vector?: string; // generated column — never written, rarely read
   date_planted: string | null; // ISO date, day always stored as 1
   photo_url: string | null;
+  image_source: "wikimedia" | "upload" | null;
+  image_attribution: string | null;
   sun_needs: SunNeeds | null;
   flowering_season_from: number | null;
   flowering_season_to: number | null;
@@ -24,7 +26,15 @@ export interface Plant {
   updated_at: string;
 }
 
-export type PlantInsert = Omit<Plant, "id" | "user_id" | "created_at" | "updated_at" | "search_vector" | "lookup_status" | "lookup_notice_seen_at">;
+// image_source and image_attribution are optional on insert — existing plant
+// creation flows don't set them; only the purchased-from-shopping-list path does.
+export type PlantInsert = Omit<
+  Plant,
+  "id" | "user_id" | "created_at" | "updated_at" | "search_vector" | "lookup_status" | "lookup_notice_seen_at" | "image_source" | "image_attribution"
+> & {
+  image_source?: "wikimedia" | "upload" | null;
+  image_attribution?: string | null;
+};
 
 export type SchemeSpace = "small" | "medium" | "large";
 export type SchemeTier = "back" | "mid" | "ground";
