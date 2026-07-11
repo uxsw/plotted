@@ -527,6 +527,18 @@ export default function PlantDetail({
             </div>
           )}
         </div>
+        {plant.image_source === "wikimedia" && plant.image_attribution && (
+          <p className="mt-1.5 text-[11px] font-sans text-ink-soft">
+            <a
+              href={plant.image_attribution}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="hover:text-ink transition-colors"
+            >
+              Source: Wikimedia Commons
+            </a>
+          </p>
+        )}
         <input
           ref={photoFileRef}
           type="file"
