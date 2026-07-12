@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { LocationSearch } from "./LocationSearch";
+import { WeatherForecast } from "./WeatherForecast";
 import { saveGardenLocation } from "@/app/actions/garden";
 import type { Garden } from "@/lib/types";
 
@@ -54,7 +55,6 @@ export function WeatherLocation({ initialGarden }: Props) {
         const label = "Current location";
         setLocation({ latitude, longitude, label });
         setGeoStatus("granted");
-        // Save to the garden record (fire-and-forget — don't block the UI on this)
         saveGardenLocation(latitude, longitude, label).catch(console.error);
       },
       () => {
@@ -72,50 +72,29 @@ export function WeatherLocation({ initialGarden }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-col gap-2">
-        {isSearching ? (
-          <LocationSearch
-            onSelect={handleLocationSelect}
-            onCancel={() => setIsSearching(false)}
-          />
-        ) : (
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-sans text-ink">
-              {geoStatus === "pending" ? (
-                <span className="text-ink-soft">Detecting location…</span>
-              ) : (
-                location?.label ?? "Unknown location"
-              )}
-            </span>
-            {geoStatus !== "pending" && (
-              <button
-                type="button"
-                onClick={() => setIsSearching(true)}
-                className="text-xs font-sans text-moss underline underline-offset-2 hover:text-moss-deep transition-colors duration-100"
-              >
-                Change
-              </button>
-            )}
-          </div>
-        )}
+    <div className="flex flex-col gap-4">
+      {geoStatus === "pending" && !isSearching && (
+        <p className="font-sans text-sm text-ink-soft">Detecting location…</p>
+      )}
 
-        {geoStatus === "denied" && !isSearching && location?.label === EXETER_LABEL && (
-          <p className="text-xs font-sans text-ink-soft">
-            Location access was denied — showing Exeter as default. Search above to set your location.
-          </p>
-        )}
-      </div>
+      {isSearching && (
+        <LocationSearch
+          onSelect={handleLocationSelect}
+          onCancel={() => setIsSearching(false)}
+        />
+      )}
 
-      {location && (
-        <div className="rounded border border-sand-line bg-paper p-4">
-          <p className="text-xs font-sans text-ink-soft">
-            Coordinates: {location.latitude.toFixed(4)}, {location.longitude.toFixed(4)}
-          </p>
-          <p className="text-xs font-sans text-ink-soft mt-1">
-            Weather forecast will appear here in Stage 3.
-          </p>
-        </div>
+      {geoStatus === "denied" && !isSearching && location?.label === EXETER_LABEL && (
+        <p className="font-sans text-xs text-ink-soft">
+          Location access was denied — showing Exeter as default. Use the Change button to set your location.
+        </p>
+      )}
+
+      {location && !isSearching && (
+        <WeatherForecast
+          location={location}
+          onChangeLocation={() => setIsSearching(true)}
+        />
       )}
     </div>
   );
