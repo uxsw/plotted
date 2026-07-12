@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter, Spline_Sans_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -21,9 +21,21 @@ const splineSansMono = Spline_Sans_Mono({
   variable: "--font-spline-mono",
 });
 
+export const viewport: Viewport = {
+  themeColor: "#2B2A24",
+};
+
 export const metadata: Metadata = {
   title: "Plotted",
   description: "Your garden portfolio",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Plotted",
+  },
+  icons: {
+    apple: "/icons/apple-touch-icon-180.png",
+  },
 };
 
 export default function RootLayout({
