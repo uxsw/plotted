@@ -39,7 +39,9 @@ export async function updateSession(request: NextRequest) {
     pathname.startsWith("/icons") ||
     pathname === "/robots.txt" ||
     pathname === "/sitemap.xml" ||
-    pathname === "/favicon.ico";
+    pathname === "/favicon.ico" ||
+    pathname === "/offline.html" ||
+    pathname === "/sw.js";
 
   const isProtected =
     !isAuthPage && !isDesignCheck && !isMarketing && !isApi && !isStatic;
