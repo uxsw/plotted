@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { LocationSearch } from "./LocationSearch";
 import { WeatherForecast } from "./WeatherForecast";
 import { saveGardenLocation } from "@/app/actions/garden";
@@ -27,27 +27,44 @@ function resolveFromGarden(garden: Garden | null): ResolvedLocation | null {
   return null;
 }
 
+// Determines the starting location and geoStatus before any async work.
+// The typeof window guard makes it SSR-safe: on the server navigator is
+// undefined, so we fall through to "pending" (matching the server HTML).
+// The !navigator.geolocation check is only evaluated on the client.
+function computeInitialState(garden: Garden | null): {
+  location: ResolvedLocation | null;
+  geoStatus: "pending" | "denied" | "idle";
+} {
+  const saved = resolveFromGarden(garden);
+  if (saved) return { location: saved, geoStatus: "idle" };
+  if (typeof window !== "undefined" && !navigator.geolocation) {
+    return {
+      location: { latitude: EXETER_LAT, longitude: EXETER_LNG, label: EXETER_LABEL },
+      geoStatus: "denied",
+    };
+  }
+  return { location: null, geoStatus: "pending" };
+}
+
 type Props = {
   initialGarden: Garden | null;
 };
 
 export function WeatherLocation({ initialGarden }: Props) {
   const [location, setLocation] = useState<ResolvedLocation | null>(
-    resolveFromGarden(initialGarden)
+    () => computeInitialState(initialGarden).location
   );
   const [isSearching, setIsSearching] = useState(false);
   const [geoStatus, setGeoStatus] = useState<"pending" | "granted" | "denied" | "idle">(
-    location ? "idle" : "pending"
+    () => computeInitialState(initialGarden).geoStatus
   );
 
-  useEffect(() => {
-    if (location) return;
+  // Captured once from the initial geoStatus so the effect doesn't need to
+  // read state, keeping its dependency array genuinely empty.
+  const needsGeoRef = useRef(geoStatus === "pending");
 
-    if (typeof navigator === "undefined" || !navigator.geolocation) {
-      setLocation({ latitude: EXETER_LAT, longitude: EXETER_LNG, label: EXETER_LABEL });
-      setGeoStatus("denied");
-      return;
-    }
+  useEffect(() => {
+    if (!needsGeoRef.current) return;
 
     navigator.geolocation.getCurrentPosition(
       (pos) => {
@@ -62,7 +79,6 @@ export function WeatherLocation({ initialGarden }: Props) {
         setGeoStatus("denied");
       }
     );
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleLocationSelect(latitude: number, longitude: number, label: string) {

@@ -21,22 +21,38 @@ function formatLabel(r: GeoResult): string {
   return [r.name, r.admin2 ?? r.admin1, r.country].filter(Boolean).join(", ");
 }
 
+// Stable empty-array reference used as the displayedResults value when query is
+// short — avoids a new [] each render which would break the render-time
+// adjustment comparison below.
+const EMPTY: GeoResult[] = [];
+
 export function LocationSearch({ onSelect, onCancel }: Props) {
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<GeoResult[]>([]);
+  const [results, setResults] = useState<GeoResult[]>(EMPTY);
   const [loading, setLoading] = useState(false);
   const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Computed during render — hides stale results while query is too short,
+  // without needing a synchronous setState in the effect guard.
+  const displayedResults = query.length >= 2 ? results : EMPTY;
+
+  // Render-time adjustment: reset highlight whenever the visible result set
+  // changes (new fetch landed, or results hidden because query shrank).
+  // This replaces the useEffect-on-results pattern that the lint rule flags.
+  const [prevDisplayedResults, setPrevDisplayedResults] = useState<GeoResult[]>(EMPTY);
+  if (prevDisplayedResults !== displayedResults) {
+    setPrevDisplayedResults(displayedResults);
+    setHighlightedIndex(-1);
+  }
 
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
 
   useEffect(() => {
-    if (query.length < 2) {
-      setResults([]);
-      return;
-    }
+    // No setState here when query is short — displayedResults handles hiding.
+    if (query.length < 2) return;
 
     const timer = setTimeout(async () => {
       setLoading(true);
@@ -45,9 +61,9 @@ export function LocationSearch({ onSelect, onCancel }: Props) {
           `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en&format=json`
         );
         const json = await res.json();
-        setResults(json.results ?? []);
+        setResults(json.results ?? EMPTY);
       } catch {
-        setResults([]);
+        setResults(EMPTY);
       } finally {
         setLoading(false);
       }
@@ -55,11 +71,6 @@ export function LocationSearch({ onSelect, onCancel }: Props) {
 
     return () => clearTimeout(timer);
   }, [query]);
-
-  // Reset highlight whenever a new result set arrives
-  useEffect(() => {
-    setHighlightedIndex(-1);
-  }, [results]);
 
   function handleSelect(r: GeoResult) {
     onSelect(r.latitude, r.longitude, formatLabel(r));
@@ -70,13 +81,13 @@ export function LocationSearch({ onSelect, onCancel }: Props) {
       onCancel();
     } else if (e.key === "ArrowDown") {
       e.preventDefault();
-      setHighlightedIndex((i) => Math.min(i + 1, results.length - 1));
+      setHighlightedIndex((i) => Math.min(i + 1, displayedResults.length - 1));
     } else if (e.key === "ArrowUp") {
       e.preventDefault();
       setHighlightedIndex((i) => Math.max(i - 1, 0));
     } else if (e.key === "Enter" && highlightedIndex >= 0) {
       e.preventDefault();
-      handleSelect(results[highlightedIndex]);
+      handleSelect(displayedResults[highlightedIndex]);
     }
   }
 
@@ -104,12 +115,12 @@ export function LocationSearch({ onSelect, onCancel }: Props) {
         )}
       </div>
 
-      {results.length > 0 && (
+      {displayedResults.length > 0 && (
         <ul
           role="listbox"
           className="rounded border border-sand-line bg-paper shadow-sm overflow-hidden"
         >
-          {results.map((r, i) => (
+          {displayedResults.map((r, i) => (
             <li key={r.id}>
               <button
                 type="button"
