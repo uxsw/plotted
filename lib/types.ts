@@ -1,3 +1,13 @@
+export interface Garden {
+  id: string;
+  user_id: string;
+  latitude: number | null;
+  longitude: number | null;
+  location_label: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export type SunNeeds = "full sun" | "full sun / partial shade" | "partial shade" | "full shade";
 export type PlantStatus = "active" | "removed";
 

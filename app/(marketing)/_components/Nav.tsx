@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { T, WRAP } from "./tokens";
+import Wordmark from "@/components/Wordmark";
 
 export default function Nav() {
   return (
@@ -9,9 +10,7 @@ export default function Nav() {
           display: "flex", alignItems: "center", justifyContent: "space-between",
           padding: "30px 0", borderBottom: `1px solid ${T.hl}`,
         }} className="max-[860px]:py-[22px]">
-          <div style={{ fontFamily: T.d, fontWeight: 500, fontSize: 25, letterSpacing: "-0.01em", color: T.ink }}>
-            Plotted
-          </div>
+          <Wordmark className="h-8 w-auto text-ink" />
           <div style={{ display: "flex", alignItems: "center", gap: 28 }}>
             <Link
               href="/auth/login"

@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import UserMenu from "@/components/UserMenu";
 import FeedbackButton from "@/components/feedback/FeedbackButton";
 import AppFooter from "@/components/app/AppFooter";
 import GlobalNav from "@/components/app/GlobalNav";
+import Wordmark from "@/components/Wordmark";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -16,9 +16,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen bg-paper">
       <header>
         <div className="px-4 py-3 flex items-center justify-between">
-          <Link href="/" className="font-display font-medium text-lg text-moss">
-            Plotted
-          </Link>
+          <Wordmark className="h-8 w-auto text-moss" />
           <UserMenu email={user.email ?? ""} />
         </div>
         <GlobalNav />
