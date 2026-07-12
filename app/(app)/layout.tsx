@@ -18,7 +18,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <OfflineBanner />
       <header>
         <div className="px-4 py-3 flex items-center justify-between">
-          <Wordmark className="h-8 w-auto text-moss" />
+          <Wordmark className="h-8 w-auto text-ink" />
           <UserMenu email={user.email ?? ""} />
         </div>
         <GlobalNav />
