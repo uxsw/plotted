@@ -1,5 +1,6 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter, Spline_Sans_Mono } from "next/font/google";
+import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -21,9 +22,21 @@ const splineSansMono = Spline_Sans_Mono({
   variable: "--font-spline-mono",
 });
 
+export const viewport: Viewport = {
+  themeColor: "#2B2A24",
+};
+
 export const metadata: Metadata = {
   title: "Plotted",
   description: "Your garden portfolio",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "Plotted",
+  },
+  icons: {
+    apple: "/icons/apple-touch-icon-180.png",
+  },
 };
 
 export default function RootLayout({
@@ -36,7 +49,10 @@ export default function RootLayout({
       lang="en"
       className={`${fraunces.variable} ${inter.variable} ${splineSansMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        {children}
+        <ServiceWorkerRegister />
+      </body>
     </html>
   );
 }

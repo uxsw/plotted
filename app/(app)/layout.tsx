@@ -5,6 +5,7 @@ import FeedbackButton from "@/components/feedback/FeedbackButton";
 import AppFooter from "@/components/app/AppFooter";
 import GlobalNav from "@/components/app/GlobalNav";
 import Wordmark from "@/components/Wordmark";
+import { OfflineBanner } from "@/components/ui/OfflineBanner";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -14,6 +15,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="min-h-screen bg-paper">
+      <OfflineBanner />
       <header>
         <div className="px-4 py-3 flex items-center justify-between">
           <Wordmark className="h-8 w-auto text-moss" />
