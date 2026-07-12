@@ -25,6 +25,7 @@ export function LocationSearch({ onSelect, onCancel }: Props) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<GeoResult[]>([]);
   const [loading, setLoading] = useState(false);
+  const [highlightedIndex, setHighlightedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -55,12 +56,28 @@ export function LocationSearch({ onSelect, onCancel }: Props) {
     return () => clearTimeout(timer);
   }, [query]);
 
+  // Reset highlight whenever a new result set arrives
+  useEffect(() => {
+    setHighlightedIndex(-1);
+  }, [results]);
+
   function handleSelect(r: GeoResult) {
     onSelect(r.latitude, r.longitude, formatLabel(r));
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "Escape") onCancel();
+    if (e.key === "Escape") {
+      onCancel();
+    } else if (e.key === "ArrowDown") {
+      e.preventDefault();
+      setHighlightedIndex((i) => Math.min(i + 1, results.length - 1));
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      setHighlightedIndex((i) => Math.max(i - 1, 0));
+    } else if (e.key === "Enter" && highlightedIndex >= 0) {
+      e.preventDefault();
+      handleSelect(results[highlightedIndex]);
+    }
   }
 
   return (
@@ -92,17 +109,20 @@ export function LocationSearch({ onSelect, onCancel }: Props) {
           role="listbox"
           className="rounded border border-sand-line bg-paper shadow-sm overflow-hidden"
         >
-          {results.map((r) => (
+          {results.map((r, i) => (
             <li key={r.id}>
               <button
                 type="button"
                 role="option"
-                aria-selected={false}
+                aria-selected={i === highlightedIndex}
                 onClick={() => handleSelect(r)}
                 className={[
                   "w-full text-left px-3 py-2 text-sm font-sans text-ink",
-                  "hover:bg-moss-tint/40 transition-colors duration-100",
-                  "focus:outline-none focus:bg-moss-tint/40",
+                  "transition-colors duration-100",
+                  "focus:outline-none",
+                  i === highlightedIndex
+                    ? "bg-moss-tint/60"
+                    : "hover:bg-moss-tint/40 focus:bg-moss-tint/40",
                 ].join(" ")}
               >
                 {formatLabel(r)}
