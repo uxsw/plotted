@@ -100,7 +100,7 @@ export default function WildlifeGrid({
     // Optimistic update
     setSpottedIds((prev) => {
       const next = new Set(prev);
-      wasSpotted ? next.delete(speciesId) : next.add(speciesId);
+      if (wasSpotted) next.delete(speciesId); else next.add(speciesId);
       return next;
     });
     setErrors((prev) => {
@@ -117,7 +117,7 @@ export default function WildlifeGrid({
       // Revert optimistic update
       setSpottedIds((prev) => {
         const next = new Set(prev);
-        wasSpotted ? next.add(speciesId) : next.delete(speciesId);
+        if (wasSpotted) next.add(speciesId); else next.delete(speciesId);
         return next;
       });
       setErrors((prev) => ({
