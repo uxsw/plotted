@@ -35,7 +35,12 @@ export const metadata: Metadata = {
     title: "Plotted",
   },
   icons: {
-    apple: "/icons/apple-touch-icon-180.png",
+    icon: [
+      { url: "/icons/favicon-96x96.png", sizes: "96x96", type: "image/png" },
+      { url: "/icons/favicon.svg", type: "image/svg+xml" },
+    ],
+    shortcut: "/icons/favicon.ico",
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180" }],
   },
 };
 
@@ -48,7 +53,7 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${fraunces.variable} ${inter.variable} ${splineSansMono.variable} h-full antialiased`}
-    >
+    > 
       <body className="min-h-full flex flex-col">
         {children}
         <ServiceWorkerRegister />
