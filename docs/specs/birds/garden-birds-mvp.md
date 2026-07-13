@@ -40,7 +40,8 @@ Concretely, this means:
 - Table names use a generic noun (`species`, not `birds`) with a `category`
   column (e.g. `'bird'`) rather than a bird-specific table name
 - Route/component naming avoids hard-coding "birds" where a category-neutral
-  term reads just as naturally (e.g. `/garden-wildlife`)
+  term reads just as naturally (e.g. `/garden-wildlife` or similar, TBC with
+  John — this is a naming decision, not a build decision)
 - Image storage path can stay `public/birds` for now (matches current
   supplied assets) — no need to move these into a generic path pre-emptively,
   since storage paths are cheap to reorganise later and doing so now would
@@ -61,8 +62,12 @@ New migration, following existing sequential numbering convention in
 - `category` (text) — e.g. `'bird'`; not used for filtering/switching in
   MVP, just future-proofs the schema per the naming note above
 - `name` (text)
-- `image_path` (text) — Supabase Storage path (`public/birds/...` for MVP
-  content), following existing plant image conventions
+- `image_path` (text) — static asset path under `public/birds/` (e.g.
+  `/birds/robin.webp`), rendered directly as an `<img src>`. Note: this is
+  NOT a Supabase Storage path — there's no upload step or bucket involved
+  for this static reference content, unlike the plant/shopping-list image
+  handling elsewhere in the app. If these are ever moved into Storage later,
+  a single migration updating `image_path` values covers it.
 - `description` (text) — single paragraph, sourced from
   `docs/specs/birds/plotted-garden-birds.md`
 - `sort_order` (int) — for consistent display order
