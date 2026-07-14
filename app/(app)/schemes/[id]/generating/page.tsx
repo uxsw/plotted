@@ -7,18 +7,19 @@ import Link from "next/link";
 
 type Status = "generating" | "complete" | "failed";
 
-// Replace these paths once the actual scheme-loading images are in public/images/scheme-loading/
 const CAROUSEL_IMAGES = [
-  "/garden-hero-1.jpg",
-  "/garden-hero-2.jpg",
-  "/garden-hero-3.jpg",
-  "/demo-thumb-cola.jpg",
-  "/demo-thumb-digitalis.jpg",
-  "/demo-thumb-fern.jpg",
-  "/demo-thumb-firecracker.jpg",
-  "/demo-thumb-geum.jpg",
-  "/demo-thumb-hosta.jpg",
-  "/demo-thumb-thyme.jpg",
+  "/carousel/carousel-1.webp",
+  "/carousel/carousel-2.webp",
+  "/carousel/carousel-3.webp",
+  "/carousel/carousel-4.webp",
+  "/carousel/carousel-5.webp",
+  "/carousel/carousel-6.webp",
+  "/carousel/carousel-7.webp",
+  "/carousel/carousel-8.webp",
+  "/carousel/carousel-9.webp",
+  "/carousel/carousel-10.webp",
+  "/carousel/carousel-11.webp",
+  "/carousel/carousel-12.webp",
 ];
 
 const POLL_INTERVAL_MS = 4000;
