@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { usePwaInstallPrompt } from "@/lib/hooks/usePwaInstallPrompt";
+import { usePwaInstallEvent } from "@/components/PwaInstallPromptProvider";
 import { isIOS, isAndroid } from "@/lib/utils/platform";
 
 interface PwaInstallTriggerCardProps {
@@ -40,17 +41,27 @@ export function PwaInstallTriggerCard({
     initialInstalledAt,
     plantCount,
   });
-
-  if (!shouldShow) return null;
+  const { canInstall, install } = usePwaInstallEvent();
 
   const ios = isIOS();
   const android = isAndroid();
+
+  // On Android, hide the card if Chrome never fired beforeinstallprompt —
+  // showing a button that does nothing is worse than showing nothing.
+  if (!shouldShow || (android && !canInstall)) return null;
+
   const ctaLabel = android ? "Install" : ios ? "Show me how" : "Install";
 
-  function handleCta() {
-    // Stage 3 wires the Android beforeinstallprompt flow here.
-    // Stage 4 wires the iOS explainer overlay here.
-    console.log("[pwa] install CTA tapped, platform:", android ? "android" : ios ? "ios" : "other");
+  async function handleCta() {
+    if (android) {
+      const outcome = await install();
+      // 'accepted' → appinstalled event fires separately and sets pwa_installed_at.
+      // 'dismissed' → treat the same as "Not now" so the backoff schedule applies.
+      if (outcome === "dismissed") dismiss();
+    } else {
+      // iOS explainer overlay wired in stage 4.
+      console.log("[pwa] install CTA tapped, platform: ios");
+    }
   }
 
   return (

@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Fraunces, Inter, Spline_Sans_Mono } from "next/font/google";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
+import { PwaInstallPromptProvider } from "@/components/PwaInstallPromptProvider";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -55,7 +56,9 @@ export default function RootLayout({
       className={`${fraunces.variable} ${inter.variable} ${splineSansMono.variable} h-full antialiased`}
     > 
       <body className="min-h-full flex flex-col">
-        {children}
+        <PwaInstallPromptProvider>
+          {children}
+        </PwaInstallPromptProvider>
         <ServiceWorkerRegister />
       </body>
     </html>
