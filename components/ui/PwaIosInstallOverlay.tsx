@@ -100,16 +100,25 @@ export function PwaIosInstallOverlay({ isOpen, onClose }: PwaIosInstallOverlayPr
   const [step, setStep] = useState(0);
   // Separate animation flag so the slide-up triggers after the portal mounts.
   const [visible, setVisible] = useState(false);
+  // Track previous isOpen to reset step during render when it transitions to true,
+  // per React's "derived state from props" pattern (avoids setState-in-effect).
+  const [prevIsOpen, setPrevIsOpen] = useState(isOpen);
 
-  // Trigger the slide-up on open; reset step each time.
-  useEffect(() => {
+  if (isOpen !== prevIsOpen) {
+    setPrevIsOpen(isOpen);
     if (isOpen) {
       setStep(0);
-      const raf = requestAnimationFrame(() => setVisible(true));
-      return () => cancelAnimationFrame(raf);
-    } else {
+      // Reset to hidden so the slide-up transition plays on every open.
       setVisible(false);
     }
+  }
+
+  // Trigger the slide-up animation after the portal mounts (deferred callback, not direct setState).
+  // setVisible(false) is handled above in the render body so this effect only ever sets true.
+  useEffect(() => {
+    if (!isOpen) return;
+    const raf = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(raf);
   }, [isOpen]);
 
   // Lock body scroll while overlay is open.

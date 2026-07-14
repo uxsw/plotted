@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/Button";
 import { usePwaInstallPrompt } from "@/lib/hooks/usePwaInstallPrompt";
 import { usePwaInstallEvent } from "@/components/PwaInstallPromptProvider";
 import { PwaIosInstallOverlay } from "@/components/ui/PwaIosInstallOverlay";
-import { isIOS, isAndroid } from "@/lib/utils/platform";
+import { isAndroid } from "@/lib/utils/platform";
 
 interface PwaInstallTriggerCardProps {
   initialDismissCount: number;
@@ -38,7 +38,7 @@ export function PwaInstallTriggerCard({
   initialInstalledAt,
   plantCount,
 }: PwaInstallTriggerCardProps) {
-  const { shouldShow, dismiss, variant: _variant } = usePwaInstallPrompt({
+  const { shouldShow, dismiss } = usePwaInstallPrompt({
     initialDismissCount,
     initialInstalledAt,
     plantCount,
@@ -46,7 +46,6 @@ export function PwaInstallTriggerCard({
   const { canInstall, install } = usePwaInstallEvent();
   const [overlayOpen, setOverlayOpen] = useState(false);
 
-  const ios = isIOS();
   const android = isAndroid();
 
   // On Android, hide the card if Chrome never fired beforeinstallprompt —
