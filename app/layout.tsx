@@ -27,9 +27,24 @@ export const viewport: Viewport = {
   themeColor: "#2B2A24",
 };
 
+const siteUrl =
+  process.env.NEXT_PUBLIC_SITE_URL ?? "https://plotted.garden";
+
 export const metadata: Metadata = {
+  metadataBase: new URL(siteUrl),
   title: "Plotted",
   description: "Your garden portfolio",
+  openGraph: {
+    title: "Plotted",
+    description: "Your garden portfolio",
+    images: [{ url: "/og-image.png", width: 1200, height: 630, alt: "Plotted – your garden portfolio" }],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Plotted",
+    description: "Your garden portfolio",
+    images: ["/og-image.png"],
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
