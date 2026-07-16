@@ -57,6 +57,23 @@ export function LocationSearch({ onSelect, onCancel }: Props) {
     const timer = setTimeout(async () => {
       setLoading(true);
       try {
+        // Try UK postcode first; falls back to Open-Meteo if no match.
+        const postcodeRes = await fetch(
+          `/api/postcode?q=${encodeURIComponent(query)}`
+        );
+        const { result: postcodeResult } = await postcodeRes.json();
+        if (postcodeResult) {
+          setResults([
+            {
+              id: 0,
+              name: postcodeResult.label,
+              latitude: postcodeResult.latitude,
+              longitude: postcodeResult.longitude,
+            },
+          ]);
+          return;
+        }
+
         const res = await fetch(
           `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(query)}&count=5&language=en&format=json`
         );
