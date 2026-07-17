@@ -8,13 +8,33 @@ type PostcodesIoResult = {
   latitude: number;
   longitude: number;
   admin_district: string | null;
+  admin_county: string | null;
+  admin_ward: string | null;
   parish: string | null;
+  region: string | null;
 };
 
+function dedupe(first: string, second: string | null): string {
+  if (!second) return first;
+  if (second.trim().toLowerCase() === first.trim().toLowerCase()) return first;
+  return `${first}, ${second}`;
+}
+
+function isRealParish(parish: string | null): parish is string {
+  return parish != null && !parish.toLowerCase().includes("unparished area");
+}
+
 function composeLabel(r: PostcodesIoResult): string {
-  const district = r.admin_district ?? "";
-  const first = r.parish ?? district;
-  return first && first !== district ? `${first}, ${district}` : district;
+  if (isRealParish(r.parish)) {
+    // Rural/suburban with a named civil parish: "Woodbury, East Devon"
+    return dedupe(r.parish, r.admin_district);
+  }
+  if (r.admin_county) {
+    // City/town with a county: "Exeter, Devon"
+    return dedupe(r.admin_district ?? r.admin_county, r.admin_county);
+  }
+  // London borough or unitary authority (no admin_county): "West Hampstead, London"
+  return dedupe(r.admin_ward ?? r.admin_district ?? "", r.region);
 }
 
 export async function GET(request: Request) {
