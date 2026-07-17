@@ -57,6 +57,14 @@ export default function UserMenu({ email }: { email: string }) {
           <p className="text-xs font-sans text-ink-soft px-1 truncate">{email}</p>
           <Popover.Close asChild>
             <Link
+              href="/account"
+              className="inline-flex items-center justify-start gap-2 w-full rounded px-4 py-2 text-sm font-medium font-sans transition-colors duration-150 text-ink-soft bg-transparent hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+            >
+              Account settings
+            </Link>
+          </Popover.Close>
+          <Popover.Close asChild>
+            <Link
               href="/shopping-list"
               className="inline-flex items-center justify-start gap-2 w-full rounded px-4 py-2 text-sm font-medium font-sans transition-colors duration-150 text-ink-soft bg-transparent hover:bg-sand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
             >
