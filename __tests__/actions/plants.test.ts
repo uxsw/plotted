@@ -4,8 +4,10 @@ import type { LookupResult } from "@/lib/plant-lookup";
 
 vi.mock("next/navigation", () => ({ redirect: vi.fn() }));
 vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+vi.mock("next/server", () => ({ after: vi.fn((cb: () => void) => cb()) }));
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/plant-lookup", () => ({ performLookup: vi.fn() }));
+vi.mock("@/lib/species-reference-enrichment", () => ({ enrichSpeciesReference: vi.fn() }));
 
 import { createClient } from "@/lib/supabase/server";
 import { performLookup } from "@/lib/plant-lookup";
