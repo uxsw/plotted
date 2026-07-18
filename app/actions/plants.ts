@@ -2,12 +2,14 @@
 
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sanitizePlantName, sanitizeGenus, sanitizeSpecies } from "@/lib/sanitize";
 import { validatePlantInput, hasFieldErrors, type FieldErrors } from "@/lib/validation";
 import type { PlantInsert } from "@/lib/types";
 import { performLookup } from "@/lib/plant-lookup";
 import { applyLookupResult } from "@/lib/lookup-apply";
+import { enrichSpeciesReference } from "@/lib/species-reference-enrichment";
 import Anthropic from "@anthropic-ai/sdk";
 
 export async function updatePlantField(
@@ -78,6 +80,7 @@ export async function upsertPlant(
       .eq("id", plantId)
       .eq("user_id", user.id);
     if (error) return { error: error.message };
+    after(() => enrichSpeciesReference(clean.genus, clean.species, clean.cultivar));
     revalidatePath("/plants");
     redirect(`/plants/${plantId}`);
   } else {
@@ -87,6 +90,7 @@ export async function upsertPlant(
       .select("id")
       .single();
     if (error) return { error: error.message };
+    after(() => enrichSpeciesReference(clean.genus, clean.species, clean.cultivar));
 
     let lookup_status: "skipped" | "success" | "not_found" | "error" = "skipped";
     if (clean.species) {
