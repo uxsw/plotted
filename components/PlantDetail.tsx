@@ -7,7 +7,7 @@ import { plantDisplayTitle } from "@/lib/plantName";
 import { PlantName } from "@/components/plants/PlantName";
 import { SunBadgePill } from "@/components/ui/SunBadge";
 import { FloweringSeasonBadge } from "@/components/ui/FloweringSeasonBadge";
-import type { Plant, PlantInsert, SunNeeds } from "@/lib/types";
+import type { Plant, PlantInsert, SpeciesRef, SunNeeds } from "@/lib/types";
 import { updatePlantField, markLookupNoticeSeen } from "@/app/actions/plants";
 import DeletePlantButton from "@/components/DeletePlantButton";
 import { Button } from "@/components/ui/Button";
@@ -290,8 +290,10 @@ function CommonNamesSection({
 
 export default function PlantDetail({
   plant: init,
+  speciesRef,
 }: {
   plant: Plant;
+  speciesRef: SpeciesRef | null;
 }) {
   const [plant, setPlant] = useState(init);
   const [editing, setEditing] = useState<string | null>(null);
@@ -766,6 +768,26 @@ export default function PlantDetail({
                   )}
                 </div>
               </div>
+
+              {/* Frost tolerance — sourced from species_reference */}
+              {speciesRef?.lookup_status === "pending" && (
+                <div className="px-4 py-3 border-t border-paper-line">
+                  <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Frost tolerance</p>
+                  <p className="text-sm text-ink-soft/60 italic">Looking up…</p>
+                </div>
+              )}
+              {speciesRef?.lookup_status === "complete" && speciesRef.frost_tolerance_c !== null && (
+                <div className="px-4 py-3 border-t border-paper-line">
+                  <p className="text-[11px] font-sans font-medium text-ink-soft mb-2">Frost tolerance</p>
+                  <AiNoticePanel>
+                    {speciesRef.frost_tolerance_c}°C
+                    {speciesRef.frost_tolerance_notice && (
+                      <span className="text-ink-soft">· {speciesRef.frost_tolerance_notice}</span>
+                    )}
+                  </AiNoticePanel>
+                </div>
+              )}
+              {/* lookup_status === 'failed', no row, or complete with null value: render nothing */}
             </div>
           </section>
 

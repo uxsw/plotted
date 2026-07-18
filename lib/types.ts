@@ -46,6 +46,13 @@ export type PlantInsert = Omit<
   image_attribution?: string | null;
 };
 
+export interface SpeciesRef {
+  id: string;
+  lookup_status: "pending" | "complete" | "failed";
+  frost_tolerance_c: number | null;
+  frost_tolerance_notice: string | null;
+}
+
 export type SchemeSpace = "small" | "medium" | "large";
 export type SchemeTier = "back" | "mid" | "ground";
 export type SchemeStatus = "generating" | "complete" | "failed";

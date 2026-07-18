@@ -21,6 +21,8 @@ export async function generateMetadata(
   };
 }
 import PlantDetail from "@/components/PlantDetail";
+import { computeSpeciesMatchKey } from "@/lib/species-match-key";
+import type { SpeciesRef } from "@/lib/types";
 
 export default async function PlantDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -33,5 +35,14 @@ export default async function PlantDetailPage({ params }: { params: Promise<{ id
 
   if (!plant) notFound();
 
-  return <PlantDetail plant={plant} />;
+  const matchKey = computeSpeciesMatchKey(plant.genus, plant.species, plant.cultivar);
+  const { data: speciesRefRow } = await supabase
+    .from("species_reference")
+    .select("id, lookup_status, frost_tolerance_c, frost_tolerance_notice")
+    .eq("match_key", matchKey)
+    .maybeSingle();
+
+  const speciesRef = speciesRefRow as SpeciesRef | null;
+
+  return <PlantDetail plant={plant} speciesRef={speciesRef} />;
 }
