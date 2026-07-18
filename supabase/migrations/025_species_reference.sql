@@ -1,6 +1,6 @@
 CREATE TABLE species_reference (
   id                    uuid        PRIMARY KEY DEFAULT gen_random_uuid(),
-  genus                 text,
+  genus                 text        NOT NULL,
   species               text,
   cultivar              text,
   match_key             text        NOT NULL UNIQUE,
@@ -12,6 +12,10 @@ CREATE TABLE species_reference (
   created_at            timestamptz DEFAULT now(),
   updated_at            timestamptz DEFAULT now()
 );
+
+create trigger species_reference_updated_at
+  before update on species_reference
+  for each row execute function update_updated_at();
 
 -- Read access open to all authenticated users; writes via service role only.
 ALTER TABLE species_reference ENABLE ROW LEVEL SECURITY;
