@@ -65,8 +65,8 @@ const BirdCard = forwardRef<HTMLDivElement, BirdCardProps>(
           {spotted && <StampBadge />}
         </div>
 
-        <div className="flex items-center justify-between gap-2 px-4 pt-3 pb-1">
-          <p className="font-display font-medium text-base text-ink leading-snug min-w-0 truncate">
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 px-4 pt-3 pb-1">
+          <p className="font-display font-medium text-base text-ink leading-snug">
             {species.name}
           </p>
           <button
