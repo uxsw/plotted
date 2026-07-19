@@ -68,6 +68,13 @@ button, [role="button"] {
   .mkt-caret, .mkt-dot, .mkt-dot-1, .mkt-dot-2, .mkt-dot-3 { animation: none; }
 }
 
+@utility no-scrollbar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar {
+    display: none;
+  }
+}
+
 body {
   background-color: #FAF6EC;
   color: #2B2A24;
