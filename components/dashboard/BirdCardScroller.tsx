@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { forwardRef, useRef, useState, useCallback, useEffect } from "react";
 import Image from "next/image";
 import { markSpeciesSpotted, unmarkSpeciesSpotted } from "@/app/actions/wildlife";
 import type { SpeciesRow } from "@/components/WildlifeGrid";
@@ -35,85 +35,86 @@ function StampBadge() {
   );
 }
 
-function BirdCard({
-  species,
-  spotted,
-  onToggle,
-  error,
-}: {
+type BirdCardProps = {
   species: SpeciesRow;
   spotted: boolean;
   onToggle: () => void;
   error: string | null;
-}) {
-  const [expanded, setExpanded] = useState(false);
+};
 
-  return (
-    <div
-      className={[
-        "flex-none w-[80%] snap-start rounded-lg border bg-paper",
-        spotted ? "border-moss/40" : "border-sand-line",
-      ].join(" ")}
-    >
-      <div className="relative h-[160px] w-full overflow-hidden bg-paper-deep rounded-t-lg">
-        <Image
-          src={species.image_path}
-          alt={species.name}
-          fill
-          sizes="80vw"
-          className="object-cover"
-        />
-        {spotted && <StampBadge />}
-      </div>
+const BirdCard = forwardRef<HTMLDivElement, BirdCardProps>(
+  ({ species, spotted, onToggle, error }, ref) => {
+    const [expanded, setExpanded] = useState(false);
 
-      <div className="flex items-center justify-between gap-2 px-4 pt-3 pb-1">
-        <p className="font-display font-medium text-base text-ink leading-snug min-w-0 truncate">
-          {species.name}
-        </p>
-        <button
-          type="button"
-          onClick={onToggle}
-          aria-label={
-            spotted
-              ? `Unmark ${species.name} as spotted`
-              : `Mark ${species.name} as spotted`
-          }
-          className={[
-            "flex-none inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium font-sans transition-colors duration-150",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2 focus-visible:ring-offset-paper",
-            spotted
-              ? "bg-moss text-white"
-              : "border border-moss text-moss bg-transparent",
-          ].join(" ")}
-        >
-          {spotted && <CheckIcon />}
-          {spotted ? "Spotted" : "Mark as spotted"}
-        </button>
-      </div>
+    return (
+      <div
+        ref={ref}
+        className={[
+          "flex-none w-[60%] snap-center rounded-lg border bg-paper",
+          spotted ? "border-moss/40" : "border-sand-line",
+        ].join(" ")}
+      >
+        <div className="relative aspect-square w-full overflow-hidden bg-paper-deep rounded-t-lg">
+          <Image
+            src={species.image_path}
+            alt={species.name}
+            fill
+            sizes="60vw"
+            className="object-cover"
+          />
+          {spotted && <StampBadge />}
+        </div>
 
-      <div className="px-4 pb-4 pt-1">
-        <p
-          className={[
-            "font-sans text-xs text-ink-soft leading-relaxed",
-            expanded ? "" : "line-clamp-2",
-          ].join(" ")}
-        >
-          {species.description}
-        </p>
-        <button
-          type="button"
-          onClick={() => setExpanded((v) => !v)}
-          className="font-sans text-xs text-moss mt-1 hover:text-moss-deep focus-visible:outline-none"
-        >
-          {expanded ? "Less" : "More"}
-        </button>
-        {error && (
-          <p className="font-sans text-xs text-clay mt-1">{error}</p>
-        )}
+        <div className="flex items-center justify-between gap-2 px-4 pt-3 pb-1">
+          <p className="font-display font-medium text-base text-ink leading-snug min-w-0 truncate">
+            {species.name}
+          </p>
+          <button
+            type="button"
+            onClick={onToggle}
+            aria-label={
+              spotted
+                ? `Unmark ${species.name} as spotted`
+                : `Mark ${species.name} as spotted`
+            }
+            className={[
+              "flex-none inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium font-sans transition-colors duration-150",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2 focus-visible:ring-offset-paper",
+              spotted
+                ? "bg-moss text-white"
+                : "border border-moss text-moss bg-transparent",
+            ].join(" ")}
+          >
+            {spotted && <CheckIcon />}
+            {spotted ? "Spotted" : "Mark as spotted"}
+          </button>
+        </div>
+
+        <div className="px-4 pb-4 pt-1">
+          <p
+            className={[
+              "font-sans text-xs text-ink-soft leading-relaxed",
+              expanded ? "" : "line-clamp-2",
+            ].join(" ")}
+          >
+            {species.description}
+          </p>
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="font-sans text-xs text-moss mt-1 hover:text-moss-deep focus-visible:outline-none"
+          >
+            {expanded ? "Less" : "More"}
+          </button>
+          {error && (
+            <p className="font-sans text-xs text-clay mt-1">{error}</p>
+          )}
+        </div>
       </div>
-    </div>
-  );
-}
+    );
+  }
+);
+BirdCard.displayName = "BirdCard";
 
 export function BirdCardScroller({
   initialSpecies,
@@ -123,20 +124,55 @@ export function BirdCardScroller({
   initialSpottedIds: string[];
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const cardRefs = useRef<(HTMLDivElement | null)[]>([]);
   const [activeIndex, setActiveIndex] = useState(0);
   const [spottedIds, setSpottedIds] = useState(() => new Set(initialSpottedIds));
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  // Frozen partition — computed once on mount, never re-sorted during the session.
+  const [{ sortedSpecies, firstUnspottedIndex }] = useState(() => {
+    const spottedSet = new Set(initialSpottedIds);
+    const spotted = initialSpecies.filter((s) => spottedSet.has(s.id));
+    const unspotted = initialSpecies.filter((s) => !spottedSet.has(s.id));
+    return {
+      sortedSpecies: [...spotted, ...unspotted],
+      firstUnspottedIndex: unspotted.length > 0 ? spotted.length : -1,
+    };
+  });
+
   const total = initialSpecies.length;
   const count = spottedIds.size;
 
+  // On mount, instantly scroll to center the first unspotted card (boundary between groups).
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el || firstUnspottedIndex === -1) return;
+    const card = cardRefs.current[firstUnspottedIndex];
+    if (!card) return;
+    const target = card.offsetLeft + card.offsetWidth / 2 - el.clientWidth / 2;
+    el.scrollLeft = target;
+    setActiveIndex(firstUnspottedIndex);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Derive active index from which card's center is closest to the scroll container's center.
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const cardWidth = el.clientWidth * 0.8 + 12; // 80% width + gap-3
-    const index = Math.round(el.scrollLeft / cardWidth);
-    setActiveIndex(Math.min(index, initialSpecies.length - 1));
-  }, [initialSpecies.length]);
+    const containerCenter = el.scrollLeft + el.clientWidth / 2;
+    let closest = 0;
+    let closestDist = Infinity;
+    cardRefs.current.forEach((card, i) => {
+      if (!card) return;
+      const cardCenter = card.offsetLeft + card.offsetWidth / 2;
+      const dist = Math.abs(cardCenter - containerCenter);
+      if (dist < closestDist) {
+        closestDist = dist;
+        closest = i;
+      }
+    });
+    setActiveIndex(closest);
+  }, []);
 
   async function handleToggle(speciesId: string) {
     const wasSpotted = spottedIds.has(speciesId);
@@ -191,11 +227,13 @@ export function BirdCardScroller({
       <div
         ref={scrollRef}
         onScroll={handleScroll}
+        style={{ scrollPaddingInline: "20%" }}
         className="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4 snap-x snap-mandatory no-scrollbar"
       >
-        {initialSpecies.map((species) => (
+        {sortedSpecies.map((species, i) => (
           <BirdCard
             key={species.id}
+            ref={(el) => { cardRefs.current[i] = el; }}
             species={species}
             spotted={spottedIds.has(species.id)}
             onToggle={() => handleToggle(species.id)}
@@ -204,9 +242,9 @@ export function BirdCardScroller({
         ))}
       </div>
 
-      {initialSpecies.length > 1 && (
+      {sortedSpecies.length > 1 && (
         <div className="flex justify-center gap-1.5 mt-1" aria-hidden="true">
-          {initialSpecies.map((_, i) => (
+          {sortedSpecies.map((_, i) => (
             <span
               key={i}
               className={`block h-1 rounded-full transition-all duration-200 ${
