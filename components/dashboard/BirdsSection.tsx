@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import WildlifeGrid, { type SpeciesRow } from "@/components/WildlifeGrid";
+import { BirdCardScroller } from "@/components/dashboard/BirdCardScroller";
+import type { SpeciesRow } from "@/components/WildlifeGrid";
 
 export default async function BirdsSection() {
   const supabase = await createClient();
@@ -18,9 +19,10 @@ export default async function BirdsSection() {
   const spottedIds = (sightings ?? []).map((s) => s.species_id as string);
 
   return (
-    <section aria-label="Bird spotter">
-      <h2 className="font-display font-medium text-xl text-ink mb-3">Bird spotter</h2>
-      <WildlifeGrid
+    <section aria-label="Garden visitors">
+      <h2 className="font-display font-medium text-xl text-ink mb-1">Garden visitors</h2>
+      <p className="font-sans text-sm text-ink-soft mb-4">Birds you might spot nearby this season. Tick them off as you go.</p>
+      <BirdCardScroller
         initialSpecies={(species ?? []) as SpeciesRow[]}
         initialSpottedIds={spottedIds}
       />
