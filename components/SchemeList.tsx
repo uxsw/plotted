@@ -13,6 +13,7 @@ export type SchemeSummary = {
   status: "complete" | "failed";
   name: string | null;
   summary: string | null;
+  narrative_intro: string | null;
   created_at: string;
   suggestion_count: number;
   source_plant_photos: string[];

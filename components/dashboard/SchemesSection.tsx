@@ -1,5 +1,23 @@
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import SchemeList, { type SchemeSummary } from "@/components/SchemeList";
+import { SchemeCardScroller } from "@/components/dashboard/SchemeCardScroller";
+import type { SchemeSummary } from "@/components/SchemeList";
+
+function ArrowRightIcon() {
+  return (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.75} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+    </svg>
+  );
+}
+
+function PlusIcon() {
+  return (
+    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
+    </svg>
+  );
+}
 
 export default async function SchemesSection() {
   const supabase = await createClient();
@@ -12,12 +30,13 @@ export default async function SchemesSection() {
     supabase
       .from("schemes")
       .select(
-        `id, status, name, summary, created_at,
+        `id, status, name, summary, narrative_intro, created_at,
          scheme_source_plants ( plant_id, plants ( photo_url ) ),
          scheme_suggestions ( saved )`
       )
-      .in("status", ["complete", "failed"])
-      .order("created_at", { ascending: false }),
+      .eq("status", "complete")
+      .order("created_at", { ascending: false })
+      .limit(4),
   ]);
 
   if (!plantCount || !schemesData?.length) return null;
@@ -27,6 +46,7 @@ export default async function SchemesSection() {
     status: scheme.status as "complete" | "failed",
     name: scheme.name,
     summary: scheme.summary,
+    narrative_intro: scheme.narrative_intro,
     created_at: scheme.created_at,
     suggestion_count: scheme.scheme_suggestions.filter((s) => s.saved).length,
     source_plant_photos: scheme.scheme_source_plants
@@ -38,7 +58,23 @@ export default async function SchemesSection() {
   return (
     <section aria-label="Planting schemes">
       <h2 className="font-display font-medium text-xl text-ink mb-3">Planting schemes</h2>
-      <SchemeList schemes={schemes} />
+      <SchemeCardScroller schemes={schemes} />
+      <div className="flex items-center justify-between mt-3">
+        <Link
+          href="/schemes"
+          className="inline-flex items-center gap-1 font-sans text-sm text-moss hover:text-moss-deep transition-colors"
+        >
+          View all
+          <ArrowRightIcon />
+        </Link>
+        <Link
+          href="/schemes/new"
+          className="inline-flex items-center gap-1.5 rounded px-4 py-2 text-sm font-medium font-sans bg-moss text-white hover:bg-moss-deep transition-colors"
+        >
+          <PlusIcon />
+          New scheme
+        </Link>
+      </div>
     </section>
   );
 }
