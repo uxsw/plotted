@@ -14,7 +14,7 @@ import RequestAccess from "./_components/RequestAccess";
 export default async function HomePage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (user) redirect("/plants");
+  if (user) redirect("/dashboard");
 
   return (
     <main>
