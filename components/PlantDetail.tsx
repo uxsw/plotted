@@ -12,6 +12,7 @@ import { updatePlantField, markLookupNoticeSeen } from "@/app/actions/plants";
 import DeletePlantButton from "@/components/DeletePlantButton";
 import { Button } from "@/components/ui/Button";
 import { AiNoticePanel } from "@/components/ui/AiNoticePanel";
+import buttonStyles from "@/components/ui/Button.module.css";
 import {
   ACCEPTED_INPUT_TYPES,
   ACCEPTED_INPUT_TYPES_LABEL,
@@ -457,11 +458,16 @@ export default function PlantDetail({
   return (
     <div className="space-y-6 max-w-2xl">
       <div className="flex items-center justify-between">
-        <Link href="/plants" className="inline-flex items-center gap-1.5 -ml-2 px-2 py-1.5 rounded-md text-sm text-moss-700 no-underline transition-colors duration-150 hover:bg-paper-deep focus-visible:bg-sand-line focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss-400">← My Plants</Link>
+        <Link
+          href="/plants"
+          className={[buttonStyles["o-button"], buttonStyles["o-button--ghost"]].join(" ")}
+          >
+            ← My Plants
+          </Link>
         <div className="flex gap-3">
           <Link
             href="/plants/new"
-            className="inline-flex items-center justify-center rounded px-4 py-2 text-sm font-medium font-sans bg-moss text-white hover:bg-moss-deep transition-colors"
+            className={[buttonStyles["o-button"], buttonStyles["o-button--primary"]].join(" ")}
           >
             + Add another
           </Link>

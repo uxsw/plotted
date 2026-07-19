@@ -17,6 +17,36 @@
   --color-gold: #C99A3D;
   --color-gold-tint: #F5EDDA;
 
+
+  /* Red */
+  --color-r-white: oklch(98.0% 0.01 29.5); 
+  --color-r-red: oklch(70.172% 0.11901 7.0907);
+  --color-r-marigold: oklch(65.809% 0.15943 31.855);
+  --color-r-smoke-red: oklch(83.547% 0.04691 4.6691);
+  --color-r-dusty-pink: oklch(84.983% 0.07832 9.9344);
+
+  /* Yellow */
+  --color-y-gold: oklch(89.589% 0.11806 89.132);
+  --color-y-lemon-yellow: oklch(94.749% 0.13225 103.52);
+  --color-y-sherbert-yellow: oklch(93.173% 0.11826 106.4);
+  --color-y-mimosa-yellow: oklch(84.25% 0.06996 103.26);
+  --color-y-yellow: oklch(94.577% 0.10215 110.6);
+
+  /* Orange */
+  --color-o-vermillion: oklch(80.309% 0.11551 37.858);
+  --color-o-apricot: oklch(80.598% 0.11099 63.836);
+  --color-o-orange: oklch(91.996% 0.0651 74.369);
+
+  /* Purple */
+  --color-p-lavender: oklch(52.839% 0.09034 282.87);
+  --color-p-white: oklch(98.0% 0.09034 282.87);
+
+  /* Grey */
+  --color-g-cool-grey: oklch(86.236% 0.0068 106.54);
+  --color-g-grey: oklch(82.105% 0.01173 176.24);
+  --color-g-dark-grey: oklch(60.535% 0.01045 100.09);
+  --color-g-deep-grey: oklch(29.716% 0 0);
+
   --font-display: var(--font-fraunces), serif;
   --font-sans: var(--font-inter), sans-serif;
   --font-mono: var(--font-spline-mono), monospace;

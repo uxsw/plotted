@@ -1,6 +1,7 @@
 "use client";
 
 import { ButtonHTMLAttributes, forwardRef } from "react";
+import styles from "./Button.module.css";
 
 type Variant = "primary" | "secondary" | "ghost" | "danger";
 
@@ -8,15 +9,11 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
 }
 
-const variantClasses: Record<Variant, string> = {
-  primary:
-    "bg-moss text-white hover:bg-moss-deep disabled:opacity-50 disabled:cursor-not-allowed",
-  secondary:
-    "border border-moss text-moss bg-transparent hover:bg-moss-tint disabled:opacity-50 disabled:cursor-not-allowed",
-  ghost:
-    "text-ink-soft bg-transparent hover:bg-sand cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed",
-  danger:
-    "bg-clay text-white hover:bg-clay-deep disabled:opacity-50 disabled:cursor-not-allowed",
+const variantClass: Record<Variant, string> = {
+  primary: styles["o-button--primary"],
+  secondary: styles["o-button--secondary"],
+  ghost: styles["o-button--ghost"],
+  danger: styles["o-button--danger"],
 };
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
@@ -24,14 +21,9 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         ref={ref}
-        className={[
-          "inline-flex items-center justify-center gap-2",
-          "rounded px-4 py-2 text-sm font-medium font-sans",
-          "transition-colors duration-150",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2 focus-visible:ring-offset-paper",
-          variantClasses[variant],
-          className,
-        ].join(" ")}
+        className={[styles["o-button"], variantClass[variant], className]
+          .filter(Boolean)
+          .join(" ")}
         {...props}
       >
         {children}
@@ -42,5 +34,5 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
 Button.displayName = "Button";
 
-export { Button };
+export { Button, styles as buttonStyles };
 export type { ButtonProps, Variant as ButtonVariant };

@@ -1,7 +1,9 @@
 import Link from "next/link";
+import clsx from "clsx";
 import { createClient } from "@/lib/supabase/server";
 import { SchemeCardScroller } from "@/components/dashboard/SchemeCardScroller";
 import type { SchemeSummary } from "@/components/SchemeList";
+import buttonStyles from "@/components/ui/Button.module.css";
 
 function ArrowRightIcon() {
   return (
@@ -62,14 +64,20 @@ export default async function SchemesSection() {
       <div className="flex items-center justify-between mt-3">
         <Link
           href="/schemes"
-          className="inline-flex items-center gap-1 font-sans text-sm text-moss hover:text-moss-deep transition-colors"
+          className={clsx(
+            buttonStyles["o-button"],
+            buttonStyles["o-button--ghost"]
+          )}
         >
           View all
           <ArrowRightIcon />
         </Link>
         <Link
           href="/schemes/new"
-          className="inline-flex items-center gap-1.5 rounded px-4 py-2 text-sm font-medium font-sans bg-moss text-white hover:bg-moss-deep transition-colors"
+          className={clsx(
+            buttonStyles["o-button"],
+            buttonStyles["o-button--primary"]
+          )}
         >
           <PlusIcon />
           New scheme

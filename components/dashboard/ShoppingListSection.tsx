@@ -2,6 +2,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { ShoppingListItemData } from "@/components/ShoppingList";
+import clsx from "clsx";
+import buttonStyles from "@/components/ui/Button.module.css";
 
 function SproutIcon() {
   return (
@@ -88,7 +90,10 @@ export default async function ShoppingListSection() {
         <h2 className="font-display font-medium text-xl text-ink">Shopping list</h2>
         <Link
           href="/shopping-list"
-          className="font-sans text-sm text-moss hover:text-moss-deep transition-colors"
+          className={clsx(
+            buttonStyles["o-button"],
+            buttonStyles["o-button--ghost"]
+          )}
         >
           View all
         </Link>

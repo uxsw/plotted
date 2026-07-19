@@ -64,7 +64,7 @@ export function GardenCardScroller({ plants }: { plants: PlantSummary[] }) {
           <Link
             key={plant.id}
             href={`/plants/${plant.id}`}
-            className="flex-none w-[80%] snap-start rounded-lg overflow-hidden border border-sand-line bg-paper hover:shadow-md active:scale-[0.98] active:opacity-75 transition-all duration-75 h-[280px] flex flex-col"
+            className="flex-none w-[80%] snap-start overflow-hidden hover:shadow-md active:scale-[0.98] active:opacity-75 transition-all duration-75 h-[280px] flex flex-col"
           >
             <div className="relative h-[160px] shrink-0 w-full overflow-hidden bg-paper-deep">
               {plant.photo_url ? (

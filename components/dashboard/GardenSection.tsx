@@ -1,8 +1,10 @@
 import Link from "next/link";
+import clsx from "clsx";
 import { createClient } from "@/lib/supabase/server";
 import type { Plant } from "@/lib/types";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { GardenCardScroller } from "@/components/dashboard/GardenCardScroller";
+import buttonStyles from "@/components/ui/Button.module.css";
 
 function ArrowRightIcon() {
   return (
@@ -57,7 +59,7 @@ export default async function GardenSection() {
           action={
             <Link
               href="/plants/new"
-              className="inline-flex items-center justify-center gap-1.5 rounded px-4 py-2 text-sm font-medium font-sans bg-moss text-white hover:bg-moss-deep transition-colors"
+              className="inline-flex items-center justify-center gap-1.5 py-2 text-sm font-medium font-sans bg-moss text-white hover:bg-moss-deep transition-colors"
             >
               <PlusIcon />
               Add plant
@@ -70,14 +72,20 @@ export default async function GardenSection() {
           <div className="flex items-center justify-between mt-3">
             <Link
               href="/plants"
-              className="inline-flex items-center gap-1 font-sans text-sm text-moss hover:text-moss-deep transition-colors"
+              className={clsx(
+                buttonStyles["o-button"],
+                buttonStyles["o-button--ghost"]
+              )}
             >
               View all
               <ArrowRightIcon />
             </Link>
             <Link
               href="/plants/new"
-              className="inline-flex items-center gap-1.5 rounded px-4 py-2 text-sm font-medium font-sans bg-moss text-white hover:bg-moss-deep transition-colors"
+              className={clsx(
+                buttonStyles["o-button"],
+                buttonStyles["o-button--primary"]
+              )}
             >
               <PlusIcon />
               Add plant
