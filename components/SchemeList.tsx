@@ -193,7 +193,7 @@ function SchemeCard({
             <Popover.Content
               align="end"
               sideOffset={6}
-              className="z-50 min-w-[140px] border p-1 shadow-md flex flex-col focus:outline-none"
+              className="z-50 min-w-[140px] bg-white p-1 shadow-md flex flex-col focus:outline-none"
             >
               <button
                 type="button"
