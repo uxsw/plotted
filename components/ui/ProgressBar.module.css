@@ -1,0 +1,15 @@
+.o-progress-bar {
+    border-radius: 1rem;
+    background-color: var(--color-g-grey);
+    height: 5px;
+    margin-top: 0.25rem;
+    overflow:hidden;
+}
+
+.o-progress-bar__complete {
+    background-color: var(--color-r-marigold);
+    height: 100%;
+    transition-duration: .3s;
+    transition-property: all;
+    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
+}

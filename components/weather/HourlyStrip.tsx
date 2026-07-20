@@ -46,7 +46,7 @@ export function HourlyStrip({ hourly, current }: Props) {
             return (
               <div
                 key={entry.time}
-                className="flex flex-col items-center gap-1 rounded-lg border border-sand-line px-2 py-2 min-w-[48px]"
+                className="flex flex-col items-center gap-1 border border-sand-line px-2 py-2 min-w-[48px]"
               >
                 <span className="font-sans text-[11px] text-ink-soft leading-none">
                   {formatHour(entry.time)}

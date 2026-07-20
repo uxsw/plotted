@@ -1,11 +1,12 @@
 "use client";
 
 import { useRef, useState, useCallback } from "react";
+import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 import { PlantName } from "@/components/plants/PlantName";
 import type { Plant } from "@/lib/types";
-
+import carouselStyles from "@/components/ui/Carousel.module.css";
 type PlantSummary = Pick<Plant, "id" | "species" | "cultivar" | "common_names" | "photo_url">;
 
 function BotanicalPlaceholder() {
@@ -100,9 +101,10 @@ export function GardenCardScroller({ plants }: { plants: PlantSummary[] }) {
           {plants.map((_, i) => (
             <span
               key={i}
-              className={`block h-1 rounded-full transition-all duration-200 ${
-                i === activeIndex ? "w-4 bg-moss" : "w-1.5 bg-sand-line"
-              }`}
+              className={clsx(
+                carouselStyles["o-carousel__position"],
+                i === activeIndex ? carouselStyles["o-carousel__position--current"] : carouselStyles["o-carousel__position--default"]
+              )}
             />
           ))}
         </div>

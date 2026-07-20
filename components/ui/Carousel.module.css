@@ -1,0 +1,16 @@
+.o-carousel__position {
+  display: block;
+  height: 0.25rem; /* h-1 */
+  border-radius: 9999px; /* rounded-full */
+  transition: all 200ms;
+}
+
+.o-carousel__position--current {
+  width: 1rem; /* w-4 */
+  background-color: var(--color-r-marigold);
+}
+
+.o-carousel__position--default {
+  width: 0.375rem; /* w-1.5 */
+  background-color: var(--color-sand-line);
+}

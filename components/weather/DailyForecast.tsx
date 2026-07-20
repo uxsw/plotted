@@ -23,7 +23,7 @@ export function DailyForecast({ daily }: Props) {
             <div
               key={date}
               className={[
-                "flex-1 flex flex-col items-center gap-1.5 rounded-lg py-3 px-1",
+                "flex-1 flex flex-col items-center gap-1.5 py-3 px-1",
                 isToday
                   ? "bg-moss-tint"
                   : "border border-sand-line",

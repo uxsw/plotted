@@ -25,7 +25,7 @@ type FetchState =
 function ForecastSkeleton() {
   return (
     <div
-      className="bg-paper border border-sand-line rounded-[10px] overflow-hidden animate-pulse"
+      className="bg-white border border-sand-line rounded-[10px] overflow-hidden animate-pulse"
       aria-hidden="true"
     >
       <div className="flex items-center px-4 py-2.5 border-b border-sand-line">
@@ -107,7 +107,7 @@ export function WeatherForecast({ location, onChangeLocation }: Props) {
 
   const { data } = fetchState;
   return (
-    <div className="bg-paper border border-sand-line rounded-[10px] overflow-hidden">
+    <div className="bg-white overflow-hidden">
       <CurrentConditions
         current={data.current}
         locationLabel={location.label}
