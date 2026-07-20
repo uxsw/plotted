@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import dynamic from "next/dynamic";
+import { buttonStyles } from "@/components/ui/Button";
 
 const FeedbackModal = dynamic(() => import("./FeedbackModal"), { ssr: false });
 
@@ -14,12 +15,11 @@ export default function FeedbackButton() {
         onClick={() => setOpen(true)}
         aria-label="Send feedback"
         className={[
-          "cursor-pointer",
-          "fixed bottom-6 right-6 z-50",
-          "flex items-center gap-2 px-4 py-2.5",
-          "rounded-full bg-moss text-white text-sm font-sans font-medium",
-          "shadow-lg hover:bg-moss-deep transition-colors duration-150",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2 focus-visible:ring-offset-paper",
+          buttonStyles["o-button"],
+          buttonStyles["o-button--primary"],
+          buttonStyles["o-button--pill"],
+          // positional + shadow are component-level concerns, not o-button's
+          "fixed bottom-6 right-6 z-50 shadow-lg",
         ].join(" ")}
       >
         <svg

@@ -1,8 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import clsx from "clsx";
 import { Button } from "@/components/ui/Button";
 import { submitFeedback } from "@/app/(app)/actions/submitFeedback";
+import buttonStyles from "@/components/ui/Button.module.css";
 
 type FeedbackType = "bug" | "ux" | "other";
 
@@ -173,13 +175,10 @@ function FormState({
               key={value}
               type="button"
               onClick={() => setType(value)}
-              className={[
-                "flex-1 py-2 text-xs font-sans font-medium transition-colors duration-150",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-moss",
-                type === value
-                  ? "bg-moss text-white"
-                  : "text-ink-soft hover:text-ink hover:bg-sand/50",
-              ].join(" ")}
+              className={clsx(
+                buttonStyles["o-button"],
+                type === value ? buttonStyles["o-button--primary"] : buttonStyles["o-button--ghost"]
+              )}
             >
               {label}
             </button>

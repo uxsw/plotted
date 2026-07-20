@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
+import clsx from "clsx";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import buttonStyles from "@/components/ui/Button.module.css";
 import SchemeList, { type SchemeSummary } from "@/components/SchemeList";
-
 export const metadata: Metadata = {
   title: "Planting Schemes | Plotted",
 };
@@ -50,7 +51,10 @@ export default async function SchemesPage() {
         {schemes.length > 0 && (
           <Link
             href="/schemes/new"
-            className="inline-flex items-center justify-center rounded px-4 py-2 text-sm font-medium font-sans bg-clay text-white hover:bg-clay-deep transition-colors"
+            className={clsx(
+              buttonStyles["o-button"],
+              buttonStyles["o-button--primary"]
+            )}
           >
             + Create new scheme
           </Link>

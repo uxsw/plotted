@@ -9,6 +9,7 @@ import { createClient } from "@/lib/supabase/server";
 import PlantGrid from "@/components/PlantGrid";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { PwaInstallTriggerCard } from "@/components/ui/PwaInstallTriggerCard";
+import buttonStyles from "@/components/ui/Button.module.css";
 
 export default async function PlantsPage() {
   const supabase = await createClient();
@@ -45,7 +46,7 @@ export default async function PlantsPage() {
         {plantCount > 0 && (
           <Link
             href="/plants/new"
-            className="inline-flex items-center justify-center rounded px-4 py-2 text-sm font-medium font-sans bg-moss text-white hover:bg-moss-deep transition-colors"
+            className={[buttonStyles["o-button"], buttonStyles["o-button--primary"]].join(" ")}
           >
             + Add plant
           </Link>

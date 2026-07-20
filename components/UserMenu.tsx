@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
+import clsx from "clsx";
+import buttonStyles from "@/components/ui/Button.module.css";
 
 function initials(email: string): string | null {
   const local = email.split("@")[0];
@@ -42,7 +44,11 @@ export default function UserMenu({ email }: { email: string }) {
       <Popover.Trigger asChild>
         <button
           aria-label="Account menu"
-          className="w-9 h-9 rounded-full bg-moss text-paper flex items-center justify-center text-sm font-medium font-sans hover:bg-moss-deep transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+          className={clsx(
+            buttonStyles["o-button"],
+            buttonStyles["o-button--primary"],
+            buttonStyles["o-button--icon"]
+          )}
         >
           {label ?? <UserIcon />}
         </button>

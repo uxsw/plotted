@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
+import { buttonStyles } from "@/components/ui/Button";
 
 function TrashIcon() {
   return (
@@ -52,7 +53,11 @@ export default function DeletePlantButton({ id, name }: { id: string; name: stri
         onClick={() => setOpen(true)}
         aria-label="Delete plant"
         title="Delete plant"
-        className="flex items-center justify-center w-9 h-9 rounded text-ink-soft transition-colors duration-150 hover:bg-clay-tint hover:text-clay focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+        className={[
+          buttonStyles["o-button"],
+          buttonStyles["o-button--ghost-danger"],
+          buttonStyles["o-button--icon"],
+        ].join(" ")}
       >
         <TrashIcon />
       </button>

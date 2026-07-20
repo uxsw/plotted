@@ -10,6 +10,7 @@ import { FeatureNoticePanel } from "@/components/ui/FeatureNoticePanel";
 import { markSchemeAiNoticeSeen } from "@/app/actions/schemes";
 import { markShoppingListNoticeSeen } from "@/app/actions/shopping-list";
 import type { Scheme, SchemeSuggestion, SchemeTier } from "@/lib/types";
+import buttonStyles from "@/components/ui/Button.module.css";
 
 const TIER_ORDER: SchemeTier[] = ["back", "mid", "ground"];
 const TIER_LABELS: Record<SchemeTier, string> = {
@@ -300,7 +301,7 @@ export default function SchemeResults({
 
         <Link
           href="/schemes"
-          className="absolute top-4 left-4 z-10 font-sans text-sm text-white/90 hover:text-white transition-colors"
+          className={[buttonStyles["o-button"], buttonStyles["o-button--overlay"]].join(" ")}
         >
           ← Planting schemes
         </Link>

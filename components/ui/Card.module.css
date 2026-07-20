@@ -1,0 +1,59 @@
+/* o-card — reusable card object */
+
+.o-card {
+  display: flex;
+  flex-direction: column;
+  border-radius: 0;
+  height: 100%;
+  overflow: hidden;
+  background-color: #fefdfb;
+  transition: box-shadow 150ms;
+}
+
+.o-card--flat {
+  border: none;
+  background-color: transparent;
+}
+
+.o-card--interactive {
+  cursor: pointer;
+  text-align: left;
+  width: 100%;
+  text-decoration: none;
+  color: inherit;
+  /* combine both transitions so hover shadow and active press both work */
+  transition: box-shadow 150ms, transform 75ms, opacity 75ms;
+}
+
+.o-card--interactive:hover {
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+}
+
+.o-card--interactive:active {
+  transform: scale(0.98);
+  opacity: 0.75;
+}
+
+/* --- Elements --- */
+
+.o-card__image {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  width: 100%;
+  overflow: hidden;
+  background-color: var(--color-paper-deep);
+}
+
+.o-card__body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  padding: 1rem;
+  flex: 1;
+}
+
+.o-card__footer {
+  padding: 0 1rem 1rem;
+  border-top: 1px solid color-mix(in srgb, var(--color-sand-line) 60%, transparent);
+  margin-top: auto;
+}

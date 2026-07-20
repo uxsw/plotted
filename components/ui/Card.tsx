@@ -1,6 +1,7 @@
 import React, { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import styles from "./Card.module.css";
 
 interface CardProps {
   photoUrl?: string | null;
@@ -37,19 +38,17 @@ function Card({
 }: CardProps) {
   const interactive = !!(href || onClick);
   const sharedClassName = [
-    "flex flex-col rounded-lg overflow-hidden",
-    variant === "flat"
-      ? ""
-      : "border border-sand-line bg-paper transition-shadow duration-150",
-    interactive ? "cursor-pointer hover:shadow-md text-left w-full" : "",
-    interactive ? "active:scale-[0.98] active:opacity-75 transition-transform duration-75" : "",
+    styles["o-card"],
+    variant === "flat" ? styles["o-card--flat"] : "",
+    interactive ? styles["o-card--interactive"] : "",
     className,
-  ].join(" ");
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   const content = (
     <>
-      {/* Image area */}
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-paper-deep">
+      <div className={styles["o-card__image"]}>
         {photoUrl ? (
           <Image
             src={photoUrl}
@@ -76,8 +75,7 @@ function Card({
         )}
       </div>
 
-      {/* Content area */}
-      <div className="flex flex-col gap-1.5 p-4 flex-1">
+      <div className={styles["o-card__body"]}>
         <h3 className="font-display font-medium text-base text-ink leading-snug">
           {title}
         </h3>
@@ -92,9 +90,7 @@ function Card({
       </div>
 
       {footer && (
-        <div className="px-4 pb-4 pt-0 border-t border-sand-line/60 mt-auto">
-          {footer}
-        </div>
+        <div className={styles["o-card__footer"]}>{footer}</div>
       )}
     </>
   );
@@ -115,11 +111,7 @@ function Card({
     );
   }
 
-  return (
-    <div className={sharedClassName}>
-      {content}
-    </div>
-  );
+  return <div className={sharedClassName}>{content}</div>;
 }
 
 function DefaultPlaceholder() {
@@ -141,5 +133,5 @@ function DefaultPlaceholder() {
   );
 }
 
-export { Card };
+export { Card, styles as cardStyles };
 export type { CardProps };

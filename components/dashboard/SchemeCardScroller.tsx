@@ -73,9 +73,9 @@ export function SchemeCardScroller({ schemes }: { schemes: SchemeSummary[] }) {
           <Link
             key={scheme.id}
             href={`/schemes/${scheme.id}`}
-            className="flex-none w-[80%] snap-start rounded-lg overflow-hidden border border-sand-line bg-paper hover:shadow-md active:scale-[0.98] active:opacity-75 transition-all duration-75 flex flex-col"
+            className="flex-none w-[60%] snap-start overflow-hidden bg-white hover:shadow-md active:scale-[0.98] active:opacity-75 transition-all duration-75 flex flex-col"
           >
-            <div className="relative h-[130px] shrink-0 w-full overflow-hidden bg-paper-deep">
+            <div className="relative h-[130px] shrink-0 w-full overflow-hidden">
               {scheme.source_plant_photos[0] && (
                 <Image
                   src={scheme.source_plant_photos[0]}

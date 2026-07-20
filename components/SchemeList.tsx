@@ -1,12 +1,15 @@
 "use client";
 
 import { useState } from "react";
+import clsx from "clsx";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import * as Popover from "@radix-ui/react-popover";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { PlaceholderSchemeCard } from "@/components/ui/PlaceholderSchemeCard";
+import cardStyles from "@/components/ui/Card.module.css";
+import buttonStyles from "@/components/ui/Button.module.css";
 
 export type SchemeSummary = {
   id: string;
@@ -160,13 +163,16 @@ function SchemeCard({
   );
 
   return (
-    <div className={`relative flex flex-col rounded-lg overflow-hidden border border-sand-line bg-paper transition-shadow duration-150 ${deleting ? "opacity-50 pointer-events-none" : ""}`}>
+    <div className={`relative flex flex-col overflow-hidden transition-shadow duration-150 ${deleting ? "opacity-50 pointer-events-none" : ""}`}>
       {renaming ? (
         <div className="flex flex-col flex-1">{cardBody}</div>
       ) : (
         <Link
           href={`/schemes/${scheme.id}`}
-          className="flex flex-col flex-1 text-left hover:shadow-md active:scale-[0.98] active:opacity-75 transition-transform duration-75"
+          className={clsx(
+            cardStyles["o-card"],
+            cardStyles["o-card--interactive"]
+          )}
         >
           {cardBody}
         </Link>
@@ -187,7 +193,7 @@ function SchemeCard({
             <Popover.Content
               align="end"
               sideOffset={6}
-              className="z-50 min-w-[140px] rounded-lg border border-sand-line bg-paper p-1 shadow-md flex flex-col focus:outline-none"
+              className="z-50 min-w-[140px] bg-white p-1 shadow-md flex flex-col focus:outline-none"
             >
               <button
                 type="button"
@@ -263,9 +269,9 @@ function FailedSchemeCard({
 
   return (
     <div
-      className={`relative flex flex-col rounded-lg overflow-hidden border border-sand-line bg-paper transition-opacity duration-150 ${deleting ? "opacity-50 pointer-events-none" : ""}`}
+      className={`relative flex flex-col overflow-hidden border transition-opacity duration-150 ${deleting ? "opacity-50 pointer-events-none" : ""}`}
     >
-      <div className="relative h-[190px] w-full overflow-hidden bg-paper-deep">
+      <div className="relative h-[190px] w-full overflow-hidden">
         {scheme.source_plant_photos[0] && (
           <Image
             src={scheme.source_plant_photos[0]}
@@ -279,7 +285,7 @@ function FailedSchemeCard({
           {scheme.source_plant_photos.length > 0 ? (
             <ThumbnailStack photos={scheme.source_plant_photos} />
           ) : (
-            <div className="w-16 h-16 text-sand-line">
+            <div className="w-16 h-16">
               <SchemeIllustration />
             </div>
           )}
@@ -295,7 +301,10 @@ function FailedSchemeCard({
           <button
             type="button"
             onClick={doRetry}
-            className="self-start inline-flex items-center justify-center rounded px-3 py-1.5 text-xs font-medium font-sans bg-moss text-white hover:bg-moss-deep transition-colors"
+            className={clsx(
+            buttonStyles["o-button"],
+            buttonStyles["o-button--primary"],
+          )}
           >
             Try again
           </button>
@@ -343,7 +352,7 @@ export default function SchemeList({ schemes: initialSchemes }: { schemes: Schem
         <button
           type="button"
           onClick={() => router.push("/schemes/new")}
-          className="flex flex-col rounded-lg overflow-hidden border border-clay bg-paper cursor-pointer hover:shadow-md text-left w-full active:scale-[0.98] active:opacity-75 transition-transform duration-75"
+          className="flex flex-col overflow-hidden border border-clay bg-paper cursor-pointer hover:shadow-md text-left w-full active:scale-[0.98] active:opacity-75 transition-transform duration-75"
         >
           <div className="h-[190px] w-full flex items-center justify-center bg-clay-tint">
             <PlusIcon />

@@ -8,6 +8,7 @@ import { plantDisplayTitle } from "@/lib/plantName";
 import { Button } from "@/components/ui/Button";
 import { Toggle } from "@/components/ui/Toggle";
 import type { Plant, SchemeSpace } from "@/lib/types";
+import buttonStyles from "@/components/ui/Button.module.css";
 
 const MAX_PLANTS = 5;
 
@@ -219,7 +220,7 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
         <button
           type="button"
           onClick={() => setStep("select")}
-          className="font-sans text-sm text-ink-soft hover:text-ink transition-colors"
+          className={[buttonStyles["o-button"], buttonStyles["o-button--ghost"]].join(" ")}
         >
           ← Back to plant selection
         </button>
