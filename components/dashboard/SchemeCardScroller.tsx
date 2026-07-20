@@ -1,9 +1,11 @@
 "use client";
 
 import { useRef, useState, useCallback } from "react";
+import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 import type { SchemeSummary } from "@/components/SchemeList";
+import carouselStyles from "@/components/ui/Carousel.module.css";
 
 function ThumbnailStack({ photos }: { photos: string[] }) {
   const shown = photos.slice(0, 5);
@@ -118,9 +120,10 @@ export function SchemeCardScroller({ schemes }: { schemes: SchemeSummary[] }) {
           {schemes.map((_, i) => (
             <span
               key={i}
-              className={`block h-1 rounded-full transition-all duration-200 ${
-                i === activeIndex ? "w-4 bg-moss" : "w-1.5 bg-sand-line"
-              }`}
+              className={clsx(
+                carouselStyles["o-carousel__position"],
+                i === activeIndex ? carouselStyles["o-carousel__position--current"] : carouselStyles["o-carousel__position--default"]
+              )}
             />
           ))}
         </div>

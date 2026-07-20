@@ -1,9 +1,13 @@
 "use client";
 
 import { forwardRef, useRef, useState, useCallback, useEffect } from "react";
+import clsx from "clsx";
 import Image from "next/image";
 import { markSpeciesSpotted, unmarkSpeciesSpotted } from "@/app/actions/wildlife";
 import type { SpeciesRow } from "@/components/WildlifeGrid";
+import carouselStyles from "@/components/ui/Carousel.module.css";
+import buttonStyles from "@/components/ui/Button.module.css";
+import progressbarStyles from "@/components/ui/ProgressBar.module.css";
 
 function CheckIcon() {
   return (
@@ -50,11 +54,11 @@ const BirdCard = forwardRef<HTMLDivElement, BirdCardProps>(
       <div
         ref={ref}
         className={[
-          "flex-none w-[60%] snap-center rounded-lg border bg-paper",
+          "flex-none w-[60%] snap-center bg-white",
           spotted ? "border-moss/40" : "border-sand-line",
         ].join(" ")}
       >
-        <div className="relative aspect-square w-full overflow-hidden bg-paper-deep rounded-t-lg">
+        <div className="relative aspect-square w-full overflow-hidden">
           <Image
             src={species.image_path}
             alt={species.name}
@@ -77,13 +81,10 @@ const BirdCard = forwardRef<HTMLDivElement, BirdCardProps>(
                 ? `Unmark ${species.name} as spotted`
                 : `Mark ${species.name} as spotted`
             }
-            className={[
-              "flex-none inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium font-sans transition-colors duration-150",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2 focus-visible:ring-offset-paper",
-              spotted
-                ? "bg-moss text-white"
-                : "border border-moss text-moss bg-transparent",
-            ].join(" ")}
+            className={clsx(
+              buttonStyles["o-button"],
+              spotted ? buttonStyles["o-button--primary"] : buttonStyles["o-button--ghost"]
+            )}
           >
             {spotted && <CheckIcon />}
             {spotted ? "Spotted" : "Mark as spotted"}
@@ -216,9 +217,9 @@ export function BirdCardScroller({
           <span className="font-display font-medium text-3xl text-ink">{count}</span>
           <span className="font-sans text-sm text-ink-soft">of {total} spotted</span>
         </div>
-        <div className="h-[5px] rounded-full bg-sand mt-2 overflow-hidden">
+        <div className={clsx(progressbarStyles["o-progress-bar"])}>
           <div
-            className="h-full rounded-full bg-moss transition-all duration-300"
+            className={clsx(progressbarStyles["o-progress-bar__complete"])}
             style={{ width: total > 0 ? `${(count / total) * 100}%` : "0%" }}
           />
         </div>
@@ -247,9 +248,10 @@ export function BirdCardScroller({
           {sortedSpecies.map((_, i) => (
             <span
               key={i}
-              className={`block h-1 rounded-full transition-all duration-200 ${
-                i === activeIndex ? "w-4 bg-moss" : "w-1.5 bg-sand-line"
-              }`}
+              className={clsx(
+                carouselStyles["o-carousel__position"],
+                i === activeIndex ? carouselStyles["o-carousel__position--current"] : carouselStyles["o-carousel__position--default"]
+              )}
             />
           ))}
         </div>
