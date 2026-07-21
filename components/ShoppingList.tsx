@@ -71,8 +71,8 @@ function ItemCard({
     .join(" ");
 
   return (
-    <div className="flex gap-3 rounded-lg border border-sand-line bg-paper p-3">
-      <div className="relative w-16 h-16 flex-shrink-0 rounded-md overflow-hidden bg-paper-deep">
+    <div className="flex gap-3 bg-white p-3">
+      <div className="relative w-16 h-16 flex-shrink-0 overflow-hidden">
         {item.thumbnail_url ? (
           <Image
             src={item.thumbnail_url}

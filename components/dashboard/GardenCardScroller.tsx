@@ -83,7 +83,7 @@ export function GardenCardScroller({ plants }: { plants: PlantSummary[] }) {
               )}
             </div>
             <div className="flex flex-col justify-center flex-1 px-4 py-3 min-h-0">
-              <p className="font-display font-medium text-base text-ink leading-snug line-clamp-2">
+              <p className="font-display font-medium text-base leading-snug line-clamp-2">
                 <PlantName species={plant.species} cultivar={plant.cultivar} variant="card" />
               </p>
               {plant.common_names?.[0] && (

@@ -70,7 +70,7 @@ const BirdCard = forwardRef<HTMLDivElement, BirdCardProps>(
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 px-4 pt-3 pb-1">
-          <p className="font-display font-medium text-base text-ink leading-snug">
+          <p className="font-display font-medium text-base leading-snug">
             {species.name}
           </p>
           <button
@@ -214,8 +214,8 @@ export function BirdCardScroller({
     <div>
       <div className="mb-4">
         <div className="flex items-baseline gap-1.5">
-          <span className="font-display font-medium text-3xl text-ink">{count}</span>
-          <span className="font-sans text-sm text-ink-soft">of {total} spotted</span>
+          <span className="font-display font-medium text-3xl">{count}</span>
+          <span className="font-sans text-sm">of {total} spotted</span>
         </div>
         <div className={clsx(progressbarStyles["o-progress-bar"])}>
           <div

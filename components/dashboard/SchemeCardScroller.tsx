@@ -98,7 +98,7 @@ export function SchemeCardScroller({ schemes }: { schemes: SchemeSummary[] }) {
               </div>
             </div>
             <div className="flex flex-col gap-1 px-4 py-3">
-              <h3 className="font-display font-medium text-base text-ink leading-snug truncate">
+              <h3 className="font-display font-medium text-base leading-snug truncate">
                 {scheme.name ?? "Unnamed scheme"}
               </h3>
               {scheme.narrative_intro && (

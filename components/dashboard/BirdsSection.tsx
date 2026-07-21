@@ -20,8 +20,8 @@ export default async function BirdsSection() {
 
   return (
     <section aria-label="Garden visitors">
-      <h2 className="font-display font-medium text-xl text-ink mb-1">Garden visitors</h2>
-      <p className="font-sans text-sm text-ink-soft mb-4">Birds you might spot nearby this season. Tick them off as you go.</p>
+      <h2 className="font-display font-medium text-xl mb-1">Garden visitors</h2>
+      <p className="font-sans text-sm mb-4">Birds you might spot nearby this season. Tick them off as you go.</p>
       <BirdCardScroller
         initialSpecies={(species ?? []) as SpeciesRow[]}
         initialSpottedIds={spottedIds}

@@ -80,7 +80,7 @@ export function WeatherForecast({ location, onChangeLocation }: Props) {
 
   if (fetchState.status === "error") {
     return (
-      <div className="bg-paper border border-sand-line rounded-[10px] px-4 py-5 flex flex-col gap-3">
+      <div className="bg-paper border border-sand-line px-4 py-5 flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-sans text-ink-soft truncate pr-2">
             {location.label}

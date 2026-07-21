@@ -14,7 +14,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   if (!user) redirect("/");
 
   return (
-    <div className="min-h-screen bg-paper">
+    <div className="min-h-screen">
       <OfflineBanner />
       <header>
         <div className="px-4 py-3 flex items-center justify-between">

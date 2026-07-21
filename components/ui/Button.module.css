@@ -36,6 +36,12 @@
   color: var(--color-r-white);
 }
 
+.o-button--outline {
+  background-color: transparent;
+  color: var(--color-g-deep-grey);
+  border: 1px solid var(--color-g-deep-grey);
+}
+
 .o-button--primary:hover:not(:disabled) {
   background-color: var(--color-o-vermillion);
   color: var(--color-g-deep-grey);
@@ -114,6 +120,18 @@
 
 /* Icon-only: square fixed-size, no text padding */
 .o-button--icon {
+  padding: 0;
+  width: 40px;
+  height: 40px;
+  gap: 0;
+
+  &:hover {
+    background-color: var(--color-o-vermillion);
+    color: var(--color-g-deep-grey);
+  }
+}
+
+.o-button--avatar {
   padding: 0;
   width: 40px;
   height: 40px;

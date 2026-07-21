@@ -32,10 +32,13 @@
   --color-y-mimosa-yellow: oklch(84.25% 0.06996 103.26);
   --color-y-yellow: oklch(94.577% 0.10215 110.6);
 
+  /* Green */
+  --color-g-summer-green: oklch(73.657% 0.09242 175.58);
   /* Orange */
   --color-o-vermillion: oklch(80.309% 0.11551 37.858);
   --color-o-apricot: oklch(80.598% 0.11099 63.836);
   --color-o-orange: oklch(91.996% 0.0651 74.369);
+  --color-o-surface: oklch(0.9677 0.0158 73.68);
 
   /* Purple */
   --color-p-lavender: oklch(52.839% 0.09034 282.87);
@@ -106,8 +109,8 @@ button, [role="button"] {
 }
 
 body {
-  background-color: #FAF6EC;
-  color: #2B2A24;
+  background-color: var(--color-o-surface);
+  color: var(--color-g-deep-grey);
   font-family: var(--font-inter), sans-serif;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.08'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)'/%3E%3C/svg%3E");
   background-repeat: repeat;
@@ -117,4 +120,24 @@ body {
 
 .bg-marigold {
   background-color: var(--color-r-marigold);
+}
+
+.surface-info {
+  background-color: var(--color-y-yellow);
+}
+
+.o-text-input {
+  background-color: transparent;
+  border: 1px solid var(--color-g-deep-grey);
+  color: var(--color-g-deep-grey);
+  font-size: 1rem;
+
+  &::placeholder {
+    color: var(--color-g-dark-grey);
+  }
+
+  &:focus {
+    background-color: white;
+    border-color: var(--color-g-summer-green);
+  }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo, useRef, useEffect } from "react";
+import clsx from "clsx";
 import { useRouter } from "next/navigation";
 import type { Plant } from "@/lib/types";
 import { scientificNameString, autocompleteTitle } from "@/lib/plantName";
@@ -9,6 +10,7 @@ import { Card } from "@/components/ui/Card";
 import { SunBadge } from "@/components/ui/SunBadge";
 import { PlaceholderPlantCard } from "@/components/ui/PlaceholderPlantCard";
 import { SEASON_STYLES, getSeasonBand, formatSeason } from "@/components/ui/FloweringSeasonBadge";
+import buttonStyles from "@/components/ui/Button.module.css";
 
 const CURRENT_MONTH = new Date().getMonth() + 1; // 1–12
 
@@ -346,7 +348,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
               onFocus={() => { if (query.length >= 1) setDropdownOpen(true); }}
               onKeyDown={handleInputKeyDown}
               placeholder="search plants…"
-              className="w-full pl-9 pr-8 py-2.5 bg-paper border border-sand-line rounded font-display italic text-[15px] text-ink placeholder:text-ink-soft/50 outline-none focus:border-moss transition-colors"
+              className="o-text-input w-full pl-9 pr-8 py-2.5 placeholder:text-ink-soft/50 outline-none focus:border-moss transition-colors"
             />
             {query && (
               <button
@@ -362,7 +364,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
 
           {/* Autocomplete dropdown */}
           {showAutocomplete && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-paper border border-sand-line rounded shadow-md z-20 overflow-hidden">
+            <div className="absolute top-full left-0 right-0 mt-1 bg-white shadow-md z-20 overflow-hidden">
               {autocompleteItems.map((item, i) => (
                 <button
                   key={item.plant.id}
@@ -402,12 +404,10 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
             type="button"
             onClick={() => setFilterOpen(o => !o)}
             aria-label="Filter plants"
-            className={[
-              "relative flex items-center justify-center w-10 h-10 rounded border transition-colors",
-              filterOpen
-                ? "bg-moss border-moss text-paper"
-                : "bg-paper border-sand-line text-ink-soft hover:border-moss hover:text-ink",
-            ].join(" ")}
+            className={clsx(
+              buttonStyles["o-button"],
+              buttonStyles["o-button--icon"]
+            )}
           >
             <FilterIcon />
             {activeFilter && !filterOpen && (
@@ -417,7 +417,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
 
           {/* Filter popover */}
           {filterOpen && (
-            <div className="absolute top-full right-0 mt-1 w-52 bg-paper border border-sand-line rounded shadow-md z-20 overflow-hidden py-1">
+            <div className="absolute top-full right-0 mt-1 w-52 bg-white shadow-md z-20 overflow-hidden py-1">
               {FILTER_OPTIONS.map(({ id, label, Icon }) => {
                 const isActive = activeFilter === id;
                 return (

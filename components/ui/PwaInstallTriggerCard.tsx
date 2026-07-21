@@ -1,11 +1,13 @@
 "use client";
 
 import { useState } from "react";
+import clsx from "clsx";
 import { Button } from "@/components/ui/Button";
 import { usePwaInstallPrompt } from "@/lib/hooks/usePwaInstallPrompt";
 import { usePwaInstallEvent } from "@/components/PwaInstallPromptProvider";
 import { PwaIosInstallOverlay } from "@/components/ui/PwaIosInstallOverlay";
 import { isAndroid } from "@/lib/utils/platform";
+import buttonStyles from "@/components/ui/Button.module.css";
 
 interface PwaInstallTriggerCardProps {
   initialDismissCount: number;
@@ -67,25 +69,31 @@ export function PwaInstallTriggerCard({
 
   return (
     <>
-      <div className="flex gap-3 bg-moss-tint border border-moss/30 rounded-[12px] p-4">
-        <div className="shrink-0 text-moss mt-0.5">
+      <div className="flex gap-3 surface-info p-4">
+        <div className="shrink-0 mt-0.5">
           <PhoneDownloadIcon />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[14px] font-sans font-medium text-ink leading-snug">
+          <p className="text-[14px] font-sans font-medium leading-snug">
             Add Plotted to your home screen
           </p>
-          <p className="text-[13px] font-sans text-ink-soft mt-0.5 leading-snug">
+          <p className="text-[13px] font-sans mt-0.5 leading-snug">
             Quick access to your garden, anytime.
           </p>
           <div className="flex items-center gap-4 mt-3">
-            <Button variant="primary" onClick={handleCta} className="text-[13px] px-3 py-1.5">
+            <Button
+              onClick={handleCta}
+              className={clsx(
+                buttonStyles["o-button"],
+                buttonStyles["o-button--outline"]
+              )}
+            >
               {ctaLabel}
             </Button>
             <button
               type="button"
               onClick={dismiss}
-              className="text-[13px] font-sans text-ink-soft hover:text-ink transition-colors"
+              className="text-[13px] font-sans hover:text-ink transition-colors"
             >
               Not now
             </button>

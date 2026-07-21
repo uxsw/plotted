@@ -76,7 +76,7 @@ function Card({
       </div>
 
       <div className={styles["o-card__body"]}>
-        <h3 className="font-display font-medium text-base text-ink leading-snug">
+        <h3 className="font-display font-medium text-base leading-snug">
           {title}
         </h3>
         {subtitle && (
