@@ -59,7 +59,7 @@ export default async function SchemesSection() {
 
   return (
     <section aria-label="Planting schemes">
-      <h2 className="font-display font-medium text-xl text-ink mb-3">Planting schemes</h2>
+      <h2 className="font-display font-medium text-xl mb-3">Planting schemes</h2>
       <SchemeCardScroller schemes={schemes} />
       <div className="flex items-center justify-between mt-3">
         <Link

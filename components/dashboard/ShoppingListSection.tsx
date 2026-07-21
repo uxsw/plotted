@@ -17,8 +17,8 @@ function ShoppingItemCard({ item }: { item: ShoppingListItemData }) {
   const nameLabel = item.common_names?.[0] ?? (item.cultivar ? `'${item.cultivar}'` : null);
 
   const inner = (
-    <div className="flex items-center gap-2.5 rounded-lg border border-sand-line bg-paper p-2.5 w-48 shrink-0 hover:shadow-sm transition-shadow duration-150">
-      <div className="relative w-10 h-10 flex-shrink-0 rounded-md overflow-hidden bg-paper-deep">
+    <div className="flex items-center gap-2.5 bg-white p-2.5 shrink-0 hover:shadow-sm transition-shadow duration-150">
+      <div className="relative w-10 h-10 flex-shrink-0 overflow-hidden">
         {item.thumbnail_url ? (
           <Image
             src={item.thumbnail_url}
@@ -34,7 +34,7 @@ function ShoppingItemCard({ item }: { item: ShoppingListItemData }) {
         )}
       </div>
       <div className="flex flex-col gap-0.5 min-w-0">
-        <p className="font-display italic text-xs text-ink leading-snug truncate">{item.species}</p>
+        <p className="font-display italic text-xs leading-snug truncate">{item.species}</p>
         {nameLabel && (
           <p className="font-sans text-[11px] text-ink-soft leading-snug truncate">{nameLabel}</p>
         )}

@@ -47,7 +47,7 @@ export default function UserMenu({ email }: { email: string }) {
           className={clsx(
             buttonStyles["o-button"],
             buttonStyles["o-button--primary"],
-            buttonStyles["o-button--icon"]
+            buttonStyles["o-button--avatar"]
           )}
         >
           {label ?? <UserIcon />}
