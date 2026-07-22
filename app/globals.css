@@ -17,6 +17,10 @@
   --color-gold: #C99A3D;
   --color-gold-tint: #F5EDDA;
 
+  --color-white: #FFF;
+
+  --border-color: var(--color-paper-line);
+
 
   /* Red */
   --color-r-white: oklch(98.0% 0.01 29.5); 
@@ -31,6 +35,9 @@
   --color-y-sherbert-yellow: oklch(93.173% 0.11826 106.4);
   --color-y-mimosa-yellow: oklch(84.25% 0.06996 103.26);
   --color-y-yellow: oklch(94.577% 0.10215 110.6);
+
+  /* Blue */
+  --color-b-cyan: oklch(78.91% 0.07815 206.15);
 
   /* Green */
   --color-g-summer-green: oklch(73.657% 0.09242 175.58);
@@ -109,7 +116,7 @@ button, [role="button"] {
 }
 
 body {
-  background-color: var(--color-o-surface);
+  background-color: var(--color-paper);
   color: var(--color-g-deep-grey);
   font-family: var(--font-inter), sans-serif;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.08'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)'/%3E%3C/svg%3E");
@@ -139,5 +146,176 @@ body {
   &:focus {
     background-color: white;
     border-color: var(--color-g-summer-green);
+  }
+}
+
+.nav-sections {
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+}
+
+.nav-sections__item {
+  border-bottom: 2px solid transparent;
+  color: var(--color-g-deep-grey);
+  justify-content: center;
+  display: flex;
+  flex: 1;
+  margin-bottom: -1px;
+  padding-block-start: 0.5rem;
+  transition:
+    color 0.4s ease,
+    border-bottom 0.4s ease;
+
+  &:hover {
+    border-bottom: 2px solid var(--color-r-marigold);
+  }
+
+  &.active {
+    border-bottom-color: var(--color-r-marigold);
+  }
+}
+
+.nav-sections__item.active {
+  border-bottom-color: var(--color-r-marigold);
+  color: var(--color-r-marigold); 
+}
+
+.plant-detail-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+
+}
+.plant-detail-section__name {
+  letter-spacing: 0.05em;
+  line-height: 1;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+}
+
+.plant-detail-section__card {
+  background-color: var(--color-white);
+  overflow: hidden;
+}
+
+.plant-detail-section__pair {
+  display: grid;
+
+  &.grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+
+      .plant-detail-section__piece:not(:last-child) {
+        border-right: 1px solid var(--border-color);
+      }
+  }
+}
+
+.plant-detail-section__label {
+  color: var(--ink-soft);
+  font-size: 0.75rem;
+}
+
+.plant-detail-section__piece {
+  border-bottom: 1px solid var(--border-color);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  padding-inline: 1rem;
+  padding-block-start: 1rem;
+  padding-block-end: 0.5rem;
+}
+
+.plant-detail-section__planted {
+  display: flex;
+  gap: 1rem;
+  padding-inline: 1rem;
+  padding-block-start: 1rem;
+  padding-block-end: 0.5rem;
+
+  >.is-icon {
+    align-items: center;
+    background-color: var(--color-y-yellow);
+    border-radius: 2rem;
+    color: var(--color-g-deep-grey);
+    display: flex;
+    height: 2.5rem;
+    justify-content: center;
+    width: 2.5rem;
+  }
+}
+
+.plant-detail-section__planted-form {
+  flex: 1;
+}
+
+.plant-detail-section__row {
+
+}
+
+.o-chip {
+  align-items: center;
+  display: inline-flex;
+  border-radius: 5rem;
+  gap: 0.25rem;
+  justify-content: center;
+  line-height: 2;
+  font-size: 0.85rem;
+  padding-inline-start: 0.5rem;
+  padding-inline-end: 0.25rem;
+  white-space: nowrap;
+  width: max-content;
+
+  &:hover {
+    background-color: var(--color-y-gold);
+  }
+
+  &.is-info {
+    background-color: var(--color-y-yellow);
+  }
+
+  > .o-chip__action {
+    background-color: transparent;
+    height: 24px;
+    width: 24px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 5rem;
+    transition: background-color 0.4s ease;
+  }
+
+  > .o-chip__action:hover {
+    background-color: white;
+  }
+}
+
+.o-stack {
+  display: grid;
+  gap: 1rem;
+}
+
+.c-input-inline {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-b-cyan);
+  padding: 0.5rem;
+  font-size: 0.85rem;
+  &:focus {
+    border-color: var(--color-b-cyan);
+    outline: 2px solid var(--color-b-cyan);
+  }
+}
+
+.c-input-trigger {
+  background-color: transparent;
+  padding-block: 0.25rem;
+  padding-inline: 0;
+  transition:
+    background-color 1s ease,
+    padding-inline 0.4s ease;
+
+  &:hover {
+    background-color: var(--color-b-cyan);
+    padding-inline: 0.25rem;
   }
 }

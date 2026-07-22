@@ -1,7 +1,7 @@
 const SUN_CONFIG = {
   "full sun": {
-    bg: "#D4A830",
-    stroke: "#FFF5D8",
+    bg: "#f7d800",
+    stroke: "#5c4e00",
     icon: "sun",
   },
   "full sun / partial shade": {

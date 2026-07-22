@@ -16,7 +16,7 @@ export function PlantName({ species, cultivar, commonNames, variant = "card" }: 
   if (variant === "detail") {
     return (
       <div>
-        <div className="font-display font-semibold text-2xl text-ink leading-snug">
+        <div className="font-display font-semibold text-2xl leading-snug">
           {hasScientific ? (
             <>
               {species && <span>{species[0].toUpperCase() + species.slice(1)}</span>}
