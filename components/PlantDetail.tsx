@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import clsx from "clsx";
 import Link from "next/link";
 import Image from "next/image";
 import { plantDisplayTitle } from "@/lib/plantName";
@@ -26,11 +27,11 @@ const SUN_OPTIONS: SunNeeds[] = ["full sun", "full sun / partial shade", "partia
 const now = new Date();
 const YEAR_OPTIONS = Array.from({ length: 30 }, (_, i) => now.getFullYear() - i);
 
-const INPUT = "border border-gray-300 rounded px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-green-500";
+const INPUT = "c-input-inline";
 const INPUT_W = `w-full ${INPUT}`;
 const INPUT_FLEX = `flex-1 min-w-0 ${INPUT}`;
 const PROMPT_CLS = "text-sm text-ink-soft";
-const EDITABLE = "cursor-pointer rounded-[8px] transition-colors duration-[120ms] ease-in-out hover:bg-paper px-2 py-1.5 -ml-2 -mt-1.5";
+const EDITABLE = "c-input-trigger";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
@@ -62,7 +63,7 @@ function SeedlingIcon() {
   );
 }
 
-const SECTION_LABEL = "text-xs font-semibold font-sans uppercase tracking-wider text-ink-soft";
+const SECTION_LABEL = "text-xs font-semibold font-sans uppercase tracking-wider";
 
 function SproutIcon() {
   return (
@@ -97,7 +98,7 @@ function SaveCancel({ onSave, onCancel }: { onSave: () => void; onCancel: () => 
         onMouseDown={e => e.preventDefault()}
         onClick={onSave}
         aria-label="Save"
-        className="flex items-center justify-center w-8 h-8 rounded text-moss hover:bg-moss-tint transition-colors"
+        className="flex items-center justify-center w-8 h-8 hover:bg-moss-tint transition-colors"
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <polyline points="2,8 6,12 14,4" />
@@ -108,7 +109,7 @@ function SaveCancel({ onSave, onCancel }: { onSave: () => void; onCancel: () => 
         onMouseDown={e => e.preventDefault()}
         onClick={onCancel}
         aria-label="Cancel"
-        className="flex items-center justify-center w-8 h-8 rounded text-ink-soft hover:bg-sand-line/40 transition-colors"
+        className="flex items-center justify-center w-8 h-8 text-ink-soft hover:bg-sand-line/40 transition-colors"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
           <line x1="2" y1="2" x2="12" y2="12" />
@@ -121,13 +122,13 @@ function SaveCancel({ onSave, onCancel }: { onSave: () => void; onCancel: () => 
 
 function Chip({ label, onRemove }: { label: string; onRemove: () => void }) {
   return (
-    <span className="inline-flex items-center gap-1.5 bg-moss-tint hover:bg-moss-tint/70 text-ink rounded-full px-[10px] py-[4px] text-[13px] font-sans transition-colors duration-[120ms]">
+    <span className="o-chip is-info">
       {label}
       <button
         type="button"
         onClick={onRemove}
-        aria-label={`Remove ${label}`}
-        className="text-ink-soft hover:text-ink transition-colors leading-none"
+        aria-label={`Remove name ${label}`}
+        className="o-chip__action"
       >
         <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
           <line x1="1" y1="1" x2="9" y2="9" />
@@ -460,14 +461,20 @@ export default function PlantDetail({
       <div className="flex items-center justify-between">
         <Link
           href="/plants"
-          className={[buttonStyles["o-button"], buttonStyles["o-button--ghost"]].join(" ")}
+          className={clsx(
+              buttonStyles["o-button"],
+              buttonStyles["o-button--ghost"]
+            )}
           >
             ← My Plants
           </Link>
         <div className="flex gap-3">
           <Link
             href="/plants/new"
-            className={[buttonStyles["o-button"], buttonStyles["o-button--primary"]].join(" ")}
+            className={clsx(
+              buttonStyles["o-button"],
+              buttonStyles["o-button--primary"]
+            )}
           >
             + Add another
           </Link>
@@ -492,10 +499,10 @@ export default function PlantDetail({
         </div>
       )}
 
-      <div>
+      <div className="o-stack">
         {/* Photo zone — click to add/replace photo */}
         <div
-          className="group relative w-full aspect-[4/3] cursor-pointer rounded-lg overflow-hidden"
+          className="group relative w-full aspect-[4/3] cursor-pointer overflow-hidden"
           onClick={() => photoFileRef.current?.click()}
         >
           {plant.photo_url ? (
@@ -555,7 +562,7 @@ export default function PlantDetail({
           onChange={handlePhotoChange}
         />
 
-        <div className="p-2 md:p-4 space-y-8">
+        <div className="o-stack">
           {photoError && (
             <p className="font-display italic text-[14px] text-[#C2603C]">{photoError}</p>
           )}
@@ -567,17 +574,15 @@ export default function PlantDetail({
               }
             </AiNoticePanel>
           )}
-          <div className="mb-3">
-            <PlantName
-              species={plant.species}
-              cultivar={plant.cultivar}
-              commonNames={plant.common_names}
-              variant="detail"
-            />
-          </div>
+          <PlantName
+            species={plant.species}
+            cultivar={plant.cultivar}
+            commonNames={plant.common_names}
+            variant="detail"
+          />
 
           {(plant.sun_needs || (plant.flowering_season_from !== null && plant.flowering_season_to !== null)) && (
-            <div className="flex flex-wrap gap-2 mb-3">
+            <div className="flex flex-wrap gap-2">
               {plant.sun_needs && <SunBadgePill value={plant.sun_needs} />}
               {plant.flowering_season_from !== null && plant.flowering_season_to !== null && (
                 <FloweringSeasonBadge from={plant.flowering_season_from} to={plant.flowering_season_to} />
@@ -586,281 +591,291 @@ export default function PlantDetail({
           )}
 
           {/* ── Identity ─────────────────────────────────────────────────── */}
-          <section>
-            <p className={`${SECTION_LABEL} mb-3`}>Identity</p>
-            <div className="bg-paper-deep rounded-[10px] overflow-hidden">
-              {/* Species + Cultivar — two columns, reflows to stacked while either is being edited */}
-              <div className={`grid border-b border-paper-line ${
-                editing === "species" || editing === "cultivar"
-                  ? "grid-cols-1 divide-y divide-paper-line"
-                  : "grid-cols-2 divide-x divide-paper-line"
-              }`}>
-                <div className="px-4 py-3 min-w-0">
-                  <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Species</p>
-                  {editing === "species" ? (
-                    <>
-                      <div ref={containerRef} className="flex items-center gap-2">
-                        <input autoFocus type="text" value={v1}
-                          onChange={e => setV1(e.target.value)}
-                          onBlur={blurCancel}
-                          onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); speciesSave(); } }}
-                          className={INPUT_FLEX} />
-                        <SaveCancel onSave={speciesSave} onCancel={cancel} />
-                      </div>
-                      {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
-                    </>
-                  ) : (
-                    <Tap
-                      value={plant.species ? <em>{plant.species}</em> : null}
-                      placeholder="+ Add species"
-                      onClick={() => open("species", plant.species ?? "")}
-                    />
-                  )}
-                </div>
-                <div className="px-4 py-3 min-w-0">
-                  <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Cultivar</p>
-                  {editing === "cultivar" ? (
-                    <>
-                      <div ref={containerRef} className="flex items-center gap-2">
-                        <input autoFocus type="text" value={v1}
-                          onChange={e => setV1(e.target.value)}
-                          onBlur={blurCancel}
-                          onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); textSave("cultivar"); } }}
-                          className={INPUT_FLEX} />
-                        <SaveCancel onSave={() => textSave("cultivar")} onCancel={cancel} />
-                      </div>
-                      {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
-                    </>
-                  ) : (
-                    <Tap
-                      value={plant.cultivar}
-                      placeholder="+ Add cultivar"
-                      onClick={() => open("cultivar", plant.cultivar ?? "")}
-                    />
-                  )}
-                </div>
-              </div>
-
-              {/* Common names — full width row, directly on panel background */}
-              <div className="px-4 py-3">
-                <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Common names</p>
-                <CommonNamesSection
-                  plantId={plant.id}
-                  initialNames={plant.common_names ?? []}
-                  onNamesChange={names => setPlant(p => ({ ...p, common_names: names }))}
-                />
-              </div>
-            </div>
-          </section>
-
-          {/* ── Growing conditions ───────────────────────────────────────── */}
-          <section>
-            <p className={`${SECTION_LABEL} mb-3`}>Growing conditions</p>
-            <div className="bg-paper-deep rounded-[10px] overflow-hidden">
-              {/* Row 1: Height | Spread */}
-              <div className={`grid border-b border-paper-line ${
-                editing === "eventual_height_cm" || editing === "eventual_spread_cm"
-                  ? "grid-cols-1 divide-y divide-paper-line"
-                  : "grid-cols-2 divide-x divide-paper-line"
-              }`}>
-                <div className="px-4 py-3 min-w-0">
-                  <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Height (mature)</p>
-                  {editing === "eventual_height_cm" ? (
-                    <>
-                      <div ref={containerRef} className="flex items-center gap-2">
-                        <input autoFocus type="number" min={1} value={v1}
-                          onChange={e => setV1(e.target.value)}
-                          onBlur={blurCancel}
-                          onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); numSave("eventual_height_cm"); } }}
-                          className={INPUT_FLEX} />
-                        <SaveCancel onSave={() => numSave("eventual_height_cm")} onCancel={cancel} />
-                      </div>
-                      {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
-                    </>
-                  ) : (
-                    <Tap
-                      value={plant.eventual_height_cm ? `${plant.eventual_height_cm} cm` : null}
-                      placeholder="+ Add height"
-                      onClick={() => open("eventual_height_cm", plant.eventual_height_cm?.toString() ?? "")}
-                    />
-                  )}
-                </div>
-                <div className="px-4 py-3 min-w-0">
-                  <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Spread (mature)</p>
-                  {editing === "eventual_spread_cm" ? (
-                    <>
-                      <div ref={containerRef} className="flex items-center gap-2">
-                        <input autoFocus type="number" min={1} value={v1}
-                          onChange={e => setV1(e.target.value)}
-                          onBlur={blurCancel}
-                          onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); numSave("eventual_spread_cm"); } }}
-                          className={INPUT_FLEX} />
-                        <SaveCancel onSave={() => numSave("eventual_spread_cm")} onCancel={cancel} />
-                      </div>
-                      {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
-                    </>
-                  ) : (
-                    <Tap
-                      value={plant.eventual_spread_cm ? `${plant.eventual_spread_cm} cm` : null}
-                      placeholder="+ Add spread"
-                      onClick={() => open("eventual_spread_cm", plant.eventual_spread_cm?.toString() ?? "")}
-                    />
-                  )}
-                </div>
-              </div>
-              {/* Row 2: Sun needs | Flowering season */}
-              <div className={`grid ${
-                editing === "sun_needs" || editing === "flowering_season"
-                  ? "grid-cols-1 divide-y divide-paper-line"
-                  : "grid-cols-2 divide-x divide-paper-line"
-              }`}>
-                <div className="px-4 py-3 min-w-0">
-                  <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Sun needs</p>
-                  {editing === "sun_needs" ? (
-                    <>
-                      <div ref={containerRef} className="flex items-center gap-2">
-                        <select autoFocus value={v1}
-                          onChange={e => setV1(e.target.value)}
-                          onBlur={blurCancel}
-                          onKeyDown={esc}
-                          className={INPUT_FLEX}>
-                          <option value="">— select —</option>
-                          {SUN_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
-                        </select>
-                        <SaveCancel onSave={() => commit({ sun_needs: (v1 as SunNeeds) || null })} onCancel={cancel} />
-                      </div>
-                      {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
-                    </>
-                  ) : (
-                    <Tap
-                      value={plant.sun_needs}
-                      placeholder="+ Add sun needs"
-                      onClick={() => open("sun_needs", plant.sun_needs ?? "")}
-                    />
-                  )}
-                </div>
-                <div className="px-4 py-3 min-w-0">
-                  <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Flowering season</p>
-                  {editing === "flowering_season" ? (
-                    <>
-                      <div ref={containerRef} className="flex items-center gap-2">
-                        <div className="flex gap-2 flex-1 min-w-0">
-                          <select autoFocus value={v1} onChange={e => setV1(e.target.value)} onBlur={blurCancel} onKeyDown={esc} className={INPUT}>
-                            <option value="">— from —</option>
-                            {MONTHS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
-                          </select>
-                          <select value={v2} onChange={e => setV2(e.target.value)} onBlur={blurCancel} onKeyDown={esc} className={INPUT}>
-                            <option value="">— to —</option>
-                            {MONTHS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
-                          </select>
+          <div className="o-stack">
+            <section className="plant-detail-section">
+              <div className="plant-detail-section__card">
+                {/* Species + Cultivar — two columns, reflows to stacked while either is being edited */}
+                <div className={`plant-detail-section__pair ${
+                  editing === "species" || editing === "cultivar"
+                    ? "grid-cols-1"
+                    : "grid-cols-2"
+                }`}>
+                  <div className="plant-detail-section__piece">
+                    <p className="plant-detail-section__label">Species</p>
+                    {editing === "species" ? (
+                      <>
+                        <div ref={containerRef} className="flex items-center gap-2">
+                          <input autoFocus type="text" value={v1}
+                            onChange={e => setV1(e.target.value)}
+                            onBlur={blurCancel}
+                            onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); speciesSave(); } }}
+                            className={INPUT_FLEX} />
+                          <SaveCancel onSave={speciesSave} onCancel={cancel} />
                         </div>
-                        <SaveCancel
-                          onSave={() => commit({ flowering_season_from: v1 ? parseInt(v1) : null, flowering_season_to: v2 ? parseInt(v2) : null })}
-                          onCancel={cancel}
-                        />
-                      </div>
-                      {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
-                    </>
-                  ) : (
-                    <Tap
-                      value={flowerDisplay()}
-                      placeholder="+ Add flowering season"
-                      onClick={() => open(
-                        "flowering_season",
-                        plant.flowering_season_from ? String(plant.flowering_season_from) : "",
-                        plant.flowering_season_to ? String(plant.flowering_season_to) : ""
-                      )}
-                    />
-                  )}
-                </div>
-              </div>
-
-              {/* Frost tolerance — sourced from species_reference */}
-              {speciesRef?.lookup_status === "pending" && (
-                <div className="px-4 py-3 border-t border-paper-line">
-                  <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Frost tolerance</p>
-                  <p className="text-sm text-ink-soft/60 italic">Looking up…</p>
-                </div>
-              )}
-              {speciesRef?.lookup_status === "complete" && speciesRef.frost_tolerance_c !== null && (
-                <div className="px-4 py-3 border-t border-paper-line">
-                  <p className="text-[11px] font-sans font-medium text-ink-soft mb-2">Frost tolerance</p>
-                  <AiNoticePanel>
-                    {speciesRef.frost_tolerance_c}°C
-                    {speciesRef.frost_tolerance_notice && (
-                      <span className="text-ink-soft">· {speciesRef.frost_tolerance_notice}</span>
-                    )}
-                  </AiNoticePanel>
-                </div>
-              )}
-              {/* lookup_status === 'failed', no row, or complete with null value: render nothing */}
-            </div>
-          </section>
-
-          {/* ── In your garden ───────────────────────────────────────────── */}
-          <section>
-            <p className={`${SECTION_LABEL} mb-3`}>In your garden</p>
-            <div className="bg-paper-deep rounded-lg px-4 py-4 flex items-center gap-4">
-              <div className="w-9 h-9 rounded-full bg-sand-line/60 flex items-center justify-center shrink-0 text-ink-soft">
-                <SeedlingIcon />
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Planted</p>
-                {editing === "date_planted" ? (
-                  <>
-                    <div ref={containerRef} className="flex items-center gap-2">
-                      <div className="flex gap-2 flex-1 min-w-0">
-                        <select autoFocus value={v1} onChange={e => setV1(e.target.value)} onBlur={blurCancel} onKeyDown={esc} className={INPUT}>
-                          {MONTHS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
-                        </select>
-                        <select value={v2} onChange={e => setV2(e.target.value)} onBlur={blurCancel} onKeyDown={esc} className={INPUT}>
-                          {YEAR_OPTIONS.map(y => <option key={y} value={String(y)}>{y}</option>)}
-                        </select>
-                      </div>
-                      <SaveCancel
-                        onSave={() => commit({ date_planted: v2 && v1 ? `${v2}-${v1.padStart(2, "0")}-01` : null })}
-                        onCancel={cancel}
+                        {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                      </>
+                    ) : (
+                      <Tap
+                        value={plant.species ? <em>{plant.species}</em> : null}
+                        placeholder="+ Add species"
+                        onClick={() => open("species", plant.species ?? "")}
                       />
-                    </div>
-                    {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
-                  </>
-                ) : (
-                  <Tap
-                    value={datePlantedDisplay()}
-                    placeholder="+ Add date planted"
-                    onClick={() => {
-                      const d = plant.date_planted ? new Date(plant.date_planted) : now;
-                      open("date_planted", String(d.getUTCMonth() + 1), String(d.getUTCFullYear()));
-                    }}
-                  />
-                )}
-              </div>
-            </div>
-          </section>
-
-          {/* Notes */}
-          <div className="pt-3 border-t border-gray-100">
-            <p className="text-sm font-medium text-gray-500 mb-1">Notes</p>
-            {editing === "notes" ? (
-              <div ref={containerRef}>
-                <textarea autoFocus rows={4} value={v1}
-                  onChange={e => setV1(e.target.value)}
-                  onBlur={blurCancel}
-                  onKeyDown={esc}
-                  className={`${INPUT_W} resize-y`} />
-                <div className="flex justify-end mt-1">
-                  <SaveCancel onSave={() => commit({ notes: v1.trim() || null })} onCancel={cancel} />
+                    )}
+                  </div>
+                  <div className="plant-detail-section__piece">
+                    <p className="plant-detail-section__label">Cultivar</p>
+                    {editing === "cultivar" ? (
+                      <>
+                        <div ref={containerRef} className="flex items-center gap-2">
+                          <input autoFocus type="text" value={v1}
+                            onChange={e => setV1(e.target.value)}
+                            onBlur={blurCancel}
+                            onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); textSave("cultivar"); } }}
+                            className={INPUT_FLEX} />
+                          <SaveCancel onSave={() => textSave("cultivar")} onCancel={cancel} />
+                        </div>
+                        {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                      </>
+                    ) : (
+                      <Tap
+                        value={plant.cultivar}
+                        placeholder="+ Add cultivar"
+                        onClick={() => open("cultivar", plant.cultivar ?? "")}
+                      />
+                    )}
+                  </div>
                 </div>
-                {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+
+                {/* Common names — full width row, directly on panel background */}
+                <div className="plant-detail-section__piece">
+                  <p className="plant-detail-section__label">Common names</p>
+                  <CommonNamesSection
+                    plantId={plant.id}
+                    initialNames={plant.common_names ?? []}
+                    onNamesChange={names => setPlant(p => ({ ...p, common_names: names }))}
+                  />
+                </div>
               </div>
-            ) : (
-              <button type="button" onClick={() => open("notes", plant.notes ?? "")} className={`text-left w-full ${EDITABLE}`}>
-                {plant.notes
-                  ? <span className="text-sm text-gray-800 whitespace-pre-wrap">{plant.notes}</span>
-                  : <span className={PROMPT_CLS}>+ Add notes</span>
-                }
-              </button>
-            )}
+            </section>
+
+            {/* ── Growing conditions ───────────────────────────────────────── */}
+            <section className="plant-detail-section">
+              <p className="plant-detail-section__name">Growing conditions</p>
+              <div className="plant-detail-section__card">
+                {/* Row 1: Height | Spread */}
+                <div className={`plant-detail-section__pair ${
+                  editing === "eventual_height_cm" || editing === "eventual_spread_cm"
+                    ? "grid-cols-1"
+                    : "grid-cols-2"
+                }`}>
+                  <div className="plant-detail-section__piece">
+                    <p className="plant-detail-section__label">Height (mature)</p>
+                    {editing === "eventual_height_cm" ? (
+                      <>
+                        <div ref={containerRef} className="flex items-center gap-2">
+                          <input autoFocus type="number" min={1} value={v1}
+                            onChange={e => setV1(e.target.value)}
+                            onBlur={blurCancel}
+                            onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); numSave("eventual_height_cm"); } }}
+                            className={INPUT_FLEX} />
+                          <SaveCancel onSave={() => numSave("eventual_height_cm")} onCancel={cancel} />
+                        </div>
+                        {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                      </>
+                    ) : (
+                      <Tap
+                        value={plant.eventual_height_cm ? `${plant.eventual_height_cm} cm` : null}
+                        placeholder="+ Add height"
+                        onClick={() => open("eventual_height_cm", plant.eventual_height_cm?.toString() ?? "")}
+                      />
+                    )}
+                  </div>
+                  <div className="plant-detail-section__piece">
+                    <p className="plant-detail-section__label">Spread (mature)</p>
+                    {editing === "eventual_spread_cm" ? (
+                      <>
+                        <div ref={containerRef} className="flex items-center gap-2">
+                          <input autoFocus type="number" min={1} value={v1}
+                            onChange={e => setV1(e.target.value)}
+                            onBlur={blurCancel}
+                            onKeyDown={e => { if (e.key === "Escape") cancel(); if (e.key === "Enter") { e.preventDefault(); numSave("eventual_spread_cm"); } }}
+                            className={INPUT_FLEX} />
+                          <SaveCancel onSave={() => numSave("eventual_spread_cm")} onCancel={cancel} />
+                        </div>
+                        {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                      </>
+                    ) : (
+                      <Tap
+                        value={plant.eventual_spread_cm ? `${plant.eventual_spread_cm} cm` : null}
+                        placeholder="+ Add spread"
+                        onClick={() => open("eventual_spread_cm", plant.eventual_spread_cm?.toString() ?? "")}
+                      />
+                    )}
+                  </div>
+                </div>
+                {/* Row 2: Sun needs | Flowering season */}
+                <div className={`plant-detail-section__pair ${
+                  editing === "sun_needs" || editing === "flowering_season"
+                    ? "grid-cols-1"
+                    : "grid-cols-2"
+                }`}>
+                  <div className="plant-detail-section__piece">
+                    <p className="plant-detail-section__label">Sun needs</p>
+                    {editing === "sun_needs" ? (
+                      <>
+                        <div ref={containerRef} className="flex items-center gap-2">
+                          <select autoFocus value={v1}
+                            onChange={e => setV1(e.target.value)}
+                            onBlur={blurCancel}
+                            onKeyDown={esc}
+                            className={INPUT_FLEX}>
+                            <option value="">— select —</option>
+                            {SUN_OPTIONS.map(s => <option key={s} value={s}>{s}</option>)}
+                          </select>
+                          <SaveCancel onSave={() => commit({ sun_needs: (v1 as SunNeeds) || null })} onCancel={cancel} />
+                        </div>
+                        {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                      </>
+                    ) : (
+                      <Tap
+                        value={plant.sun_needs}
+                        placeholder="+ Add sun needs"
+                        onClick={() => open("sun_needs", plant.sun_needs ?? "")}
+                      />
+                    )}
+                  </div>
+                  <div className="plant-detail-section__piece">
+                    <p className="plant-detail-section__label">Flowering season</p>
+                    {editing === "flowering_season" ? (
+                      <>
+                        <div ref={containerRef} className="flex items-center gap-2">
+                          <div className="flex gap-2 flex-1 min-w-0">
+                            <select autoFocus value={v1} onChange={e => setV1(e.target.value)} onBlur={blurCancel} onKeyDown={esc} className={INPUT}>
+                              <option value="">— from —</option>
+                              {MONTHS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
+                            </select>
+                            <select value={v2} onChange={e => setV2(e.target.value)} onBlur={blurCancel} onKeyDown={esc} className={INPUT}>
+                              <option value="">— to —</option>
+                              {MONTHS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
+                            </select>
+                          </div>
+                          <SaveCancel
+                            onSave={() => commit({ flowering_season_from: v1 ? parseInt(v1) : null, flowering_season_to: v2 ? parseInt(v2) : null })}
+                            onCancel={cancel}
+                          />
+                        </div>
+                        {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                      </>
+                    ) : (
+                      <Tap
+                        value={flowerDisplay()}
+                        placeholder="+ Add flowering season"
+                        onClick={() => open(
+                          "flowering_season",
+                          plant.flowering_season_from ? String(plant.flowering_season_from) : "",
+                          plant.flowering_season_to ? String(plant.flowering_season_to) : ""
+                        )}
+                      />
+                    )}
+                  </div>
+                </div>
+
+                {/* Frost tolerance — sourced from species_reference */}
+                {speciesRef?.lookup_status === "pending" && (
+                  <div className="px-4 py-3 border-t border-paper-line">
+                    <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Frost tolerance</p>
+                    <p className="text-sm text-ink-soft/60 italic">Looking up…</p>
+                  </div>
+                )}
+                {speciesRef?.lookup_status === "complete" && speciesRef.frost_tolerance_c !== null && (
+                  <div className="px-4 py-3 border-t border-paper-line">
+                    <p className="text-[11px] font-sans font-medium text-ink-soft mb-2">Frost tolerance</p>
+                    <AiNoticePanel>
+                      {speciesRef.frost_tolerance_c}°C
+                      {speciesRef.frost_tolerance_notice && (
+                        <span className="text-ink-soft">· {speciesRef.frost_tolerance_notice}</span>
+                      )}
+                    </AiNoticePanel>
+                  </div>
+                )}
+                {/* lookup_status === 'failed', no row, or complete with null value: render nothing */}
+              </div>
+            </section>
+
+            {/* ── In your garden ───────────────────────────────────────────── */}
+            <section className="plant-detail-section">
+              <p className="plant-detail-section__name">In your garden</p>
+              <div className="plant-detail-section__card">
+                <div className="plant-detail-section__planted">
+                  <div className="is-icon">
+                    <SeedlingIcon />
+                  </div>
+                  <div className="plant-detail-section__planted-form">
+                    <p className="plant-detail-section__label">Planted</p>
+                    {editing === "date_planted" ? (
+                      <>
+                        <div ref={containerRef} className="flex items-center gap-2">
+                          <div className="flex gap-2 flex-1 min-w-0">
+                            <select autoFocus value={v1} onChange={e => setV1(e.target.value)} onBlur={blurCancel} onKeyDown={esc} className={INPUT}>
+                              {MONTHS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
+                            </select>
+                            <select value={v2} onChange={e => setV2(e.target.value)} onBlur={blurCancel} onKeyDown={esc} className={INPUT}>
+                              {YEAR_OPTIONS.map(y => <option key={y} value={String(y)}>{y}</option>)}
+                            </select>
+                          </div>
+                          <SaveCancel
+                            onSave={() => commit({ date_planted: v2 && v1 ? `${v2}-${v1.padStart(2, "0")}-01` : null })}
+                            onCancel={cancel}
+                          />
+                        </div>
+                        {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                      </>
+                    ) : (
+                      <Tap
+                        value={datePlantedDisplay()}
+                        placeholder="+ Add date planted"
+                        onClick={() => {
+                          const d = plant.date_planted ? new Date(plant.date_planted) : now;
+                          open("date_planted", String(d.getUTCMonth() + 1), String(d.getUTCFullYear()));
+                        }}
+                      />
+                    )}
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Notes */}
+            <div className="pt-3 border-t border-gray-100">
+              <p className="text-sm font-medium mb-1">Notes</p>
+              {editing === "notes" ? (
+                <div ref={containerRef}>
+                  <textarea autoFocus rows={4} value={v1}
+                    onChange={e => setV1(e.target.value)}
+                    onBlur={blurCancel}
+                    onKeyDown={esc}
+                    className={`${INPUT_W} resize-y`} />
+                  <div className="flex justify-end mt-1">
+                    <SaveCancel onSave={() => commit({ notes: v1.trim() || null })} onCancel={cancel} />
+                  </div>
+                  {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => open("notes", plant.notes ?? "")} 
+                  className={clsx(
+                    buttonStyles["o-button"],
+                    buttonStyles["o-button--ghost"]
+                  )}
+                >
+                  {plant.notes
+                    ? <span className="text-sm text-gray-800 whitespace-pre-wrap">{plant.notes}</span>
+                    : <span className={PROMPT_CLS}>+ Add notes</span>
+                  }
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>

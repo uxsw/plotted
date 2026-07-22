@@ -23,7 +23,7 @@ export const SEASON_STYLES = {
   "winter":       { background: "#D8E4ED", color: "#3D6278" },
   "spring":       { background: "#D4E8D0", color: "#3A6438" },
   "early-summer": { background: "#E8EDCC", color: "#4E5818" },
-  "summer":       { background: "#EDE0B8", color: "#664A10" },
+  "summer":       { background: "#f3badf", color: "#68124a" },
   "autumn":       { background: "#EDD4BE", color: "#663818" },
 } as const;
 
