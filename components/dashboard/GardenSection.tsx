@@ -51,24 +51,28 @@ export default async function GardenSection() {
   >[];
 
   return (
-    <section aria-label="Your garden" className="hero-card--empty">
+    <section
+      aria-label="Your garden"
+    >
       {plants.length === 0 ? (
-        <EmptyState
-          heading="No plants yet"
-          body="Start building your garden portfolio."
-          action={
-            <Link
-              href="/plants/new"
-              className={clsx(
-                buttonStyles["o-button"],
-                buttonStyles["o-button--primary"]
-              )}
-            >
-              <PlusIcon />
-              Add plant
-            </Link>
-          }
-        />
+        <div className="hero-card--empty">
+          <EmptyState
+            heading="No plants yet"
+            body="Start building your garden portfolio."
+            action={
+              <Link
+                href="/plants/new"
+                className={clsx(
+                  buttonStyles["o-button"],
+                  buttonStyles["o-button--primary"]
+                )}
+              >
+                <PlusIcon />
+                Add plant
+              </Link>
+            }
+          />
+        </div>
       ) : (
         <>
           <GardenCardScroller plants={plants} />
@@ -77,7 +81,7 @@ export default async function GardenSection() {
               href="/plants"
               className={clsx(
                 buttonStyles["o-button"],
-                buttonStyles["o-button--ghost"]
+                buttonStyles["o-button--ghost"],
               )}
             >
               View all
