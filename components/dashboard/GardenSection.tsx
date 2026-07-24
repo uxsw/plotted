@@ -51,7 +51,7 @@ export default async function GardenSection() {
   >[];
 
   return (
-    <section aria-label="Your garden">
+    <section aria-label="Your garden" className="hero-card--empty">
       {plants.length === 0 ? (
         <EmptyState
           heading="No plants yet"
@@ -59,7 +59,10 @@ export default async function GardenSection() {
           action={
             <Link
               href="/plants/new"
-              className="inline-flex items-center justify-center gap-1.5 py-2 text-sm font-medium font-sans bg-moss text-white hover:bg-moss-deep transition-colors"
+              className={clsx(
+                buttonStyles["o-button"],
+                buttonStyles["o-button--primary"]
+              )}
             >
               <PlusIcon />
               Add plant

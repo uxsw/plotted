@@ -33,14 +33,14 @@ function UnderlineField({ label, focused, children }: {
   children: React.ReactNode;
 }) {
   return (
-    <div>
-      <label className="block font-display italic text-[15px] font-normal text-ink-soft">
+    <div className="c-underline-field">
+      <label className="minion">
         {label}
       </label>
       <div className="relative">
         {children}
-        <div className="absolute bottom-0 left-0 right-0 h-px bg-sand-line" />
-        <div className={`absolute bottom-0 left-0 right-0 h-[2px] bg-moss transition-transform duration-200 ease-out origin-left ${focused ? "scale-x-100" : "scale-x-0"}`} />
+        <div className="c-underline-field__line" />
+        <div className={`c-underline-field__line is-active ${focused ? "scale-x-100" : "scale-x-0"}`} />
       </div>
     </div>
   );
@@ -163,19 +163,19 @@ export default function PlantForm() {
         onClick={() => fileRef.current?.click()}
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
-        className="w-full h-[172px] rounded-[16px] bg-moss-tint border-[1.5px] border-dashed border-moss cursor-pointer overflow-hidden flex items-center justify-center"
+        className="c-add-photo"
       >
         {photoPreview ? (
-          <div className="relative w-full h-full">
+          <div className="relative w-full h-full ">
             <Image src={photoPreview} alt="Preview" fill className="object-cover" />
             <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
               <span className="text-white text-sm font-medium font-sans">Click to change</span>
             </div>
           </div>
         ) : (
-          <div className="flex flex-col items-center gap-2 text-moss-deep/70">
+          <div className="c-add-photo__placeholder">
             <SproutIcon />
-            <span className="font-display italic text-[15px]">add a photo</span>
+            <span className="minion">add a photo</span>
           </div>
         )}
       </div>
@@ -191,7 +191,7 @@ export default function PlantForm() {
             onChange={(e) => setSpecies(e.target.value)}
             onFocus={() => setFocusedField("species")}
             onBlur={(e) => { setFocusedField(null); setSpecies(e.target.value.trim()); }}
-            className={`${inputCls} font-display italic text-[18px]`}
+            className={`${inputCls}`}
           />
         </UnderlineField>
         {fieldErrors.species && <p className="text-xs text-clay mt-1">{fieldErrors.species}</p>}
@@ -206,7 +206,7 @@ export default function PlantForm() {
             onChange={(e) => setCultivar(e.target.value)}
             onFocus={() => setFocusedField("cultivar")}
             onBlur={(e) => { setFocusedField(null); setCultivar(e.target.value.trim()); }}
-            className={`${inputCls} font-display italic text-[18px]`}
+            className={`${inputCls}`}
           />
         </UnderlineField>
       </div>

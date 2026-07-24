@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import clsx from "clsx";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -82,17 +83,20 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
 
   if (plants.length === 0) {
     return (
-      <div className="flex flex-col items-center text-center gap-3 py-16 px-6 rounded-lg bg-clay-tint/50">
+      <div className="surface-info island o-stack">
         <div className="text-clay">
           <SproutIcon />
         </div>
-        <h2 className="font-display font-medium text-lg text-ink">Add a plant to get started</h2>
-        <p className="font-sans text-sm text-ink-soft max-w-xs">
+        <h2 className="font-display pica">Add a plant to get started</h2>
+        <p className="brevier">
           Companion suggestions are based on what&apos;s already growing in your garden. Add a plant or two, and Plotted will show you what pairs well alongside them.
         </p>
         <Link
           href="/plants/new"
-          className="inline-flex items-center justify-center rounded px-4 py-2 text-sm font-medium font-sans bg-clay text-white hover:bg-clay-deep transition-colors"
+          className={clsx(
+              buttonStyles["o-button"],
+              buttonStyles["o-button--primary"],
+            )}
         >
           + Add a plant
         </Link>
@@ -220,7 +224,10 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
         <button
           type="button"
           onClick={() => setStep("select")}
-          className={[buttonStyles["o-button"], buttonStyles["o-button--ghost"]].join(" ")}
+          className={clsx(
+              buttonStyles["o-button"],
+              buttonStyles["o-button--ghost"],
+            )}
         >
           ← Back to plant selection
         </button>

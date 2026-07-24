@@ -297,9 +297,9 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
         <button
           type="button"
           onClick={() => router.push("/plants/new")}
-          className="flex flex-col rounded-lg overflow-hidden border border-sand-line bg-paper cursor-pointer hover:shadow-md text-left w-full active:scale-[0.98] active:opacity-75 transition-transform duration-75"
+          className="c-first-plant-card"
         >
-          <div className="aspect-[4/3] w-full flex items-center justify-center bg-paper-deep">
+          <div className="c-first-plant-card__media">
             <PlusIcon />
           </div>
           <div className="flex flex-col gap-1.5 p-4 flex-1">
@@ -511,7 +511,6 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
 function PlusIcon() {
   return (
     <svg
-      className="w-8 h-8 text-moss"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"
