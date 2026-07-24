@@ -302,9 +302,9 @@ function FailedSchemeCard({
             type="button"
             onClick={doRetry}
             className={clsx(
-            buttonStyles["o-button"],
-            buttonStyles["o-button--primary"],
-          )}
+              buttonStyles["o-button"],
+              buttonStyles["o-button--primary"],
+            )}
           >
             Try again
           </button>
@@ -352,17 +352,17 @@ export default function SchemeList({ schemes: initialSchemes }: { schemes: Schem
         <button
           type="button"
           onClick={() => router.push("/schemes/new")}
-          className="flex flex-col overflow-hidden border border-clay bg-paper cursor-pointer hover:shadow-md text-left w-full active:scale-[0.98] active:opacity-75 transition-transform duration-75"
+          className="c-first-plant-card"
         >
-          <div className="h-[190px] w-full flex items-center justify-center bg-clay-tint">
+          <div className="c-first-plant-card__media">
             <PlusIcon />
           </div>
-          <div className="flex flex-col gap-1.5 p-4 flex-1">
-            <h3 className="font-display font-medium text-base text-ink leading-snug">
+          <div className="o-stack u-pad-block">
+            <h3 className="font-display long-primer">
               Create your first scheme
             </h3>
-            <p className="font-sans text-xs text-ink-soft leading-snug">
-              Pick a few plants, get companion suggestions.
+            <p className="brevier">
+              Pick a few plants to get companion suggestions.
             </p>
           </div>
         </button>

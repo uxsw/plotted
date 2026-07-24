@@ -10,8 +10,8 @@ function PlaceholderPlantCard({ opacity = 1 }: { opacity?: number }) {
     >
       <div className={cardStyles["o-card__image"]} />
       <div className={cardStyles["o-card__body"]}>
-        <div className="h-4 w-3/4 rounded bg-sand-line" />
-        <div className="h-3 w-1/2 rounded bg-sand-line" />
+        <div className={cardStyles["o-card__text-skeleton-lead"]} />
+        <div className={cardStyles["o-card__text-skeleton-secondary"]} />
       </div>
     </div>
   );

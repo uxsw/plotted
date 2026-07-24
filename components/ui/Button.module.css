@@ -15,7 +15,19 @@
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
-  transition: background-color 150ms, color 150ms, border-color 150ms;
+  transition:
+    background-color 150ms, color 150ms,
+    border-color 150ms;
+  inline-size: max-content;
+}
+
+.o-button--flush-start {
+  padding-inline-start: 0;
+  transition: padding-inline-start 0.4s ease;
+
+  &:hover {
+    padding-inline-start: 0.5rem;
+  }
 }
 
 .o-button:focus-visible {

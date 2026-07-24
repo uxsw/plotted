@@ -28,9 +28,8 @@ const now = new Date();
 const YEAR_OPTIONS = Array.from({ length: 30 }, (_, i) => now.getFullYear() - i);
 
 const INPUT = "c-input-inline";
-const INPUT_W = `w-full ${INPUT}`;
-const INPUT_FLEX = `flex-1 min-w-0 ${INPUT}`;
-const PROMPT_CLS = "text-sm text-ink-soft";
+const INPUT_W = `${INPUT}`;
+const INPUT_FLEX = `${INPUT}`;
 const EDITABLE = "c-input-trigger";
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
@@ -63,8 +62,6 @@ function SeedlingIcon() {
   );
 }
 
-const SECTION_LABEL = "text-xs font-semibold font-sans uppercase tracking-wider";
-
 function SproutIcon() {
   return (
     <svg width="36" height="36" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -81,10 +78,10 @@ function Tap({ value, placeholder, onClick }: {
   onClick: () => void;
 }) {
   return (
-    <button type="button" onClick={onClick} className={`text-left w-full ${EDITABLE}`}>
+    <button type="button" onClick={onClick} className={`${EDITABLE}`}>
       {value
-        ? <span className="text-sm text-gray-900">{value}</span>
-        : <span className={PROMPT_CLS}>{placeholder}</span>
+        ? <span>{value}</span>
+        : <span>{placeholder}</span>
       }
     </button>
   );
@@ -92,13 +89,13 @@ function Tap({ value, placeholder, onClick }: {
 
 function SaveCancel({ onSave, onCancel }: { onSave: () => void; onCancel: () => void }) {
   return (
-    <div className="flex items-center gap-1 shrink-0">
+    <div className="c-input-inline__actions">
       <button
         type="button"
         onMouseDown={e => e.preventDefault()}
         onClick={onSave}
         aria-label="Save"
-        className="flex items-center justify-center w-8 h-8 hover:bg-moss-tint transition-colors"
+        className="c-input-inline__button"
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
           <polyline points="2,8 6,12 14,4" />
@@ -109,7 +106,7 @@ function SaveCancel({ onSave, onCancel }: { onSave: () => void; onCancel: () => 
         onMouseDown={e => e.preventDefault()}
         onClick={onCancel}
         aria-label="Cancel"
-        className="flex items-center justify-center w-8 h-8 text-ink-soft hover:bg-sand-line/40 transition-colors"
+        className="c-input-inline__button is-cancel"
       >
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
           <line x1="2" y1="2" x2="12" y2="12" />
@@ -214,72 +211,46 @@ function CommonNamesSection({
   }
 
   return (
-    <div className="space-y-3">
+    <div className="o-stack">
       {/* Saved chips */}
       {hasSaved && (
-        <div className="flex flex-wrap gap-2">
+        <div className="o-chip-group">
           {savedNames.map(name => (
             <Chip key={name} label={name} onRemove={() => removeName(name)} />
           ))}
         </div>
       )}
 
-      {/* No saved names — lookup button or loading */}
-      {!hasSaved && phase !== "loading" && (
-        <Button type="button" variant="secondary" onClick={runLookup}>
-          Get common names
-        </Button>
-      )}
-      {!hasSaved && phase === "loading" && (
-        <Button type="button" variant="secondary" disabled>
-          Looking up…
-        </Button>
-      )}
-
-      {/* Empty result */}
-      {phase === "empty" && (
-        <p className="font-display italic text-[14px] text-ink-soft">No common names found for this plant</p>
-      )}
-
-      {/* Lookup error */}
-      {phase === "error" && (
-        <p className="font-display italic text-[14px] text-[#C2603C]">Lookup failed — please try again</p>
-      )}
-
-      {/* Patch error */}
-      {patchError && (
-        <p className="font-display italic text-[14px] text-[#C2603C]">{patchError}</p>
-      )}
-
       {/* Manual name entry */}
       {addingName ? (
-        <div ref={addContainerRef} className="flex items-center gap-2">
-          <div className="flex-1 relative">
-            <input
-              autoFocus
-              type="text"
-              value={newName}
-              onChange={e => setNewName(e.target.value)}
-              onBlur={e => {
-                if (addContainerRef.current?.contains(e.relatedTarget as Node)) return;
-                cancelNewName();
-              }}
-              onKeyDown={e => {
-                if (e.key === "Escape") cancelNewName();
-                if (e.key === "Enter") { e.preventDefault(); saveNewName(); }
-              }}
-              placeholder="e.g. Foxglove"
-              className="w-full bg-transparent border-0 outline-none font-display italic text-[15px] text-ink pb-3 pt-[10px]"
-            />
-            <div className="absolute bottom-0 left-0 right-0 h-px bg-sand-line" />
-          </div>
+        <div ref={addContainerRef} className="c-input-inline__group">
+          <input
+            autoFocus
+            type="text"
+            value={newName}
+            onChange={e => setNewName(e.target.value)}
+            onBlur={e => {
+              if (addContainerRef.current?.contains(e.relatedTarget as Node)) return;
+              cancelNewName();
+            }}
+            onKeyDown={e => {
+              if (e.key === "Escape") cancelNewName();
+              if (e.key === "Enter") { e.preventDefault(); saveNewName(); }
+            }}
+            placeholder="e.g. Foxglove"
+            className="c-input-inline"
+          />
           <SaveCancel onSave={saveNewName} onCancel={cancelNewName} />
         </div>
       ) : (
         <button
           type="button"
           onClick={() => { setPatchError(null); setAddingName(true); }}
-          className="font-sans text-sm text-gray-400 hover:text-gray-600 transition-colors block"
+          className={clsx(
+            buttonStyles["o-button"],
+            buttonStyles["o-button--ghost"],
+            buttonStyles["o-button--flush-start"]
+          )}
         >
           + Add name
         </button>
@@ -457,18 +428,19 @@ export default function PlantDetail({
   }
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <div className="flex items-center justify-between">
+    <div className="o-stack o-page-size">
+      <div className="plant-detail__action-bar">
         <Link
           href="/plants"
           className={clsx(
               buttonStyles["o-button"],
-              buttonStyles["o-button--ghost"]
+              buttonStyles["o-button--ghost"],
+              buttonStyles["o-button--flush-start"]
             )}
           >
             ← My Plants
           </Link>
-        <div className="flex gap-3">
+        <div className="o-row">
           <Link
             href="/plants/new"
             className={clsx(
@@ -483,7 +455,7 @@ export default function PlantDetail({
       </div>
 
       {plant.lookup_status === "error" && (
-        <div className="flex items-center gap-3">
+        <div className="o-row">
           <p className="font-display italic text-[14px] text-[#C2603C]">
             Something went wrong looking this up.
           </p>
@@ -501,49 +473,44 @@ export default function PlantDetail({
 
       <div className="o-stack">
         {/* Photo zone — click to add/replace photo */}
-        <div
-          className="group relative w-full aspect-[4/3] cursor-pointer overflow-hidden"
-          onClick={() => photoFileRef.current?.click()}
-        >
-          {plant.photo_url ? (
-            <>
-              <Image src={plant.photo_url} alt={title} fill className="object-cover" />
-              <div className="absolute inset-0 bg-moss-tint/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none text-moss-deep">
-                <CameraIcon />
-              </div>
-            </>
-          ) : (
-            <div className="w-full h-full bg-moss-tint flex flex-col items-center justify-center gap-2 text-moss-deep/70 group-hover:brightness-95 transition-all">
-              <SproutIcon />
-              <span className="font-display italic text-[15px]">add a photo</span>
-            </div>
-          )}
-
-          {/* Photo count pill — bottom-left, only when a photo exists */}
-          {plant.photo_url && (
-            <span className="absolute bottom-2.5 left-2.5 flex items-center rounded-full bg-black/50 px-2.5 py-1 text-[11px] font-sans font-medium text-white leading-none pointer-events-none">
-              1 photo
-            </span>
-          )}
-
-          {/* Add photo button — top-right */}
-          <button
-            type="button"
-            aria-label="Add photo"
-            onClick={e => { e.stopPropagation(); photoFileRef.current?.click(); }}
-            className="absolute top-2.5 right-2.5 flex items-center justify-center w-8 h-8 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+        <div>
+          <div
+            className="plant-detail__image"
+            onClick={() => photoFileRef.current?.click()}
           >
-            <PlusIcon />
-          </button>
+            {plant.photo_url ? (
+              <>
+                <Image src={plant.photo_url} alt={title} fill/>
+                <div className="absolute inset-0 bg-moss-tint/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none text-moss-deep">
+                  <CameraIcon />
+                </div>
+              </>
+            ) : (
+              <div className="w-full h-full bg-moss-tint flex flex-col items-center justify-center gap-2 text-moss-deep/70 group-hover:brightness-95 transition-all">
+                <SproutIcon />
+                <span className="font-display italic text-[15px]">add a photo</span>
+              </div>
+            )}
 
-          {photoUploading && (
-            <div className="absolute inset-0 bg-white/60 flex items-center justify-center pointer-events-none">
-              <div className="w-6 h-6 border-2 border-moss border-t-transparent rounded-full animate-spin" />
-            </div>
-          )}
-        </div>
-        {plant.image_source === "wikimedia" && plant.image_attribution && (
-          <p className="mt-1.5 text-[11px] font-sans text-ink-soft">
+            {/* Add photo button — top-right */}
+            <button
+              type="button"
+              aria-label="Add photo"
+              onClick={e => { e.stopPropagation(); photoFileRef.current?.click(); }}
+              className="is-add-photo-icon"
+            >
+              <PlusIcon />
+            </button>
+
+            {photoUploading && (
+              <div className="absolute inset-0 bg-white/60 flex items-center justify-center pointer-events-none">
+                <div className="w-6 h-6 border-2 border-moss border-t-transparent rounded-full animate-spin" />
+              </div>
+            )}
+          </div>
+
+          {plant.image_source === "wikimedia" && plant.image_attribution && (
+          <p className="o-minion">
             <a
               href={plant.image_attribution}
               target="_blank"
@@ -554,6 +521,8 @@ export default function PlantDetail({
             </a>
           </p>
         )}
+        </div>
+        
         <input
           ref={photoFileRef}
           type="file"
@@ -582,7 +551,7 @@ export default function PlantDetail({
           />
 
           {(plant.sun_needs || (plant.flowering_season_from !== null && plant.flowering_season_to !== null)) && (
-            <div className="flex flex-wrap gap-2">
+            <div className="o-row">
               {plant.sun_needs && <SunBadgePill value={plant.sun_needs} />}
               {plant.flowering_season_from !== null && plant.flowering_season_to !== null && (
                 <FloweringSeasonBadge from={plant.flowering_season_from} to={plant.flowering_season_to} />
@@ -604,7 +573,7 @@ export default function PlantDetail({
                     <p className="plant-detail-section__label">Species</p>
                     {editing === "species" ? (
                       <>
-                        <div ref={containerRef} className="flex items-center gap-2">
+                        <div ref={containerRef} className="c-input-inline__group">
                           <input autoFocus type="text" value={v1}
                             onChange={e => setV1(e.target.value)}
                             onBlur={blurCancel}
@@ -626,7 +595,7 @@ export default function PlantDetail({
                     <p className="plant-detail-section__label">Cultivar</p>
                     {editing === "cultivar" ? (
                       <>
-                        <div ref={containerRef} className="flex items-center gap-2">
+                        <div ref={containerRef} className="c-input-inline__group">
                           <input autoFocus type="text" value={v1}
                             onChange={e => setV1(e.target.value)}
                             onBlur={blurCancel}
@@ -672,7 +641,7 @@ export default function PlantDetail({
                     <p className="plant-detail-section__label">Height (mature)</p>
                     {editing === "eventual_height_cm" ? (
                       <>
-                        <div ref={containerRef} className="flex items-center gap-2">
+                        <div ref={containerRef} className="c-input-inline__group">
                           <input autoFocus type="number" min={1} value={v1}
                             onChange={e => setV1(e.target.value)}
                             onBlur={blurCancel}
@@ -694,7 +663,7 @@ export default function PlantDetail({
                     <p className="plant-detail-section__label">Spread (mature)</p>
                     {editing === "eventual_spread_cm" ? (
                       <>
-                        <div ref={containerRef} className="flex items-center gap-2">
+                        <div ref={containerRef} className="c-input-inline__group">
                           <input autoFocus type="number" min={1} value={v1}
                             onChange={e => setV1(e.target.value)}
                             onBlur={blurCancel}
@@ -723,7 +692,7 @@ export default function PlantDetail({
                     <p className="plant-detail-section__label">Sun needs</p>
                     {editing === "sun_needs" ? (
                       <>
-                        <div ref={containerRef} className="flex items-center gap-2">
+                        <div ref={containerRef} className="c-input-inline__group">
                           <select autoFocus value={v1}
                             onChange={e => setV1(e.target.value)}
                             onBlur={blurCancel}
@@ -748,8 +717,8 @@ export default function PlantDetail({
                     <p className="plant-detail-section__label">Flowering season</p>
                     {editing === "flowering_season" ? (
                       <>
-                        <div ref={containerRef} className="flex items-center gap-2">
-                          <div className="flex gap-2 flex-1 min-w-0">
+                        <div ref={containerRef} className="o-row">
+                          <div className="o-row expand">
                             <select autoFocus value={v1} onChange={e => setV1(e.target.value)} onBlur={blurCancel} onKeyDown={esc} className={INPUT}>
                               <option value="">— from —</option>
                               {MONTHS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}
@@ -846,16 +815,16 @@ export default function PlantDetail({
             </section>
 
             {/* Notes */}
-            <div className="pt-3 border-t border-gray-100">
-              <p className="text-sm font-medium mb-1">Notes</p>
+            <div>
+              <p className="plant-detail-section__name">Notes</p>
               {editing === "notes" ? (
                 <div ref={containerRef}>
                   <textarea autoFocus rows={4} value={v1}
                     onChange={e => setV1(e.target.value)}
                     onBlur={blurCancel}
                     onKeyDown={esc}
-                    className={`${INPUT_W} resize-y`} />
-                  <div className="flex justify-end mt-1">
+                    className={`${INPUT_W}`} />
+                  <div className="u-justify-end">
                     <SaveCancel onSave={() => commit({ notes: v1.trim() || null })} onCancel={cancel} />
                   </div>
                   {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
@@ -866,12 +835,13 @@ export default function PlantDetail({
                   onClick={() => open("notes", plant.notes ?? "")} 
                   className={clsx(
                     buttonStyles["o-button"],
-                    buttonStyles["o-button--ghost"]
+                    buttonStyles["o-button--ghost"],
+                    buttonStyles["o-button--flush-start"]
                   )}
                 >
                   {plant.notes
-                    ? <span className="text-sm text-gray-800 whitespace-pre-wrap">{plant.notes}</span>
-                    : <span className={PROMPT_CLS}>+ Add notes</span>
+                    ? <span className="primer u-whitespace-pre-wrap">{plant.notes}</span>
+                    : <span>+ Add notes</span>
                   }
                 </button>
               )}
