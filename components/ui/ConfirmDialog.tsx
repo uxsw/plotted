@@ -2,6 +2,8 @@
 
 import { Modal } from "./Modal";
 import { Button } from "./Button";
+import clsx from "clsx";
+import buttonStyles from "@/components/ui/Button.module.css";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -26,19 +28,27 @@ export function ConfirmDialog({
 }: ConfirmDialogProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <div className="flex flex-col gap-5">
-        <div className="flex flex-col gap-1">
-          <h2 className="font-display text-xl font-semibold text-ink">{title}</h2>
-          <p className="text-sm font-sans text-ink-soft">{message}</p>
-        </div>
+      <div className="o-stack">
+        <h2 className="long-primer">{title}</h2>
+        <p className="primer">{message}</p>
         <div className="flex gap-2 justify-end">
-          <Button type="button" variant="ghost" onClick={onClose}>
+          <Button
+            type="button"
+            onClick={onClose}
+            className={clsx(
+              buttonStyles["o-button"],
+              buttonStyles["o-button--ghost"]
+            )}  
+          >
             {cancelLabel}
           </Button>
           <Button
             type="button"
-            variant={variant === "danger" ? "danger" : "primary"}
             onClick={onConfirm}
+            className={clsx(
+                  buttonStyles["o-button"],
+                  buttonStyles["o-button--primary"]
+                )}
           >
             {confirmLabel}
           </Button>

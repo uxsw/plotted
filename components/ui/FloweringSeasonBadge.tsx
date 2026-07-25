@@ -58,7 +58,7 @@ export function FloweringSeasonBadge({ from, to }: { from: number; to: number })
   return (
     <span
       style={{ background: style.background, color: style.color }}
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium font-sans leading-none"
+      className="c-flowering-season-chip minion"
     >
       <FlowerIconSvg color={style.color} />
       {formatSeason(from, to)}
