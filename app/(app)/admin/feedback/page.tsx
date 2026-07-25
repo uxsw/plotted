@@ -31,10 +31,11 @@ export default async function FeedbackAdminPage() {
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="font-display font-medium text-2xl text-ink">Feedback</h1>
-        <span className="text-xs font-sans text-ink-soft">
+
+    <div className="o-stack">
+      <div className="o-row space-between">
+        <h1 className="pica">Feedback</h1>
+        <span className="minion">
           {rows?.length ?? 0} {rows?.length === 1 ? "entry" : "entries"}
         </span>
       </div>

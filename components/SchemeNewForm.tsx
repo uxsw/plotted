@@ -110,17 +110,17 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
       .filter(Boolean) as PickerPlant[];
 
     return (
-      <div className="flex flex-col gap-4">
+      <div className="o-stack">
         <div>
-          <p className="font-sans text-xs font-semibold uppercase tracking-wider text-ink-soft">Step 1 of 2</p>
-          <h1 className="font-display font-medium text-2xl text-ink mt-1">Pick up to 5 plants</h1>
-          <p className="font-sans text-sm text-ink-soft mt-1">
+          <p className="brevier">Step 1 of 2</p>
+          <h1 className="long-primer">Pick up to 5 plants</h1>
+          <p className="primer">
             Choose the plants you&apos;d like companion suggestions for.
           </p>
         </div>
 
         <div
-          className="flex gap-3 overflow-x-auto pb-3 -mx-4 snap-x snap-mandatory"
+          className="c-scheme-scroller"
           style={{ paddingLeft: 24, paddingRight: 24 }}
         >
           {plants.map((plant) => {
@@ -134,28 +134,28 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
                 disabled={disabled}
                 aria-pressed={selected}
                 className={[
-                  "relative shrink-0 rounded-xl overflow-hidden snap-center border-2 transition-all duration-150",
-                  selected ? "border-moss ring-2 ring-moss ring-offset-2 ring-offset-paper" : "border-sand-line",
-                  disabled ? "opacity-40 cursor-not-allowed" : "",
+                  "c-scheme-scroller__card",
+                  selected ? "is-selected" : "default",
+                  disabled ? "is-disabled" : "",
                 ].join(" ")}
-                style={{ width: "min(60vw, 280px)", height: "min(60vw, 280px)" }}
+                
               >
                 {plant.photo_url ? (
-                  <Image src={plant.photo_url} alt="" fill sizes="min(60vw, 280px)" className="object-cover" />
+                  <Image src={plant.photo_url} alt="" fill sizes="min(60vw, 280px)" className="is-image" />
                 ) : (
-                  <div className="w-full h-full flex items-center justify-center bg-moss-tint text-moss-deep/60">
+                  <div className="missing-image">
                     <SproutIcon />
                   </div>
                 )}
                 {selected && (
-                  <div className="absolute inset-0 bg-moss/20 flex items-start justify-end p-2">
-                    <span className="w-6 h-6 rounded-full bg-moss text-white flex items-center justify-center">
+                  <div className="c-scheme-scroller__check">
+                    <span className="is-icon">
                       <CheckIcon />
                     </span>
                   </div>
                 )}
-                <div className="absolute bottom-0 left-0 right-0 bg-black/50 px-2 py-1.5">
-                  <span className="text-[12px] text-white font-sans block">
+                <div className="overlay-text">
+                  <span className="minion">
                     {plantDisplayTitle(plant)}
                   </span>
                 </div>
@@ -164,21 +164,21 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
           })}
         </div>
 
-        <div className="flex flex-col gap-2">
-          <span className="font-sans text-xs font-semibold text-ink-soft">
+        <div className="c-scheme-scroller__selected">
+          <span className="minion">
             Selected ({selectedIds.length}/5)
           </span>
-          <div className="flex gap-[10px] overflow-x-auto pb-1">
+          <div className="c-scheme-scroller__selected-list">
             {Array.from({ length: MAX_PLANTS }).map((_, i) => {
               const plant = selectedPlants[i];
               if (plant) {
                 return (
-                  <div key={plant.id} className="relative shrink-0 w-[84px] h-[84px]">
-                    <div className="absolute inset-0 rounded-xl overflow-hidden">
+                  <div key={plant.id} className="scheme-scroller__selected-item">
+                    <div className="is-inner">
                       {plant.photo_url ? (
-                        <Image src={plant.photo_url} alt={plantDisplayTitle(plant)} fill sizes="84px" className="object-cover" />
+                        <Image src={plant.photo_url} alt={plantDisplayTitle(plant)} fill sizes="100px" className="is-image" />
                       ) : (
-                        <div className="w-full h-full flex items-center justify-center bg-moss-tint text-moss-deep/60">
+                        <div className="missing-image">
                           <SproutIcon />
                         </div>
                       )}
@@ -187,7 +187,7 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
                       type="button"
                       onClick={() => toggleSelect(plant.id)}
                       aria-label={`Remove ${plantDisplayTitle(plant)}`}
-                      className="absolute -top-[6px] -right-[6px] w-[22px] h-[22px] rounded-full bg-paper border border-sand-line flex items-center justify-center text-ink-soft hover:text-ink hover:border-ink-soft transition-colors"
+                      className="is-remove"
                     >
                       <XSmallIcon />
                     </button>
@@ -197,70 +197,71 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
               return (
                 <div
                   key={i}
-                  className="shrink-0 w-[84px] h-[84px] rounded-xl border-[1.5px] border-dashed border-sand-line"
+                  className="scheme-scroller__placeholder"
                 />
               );
             })}
           </div>
         </div>
 
-        <div className="sticky bottom-4 z-10 pt-2">
-          <Button
-            variant="primary"
-            className="w-full justify-center"
-            disabled={selectedIds.length === 0}
-            onClick={() => setStep("preferences")}
-          >
-            Continue with {selectedIds.length} plant{selectedIds.length === 1 ? "" : "s"} →
-          </Button>
-        </div>
+        <Button
+          className={clsx(
+            buttonStyles["o-button"],
+            buttonStyles["o-button--primary"]
+          )}
+          disabled={selectedIds.length === 0}
+          onClick={() => setStep("preferences")}
+        >
+          Continue with {selectedIds.length} plant{selectedIds.length === 1 ? "" : "s"} →
+        </Button>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
+    <div className="o-stack">
+      <div className="o-stack">
         <button
           type="button"
           onClick={() => setStep("select")}
           className={clsx(
               buttonStyles["o-button"],
               buttonStyles["o-button--ghost"],
+              buttonStyles["o-button--flush-start"]
             )}
         >
           ← Back to plant selection
         </button>
-        <p className="font-sans text-xs font-semibold uppercase tracking-wider text-ink-soft mt-3">Step 2 of 2</p>
-        <h1 className="font-display font-medium text-2xl text-ink mt-1">Preferences</h1>
-      </div>
-
-      <div className="flex flex-col gap-2">
-        <span className="font-sans text-sm font-medium text-ink">Space available</span>
-        <div className="grid grid-cols-3 gap-2">
-          {SPACE_OPTIONS.map((opt) => {
-            const selected = space === opt.value;
-            return (
-              <button
-                key={opt.value}
-                type="button"
-                onClick={() => setSpace(opt.value)}
-                className={[
-                  "flex flex-col items-center gap-0.5 rounded-lg border px-2 py-3 transition-colors",
-                  selected
-                    ? "border-moss bg-moss-tint text-moss-deep"
-                    : "border-sand-line text-ink hover:border-moss/50",
-                ].join(" ")}
-              >
-                <span className="font-display font-medium text-sm">{opt.label}</span>
-                <span className="font-sans text-xs text-ink-soft">{opt.description}</span>
-              </button>
-            );
-          })}
+        
+        <div className="c-scheme-prefs">
+          <p className="minion">Step 2 of 2</p>
+          <h1 className="pica">Preferences</h1>
+          <span className="brevier">Space available</span>
+          <div className="c-scheme-prefs__opts">
+            {SPACE_OPTIONS.map((opt) => {
+              const selected = space === opt.value;
+              return (
+                <button
+                  key={opt.value}
+                  type="button"
+                  onClick={() => setSpace(opt.value)}
+                  className={[
+                    "c-scheme-prefs__choice",
+                    selected
+                      ? "is-selected"
+                      : "is-default",
+                  ].join(" ")}
+                >
+                  <span className="primer">{opt.label}</span>
+                  <span className="minion">{opt.description}</span>
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
 
-      <div className="flex flex-col gap-4 rounded-lg border border-sand-line p-4">
+      <div className="c-scheme-prefs__toggle">
         <Toggle
           id="successional"
           checked={successional}
@@ -275,25 +276,23 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
         />
       </div>
 
-      <div className="sticky bottom-4 z-10">
-        <Button
-          variant="primary"
-          className="w-full justify-center"
-          disabled={!space || submitting}
-          onClick={handleGenerate}
-        >
-          {submitting ? (
-            <span className="flex items-center gap-2">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="animate-spin" aria-hidden="true">
-                <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-              </svg>
-              Generating…
-            </span>
-          ) : (
-            "Generate scheme"
-          )}
-        </Button>
-      </div>
+      <Button
+        variant="primary"
+        className="w-full justify-center"
+        disabled={!space || submitting}
+        onClick={handleGenerate}
+      >
+        {submitting ? (
+          <span className="flex items-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="animate-spin" aria-hidden="true">
+              <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+            </svg>
+            Generating…
+          </span>
+        ) : (
+          "Generate a scheme"
+        )}
+      </Button>
     </div>
   );
 }
