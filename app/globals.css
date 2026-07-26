@@ -863,3 +863,112 @@ body {
   border: 1.5px dashed var(--color-sand-line);
 
 }
+
+.o-popover {
+  background-color: var(--color-white);
+  z-index: 50;
+  min-width: 200px;
+  border: 1px solid var(--color-sand-line);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.25rem;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline-offset: 2px;
+    outline-width: 2px;
+    outline: 2px solid var(--color-b-cyan);
+  }
+}
+
+.o-popover__link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  inline-size: 100%;
+  background-color: transparent;
+  color: var(--color-g-deep-grey);
+  padding: 0.5rem;
+  cursor: pointer;
+  transition: background-color 0.4s ease;
+
+  &:hover {
+    background-color: var(--color-y-yellow);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--color-b-cyan);
+  }
+}
+
+.o-hr {
+  border-color: var(--color-sand-line);
+}
+
+.c-account-location {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.c-account-location__edit {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.c-location-search__input {
+  inline-size: 100%;
+  border-color: 1px solid var(--color-g-dark-grey);
+  padding: 0.5rem;
+  background-color: transparent;
+  color: var(--color-g-deep-grey);
+  transition:
+    border-color 0.4s ease,
+    background-color 0.4s ease;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-b-cyan);
+  }
+
+  &:hover {
+    border-color: var(--color-b-cyan);
+    background-color: var(--color-y-yellow);
+  }
+  
+  &::placeholder {
+    color: var(--color-g-grey);
+  }
+}
+
+.c-location-search__menu {
+  background-color: var(--color-white);
+  border: 1px solid var(--color-sand-line);
+  overflow: hidden;
+}
+
+.c-location-search__menu-item {
+  inline-size: 100%;
+  text-align: left;
+  padding: 0.5rem;
+  color: var(--color-g-deep-grey);
+  transition: background-color 0.4s;
+
+  &:focus-visible {
+    outline: 2px solid var(--color-b-cyan);
+  }
+
+  &:hover {
+    background-color: var(--color-y-yellow);
+  }
+
+  &.is-selected {
+    background-color: var(--color-y-yellow);
+  }
+}

@@ -1,4 +1,6 @@
 "use client";
+import clsx from "clsx";
+import buttonStyles from "@/components/ui/Button.module.css";
 
 import { useState, useEffect, useRef } from "react";
 
@@ -109,7 +111,7 @@ export function LocationSearch({ onSelect, onCancel }: Props) {
   }
 
   return (
-    <div className="flex flex-col gap-1">
+    <div>
       <div className="relative">
         <input
           ref={inputRef}
@@ -119,14 +121,11 @@ export function LocationSearch({ onSelect, onCancel }: Props) {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           className={[
-            "w-full rounded border border-sand-line px-3 py-2 text-sm font-sans text-ink",
-            "bg-paper placeholder:text-ink-soft/50",
-            "focus:outline-none focus:ring-2 focus:ring-moss focus:ring-offset-1 focus:ring-offset-paper focus:border-moss focus:bg-moss-tint/30",
-            "transition-colors duration-150",
+            "c-location-search__input",
           ].join(" ")}
         />
         {loading && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-ink-soft">
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-ink-soft bosco">
             …
           </span>
         )}
@@ -135,7 +134,7 @@ export function LocationSearch({ onSelect, onCancel }: Props) {
       {displayedResults.length > 0 && (
         <ul
           role="listbox"
-          className="rounded border border-sand-line bg-paper shadow-sm overflow-hidden"
+          className="c-location-search__menu"
         >
           {displayedResults.map((r, i) => (
             <li key={r.id}>
@@ -145,12 +144,10 @@ export function LocationSearch({ onSelect, onCancel }: Props) {
                 aria-selected={i === highlightedIndex}
                 onClick={() => handleSelect(r)}
                 className={[
-                  "w-full text-left px-3 py-2 text-sm font-sans text-ink",
-                  "transition-colors duration-100",
-                  "focus:outline-none",
+                  "c-location-search__menu-item brevier",
                   i === highlightedIndex
-                    ? "bg-moss-tint/60"
-                    : "hover:bg-moss-tint/40 focus:bg-moss-tint/40",
+                    ? "is-selected"
+                    : "is-hover",
                 ].join(" ")}
               >
                 {formatLabel(r)}
@@ -163,7 +160,10 @@ export function LocationSearch({ onSelect, onCancel }: Props) {
       <button
         type="button"
         onClick={onCancel}
-        className="self-start text-xs font-sans text-ink-soft underline underline-offset-2 hover:text-ink transition-colors duration-100"
+        className={clsx(
+          buttonStyles["o-button"],
+          buttonStyles["o-button--ghost"]
+        )}
       >
         Cancel
       </button>

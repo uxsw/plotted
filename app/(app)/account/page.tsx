@@ -25,17 +25,15 @@ export default async function AccountPage() {
   const garden = data as Garden | null;
 
   return (
-    <div className="flex flex-col gap-8">
-      <h1 className="font-display font-medium text-2xl text-ink">Account</h1>
+    <section className="o-stack">
+      <h1 className="pica">Account</h1>
 
-      <section className="flex flex-col gap-3">
-        <h2 className="text-xs font-sans font-medium uppercase tracking-wide text-ink-soft">
-          Location
-        </h2>
-        <LocationEditor
-          initialLabel={garden?.location_label ?? null}
-        />
-      </section>
-    </div>
+      <p className="brevier">
+        Location
+      </p>
+      <LocationEditor
+        initialLabel={garden?.location_label ?? null}
+      />
+    </section>
   );
 }
