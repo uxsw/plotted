@@ -4,6 +4,8 @@ import { useState } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
+import clsx from "clsx";
+import buttonStyles from "@/components/ui/Button.module.css";
 
 function UnderlineField({ label, focused, children }: {
   label: string;
@@ -12,7 +14,7 @@ function UnderlineField({ label, focused, children }: {
 }) {
   return (
     <div>
-      <label className="block font-display italic text-[15px] font-normal text-ink-soft">
+      <label className="brevier">
         {label}
       </label>
       <div className="relative">
@@ -80,12 +82,12 @@ export default function ForgotPasswordPage() {
           <Illustration />
         </div>
 
-        <h1 className="font-display font-medium text-[36px] text-ink text-center mb-[6px]">Plotted</h1>
-        <p className="font-display italic text-[15px] font-normal text-ink-soft text-center mb-10">find your way back</p>
+        <h1 className="paragon">Plotted</h1>
+        <p className="primer">Find your way back</p>
 
         {sent ? (
-          <p className="font-display italic text-[15px] font-normal text-ink-soft text-center">
-            check your email for a reset link
+          <p className="primer">
+            Check your email for a reset link
           </p>
         ) : (
           <form onSubmit={handleSubmit} className="w-full flex flex-col">
@@ -101,7 +103,7 @@ export default function ForgotPasswordPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 onFocus={() => setFocusedField("email")}
                 onBlur={() => setFocusedField(null)}
-                className="w-full bg-transparent border-0 outline-none font-sans text-[17px] text-ink pb-3 pt-[10px]"
+                className="o-text-input__underline"
               />
             </UnderlineField>
 
@@ -112,8 +114,13 @@ export default function ForgotPasswordPage() {
             </div>
 
             <div className="flex justify-center mt-6">
-              <Link href="/auth/login" className="font-display italic text-[14px] text-moss hover:underline">
-                back to sign in
+              <Link
+                href="/auth/login"
+                className={clsx(
+                  buttonStyles["o-button"],
+                  buttonStyles["o-button--ghost"]
+                )}>
+                Back to sign in
               </Link>
             </div>
           </form>

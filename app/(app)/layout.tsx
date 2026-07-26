@@ -17,13 +17,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     <div className="min-h-screen">
       <OfflineBanner />
       <header>
-        <div className="px-4 py-3 flex items-center justify-between">
-          <Wordmark className="h-8 w-auto text-ink" />
+        <div className="c-head">
+          <Wordmark className="is-wordmark" />
           <UserMenu email={user.email ?? ""} />
         </div>
         <GlobalNav />
       </header>
-      <main className="max-w-[500px] mx-auto px-4 py-8">{children}</main>
+      <main className="o-page">{children}</main>
       <AppFooter />
       <FeedbackButton />
     </div>

@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import clsx from "clsx";
+import buttonStyles from "@/components/ui/Button.module.css";
 
 export const metadata: Metadata = {
   title: "Add Plant | Plotted",
@@ -8,10 +10,17 @@ import PlantForm from "@/components/PlantForm";
 
 export default function NewPlantPage() {
   return (
-    <div className="space-y-4">
+    <div>
       <div>
-        <Link href="/plants" className="text-sm text-ink-soft hover:underline">← My Plants</Link>
-        <h1 className="font-display font-medium text-[30px] mt-2">Add a plant</h1>
+        <Link
+          href="/plants"
+          className={clsx(
+            buttonStyles["o-button"],
+            buttonStyles["o-button--ghost"],
+            buttonStyles["o-button--flush-start"]
+          )}
+        >← My Plants</Link>
+        <h1 className="pica">Add a plant</h1>
       </div>
       <PlantForm />
     </div>
