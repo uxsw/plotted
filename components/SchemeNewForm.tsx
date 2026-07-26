@@ -94,9 +94,9 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
         <Link
           href="/plants/new"
           className={clsx(
-              buttonStyles["o-button"],
-              buttonStyles["o-button--primary"],
-            )}
+            buttonStyles["o-button"],
+            buttonStyles["o-button--primary"],
+          )}
         >
           + Add a plant
         </Link>

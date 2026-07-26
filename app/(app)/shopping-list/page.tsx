@@ -35,8 +35,8 @@ export default async function ShoppingListPage() {
   });
 
   return (
-    <div className="flex flex-col gap-6">
-      <h1 className="font-display font-medium text-2xl text-ink">Shopping list</h1>
+    <div className="o-stack">
+      <h1 className="pica">Shopping list</h1>
       <ShoppingList initialItems={mapped} />
     </div>
   );

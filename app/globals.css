@@ -110,6 +110,26 @@ line-height: 1.5;
   white-space: pre-wrap;
 }
 
+.c-head {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  padding-inline: 1rem;
+  padding-block: 0.5rem;
+
+  .is-wordmark {
+    height: 2rem;
+    color: var(--color-g-deep-grey);
+    inline-size: auto;
+  }
+}
+
+.o-page {
+  max-width: 500px;
+  margin-inline: auto;
+  padding: 1rem;
+}
+
 button, [role="button"] {
   cursor: pointer;
 }
@@ -193,6 +213,15 @@ body {
     background-color: white;
     border-color: var(--color-g-summer-green);
   }
+}
+
+.o-text-input__underline {
+  inline-size: 100%;
+  background-color: transparent;
+  outline: none;
+  color: var(--color-g-deep-grey);
+  padding-inline: 1rem;
+  padding-block: 0.5rem;
 }
 
 .nav-sections {
@@ -970,5 +999,29 @@ body {
 
   &.is-selected {
     background-color: var(--color-y-yellow);
+  }
+}
+
+.o-pulse {
+  animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+}
+
+.c-plant-detail-skeleton {
+  overflow: hidden;
+  border: 1px solid var(--color-sand-line);
+
+  > .is-photo {
+    height: 64px;
+    inline-size: 100%;
+    background-color: var(--color-sand-line);
   }
 }

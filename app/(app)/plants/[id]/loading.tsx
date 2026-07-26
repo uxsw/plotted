@@ -1,11 +1,11 @@
 export default function PlantDetailLoading() {
   return (
-    <div className="rounded-xl overflow-hidden border border-sand-line bg-paper">
+    <div className="c-plant-detail-skeleton">
       {/* Photo zone */}
-      <div className="h-64 w-full bg-sand-line animate-pulse" />
+      <div className="is-photo o-pulse" />
 
       {/* Content */}
-      <div className="p-6 space-y-4">
+      <div className="o-stack island">
         {/* Title + subtitle */}
         <div>
           <div className="h-7 w-48 bg-sand-line rounded animate-pulse" />
