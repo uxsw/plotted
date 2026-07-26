@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { LocationSearch } from "@/components/weather/LocationSearch";
 import { saveGardenLocation } from "@/app/actions/garden";
+import clsx from "clsx";
+import buttonStyles from "@/components/ui/Button.module.css";
 
 type Props = {
   initialLabel: string | null;
@@ -42,14 +44,17 @@ export function LocationEditor({ initialLabel }: Props) {
   }
 
   return (
-    <div className="flex items-center justify-between gap-4">
-      <span className="text-sm font-sans text-ink">
-        {label ?? <span className="text-ink-soft">Not set</span>}
+    <div className="c-account-location__edit">
+      <span className="brevier">
+        {label ?? <span>Not set</span>}
       </span>
       <button
         type="button"
         onClick={() => setIsEditing(true)}
-        className="shrink-0 text-sm font-sans text-moss underline underline-offset-2 hover:text-moss-deep transition-colors duration-100"
+        className={clsx(
+            buttonStyles["o-button"],
+            buttonStyles["o-button--ghost"]
+          )}
       >
         Edit
       </button>
