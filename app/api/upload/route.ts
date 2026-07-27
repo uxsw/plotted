@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { ACCEPTED_UPLOAD_TYPES, MAX_UPLOAD_SIZE, MAX_UPLOAD_SIZE_LABEL } from "@/lib/upload";
+import { stripExif } from "@/lib/identification/exif";
 
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
@@ -35,10 +36,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  let stripped: Buffer;
+  try {
+    stripped = await stripExif(Buffer.from(await file.arrayBuffer()));
+  } catch {
+    return NextResponse.json({ error: "Could not process image" }, { status: 400 });
+  }
+
   const path = `${user.id}/${Date.now()}.jpg`;
   const { error: uploadError } = await supabase.storage
     .from("plant-photos")
-    .upload(path, file, { contentType: file.type, upsert: true });
+    .upload(path, stripped, { contentType: "image/jpeg", upsert: true });
 
   if (uploadError) {
     return NextResponse.json({ error: uploadError.message }, { status: 500 });

@@ -112,7 +112,7 @@ export default function PlantList({ plants }: { plants: Plant[] }) {
                         >
                           {title ?? (
                             hasScientific
-                              ? <ScientificName species={plant.species} cultivar={plant.cultivar} />
+                              ? <ScientificName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} />
                               : "Unnamed plant"
                           )}
                         </Link>

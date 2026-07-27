@@ -13,6 +13,8 @@ import {
   MAX_ORIGINAL_SIZE_LABEL,
 } from "@/lib/upload";
 import { resizeImage } from "@/lib/resize";
+import PhotoIdentification from "@/components/identification/PhotoIdentification";
+import type { IdentifiedPlantFields } from "@/lib/identification/name";
 
 // ─── Icons ───────────────────────────────────────────────────────────────────
 
@@ -59,6 +61,30 @@ export default function PlantForm() {
   const [species, setSpecies] = useState("");
   const [cultivar, setCultivar] = useState("");
   const [focusedField, setFocusedField] = useState<string | null>(null);
+
+  // Set only by photo identification. The species input is the single visible
+  // name field, so these ride alongside it and are dropped the moment the user
+  // edits that field by hand — at that point the identification no longer
+  // describes what's in the box, and a stale genus would corrupt the match_key.
+  const [identified, setIdentified] = useState<Pick<
+    IdentifiedPlantFields,
+    "genus" | "common_names" | "species_input"
+  > | null>(null);
+
+  function handleSpeciesEdit(value: string) {
+    setSpecies(value);
+    if (identified) setIdentified(null);
+  }
+
+  function handleIdentified(fields: IdentifiedPlantFields) {
+    // Overwrites whatever was typed, with no confirmation — by design.
+    setSpecies(fields.species ?? "");
+    setIdentified({
+      genus: fields.genus,
+      common_names: fields.common_names,
+      species_input: fields.species_input,
+    });
+  }
 
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
@@ -123,9 +149,10 @@ export default function PlantForm() {
       const photoUrl = await uploadPhoto();
 
       const payload: PlantInsert = {
-        genus: "",
+        genus: identified?.genus ?? "",
         species: species || null,
         cultivar: cultivar || null,
+        species_input: identified?.species_input ?? null,
         date_planted: defaultDatePlanted,
         photo_url: photoUrl,
         sun_needs: null,
@@ -135,7 +162,7 @@ export default function PlantForm() {
         eventual_spread_cm: null,
         status: "active",
         notes: null,
-        common_names: [],
+        common_names: identified?.common_names ?? [],
       };
 
       const result = await upsertPlant(null, payload);
@@ -181,6 +208,16 @@ export default function PlantForm() {
       </div>
       <input type="file" accept="image/*" ref={fileRef} onChange={handleFileChange} className="hidden" />
 
+      {/* Identification — appears only once there's an image to identify.
+          Never gates the form: the species field below is always usable. */}
+      {photoBlob && (
+        <PhotoIdentification
+          photoBlob={photoBlob}
+          currentSpecies={species}
+          onSelect={handleIdentified}
+        />
+      )}
+
       {/* Species */}
       <div className="mt-6">
         <UnderlineField label="species *" focused={focusedField === "species"}>
@@ -188,7 +225,7 @@ export default function PlantForm() {
             type="text"
             required
             value={species}
-            onChange={(e) => setSpecies(e.target.value)}
+            onChange={(e) => handleSpeciesEdit(e.target.value)}
             onFocus={() => setFocusedField("species")}
             onBlur={(e) => { setFocusedField(null); setSpecies(e.target.value.trim()); }}
             className={`${inputCls}`}

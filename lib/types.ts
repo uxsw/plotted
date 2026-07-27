@@ -17,6 +17,12 @@ export interface Plant {
   genus: string;
   species: string | null;
   cultivar: string | null;
+  /**
+   * What the user actually typed, when it differs from the canonical name.
+   * Someone who searched "bugle" should be shown "bugle" back, not
+   * "Ajuga reptans". Null when they never typed anything of their own.
+   */
+  species_input: string | null;
   search_vector?: string; // generated column — never written, rarely read
   date_planted: string | null; // ISO date, day always stored as 1
   photo_url: string | null;
@@ -38,12 +44,15 @@ export interface Plant {
 
 // image_source and image_attribution are optional on insert — existing plant
 // creation flows don't set them; only the purchased-from-shopping-list path does.
+// species_input is likewise optional: only photo identification sets it, and
+// only when the user's own wording differs from the canonical name.
 export type PlantInsert = Omit<
   Plant,
-  "id" | "user_id" | "created_at" | "updated_at" | "search_vector" | "lookup_status" | "lookup_notice_seen_at" | "image_source" | "image_attribution"
+  "id" | "user_id" | "created_at" | "updated_at" | "search_vector" | "lookup_status" | "lookup_notice_seen_at" | "image_source" | "image_attribution" | "species_input"
 > & {
   image_source?: "wikimedia" | "upload" | null;
   image_attribution?: string | null;
+  species_input?: string | null;
 };
 
 export interface SpeciesRef {
