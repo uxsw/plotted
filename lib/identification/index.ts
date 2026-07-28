@@ -21,4 +21,4 @@ export type {
   IdentificationResult,
   RegionHint,
 } from "./types";
-export { IdentificationProviderError, IdentificationTimeoutError } from "./types";
+export { IdentificationProviderError, IdentificationTimeoutError, IdentificationLimitError } from "./types";

@@ -43,3 +43,34 @@ export async function resolveIdentifiedSpecies(
 
   return { matchKey, speciesRef: (speciesRefRow as SpeciesRef | null) ?? null };
 }
+
+/**
+ * Choice logging for photo identification. Write-and-forget — there is no
+ * reporting view or feedback loop; this exists purely to answer, in a couple
+ * of weeks, whether Pl@ntNet's suggestions are good enough or whether paying
+ * for Plant.id is worth it. See the SQL in spec_1.md's staging notes / the
+ * stage 6 deliverable for the actual comparison query.
+ *
+ * selected is null for a "none of these" — that is itself the signal being
+ * measured, not an error case, so failures here are swallowed rather than
+ * surfaced to the user (logging must never block or visibly affect the
+ * identification flow).
+ */
+export async function logIdentificationChoice(
+  firstRanked: string,
+  selected: string | null
+): Promise<void> {
+  try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    await supabase
+      .from("identification_choices")
+      .insert({ user_id: user.id, first_ranked: firstRanked, selected });
+  } catch (err) {
+    console.error("[identification] choice logging failed:", err);
+  }
+}

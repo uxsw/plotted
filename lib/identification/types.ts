@@ -25,3 +25,4 @@ export interface IdentificationAdapter {
 
 export class IdentificationProviderError extends Error {}
 export class IdentificationTimeoutError extends Error {}
+export class IdentificationLimitError extends Error {}

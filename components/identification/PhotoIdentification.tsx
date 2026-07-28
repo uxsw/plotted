@@ -15,6 +15,7 @@ import {
   sharedGenus,
 } from "@/lib/identification/candidates";
 import type { IdentificationCandidate } from "@/lib/identification/types";
+import { logIdentificationChoice } from "@/app/actions/identification";
 
 // The unit knows nothing about where the chosen name is going — the consumer
 // passes the destination in via onSelect. That is what keeps the shopping-list
@@ -35,6 +36,7 @@ function errorMessage(status: number, body: { error?: string }): string {
   if (status === 504) return "That took too long. Try again in a moment.";
   if (status === 502) return "Couldn't reach the identification service. Try again in a moment.";
   if (status === 401) return "Your session has expired. Please sign in again.";
+  if (status === 429) return "You've reached today's identification limit. Try again tomorrow, or enter the name yourself.";
   return body.error ?? "Something went wrong identifying this photo.";
 }
 
@@ -89,6 +91,19 @@ export default function PhotoIdentification({ photoBlob, currentSpecies, onSelec
         ? genusFallbackToPlantFields(genus ?? "", currentSpecies)
         : candidateToPlantFields(shown[next.index], currentSpecies);
     onSelect(fields);
+
+    const selectedLabel =
+      next.kind === "genus" ? `${genus} (genus only)` : shown[next.index].scientificName;
+    void logIdentificationChoice(shown[0].scientificName, selectedLabel);
+
+    dismiss();
+  }
+
+  // "None of these" is itself the signal this logs — not skipped, not an
+  // error. Only reachable from the populated-results view below, so
+  // shown[0] always exists here.
+  function rejectAll() {
+    void logIdentificationChoice(shown[0].scientificName, null);
     dismiss();
   }
 
@@ -193,7 +208,7 @@ export default function PhotoIdentification({ photoBlob, currentSpecies, onSelec
       </div>
 
       <div className="c-identify-results__actions mt-4">
-        <Button type="button" variant="ghost" onClick={dismiss} className="w-full justify-center">
+        <Button type="button" variant="ghost" onClick={rejectAll} className="w-full justify-center">
           None of these
         </Button>
       </div>

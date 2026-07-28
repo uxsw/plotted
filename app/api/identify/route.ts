@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient, createBearerClient } from "@/lib/supabase/server";
-import { getIdentificationAdapter, IdentificationProviderError, IdentificationTimeoutError } from "@/lib/identification";
+import {
+  getIdentificationAdapter,
+  IdentificationProviderError,
+  IdentificationTimeoutError,
+  IdentificationLimitError,
+} from "@/lib/identification";
 import { stripExif } from "@/lib/identification/exif";
+import { enforceDailyIdentifyLimit } from "@/lib/identification/dailyLimit";
 import { ACCEPTED_UPLOAD_TYPES, MAX_ORIGINAL_SIZE, MAX_ORIGINAL_SIZE_LABEL } from "@/lib/upload";
 
 export async function POST(request: NextRequest) {
@@ -15,6 +21,15 @@ export async function POST(request: NextRequest) {
     data: { user },
   } = bearerToken ? await supabase.auth.getUser(bearerToken) : await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+  try {
+    await enforceDailyIdentifyLimit(supabase, user.id);
+  } catch (err) {
+    if (err instanceof IdentificationLimitError) {
+      return NextResponse.json({ error: "daily_limit_reached" }, { status: 429 });
+    }
+    throw err;
+  }
 
   let formData: FormData;
   try {

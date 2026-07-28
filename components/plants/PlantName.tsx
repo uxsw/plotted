@@ -1,3 +1,5 @@
+import type { ReactNode } from "react";
+
 interface PlantNameProps {
   genus?: string | null;
   species?: string | null;
@@ -11,14 +13,22 @@ interface PlantNameProps {
  * species (upright) + 'cultivar' (italic) on the primary line,
  * common names below in muted text (detail variant only).
  *
- * Fallback chain when there's no species: genus alone (a deliberate
- * genus-only identification — see spec's genus-fallback), then "Unnamed
- * plant" only when there's truly nothing (the fully unidentified state).
- * Genus is never shown alongside species here — that binomial form lives in
- * lib/plantName.tsx's plantDisplayTitle; this component's job is the
- * card/detail heading specifically, where species-with-genus hasn't been
- * the existing convention and isn't being introduced by this fix.
+ * Fallback chain: common name (handled by the caller, not here — this
+ * component only ever renders the scientific line) → full "Genus species"
+ * binomial when both are available → bare species alone when genus is blank
+ * (legacy rows only — genus is populated on every current write path) →
+ * bare genus alone (a deliberate genus-only identification — see spec's
+ * genus-fallback) → "Unnamed plant" when there's truly nothing.
+ *
+ * Species is only capitalised when standing in alone (no genus to lead the
+ * name) — once genus is shown, species reverts to lowercase per normal
+ * binomial convention.
  */
+function speciesLine(genus: string | null | undefined, species: string): ReactNode {
+  if (genus) return <span>{genus} {species}</span>;
+  return <span>{species[0].toUpperCase() + species.slice(1)}</span>;
+}
+
 export function PlantName({ genus, species, cultivar, commonNames, variant = "card" }: PlantNameProps) {
   const hasScientific = !!(species || cultivar);
   const bareGenus = !hasScientific && genus ? genus : null;
@@ -29,7 +39,7 @@ export function PlantName({ genus, species, cultivar, commonNames, variant = "ca
         <div className="font-display font-semibold text-2xl leading-snug">
           {hasScientific ? (
             <>
-              {species && <span>{species[0].toUpperCase() + species.slice(1)}</span>}
+              {species && speciesLine(genus, species)}
               {cultivar && <> <em>&lsquo;{cultivar}&rsquo;</em></>}
             </>
           ) : bareGenus ? (
@@ -51,7 +61,7 @@ export function PlantName({ genus, species, cultivar, commonNames, variant = "ca
   if (!hasScientific) return <span>{bareGenus ?? "Unnamed plant"}</span>;
   return (
     <span>
-      {species && <span>{species[0].toUpperCase() + species.slice(1)}</span>}
+      {species && speciesLine(genus, species)}
       {cultivar && <> <em>&apos;{cultivar}&apos;</em></>}
     </span>
   );
