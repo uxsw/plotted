@@ -20,8 +20,8 @@ const BASE_LOOKUP: LookupResult = {
   corrected_cultivar: null,
 };
 
-// Mocks the exact chain the route calls: .from("plants").select(...).eq().eq().single()
-// for the read, and .from("plants").update(...).eq() for the write. Captures
+// Mocks the exact chain the route calls: .from("plants").select(...).eq().eq().eq().single()
+// for the read, and .from("plants").update(...).eq().eq() for the write. Captures
 // the update payload so tests can assert on what was actually persisted.
 function setupSupabase(plantRow: Record<string, unknown>) {
   let capturedUpdate: Record<string, unknown> | null = null;
@@ -32,13 +32,19 @@ function setupSupabase(plantRow: Record<string, unknown>) {
       select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
           eq: vi.fn().mockReturnValue({
-            single: vi.fn().mockResolvedValue({ data: plantRow }),
+            eq: vi.fn().mockReturnValue({
+              single: vi.fn().mockResolvedValue({ data: plantRow }),
+            }),
           }),
         }),
       }),
       update: vi.fn().mockImplementation((payload: Record<string, unknown>) => {
         capturedUpdate = payload;
-        return { eq: vi.fn().mockResolvedValue({ error: null }) };
+        return {
+          eq: vi.fn().mockReturnValue({
+            eq: vi.fn().mockResolvedValue({ error: null }),
+          }),
+        };
       }),
     }),
   } as unknown as Awaited<ReturnType<typeof createClient>>);
@@ -117,6 +123,34 @@ describe("POST /api/plants/[id]/lookup — species_source gate", () => {
     });
     await callRoute();
     expect(capturedUpdate()).toMatchObject({ species: "canina", common_names: ["Dog rose"] });
+  });
+
+  it("scopes both the read and the write to the requesting user (defense-in-depth alongside RLS)", async () => {
+    const selectEq = vi.fn().mockReturnThis();
+    const updateEq = vi.fn().mockReturnThis();
+    vi.mocked(createClient).mockResolvedValue({
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "user-1" } } }) },
+      from: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: selectEq,
+          single: vi.fn().mockResolvedValue({
+            data: {
+              genus: "Thymus",
+              species: "praecox",
+              cultivar: null,
+              common_names: [],
+              species_source: null,
+            },
+          }),
+        }),
+        update: vi.fn().mockReturnValue({ eq: updateEq }),
+      }),
+    } as unknown as Awaited<ReturnType<typeof createClient>>);
+
+    await callRoute();
+
+    expect(selectEq).toHaveBeenCalledWith("user_id", "user-1");
+    expect(updateEq).toHaveBeenCalledWith("user_id", "user-1");
   });
 
   it("existing row with species_source: null behaves exactly like 'manual' — no regression", async () => {

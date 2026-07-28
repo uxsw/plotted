@@ -15,11 +15,13 @@ export async function POST(
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
+  // RLS ensures only the plant owner can access this row
   const { data: plant } = await supabase
     .from("plants")
     .select("genus, species, cultivar, common_names, species_source")
     .eq("id", id)
     .eq("status", "active")
+    .eq("user_id", user.id)
     .single();
 
   if (!plant) {
@@ -53,10 +55,12 @@ export async function POST(
         existingCommonNames: fromIdentification ? plant.common_names : undefined,
       }
     );
-    await supabase.from("plants").update({ ...updates, lookup_status }).eq("id", id);
+    // RLS ensures only the plant owner can update
+    await supabase.from("plants").update({ ...updates, lookup_status }).eq("id", id).eq("user_id", user.id);
     return NextResponse.json({ ...result, ...updates, lookup_status });
   } catch {
-    await supabase.from("plants").update({ lookup_status: "error" }).eq("id", id);
+    // RLS ensures only the plant owner can update
+    await supabase.from("plants").update({ lookup_status: "error" }).eq("id", id).eq("user_id", user.id);
     return NextResponse.json({ error: "Lookup failed" }, { status: 500 });
   }
 }
