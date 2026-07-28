@@ -62,30 +62,6 @@ export default function PlantForm() {
   const [cultivar, setCultivar] = useState("");
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  // Set only by photo identification. The species input is the single visible
-  // name field, so these ride alongside it and are dropped the moment the user
-  // edits that field by hand — at that point the identification no longer
-  // describes what's in the box, and a stale genus would corrupt the match_key.
-  const [identified, setIdentified] = useState<Pick<
-    IdentifiedPlantFields,
-    "genus" | "common_names" | "species_input"
-  > | null>(null);
-
-  function handleSpeciesEdit(value: string) {
-    setSpecies(value);
-    if (identified) setIdentified(null);
-  }
-
-  function handleIdentified(fields: IdentifiedPlantFields) {
-    // Overwrites whatever was typed, with no confirmation — by design.
-    setSpecies(fields.species ?? "");
-    setIdentified({
-      genus: fields.genus,
-      common_names: fields.common_names,
-      species_input: fields.species_input,
-    });
-  }
-
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   const [photoBlob, setPhotoBlob] = useState<Blob | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -149,10 +125,9 @@ export default function PlantForm() {
       const photoUrl = await uploadPhoto();
 
       const payload: PlantInsert = {
-        genus: identified?.genus ?? "",
+        genus: "",
         species: species || null,
         cultivar: cultivar || null,
-        species_input: identified?.species_input ?? null,
         date_planted: defaultDatePlanted,
         photo_url: photoUrl,
         sun_needs: null,
@@ -162,7 +137,7 @@ export default function PlantForm() {
         eventual_spread_cm: null,
         status: "active",
         notes: null,
-        common_names: identified?.common_names ?? [],
+        common_names: [],
       };
 
       const result = await upsertPlant(null, payload);
@@ -174,6 +149,55 @@ export default function PlantForm() {
       throw new Error(result.error);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  /**
+   * Save path for the identification results screen — a candidate, a
+   * genus-fallback pick, or "none of these" (unidentified). All three end
+   * the add-plant journey directly: photo and name are already resolved by
+   * this point, so there's nothing left on the form to review. Mirrors
+   * handleSubmit's upload → build payload → upsertPlant sequence, reusing
+   * the same save action rather than a second path.
+   *
+   * Deliberately does not catch: a thrown Error here is a genuine failure
+   * and must propagate to PhotoIdentification's own catch, which displays it
+   * inline on the results screen. upsertPlant's redirect() on success is a
+   * framework-level navigation, not a normal promise resolution/rejection —
+   * it's never caught here, exactly as handleSubmit above already relies on.
+   */
+  async function handleIdentificationSave(fields: IdentifiedPlantFields): Promise<void> {
+    setError(null);
+    setSaving(true);
+    try {
+      const photoUrl = await uploadPhoto();
+
+      const payload: PlantInsert = {
+        genus: fields.genus,
+        species: fields.species,
+        cultivar: null,
+        species_input: fields.species_input,
+        date_planted: defaultDatePlanted,
+        photo_url: photoUrl,
+        sun_needs: null,
+        flowering_season_from: null,
+        flowering_season_to: null,
+        eventual_height_cm: null,
+        eventual_spread_cm: null,
+        status: "active",
+        notes: null,
+        common_names: fields.common_names,
+      };
+
+      const result = await upsertPlant(null, payload, { fromIdentification: true });
+      if (!result) return; // redirected — success
+      if ("error" in result) throw new Error(result.error);
+      // fieldErrors shouldn't occur here — genus/species and the photo are
+      // already resolved and valid by construction — but surface it plainly
+      // rather than silently failing if it somehow does.
+      throw new Error(Object.values(result.fieldErrors)[0] ?? "Could not save this plant.");
     } finally {
       setSaving(false);
     }
@@ -209,12 +233,15 @@ export default function PlantForm() {
       <input type="file" accept="image/*" ref={fileRef} onChange={handleFileChange} className="hidden" />
 
       {/* Identification — appears only once there's an image to identify.
-          Never gates the form: the species field below is always usable. */}
+          Never gates the form: the species field below is always usable.
+          Every outcome here (a candidate, genus-fallback, or "none of
+          these") saves directly and redirects — there is no return to this
+          form once a result is chosen. */}
       {photoBlob && (
         <PhotoIdentification
           photoBlob={photoBlob}
           currentSpecies={species}
-          onSelect={handleIdentified}
+          onSelect={handleIdentificationSave}
         />
       )}
 
@@ -224,7 +251,7 @@ export default function PlantForm() {
           <input
             type="text"
             value={species}
-            onChange={(e) => handleSpeciesEdit(e.target.value)}
+            onChange={(e) => setSpecies(e.target.value)}
             onFocus={() => setFocusedField("species")}
             onBlur={(e) => { setFocusedField(null); setSpecies(e.target.value.trim()); }}
             className={`${inputCls}`}

@@ -27,6 +27,7 @@ export function validMonth(v: unknown): number | null {
 }
 
 export async function performLookup(
+  genus: string,
   species: string,
   cultivar: string | null
 ): Promise<LookupResult> {
@@ -38,8 +39,9 @@ export async function performLookup(
         role: "user",
         content: `You are a botanical reference assistant with knowledge of UK growing conditions.
 
-Given a plant's scientific species name and optional cultivar, return the following data as a JSON object. Base all values on typical UK conditions.
+Given a plant's genus, species, and optional cultivar, return the following data as a JSON object. Base all values on typical UK conditions.
 
+Genus: ${genus}
 Species: ${species}
 Cultivar: ${cultivar ?? ""} (may be empty — if so, base values on the species)
 

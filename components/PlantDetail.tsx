@@ -543,6 +543,18 @@ export default function PlantDetail({
               }
             </AiNoticePanel>
           )}
+          {/* Distinct from the notice above — not a claim about AI-generated
+              content, an explanation for why this record has no name.
+              Placeholder copy pending Natalie's review. Not tied to a "seen"
+              flag like the notice above: it's describing an ongoing state of
+              the record, not a one-off event, so it persists until the
+              record actually has a species. */}
+          {plant.identification_status === "unidentified" && (
+            <AiNoticePanel>
+              We couldn&apos;t identify this plant from the photo. If you know its
+              name, you can add it any time — just tap to edit.
+            </AiNoticePanel>
+          )}
           <PlantName
             genus={plant.genus}
             species={plant.species}

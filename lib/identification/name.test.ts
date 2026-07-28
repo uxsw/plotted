@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
-import { parseScientificName, candidateToPlantFields, genusFallbackToPlantFields } from "./name";
+import {
+  parseScientificName,
+  candidateToPlantFields,
+  genusFallbackToPlantFields,
+  unidentifiedPlantFields,
+} from "./name";
 import { computeSpeciesMatchKey } from "@/lib/species-match-key";
 
 describe("parseScientificName", () => {
@@ -143,6 +148,24 @@ describe("genusFallbackToPlantFields", () => {
   it("discards the original input when it just restates the genus", () => {
     expect(genusFallbackToPlantFields("Thymus", "Thymus").species_input).toBeNull();
     expect(genusFallbackToPlantFields("Thymus", "thymus").species_input).toBeNull();
+  });
+});
+
+describe("unidentifiedPlantFields", () => {
+  it("returns a record with neither genus nor species", () => {
+    expect(unidentifiedPlantFields()).toEqual({
+      genus: "",
+      species: null,
+      cultivar: null,
+      common_names: [],
+      species_input: null,
+    });
+  });
+
+  it("is distinct from the genus-fallback shape — this is 'no idea', not 'genus known'", () => {
+    const unidentified = unidentifiedPlantFields();
+    const genusOnly = genusFallbackToPlantFields("Thymus");
+    expect(unidentified.genus).not.toBe(genusOnly.genus);
   });
 });
 

@@ -11,6 +11,7 @@ export interface Garden {
 export type SunNeeds = "full sun" | "full sun / partial shade" | "partial shade" | "full shade";
 export type PlantStatus = "active" | "removed";
 export type IdentificationStatus = "identified" | "unidentified";
+export type SpeciesSource = "identification" | "manual";
 
 export interface Plant {
   id: string;
@@ -30,6 +31,15 @@ export interface Plant {
    * chosen directly by any UI control.
    */
   identification_status: IdentificationStatus;
+  /**
+   * Where the species came from — set once at creation from
+   * options.fromIdentification (see upsertPlant), read back by the retry
+   * lookup route so it can apply the same skipCorrection/existingCommonNames
+   * protection the initial save got. Null for rows written before this
+   * column existed; treated identically to 'manual' everywhere it's read —
+   * that's the behaviour those rows have always had, unchanged.
+   */
+  species_source: SpeciesSource | null;
   search_vector?: string; // generated column — never written, rarely read
   date_planted: string | null; // ISO date, day always stored as 1
   photo_url: string | null;
@@ -53,16 +63,18 @@ export interface Plant {
 // creation flows don't set them; only the purchased-from-shopping-list path does.
 // species_input is likewise optional: only photo identification sets it, and
 // only when the user's own wording differs from the canonical name.
-// identification_status is computed by upsertPlant from genus/species right
-// before validation and insert — callers don't set it directly.
+// identification_status and species_source are both computed by upsertPlant
+// (from genus/species, and from options.fromIdentification, respectively)
+// right before validation and insert — callers don't set either directly.
 export type PlantInsert = Omit<
   Plant,
-  "id" | "user_id" | "created_at" | "updated_at" | "search_vector" | "lookup_status" | "lookup_notice_seen_at" | "image_source" | "image_attribution" | "species_input" | "identification_status"
+  "id" | "user_id" | "created_at" | "updated_at" | "search_vector" | "lookup_status" | "lookup_notice_seen_at" | "image_source" | "image_attribution" | "species_input" | "identification_status" | "species_source"
 > & {
   image_source?: "wikimedia" | "upload" | null;
   image_attribution?: string | null;
   species_input?: string | null;
   identification_status?: IdentificationStatus;
+  species_source?: SpeciesSource | null;
 };
 
 export interface SpeciesRef {

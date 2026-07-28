@@ -7,6 +7,7 @@ import { AiNoticePanel } from "@/components/ui/AiNoticePanel";
 import {
   candidateToPlantFields,
   genusFallbackToPlantFields,
+  unidentifiedPlantFields,
   type IdentifiedPlantFields,
 } from "@/lib/identification/name";
 import {
@@ -20,14 +21,21 @@ import { logIdentificationChoice } from "@/app/actions/identification";
 // The unit knows nothing about where the chosen name is going — the consumer
 // passes the destination in via onSelect. That is what keeps the shopping-list
 // journey a new entry point later rather than a refactor of this component.
+//
+// onSelect now performs the actual save (upload + upsertPlant + redirect),
+// not just a state update — every outcome here (a candidate, genus-fallback,
+// or "none of these") ends the add-plant journey directly, with nothing left
+// on the form for the user to usefully review. A resolving promise means the
+// save failed (upsertPlant's redirect() never returns to the caller on
+// success — the browser just navigates away).
 type Props = {
   photoBlob: Blob;
   /** Whatever the user has already typed, preserved as species_input if it differs. */
   currentSpecies: string;
-  onSelect: (fields: IdentifiedPlantFields) => void;
+  onSelect: (fields: IdentifiedPlantFields) => Promise<void>;
 };
 
-type Status = "idle" | "loading" | "results" | "error";
+type Status = "idle" | "loading" | "results" | "saving" | "error";
 
 // A selection is either one of the ranked candidates or the genus fallback.
 type Selection = { kind: "candidate"; index: number } | { kind: "genus" };
@@ -79,32 +87,57 @@ export default function PhotoIdentification({ photoBlob, currentSpecies, onSelec
   const shown = topCandidates(candidates);
   const genus = sharedGenus(candidates);
 
-  // Selecting an option applies it immediately — there is no separate confirm
-  // step. This fires even for the pre-selected top card, which is a visual
-  // default only: nothing is written to the species field until the user
-  // actively picks one, so results appearing doesn't silently overwrite
-  // whatever they'd already typed.
-  function choose(next: Selection) {
+  // Selecting an option saves directly — there is no separate confirm step
+  // and no return to the form. This fires even for the pre-selected top
+  // card, which is a visual default only: nothing is saved until the user
+  // actively picks one.
+  async function choose(next: Selection) {
     setSelection(next);
     const fields =
       next.kind === "genus"
         ? genusFallbackToPlantFields(genus ?? "", currentSpecies)
         : candidateToPlantFields(shown[next.index], currentSpecies);
-    onSelect(fields);
 
     const selectedLabel =
       next.kind === "genus" ? `${genus} (genus only)` : shown[next.index].scientificName;
     void logIdentificationChoice(shown[0].scientificName, selectedLabel);
 
-    dismiss();
+    setStatus("saving");
+    setError(null);
+    try {
+      await onSelect(fields);
+      // Success redirects to the new plant's detail page from inside
+      // onSelect (upsertPlant's redirect()) — the browser navigates away
+      // before this line would run.
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not save this plant. Try again.");
+      setStatus("results");
+    }
   }
 
   // "None of these" is itself the signal this logs — not skipped, not an
   // error. Only reachable from the populated-results view below, so
-  // shown[0] always exists here.
-  function rejectAll() {
+  // shown[0] always exists here. Saves directly as unidentified rather than
+  // returning to manual entry — see spec's "identification failure is never
+  // a dead end".
+  async function rejectAll() {
     void logIdentificationChoice(shown[0].scientificName, null);
-    dismiss();
+    setStatus("saving");
+    setError(null);
+    try {
+      await onSelect(unidentifiedPlantFields());
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Could not save this plant. Try again.");
+      setStatus("results");
+    }
+  }
+
+  if (status === "saving") {
+    return (
+      <div className="c-identify mt-4" role="status">
+        <p className="text-sm text-ink-soft">Saving your plant…</p>
+      </div>
+    );
   }
 
   if (status === "idle" || status === "loading" || status === "error") {
@@ -152,6 +185,11 @@ export default function PhotoIdentification({ photoBlob, currentSpecies, onSelec
 
   return (
     <section className="c-identify-results mt-4" aria-label="Identification results">
+      {error && (
+        <p className="c-identify__error text-xs text-clay mb-3" role="alert">
+          {error}
+        </p>
+      )}
       <AiNoticePanel>
         <span>
           {register === "likely"

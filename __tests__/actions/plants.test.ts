@@ -261,3 +261,91 @@ describe("upsertPlant – identification_status", () => {
     expect(enrichSpeciesReference).not.toHaveBeenCalled();
   });
 });
+
+// ─── upsertPlant – fromIdentification trust boundary ─────────────────────────
+
+describe("upsertPlant – fromIdentification trust boundary", () => {
+  let capturedAIUpdate: () => Record<string, unknown> | null;
+
+  beforeEach(() => {
+    ({ capturedAIUpdate } = setupAISupabase());
+  });
+
+  it("passes genus through to performLookup (the actual bug fix)", async () => {
+    vi.mocked(performLookup).mockResolvedValue({ ...BASE_LOOKUP });
+    await upsertPlant(null, BASE_PLANT); // genus "Rosa", species "canina"
+    expect(performLookup).toHaveBeenCalledWith("Rosa", "canina", null);
+  });
+
+  it("identification-sourced save: does not let a spelling correction overwrite the species", async () => {
+    // The exact live failure: Digitalis thapsi (correct, Pl@ntNet-supplied)
+    // "corrected" to thapsus (Verbascum thapsus — a different plant).
+    vi.mocked(performLookup).mockResolvedValue({
+      ...BASE_LOOKUP,
+      corrected_species: "thapsus",
+    });
+    await upsertPlant(
+      null,
+      { ...BASE_PLANT, genus: "Digitalis", species: "thapsi", common_names: ["Spanish foxglove"] },
+      { fromIdentification: true }
+    );
+    expect(capturedAIUpdate()).not.toHaveProperty("species");
+  });
+
+  it("identification-sourced save: does not let AI common names overwrite the provider's", async () => {
+    // The exact live failure: Pl@ntNet's real
+    // ["Mother of thyme","Creeping thyme","Wild thyme"] clobbered by
+    // enrichment's hallucinated ["Winter jasmine"].
+    vi.mocked(performLookup).mockResolvedValue({
+      ...BASE_LOOKUP,
+      common_names: ["Winter jasmine"],
+    });
+    await upsertPlant(
+      null,
+      {
+        ...BASE_PLANT,
+        genus: "Thymus",
+        species: "praecox",
+        common_names: ["Mother of thyme", "Creeping thyme", "Wild thyme"],
+      },
+      { fromIdentification: true }
+    );
+    expect(capturedAIUpdate()).not.toHaveProperty("common_names");
+  });
+
+  it("manual entry (no fromIdentification): correction and common names still apply as before", async () => {
+    vi.mocked(performLookup).mockResolvedValue({
+      ...BASE_LOOKUP,
+      corrected_species: "canina",
+      common_names: ["Dog rose"],
+    });
+    await upsertPlant(null, { ...BASE_PLANT, species: "canna" });
+    expect(capturedAIUpdate()).toMatchObject({ species: "canina", common_names: ["Dog rose"] });
+  });
+});
+
+// ─── upsertPlant – species_source persistence ────────────────────────────────
+
+describe("upsertPlant – species_source", () => {
+  beforeEach(() => {
+    vi.mocked(performLookup).mockResolvedValue({ ...BASE_LOOKUP });
+  });
+
+  it("persists 'identification' when fromIdentification is true", async () => {
+    const { capturedInsert } = setupInsertCapture();
+    await upsertPlant(null, BASE_PLANT, { fromIdentification: true });
+    expect(capturedInsert()).toMatchObject({ species_source: "identification" });
+  });
+
+  it("persists 'manual' when fromIdentification is not set", async () => {
+    const { capturedInsert } = setupInsertCapture();
+    await upsertPlant(null, BASE_PLANT);
+    expect(capturedInsert()).toMatchObject({ species_source: "manual" });
+  });
+
+  it("persists 'manual' when fromIdentification is explicitly false", async () => {
+    const { capturedInsert } = setupInsertCapture();
+    await upsertPlant(null, BASE_PLANT, { fromIdentification: false });
+    expect(capturedInsert()).toMatchObject({ species_source: "manual" });
+  });
+});

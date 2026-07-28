@@ -52,10 +52,22 @@ type UpsertError = { error: string } | { fieldErrors: FieldErrors };
  * Returns an error shape only on failure; on success, redirect() handles navigation.
  * Order of operations: sanitize → validate → write → redirect.
  * Pass plantId=null to insert; pass an existing id to update.
+ *
+ * options.fromIdentification: set by the identification results screen only
+ * (see PlantForm.tsx's handleIdentificationSave). Gates the AI lookup below,
+ * which must trust a photo-identified name and its provider-supplied common
+ * names rather than "correcting" a canonical species (see Digitalis thapsi →
+ * thapsus) or overwriting real common names with an enrichment guess.
+ * Manual entry has no such trust boundary — full, uncritical lookup
+ * treatment as before. Also persisted as species_source below, so the retry
+ * lookup route (app/api/plants/[id]/lookup/route.ts) can re-derive the same
+ * gate later for an already-saved plant, where this call-time flag is no
+ * longer available.
  */
 export async function upsertPlant(
   plantId: string | null,
-  data: PlantInsert
+  data: PlantInsert,
+  options: { fromIdentification?: boolean } = {}
 ): Promise<UpsertError | void> {
   const supabase = await createClient();
   const {
@@ -75,6 +87,8 @@ export async function upsertPlant(
     // only reachable by having neither a genus nor a species at all. See
     // migration 027 and lib/validation.ts.
     identification_status: genus || species ? "identified" : "unidentified",
+    // The single source of truth for this column — nothing else sets it.
+    species_source: options.fromIdentification ? "identification" : "manual",
   };
 
   const fieldErrors = validatePlantInput(clean);
@@ -109,8 +123,15 @@ export async function upsertPlant(
     let lookup_status: "skipped" | "success" | "not_found" | "error" = "skipped";
     if (clean.species) {
       try {
-        const result = await performLookup(clean.species, clean.cultivar ?? null);
-        const { updates, lookup_status: ls } = applyLookupResult(result, { species: clean.species, cultivar: clean.cultivar ?? null });
+        const result = await performLookup(clean.genus, clean.species, clean.cultivar ?? null);
+        const { updates, lookup_status: ls } = applyLookupResult(
+          result,
+          { species: clean.species, cultivar: clean.cultivar ?? null },
+          {
+            skipCorrection: options.fromIdentification,
+            existingCommonNames: options.fromIdentification ? clean.common_names : undefined,
+          }
+        );
         lookup_status = ls;
         await supabase.from("plants").update({ ...updates, lookup_status }).eq("id", row.id);
       } catch (err) {

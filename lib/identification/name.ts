@@ -136,10 +136,10 @@ export function candidateToPlantFields(
  * genus unknown" — the opposite of what was actually selected — and would
  * have asked enrichSpeciesReference to describe a species, not a genus.
  *
- * Known consequence, not fixed here: plantName.tsx omits genus from every
- * display path, so this record currently renders as "Unnamed plant", and
- * validatePlantInput's "species is required" check blocks saving it at all.
- * Both are pre-existing, out of scope for this feature.
+ * (Historical note: an earlier version of this function hit both the
+ * display fallback and the validation gap described above; both were fixed
+ * in stage 5 — see plantName.tsx's genus fallback and validatePlantInput's
+ * species-or-genus rule.)
  */
 export function genusFallbackToPlantFields(
   genus: string,
@@ -153,5 +153,22 @@ export function genusFallbackToPlantFields(
     cultivar: null,
     common_names: [],
     species_input: pickSpeciesInput(originalInput, [canonical]),
+  };
+}
+
+/**
+ * The "none of these" outcome — no genus, no species. Distinct from the
+ * genus-fallback case above: this is "we have no idea", not "we know the
+ * genus at least". upsertPlant computes identification_status from these
+ * same two fields, so returning both empty is what makes the save land as
+ * 'unidentified' rather than a fourth, redundant status field to set here.
+ */
+export function unidentifiedPlantFields(): IdentifiedPlantFields {
+  return {
+    genus: "",
+    species: null,
+    cultivar: null,
+    common_names: [],
+    species_input: null,
   };
 }
