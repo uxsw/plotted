@@ -10,6 +10,7 @@ export interface Garden {
 
 export type SunNeeds = "full sun" | "full sun / partial shade" | "partial shade" | "full shade";
 export type PlantStatus = "active" | "removed";
+export type IdentificationStatus = "identified" | "unidentified";
 
 export interface Plant {
   id: string;
@@ -23,6 +24,12 @@ export interface Plant {
    * "Ajuga reptans". Null when they never typed anything of their own.
    */
   species_input: string | null;
+  /**
+   * 'unidentified' is the only state that may have neither genus nor species
+   * — see migration 027. Computed from those two fields at write time, not
+   * chosen directly by any UI control.
+   */
+  identification_status: IdentificationStatus;
   search_vector?: string; // generated column — never written, rarely read
   date_planted: string | null; // ISO date, day always stored as 1
   photo_url: string | null;
@@ -46,13 +53,16 @@ export interface Plant {
 // creation flows don't set them; only the purchased-from-shopping-list path does.
 // species_input is likewise optional: only photo identification sets it, and
 // only when the user's own wording differs from the canonical name.
+// identification_status is computed by upsertPlant from genus/species right
+// before validation and insert — callers don't set it directly.
 export type PlantInsert = Omit<
   Plant,
-  "id" | "user_id" | "created_at" | "updated_at" | "search_vector" | "lookup_status" | "lookup_notice_seen_at" | "image_source" | "image_attribution" | "species_input"
+  "id" | "user_id" | "created_at" | "updated_at" | "search_vector" | "lookup_status" | "lookup_notice_seen_at" | "image_source" | "image_attribution" | "species_input" | "identification_status"
 > & {
   image_source?: "wikimedia" | "upload" | null;
   image_attribution?: string | null;
   species_input?: string | null;
+  identification_status?: IdentificationStatus;
 };
 
 export interface SpeciesRef {

@@ -63,11 +63,18 @@ export async function upsertPlant(
   } = await supabase.auth.getUser();
   if (!user) return { error: "Not authenticated" };
 
+  const genus = data.genus ? sanitizeGenus(data.genus) : "";
+  const species = data.species ? sanitizeSpecies(data.species) : null;
+
   const clean: PlantInsert = {
     ...data,
-    genus: data.genus ? sanitizeGenus(data.genus) : "",
-    species: data.species ? sanitizeSpecies(data.species) : null,
+    genus,
+    species,
     cultivar: data.cultivar ? sanitizePlantName(data.cultivar) : null,
+    // Computed, not chosen directly by any UI control — 'unidentified' is
+    // only reachable by having neither a genus nor a species at all. See
+    // migration 027 and lib/validation.ts.
+    identification_status: genus || species ? "identified" : "unidentified",
   };
 
   const fieldErrors = validatePlantInput(clean);
@@ -80,7 +87,12 @@ export async function upsertPlant(
       .eq("id", plantId)
       .eq("user_id", user.id);
     if (error) return { error: error.message };
-    after(() => enrichSpeciesReference(clean.genus, clean.species, clean.cultivar));
+    // Nothing to enrich for a fully unidentified plant — genus-only is still
+    // enriched (a genus-level lookup is a real, if hedged, answer; see spec's
+    // "Enrichment of genus-level records").
+    if (clean.genus || clean.species) {
+      after(() => enrichSpeciesReference(clean.genus, clean.species, clean.cultivar));
+    }
     revalidatePath("/plants");
     redirect(`/plants/${plantId}`);
   } else {
@@ -90,7 +102,9 @@ export async function upsertPlant(
       .select("id")
       .single();
     if (error) return { error: error.message };
-    after(() => enrichSpeciesReference(clean.genus, clean.species, clean.cultivar));
+    if (clean.genus || clean.species) {
+      after(() => enrichSpeciesReference(clean.genus, clean.species, clean.cultivar));
+    }
 
     let lookup_status: "skipped" | "success" | "not_found" | "error" = "skipped";
     if (clean.species) {

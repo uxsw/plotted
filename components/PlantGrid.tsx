@@ -479,7 +479,8 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
                 photoUrl={plant.photo_url}
                 photoAlt={sciName}
                 priority={index === 0}
-                title={<PlantName species={plant.species} cultivar={plant.cultivar} variant="card" />}
+                identificationStatus={plant.identification_status}
+                title={<PlantName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} variant="card" />}
                 subtitle={plant.common_names?.[0]}
                 sunBadge={plant.sun_needs ? <SunBadge value={plant.sun_needs} /> : undefined}
                 tags={

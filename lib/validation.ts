@@ -19,9 +19,21 @@ function isValidMonth(n: number | null | undefined): boolean {
 export function validatePlantInput(data: PlantInsert): FieldErrors {
   const errors: FieldErrors = {};
 
-  // species — required after sanitization
-  if (!data.species) {
-    errors.species = "Species is required.";
+  // A plant needs a name — species or genus, either is enough — unless it's
+  // an explicit unidentified save (photo, no name at all, a deliberate act
+  // rather than a form left blank by accident). Mirrors migration 027's DB
+  // constraint: only identification_status = 'unidentified' may have neither.
+  // identification_status itself is computed upstream from these same two
+  // fields (see upsertPlant), so it can only be 'unidentified' when hasName
+  // is already false — this just adds the extra "and it needs a photo too"
+  // product rule the DB doesn't enforce.
+  const hasName = !!(data.species || data.genus);
+  if (!hasName) {
+    if (data.identification_status !== "unidentified") {
+      errors.species = "Species is required.";
+    } else if (!data.photo_url) {
+      errors.species = "Add a photo to save this plant without a name.";
+    }
   }
 
   // date_planted — must be YYYY-MM-01 with a real month and sensible year

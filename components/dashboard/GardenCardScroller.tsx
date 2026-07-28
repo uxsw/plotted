@@ -7,7 +7,10 @@ import Link from "next/link";
 import { PlantName } from "@/components/plants/PlantName";
 import type { Plant } from "@/lib/types";
 import carouselStyles from "@/components/ui/Carousel.module.css";
-type PlantSummary = Pick<Plant, "id" | "species" | "cultivar" | "common_names" | "photo_url">;
+type PlantSummary = Pick<
+  Plant,
+  "id" | "genus" | "species" | "cultivar" | "common_names" | "photo_url" | "identification_status"
+>;
 
 function BotanicalPlaceholder() {
   return (
@@ -65,6 +68,7 @@ export function GardenCardScroller({ plants }: { plants: PlantSummary[] }) {
           <Link
             key={plant.id}
             href={`/plants/${plant.id}`}
+            data-identification-status={plant.identification_status}
             className="bg-white flex-none w-[60%] snap-start overflow-hidden hover:shadow-md active:scale-[0.98] active:opacity-75 transition-all duration-75 h-[280px] flex flex-col o-card"
           >
             <div className="relative h-[160px] shrink-0 w-full overflow-hidden">
@@ -84,7 +88,7 @@ export function GardenCardScroller({ plants }: { plants: PlantSummary[] }) {
             </div>
             <div className="flex flex-col justify-center flex-1 px-4 py-3 min-h-0">
               <p className="font-display font-medium text-base leading-snug line-clamp-2">
-                <PlantName species={plant.species} cultivar={plant.cultivar} variant="card" />
+                <PlantName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} variant="card" />
               </p>
               {plant.common_names?.[0] && (
                 <p className="font-sans text-xs text-ink-soft leading-snug mt-1 truncate">

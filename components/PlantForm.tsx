@@ -220,10 +220,9 @@ export default function PlantForm() {
 
       {/* Species */}
       <div className="mt-6">
-        <UnderlineField label="species *" focused={focusedField === "species"}>
+        <UnderlineField label="species" focused={focusedField === "species"}>
           <input
             type="text"
-            required
             value={species}
             onChange={(e) => handleSpeciesEdit(e.target.value)}
             onFocus={() => setFocusedField("species")}

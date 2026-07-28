@@ -11,6 +11,7 @@ vi.mock("@/lib/species-reference-enrichment", () => ({ enrichSpeciesReference: v
 
 import { createClient } from "@/lib/supabase/server";
 import { performLookup } from "@/lib/plant-lookup";
+import { enrichSpeciesReference } from "@/lib/species-reference-enrichment";
 import { updatePlantField, upsertPlant } from "@/app/actions/plants";
 
 // A minimal valid plant that passes sanitization and validation
@@ -83,6 +84,34 @@ function setupAISupabase(): { capturedAIUpdate: () => Record<string, unknown> | 
   } as unknown as Awaited<ReturnType<typeof createClient>>);
 
   return { capturedAIUpdate: () => captured };
+}
+
+// Builds a supabase client mock that also captures the initial insert payload
+// (not just the follow-up AI-lookup update), for asserting on computed fields
+// like identification_status.
+function setupInsertCapture(): { capturedInsert: () => Record<string, unknown> | null } {
+  let captured: Record<string, unknown> | null = null;
+
+  const plantsTable = {
+    insert: vi.fn().mockImplementation((payload: Record<string, unknown>) => {
+      captured = payload;
+      return {
+        select: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({ data: { id: "new-plant-id" }, error: null }),
+        }),
+      };
+    }),
+    update: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
+  };
+
+  vi.mocked(createClient).mockResolvedValue({
+    auth: {
+      getUser: vi.fn().mockResolvedValue({ data: { user: { id: "user-123" } } }),
+    },
+    from: vi.fn().mockReturnValue(plantsTable),
+  } as unknown as Awaited<ReturnType<typeof createClient>>);
+
+  return { capturedInsert: () => captured };
 }
 
 // ─── updatePlantField ─────────────────────────────────────────────────────────
@@ -175,5 +204,60 @@ describe("upsertPlant – AI lookup validation", () => {
       await upsertPlant(null, BASE_PLANT);
       expect(capturedAIUpdate()).toMatchObject({ eventual_height_cm: 100 });
     });
+  });
+});
+
+// ─── upsertPlant – identification_status computation ─────────────────────────
+
+describe("upsertPlant – identification_status", () => {
+  beforeEach(() => {
+    vi.mocked(performLookup).mockResolvedValue({ ...BASE_LOOKUP });
+    vi.mocked(enrichSpeciesReference).mockClear();
+  });
+
+  it("computes 'identified' for a normal species submission", async () => {
+    const { capturedInsert } = setupInsertCapture();
+    await upsertPlant(null, BASE_PLANT); // genus "Rosa", species "canina"
+    expect(capturedInsert()).toMatchObject({ identification_status: "identified" });
+  });
+
+  it("computes 'identified' for a genus-only submission (the genus-fallback case)", async () => {
+    const { capturedInsert } = setupInsertCapture();
+    await upsertPlant(null, { ...BASE_PLANT, genus: "Thymus", species: null });
+    expect(capturedInsert()).toMatchObject({ identification_status: "identified" });
+  });
+
+  it("computes 'unidentified' when neither genus nor species is set, given a photo", async () => {
+    const { capturedInsert } = setupInsertCapture();
+    await upsertPlant(null, {
+      ...BASE_PLANT,
+      genus: "",
+      species: null,
+      photo_url: "https://example.supabase.co/storage/v1/object/public/plant-photos/x.jpg",
+    });
+    expect(capturedInsert()).toMatchObject({ identification_status: "unidentified" });
+  });
+
+  it("rejects neither genus nor species with no photo, rather than silently saving unidentified", async () => {
+    setupInsertCapture();
+    const result = await upsertPlant(null, { ...BASE_PLANT, genus: "", species: null, photo_url: null });
+    expect(result).toMatchObject({ fieldErrors: { species: expect.any(String) } });
+  });
+
+  it("still triggers enrichment for a genus-only save", async () => {
+    setupInsertCapture();
+    await upsertPlant(null, { ...BASE_PLANT, genus: "Thymus", species: null });
+    expect(enrichSpeciesReference).toHaveBeenCalledWith("Thymus", null, null);
+  });
+
+  it("does not trigger enrichment for a fully unidentified save — nothing to describe", async () => {
+    setupInsertCapture();
+    await upsertPlant(null, {
+      ...BASE_PLANT,
+      genus: "",
+      species: null,
+      photo_url: "https://example.supabase.co/storage/v1/object/public/plant-photos/x.jpg",
+    });
+    expect(enrichSpeciesReference).not.toHaveBeenCalled();
   });
 });

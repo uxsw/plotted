@@ -40,14 +40,14 @@ export default async function GardenSection() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("plants")
-    .select("id, species, cultivar, common_names, photo_url, sun_needs")
+    .select("id, genus, species, cultivar, common_names, photo_url, sun_needs, identification_status")
     .eq("status", "active")
     .order("created_at", { ascending: false })
     .limit(6);
 
   const plants = (data ?? []) as Pick<
     Plant,
-    "id" | "species" | "cultivar" | "common_names" | "photo_url" | "sun_needs"
+    "id" | "genus" | "species" | "cultivar" | "common_names" | "photo_url" | "sun_needs" | "identification_status"
   >[];
 
   return (

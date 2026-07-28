@@ -544,6 +544,7 @@ export default function PlantDetail({
             </AiNoticePanel>
           )}
           <PlantName
+            genus={plant.genus}
             species={plant.species}
             cultivar={plant.cultivar}
             commonNames={plant.common_names}
