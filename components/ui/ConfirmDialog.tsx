@@ -47,7 +47,9 @@ export function ConfirmDialog({
             onClick={onConfirm}
             className={clsx(
                   buttonStyles["o-button"],
-                  buttonStyles["o-button--primary"]
+                  variant === "danger"
+                    ? buttonStyles["o-button--danger"]
+                    : buttonStyles["o-button--primary"]
                 )}
           >
             {confirmLabel}
