@@ -34,13 +34,20 @@ export async function updatePlantField(
     if (clean.notes && clean.notes.length > 5000) return { error: "Notes must be 5000 characters or fewer." };
   }
 
-  const { error } = await supabase
+  const { data: updated, error } = await supabase
     .from("plants")
     .update(clean)
     .eq("id", plantId)
-    .eq("user_id", user.id);
+    .eq("user_id", user.id)
+    .select("genus, species, cultivar")
+    .single();
 
   if (error) return { error: error.message };
+
+  if ("species" in clean || "cultivar" in clean) {
+    after(() => enrichSpeciesReference(updated.genus, updated.species, updated.cultivar));
+  }
+
   revalidatePath(`/plants/${plantId}`);
   revalidatePath("/plants");
 }
@@ -116,11 +123,10 @@ export async function upsertPlant(
       .select("id")
       .single();
     if (error) return { error: error.message };
-    if (clean.genus || clean.species) {
-      after(() => enrichSpeciesReference(clean.genus, clean.species, clean.cultivar));
-    }
 
     let lookup_status: "skipped" | "success" | "not_found" | "error" = "skipped";
+    let finalSpecies = clean.species;
+    let finalCultivar = clean.cultivar;
     if (clean.species) {
       try {
         const result = await performLookup(clean.genus, clean.species, clean.cultivar ?? null);
@@ -133,6 +139,8 @@ export async function upsertPlant(
           }
         );
         lookup_status = ls;
+        if (updates.species !== undefined) finalSpecies = updates.species as string;
+        if (updates.cultivar !== undefined) finalCultivar = updates.cultivar as string;
         await supabase.from("plants").update({ ...updates, lookup_status }).eq("id", row.id);
       } catch (err) {
         const isBillingError =
@@ -151,6 +159,10 @@ export async function upsertPlant(
       }
     } else {
       await supabase.from("plants").update({ lookup_status }).eq("id", row.id);
+    }
+
+    if (clean.genus || finalSpecies) {
+      after(() => enrichSpeciesReference(clean.genus, finalSpecies, finalCultivar));
     }
 
     revalidatePath("/plants");

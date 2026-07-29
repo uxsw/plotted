@@ -47,7 +47,14 @@ const BASE_LOOKUP: LookupResult = {
 function setupBasicSupabase() {
   const mockUpdate = vi.fn().mockReturnValue({
     eq: vi.fn().mockReturnValue({
-      eq: vi.fn().mockResolvedValue({ error: null }),
+      eq: vi.fn().mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue({
+            data: { genus: "Rosa", species: "canina", cultivar: null },
+            error: null,
+          }),
+        }),
+      }),
     }),
   });
 
