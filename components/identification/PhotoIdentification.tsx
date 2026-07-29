@@ -1,12 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { AiNoticePanel } from "@/components/ui/AiNoticePanel";
+import clsx from "clsx";
+import buttonStyles from "@/components/ui/Button.module.css";
 import {
   candidateToPlantFields,
-  genusFallbackToPlantFields,
   unidentifiedPlantFields,
   type IdentifiedPlantFields,
 } from "@/lib/identification/name";
@@ -23,9 +24,9 @@ import { logIdentificationChoice } from "@/app/actions/identification";
 // journey a new entry point later rather than a refactor of this component.
 //
 // onSelect now performs the actual save (upload + upsertPlant + redirect),
-// not just a state update — every outcome here (a candidate, genus-fallback,
-// or "none of these") ends the add-plant journey directly, with nothing left
-// on the form for the user to usefully review. A resolving promise means the
+// not just a state update — every outcome here (a candidate, or "none of
+// these") ends the add-plant journey directly, with nothing left on the
+// form for the user to usefully review. A resolving promise means the
 // save failed (upsertPlant's redirect() never returns to the caller on
 // success — the browser just navigates away).
 type Props = {
@@ -33,12 +34,22 @@ type Props = {
   /** Whatever the user has already typed, preserved as species_input if it differs. */
   currentSpecies: string;
   onSelect: (fields: IdentifiedPlantFields) => Promise<void>;
+  /** Reports whether populated candidate results are currently on screen, so
+   * the consumer can hide its own manual-entry escape hatch while this unit
+   * is showing "pick a card" — manual entry isn't needed at this step. */
+  onResultsChange?: (hasResults: boolean) => void;
 };
 
 type Status = "idle" | "loading" | "results" | "saving" | "error";
 
-// A selection is either one of the ranked candidates or the genus fallback.
-type Selection = { kind: "candidate"; index: number } | { kind: "genus" };
+// Placeholder copy pending review by Natalie (brand/copy) — keep it here,
+// in one place, so it's easy to find and swap later.
+const IDENTIFY_COPY = {
+  likely: "Most likely matches, based on your photo. Have a look and pick the closest.",
+  guess: "Best guesses, based on your photo. We're less sure about this one - compare the pictures.",
+  genusLine: (genus: string) => `${genus} — species uncertain`,
+  tapToSelect: "Tap the result that matches your plant.",
+};
 
 function errorMessage(status: number, body: { error?: string }): string {
   if (status === 504) return "That took too long. Try again in a moment.";
@@ -48,11 +59,17 @@ function errorMessage(status: number, body: { error?: string }): string {
   return body.error ?? "Something went wrong identifying this photo.";
 }
 
-export default function PhotoIdentification({ photoBlob, currentSpecies, onSelect }: Props) {
+export default function PhotoIdentification({ photoBlob, currentSpecies, onSelect, onResultsChange }: Props) {
   const [status, setStatus] = useState<Status>("idle");
   const [candidates, setCandidates] = useState<IdentificationCandidate[]>([]);
-  const [selection, setSelection] = useState<Selection>({ kind: "candidate", index: 0 });
+  const [selection, setSelection] = useState(0);
   const [error, setError] = useState<string | null>(null);
+
+  const shownForEffect = topCandidates(candidates);
+  const hasResults = status === "results" && shownForEffect.length > 0;
+  useEffect(() => {
+    onResultsChange?.(hasResults);
+  }, [hasResults, onResultsChange]);
 
   async function identify() {
     setStatus("loading");
@@ -70,7 +87,7 @@ export default function PhotoIdentification({ photoBlob, currentSpecies, onSelec
       }
 
       setCandidates(json.candidates ?? []);
-      setSelection({ kind: "candidate", index: 0 }); // top result pre-selected
+      setSelection(0); // top result pre-selected
       setStatus("results");
     } catch {
       setError("Couldn't reach the identification service. Check your connection and try again.");
@@ -84,23 +101,17 @@ export default function PhotoIdentification({ photoBlob, currentSpecies, onSelec
     setError(null);
   }
 
-  const shown = topCandidates(candidates);
+  const shown = shownForEffect;
   const genus = sharedGenus(candidates);
 
   // Selecting an option saves directly — there is no separate confirm step
   // and no return to the form. This fires even for the pre-selected top
   // card, which is a visual default only: nothing is saved until the user
   // actively picks one.
-  async function choose(next: Selection) {
-    setSelection(next);
-    const fields =
-      next.kind === "genus"
-        ? genusFallbackToPlantFields(genus ?? "", currentSpecies)
-        : candidateToPlantFields(shown[next.index], currentSpecies);
-
-    const selectedLabel =
-      next.kind === "genus" ? `${genus} (genus only)` : shown[next.index].scientificName;
-    void logIdentificationChoice(shown[0].scientificName, selectedLabel);
+  async function choose(index: number) {
+    setSelection(index);
+    const fields = candidateToPlantFields(shown[index], currentSpecies);
+    void logIdentificationChoice(shown[0].scientificName, shown[index].scientificName);
 
     setStatus("saving");
     setError(null);
@@ -134,7 +145,7 @@ export default function PhotoIdentification({ photoBlob, currentSpecies, onSelec
 
   if (status === "saving") {
     return (
-      <div className="c-identify mt-4" role="status">
+      <div className="c-identify" role="status">
         <p className="text-sm text-ink-soft">Saving your plant…</p>
       </div>
     );
@@ -142,18 +153,21 @@ export default function PhotoIdentification({ photoBlob, currentSpecies, onSelec
 
   if (status === "idle" || status === "loading" || status === "error") {
     return (
-      <div className="c-identify mt-4">
+      <div>
         <Button
           type="button"
-          variant="secondary"
           onClick={identify}
           disabled={status === "loading"}
-          className="w-full justify-center"
+          className={clsx(
+            buttonStyles["o-button"],
+            buttonStyles["o-button--outline"],
+            buttonStyles["o-button--w100"]
+          )}
         >
           {status === "loading" ? "Identifying…" : "Identify from photo"}
         </Button>
         {error && (
-          <p className="c-identify__error text-xs text-clay mt-2" role="alert">
+          <p className="o-surface--error island primer u-margin-block-start" role="alert">
             {error}
           </p>
         )}
@@ -165,18 +179,20 @@ export default function PhotoIdentification({ photoBlob, currentSpecies, onSelec
   // manual entry rather than leaving the user at a dead end.
   if (shown.length === 0) {
     return (
-      <section className="c-identify-results mt-4" aria-label="Identification results">
-        <AiNoticePanel>
-          <span>
-            We couldn&apos;t match this photo to a plant. Try a closer shot of a leaf or
-            flower, or type the name yourself.
-          </span>
-        </AiNoticePanel>
-        <div className="mt-3">
-          <Button type="button" variant="ghost" onClick={dismiss} className="w-full justify-center">
-            Enter the name myself
-          </Button>
-        </div>
+      <section className="o-surface-info has-border island o-stack" aria-label="Identification results">
+        <p className="long-primer o-type-display">We couldn&apos;t match this photo to a plant.</p>
+        <p className="brevier">You can still save the plant as <em>unidentified</em>. We're constantly working on our plant identification featues so might be able to give you a better answer in future.</p>
+        <Button
+          type="button"
+          className={clsx(
+            buttonStyles["o-button"],
+            buttonStyles["o-button--outline"],
+            buttonStyles["o-button-w100"]
+          )}
+          onClick={dismiss}
+        >
+          Save as unidentified
+        </Button>
       </section>
     );
   }
@@ -184,22 +200,25 @@ export default function PhotoIdentification({ photoBlob, currentSpecies, onSelec
   const register = confidenceRegister(shown[0].score);
 
   return (
-    <section className="c-identify-results mt-4" aria-label="Identification results">
+    <section className="c-identify-results o-stack" aria-label="Identification results">
       {error && (
-        <p className="c-identify__error text-xs text-clay mb-3" role="alert">
+        <p className="o-surface--error island primer" role="alert">
           {error}
         </p>
       )}
       <AiNoticePanel>
-        <span>
-          {register === "likely"
-            ? "Most likely matches, based on your photo. Have a look and pick the closest."
-            : "Best guesses, based on your photo. We're less sure about this one — compare the pictures."}
-        </span>
+        <div>
+          {genus && (
+            <p className="long-primer o-type-display">{IDENTIFY_COPY.genusLine(genus)}</p>
+          )}
+          <p className="brevier">{register === "likely" ? IDENTIFY_COPY.likely : IDENTIFY_COPY.guess}</p>
+        </div>
       </AiNoticePanel>
 
+      <p className="brevier">{IDENTIFY_COPY.tapToSelect}</p>
+
       <div
-        className="c-identify-results__options mt-3"
+        className="c-identify-results__options"
         role="radiogroup"
         aria-label="Suggested plants"
       >
@@ -207,47 +226,37 @@ export default function PhotoIdentification({ photoBlob, currentSpecies, onSelec
             image, not the name, is what the user judges. */}
         <CandidateOption
           candidate={shown[0]}
-          selected={selection.kind === "candidate" && selection.index === 0}
-          onSelect={() => choose({ kind: "candidate", index: 0 })}
+          selected={selection === 0}
+          onSelect={() => choose(0)}
           emphasis
         />
 
         {shown.length > 1 && (
-          <div className="c-identify-results__alternatives grid grid-cols-2 gap-3 mt-3">
+          <div className="is-options">
             {shown.slice(1).map((candidate, i) => (
               <CandidateOption
                 key={candidate.scientificName}
                 candidate={candidate}
-                selected={selection.kind === "candidate" && selection.index === i + 1}
-                onSelect={() => choose({ kind: "candidate", index: i + 1 })}
+                selected={selection === i + 1}
+                onSelect={() => choose(i + 1)}
               />
             ))}
           </div>
         )}
-
-        {genus && (
-          <button
-            type="button"
-            role="radio"
-            aria-checked={selection.kind === "genus"}
-            onClick={() => choose({ kind: "genus" })}
-            className={`c-identify-results__genus w-full text-left mt-3 rounded-[10px] border px-4 py-3 ${
-              selection.kind === "genus"
-                ? "border-ink ring-2 ring-ink"
-                : "border-sand-line"
-            }`}
-          >
-            <span className="font-display text-base">{genus} — species uncertain</span>
-            <span className="block font-sans text-xs text-ink-soft mt-0.5">
-              Right plant family, but we can&apos;t tell which one. You can narrow it down later.
-            </span>
-          </button>
-        )}
       </div>
 
-      <div className="c-identify-results__actions mt-4">
-        <Button type="button" variant="ghost" onClick={rejectAll} className="w-full justify-center">
-          None of these
+      <div className="o-surface-info has-border island o-stack">
+        <p className="long-primer o-type-display">Still not convinced?</p>
+        <p className="brevier">Save the plant as <em>unidentified</em>. We're constantly working on our plant identification featues so might be able to give you a better answer in future.</p>
+        <Button
+          type="button"
+          onClick={rejectAll}
+          className={clsx(
+              buttonStyles["o-button"],
+              buttonStyles["o-button--outline"]
+            )}
+        >
+          Continue
         </Button>
       </div>
 
@@ -291,8 +300,8 @@ function CandidateOption({
       role="radio"
       aria-checked={selected}
       onClick={onSelect}
-      className={`c-identify-option block w-full text-left rounded-[10px] overflow-hidden border ${
-        selected ? "border-ink ring-2 ring-ink" : "border-sand-line"
+      className={`c-identify-option ${
+        selected ? "is-selected" : "is-default"
       } ${emphasis ? "c-identify-option--emphasis" : ""}`}
     >
       <Card

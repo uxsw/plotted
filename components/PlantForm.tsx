@@ -68,6 +68,7 @@ export default function PlantForm() {
   const [error, setError] = useState<string | null>(null);
   const [fieldErrors, setFieldErrors] = useState<FieldErrors>({});
   const [saving, setSaving] = useState(false);
+  const [identificationResultsPresent, setIdentificationResultsPresent] = useState(false);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -206,7 +207,7 @@ export default function PlantForm() {
   const inputCls = "w-full bg-transparent border-0 outline-none text-ink pb-3 pt-[10px] placeholder:text-ink-soft/30";
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col">
+    <form onSubmit={handleSubmit} className="o-stack">
       {error && <p className="text-sm text-clay bg-clay-tint p-3 rounded mb-4">{error}</p>}
 
       {/* Photo zone */}
@@ -242,44 +243,49 @@ export default function PlantForm() {
           photoBlob={photoBlob}
           currentSpecies={species}
           onSelect={handleIdentificationSave}
+          onResultsChange={setIdentificationResultsPresent}
         />
       )}
 
-      {/* Species */}
-      <div className="mt-6">
-        <UnderlineField label="species" focused={focusedField === "species"}>
-          <input
-            type="text"
-            value={species}
-            onChange={(e) => setSpecies(e.target.value)}
-            onFocus={() => setFocusedField("species")}
-            onBlur={(e) => { setFocusedField(null); setSpecies(e.target.value.trim()); }}
-            className={`${inputCls}`}
-          />
-        </UnderlineField>
-        {fieldErrors.species && <p className="text-xs text-clay mt-1">{fieldErrors.species}</p>}
-      </div>
+      {/* Manual entry — hidden once identification results are on screen.
+          At that stage the choice is pick-a-card only; manual entry is
+          equally available with the same effort on the next screen once a
+          plant record exists, so no escape hatch is needed here. */}
+      {!identificationResultsPresent && (
+        <>
+          {/* Species */}
+          <div>
+            <UnderlineField label="species" focused={focusedField === "species"}>
+              <input
+                type="text"
+                value={species}
+                onChange={(e) => setSpecies(e.target.value)}
+                onFocus={() => setFocusedField("species")}
+                onBlur={(e) => { setFocusedField(null); setSpecies(e.target.value.trim()); }}
+                className={`${inputCls}`}
+              />
+            </UnderlineField>
+            {fieldErrors.species && <p className="text-xs text-clay mt-1">{fieldErrors.species}</p>}
+          </div>
 
-      {/* Cultivar */}
-      <div className="mt-4">
-        <UnderlineField label="cultivar" focused={focusedField === "cultivar"}>
-          <input
-            type="text"
-            value={cultivar}
-            onChange={(e) => setCultivar(e.target.value)}
-            onFocus={() => setFocusedField("cultivar")}
-            onBlur={(e) => { setFocusedField(null); setCultivar(e.target.value.trim()); }}
-            className={`${inputCls}`}
-          />
-        </UnderlineField>
-      </div>
+          {/* Cultivar */}
+          <UnderlineField label="cultivar" focused={focusedField === "cultivar"}>
+            <input
+              type="text"
+              value={cultivar}
+              onChange={(e) => setCultivar(e.target.value)}
+              onFocus={() => setFocusedField("cultivar")}
+              onBlur={(e) => { setFocusedField(null); setCultivar(e.target.value.trim()); }}
+              className={`${inputCls}`}
+            />
+          </UnderlineField>
 
-      {/* Submit */}
-      <div className="mt-6">
-        <Button type="submit" disabled={saving || uploading} className="w-full justify-center">
-          {saving || uploading ? "Saving…" : "Add plant"}
-        </Button>
-      </div>
+          {/* Submit */}
+          <Button type="submit" disabled={saving || uploading} className="w-full justify-center">
+            {saving || uploading ? "Saving…" : "Add plant"}
+          </Button>
+        </>
+      )}
     </form>
   );
 }
