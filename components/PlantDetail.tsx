@@ -146,10 +146,8 @@ function CommonNamesSection({
   onNamesChange: (names: string[]) => void;
 }) {
   const [savedNames, setSavedNames] = useState<string[]>(initialNames);
-  const [phase, setPhase] = useState<"idle" | "loading" | "empty" | "error">("idle");
   const [addingName, setAddingName] = useState(false);
   const [newName, setNewName] = useState("");
-  const [patchError, setPatchError] = useState<string | null>(null);
   const addContainerRef = useRef<HTMLDivElement>(null);
 
   const hasSaved = savedNames.length > 0;
@@ -165,31 +163,11 @@ function CommonNamesSection({
     onNamesChange(names);
   }
 
-  async function runLookup() {
-    setPhase("loading");
-    setPatchError(null);
-    try {
-      const res = await fetch(`/api/plants/${plantId}/lookup`, { method: "POST" });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Lookup failed");
-      const names: string[] = Array.isArray(data.common_names) ? data.common_names : [];
-      if (names.length === 0) {
-        setPhase("empty");
-      } else {
-        await patch(names);
-        setPhase("idle");
-      }
-    } catch {
-      setPhase("error");
-    }
-  }
-
   async function removeName(name: string) {
-    setPatchError(null);
     try {
       await patch(savedNames.filter(n => n !== name));
     } catch {
-      setPatchError("Remove failed. Please try again.");
+      // Remove failed; savedNames stays unchanged.
     }
   }
 
@@ -201,7 +179,7 @@ function CommonNamesSection({
       setNewName("");
       setAddingName(false);
     } catch {
-      setPatchError("Save failed. Please try again.");
+      // Save failed; leave the input open for retry.
     }
   }
 
@@ -245,7 +223,7 @@ function CommonNamesSection({
       ) : (
         <button
           type="button"
-          onClick={() => { setPatchError(null); setAddingName(true); }}
+          onClick={() => setAddingName(true)}
           className={clsx(
             buttonStyles["o-button"],
             buttonStyles["o-button--ghost"],

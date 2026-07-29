@@ -13,7 +13,6 @@ interface ConfirmDialogProps {
   message: string;
   confirmLabel?: string;
   cancelLabel?: string;
-  variant?: "default" | "danger";
 }
 
 export function ConfirmDialog({
@@ -24,7 +23,6 @@ export function ConfirmDialog({
   message,
   confirmLabel = "Confirm",
   cancelLabel = "Cancel",
-  variant = "default",
 }: ConfirmDialogProps) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
