@@ -33,3 +33,19 @@ export function createServiceClient() {
     process.env.SUPABASE_SERVICE_ROLE_KEY!
   );
 }
+
+// Scriptable/non-browser callers (e.g. diagnostic scripts, future mobile
+// clients) that can't hold a cookie jar — authenticates via a bearer access
+// token instead. Sets it as the Authorization header so PostgREST/RLS still
+// sees the request as that user, same as the cookie-based client does.
+export function createBearerClient(accessToken: string) {
+  return createSupabaseClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      global: {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      },
+    }
+  );
+}

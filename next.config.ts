@@ -12,6 +12,12 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "upload.wikimedia.org",
       },
+      // Pl@ntNet reference imagery, shown on the identification results step.
+      // These are never persisted — only the user's own photo is stored.
+      {
+        protocol: "https",
+        hostname: "bs.plantnet.org",
+      },
     ],
   },
 };

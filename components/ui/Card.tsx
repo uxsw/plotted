@@ -18,6 +18,8 @@ interface CardProps {
   className?: string;
   priority?: boolean;
   variant?: "default" | "flat";
+  /** Rendered as data-identification-status on the outer element, unstyled — see plants.identification_status. */
+  identificationStatus?: string;
 }
 
 function Card({
@@ -35,6 +37,7 @@ function Card({
   className = "",
   priority = false,
   variant = "default",
+  identificationStatus,
 }: CardProps) {
   const interactive = !!(href || onClick);
   const sharedClassName = [
@@ -97,7 +100,7 @@ function Card({
 
   if (href) {
     return (
-      <Link href={href} className={sharedClassName}>
+      <Link href={href} className={sharedClassName} data-identification-status={identificationStatus}>
         {content}
       </Link>
     );
@@ -105,13 +108,17 @@ function Card({
 
   if (onClick) {
     return (
-      <button onClick={onClick} className={sharedClassName}>
+      <button onClick={onClick} className={sharedClassName} data-identification-status={identificationStatus}>
         {content}
       </button>
     );
   }
 
-  return <div className={sharedClassName}>{content}</div>;
+  return (
+    <div className={sharedClassName} data-identification-status={identificationStatus}>
+      {content}
+    </div>
+  );
 }
 
 function DefaultPlaceholder() {

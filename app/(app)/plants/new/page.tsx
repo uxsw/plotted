@@ -10,8 +10,8 @@ import PlantForm from "@/components/PlantForm";
 
 export default function NewPlantPage() {
   return (
-    <div>
-      <div>
+    <div className="o-stack">
+      <div className="o-stack">
         <Link
           href="/plants"
           className={clsx(
@@ -20,7 +20,7 @@ export default function NewPlantPage() {
             buttonStyles["o-button--flush-start"]
           )}
         >← My Plants</Link>
-        <h1 className="pica">Add a plant</h1>
+        <h1 className="pica o-type-display o-type-weight--bold">Add a plant</h1>
       </div>
       <PlantForm />
     </div>

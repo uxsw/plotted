@@ -8,7 +8,6 @@
   padding: 0.75rem 1rem;
   border-radius: 0;
   font-size: 0.875rem;
-  font-weight: 500;
   font-family: var(--font-sans);
   line-height: 1;
   border: none;
@@ -125,6 +124,10 @@
 }
 
 /* --- Shape modifiers --- */
+
+.o-button--w100 {
+  inline-size: 100%;
+}
 
 .o-button--pill {
   border-radius: 9999px;
