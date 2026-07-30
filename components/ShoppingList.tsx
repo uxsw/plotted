@@ -8,6 +8,7 @@ import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { deleteShoppingListItem, purchaseShoppingListItem } from "@/app/actions/shopping-list";
+import { Icon } from "@/components/ui/Icon";
 
 export type ShoppingListItemData = {
   id: string;
@@ -125,7 +126,7 @@ function ItemCard({
           aria-label={`Remove ${item.species} from shopping list`}
           className="flex items-center justify-center w-8 h-8 rounded text-ink-soft transition-colors hover:bg-clay-tint hover:text-clay focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
         >
-          <TrashIcon />
+          <Icon name="delete" aria-label="Delete" /> 
         </button>
       </div>
     </div>

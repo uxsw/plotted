@@ -17,7 +17,7 @@ export default async function WeatherSection() {
 
   return (
     <section aria-label="Garden weather">
-      <h2 className="font-display font-medium text-xl mb-3">Garden weather</h2>
+      <h2 className="pica o-type-display kirk">Garden weather</h2>
       <WeatherLocation initialGarden={data as Garden | null} />
     </section>
   );

@@ -493,10 +493,15 @@ body {
   gap: 1rem;
 }
 
+.o-stack--spacious {
+  display: grid;
+  gap: 2rem;
+}
+
 .c-dashboard__container {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 2rem;
 }
 
 .c-input-inline__group {

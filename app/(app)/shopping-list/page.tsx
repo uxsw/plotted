@@ -36,7 +36,7 @@ export default async function ShoppingListPage() {
 
   return (
     <div className="o-stack">
-      <h1 className="pica">Shopping list</h1>
+      <h1 className="pica o-type-display kirk">Shopping list</h1>
       <ShoppingList initialItems={mapped} />
     </div>
   );

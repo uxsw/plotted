@@ -1,0 +1,6 @@
+/* o-icon — reusable icon object */
+
+.o-icon {
+  display: inline-block;
+  flex-shrink: 0;
+}
