@@ -5,6 +5,7 @@ import type { Plant } from "@/lib/types";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { GardenCardScroller } from "@/components/dashboard/GardenCardScroller";
 import buttonStyles from "@/components/ui/Button.module.css";
+import { Icon } from "@/components/ui/Icon";
 
 function ArrowRightIcon() {
   return (
@@ -82,10 +83,11 @@ export default async function GardenSection() {
               className={clsx(
                 buttonStyles["o-button"],
                 buttonStyles["o-button--ghost"],
+                buttonStyles["o-button--flush-start"],
               )}
             >
               View all
-              <ArrowRightIcon />
+              <Icon name="right" aria-label="View all" /> 
             </Link>
             <Link
               href="/plants/new"
@@ -94,7 +96,7 @@ export default async function GardenSection() {
                 buttonStyles["o-button--primary"]
               )}
             >
-              <PlusIcon />
+              <Icon name="add" aria-label="Add plants" /> 
               Add plant
             </Link>
           </div>

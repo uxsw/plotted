@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { SchemeCardScroller } from "@/components/dashboard/SchemeCardScroller";
 import type { SchemeSummary } from "@/components/SchemeList";
 import buttonStyles from "@/components/ui/Button.module.css";
+import { Icon } from "@/components/ui/Icon";
 
 function ArrowRightIcon() {
   return (
@@ -59,18 +60,19 @@ export default async function SchemesSection() {
 
   return (
     <section aria-label="Planting schemes">
-      <h2 className="font-display font-medium text-xl mb-3">Planting schemes</h2>
+      <h2 className="o-type-display pica kirk">Planting schemes</h2>
       <SchemeCardScroller schemes={schemes} />
       <div className="flex items-center justify-between mt-3">
         <Link
           href="/schemes"
           className={clsx(
             buttonStyles["o-button"],
-            buttonStyles["o-button--ghost"]
+            buttonStyles["o-button--ghost"],
+            buttonStyles["o-button--flush-start"]
           )}
         >
           View all
-          <ArrowRightIcon />
+          <Icon name="right" aria-label="View all" /> 
         </Link>
         <Link
           href="/schemes/new"
@@ -79,7 +81,7 @@ export default async function SchemesSection() {
             buttonStyles["o-button--primary"]
           )}
         >
-          <PlusIcon />
+          <Icon name="add" aria-label="Add plants" /> 
           New scheme
         </Link>
       </div>

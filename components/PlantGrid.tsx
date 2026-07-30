@@ -11,6 +11,7 @@ import { SunBadge } from "@/components/ui/SunBadge";
 import { PlaceholderPlantCard } from "@/components/ui/PlaceholderPlantCard";
 import { SEASON_STYLES, getSeasonBand, formatSeason } from "@/components/ui/FloweringSeasonBadge";
 import buttonStyles from "@/components/ui/Button.module.css";
+import { Icon } from "@/components/ui/Icon";
 
 const CURRENT_MONTH = new Date().getMonth() + 1; // 1–12
 
@@ -333,7 +334,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
         <div ref={searchRef} className="relative flex-1">
           <div className="relative flex items-center">
             <span className="absolute left-3 text-ink-soft pointer-events-none">
-              <SearchIcon />
+              <Icon name="search" aria-label="Search plants" /> 
             </span>
             <input
               ref={inputRef}
@@ -409,7 +410,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
               buttonStyles["o-button--icon"]
             )}
           >
-            <FilterIcon />
+            <Icon name="filter" aria-label="Filter plants" /> 
             {activeFilter && !filterOpen && (
               <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-moss" />
             )}

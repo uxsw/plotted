@@ -14,6 +14,8 @@ import DeletePlantButton from "@/components/DeletePlantButton";
 import { Button } from "@/components/ui/Button";
 import { AiNoticePanel } from "@/components/ui/AiNoticePanel";
 import buttonStyles from "@/components/ui/Button.module.css";
+import { Icon } from "@/components/ui/Icon";
+
 import {
   ACCEPTED_INPUT_TYPES,
   ACCEPTED_INPUT_TYPES_LABEL,
@@ -32,43 +34,6 @@ const INPUT_W = `${INPUT}`;
 const INPUT_FLEX = `${INPUT}`;
 const EDITABLE = "c-input-trigger";
 
-// ─── Icons ────────────────────────────────────────────────────────────────────
-
-function CameraIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-      <circle cx="12" cy="13" r="4" />
-    </svg>
-  );
-}
-
-function PlusIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-      <line x1="8" y1="2" x2="8" y2="14" />
-      <line x1="2" y1="8" x2="14" y2="8" />
-    </svg>
-  );
-}
-
-function SeedlingIcon() {
-  return (
-    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M12 22V12" />
-      <path d="M12 12C12 8 9 5 5 5c0 4 3 7 7 7z" />
-      <path d="M12 12C12 8 15 5 19 5c0 4-3 7-7 7z" />
-    </svg>
-  );
-}
-
-function SproutIcon() {
-  return (
-    <svg width="36" height="36" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M24 8c-4 0-8 4-8 8s4 8 8 8c0 4-2 8-8 12h16c-6-4-8-8-8-12 4 0 8-4 8-8s-4-8-8-8z" />
-    </svg>
-  );
-}
 
 // ─── Module-scope helpers ─────────────────────────────────────────────────────
 
@@ -230,7 +195,7 @@ function CommonNamesSection({
             buttonStyles["o-button--flush-start"]
           )}
         >
-          + Add name
+          <Icon name="add" aria-label="Add notes" size={16} /> Add name
         </button>
       )}
     </div>
@@ -416,7 +381,7 @@ export default function PlantDetail({
               buttonStyles["o-button--flush-start"]
             )}
           >
-            ← My Plants
+            <Icon name="back" aria-label="Go back" /> My Plants
           </Link>
         <div className="o-row">
           <Link
@@ -426,7 +391,7 @@ export default function PlantDetail({
               buttonStyles["o-button--primary"]
             )}
           >
-            + Add another
+            <Icon name="add" aria-label="Add plant" /> Add another
           </Link>
           <DeletePlantButton id={plant.id} name={title} />
         </div>
@@ -460,13 +425,13 @@ export default function PlantDetail({
               <>
                 <Image src={plant.photo_url} alt={title} fill/>
                 <div className="absolute inset-0 bg-moss-tint/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none text-moss-deep">
-                  <CameraIcon />
+                  <Icon name="camera" aria-label="Add photo" />
                 </div>
               </>
             ) : (
               <div className="w-full h-full bg-moss-tint flex flex-col items-center justify-center gap-2 text-moss-deep/70 group-hover:brightness-95 transition-all">
-                <SproutIcon />
-                <span className="font-display italic text-[15px]">add a photo</span>
+                <Icon name="image" aria-label="Add a photo" size={32} />
+                <span className="brevier">Add a photo</span>
               </div>
             )}
 
@@ -477,7 +442,7 @@ export default function PlantDetail({
               onClick={e => { e.stopPropagation(); photoFileRef.current?.click(); }}
               className="is-add-photo-icon"
             >
-              <PlusIcon />
+              <Icon name="add" aria-label="Add photo" /> 
             </button>
 
             {photoUploading && (
@@ -768,7 +733,7 @@ export default function PlantDetail({
               <div className="plant-detail-section__card">
                 <div className="plant-detail-section__planted">
                   <div className="is-icon">
-                    <SeedlingIcon />
+                    <Icon name="sprout" aria-label="Planted" /> 
                   </div>
                   <div className="plant-detail-section__planted-form">
                     <p className="plant-detail-section__label">Planted</p>
@@ -832,7 +797,7 @@ export default function PlantDetail({
                 >
                   {plant.notes
                     ? <span className="primer u-whitespace-pre-wrap">{plant.notes}</span>
-                    : <span>+ Add notes</span>
+                    : <span><Icon name="add" aria-label="Add notes" size={16} />  Add notes</span>
                   }
                 </button>
               )}

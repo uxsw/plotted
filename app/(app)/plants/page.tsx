@@ -10,6 +10,7 @@ import PlantGrid from "@/components/PlantGrid";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { PwaInstallTriggerCard } from "@/components/ui/PwaInstallTriggerCard";
 import buttonStyles from "@/components/ui/Button.module.css";
+import { Icon } from "@/components/ui/Icon";
 
 export default async function PlantsPage() {
   const supabase = await createClient();
@@ -42,13 +43,13 @@ export default async function PlantsPage() {
   return (
     <div className="o-stack">
       <div className="o-row space-between">
-        <h1 className="pica">My plants</h1>
+        <h1 className="pica o-type-display kirk">My plants</h1>
         {plantCount > 0 && (
           <Link
             href="/plants/new"
             className={[buttonStyles["o-button"], buttonStyles["o-button--primary"]].join(" ")}
           >
-            + Add plant
+            <Icon name="add" aria-label="Add plant" /> Add plant
           </Link>
         )}
       </div>

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { buttonStyles } from "@/components/ui/Button";
+import { Icon } from "@/components/ui/Icon";
 
 function TrashIcon() {
   return (
@@ -59,7 +60,7 @@ export default function DeletePlantButton({ id, name }: { id: string; name: stri
           buttonStyles["o-button--icon"],
         ].join(" ")}
       >
-        <TrashIcon />
+        <Icon name="delete" aria-label="Delete" />
       </button>
       <ConfirmDialog
         isOpen={open}

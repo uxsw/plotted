@@ -86,8 +86,8 @@ export default async function ShoppingListSection() {
 
   return (
     <section aria-label="Shopping list">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="font-display font-medium text-xl text-ink">Shopping list</h2>
+      <div className="o-row space-between">
+        <h2 className="pica o-type-display kirk">Shopping list</h2>
         <Link
           href="/shopping-list"
           className={clsx(
