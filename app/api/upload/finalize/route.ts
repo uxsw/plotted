@@ -128,13 +128,39 @@ export async function POST(request: NextRequest) {
   // write to finalPath must match.
   const writtenHash = sha256(stripped);
 
-  const { error: uploadError } = await supabase.storage
+  // TEMPORARY diagnostic: writing via a hand-rolled fetch() PUT to a signed
+  // URL instead of the SDK's own .upload(), to isolate whether storage-js's
+  // request construction is the source of the mismatches seen here — mirrors
+  // the mechanism already used for the client's direct-upload leg, which has
+  // never shown a mismatch. Revert to supabase.storage.upload() once this
+  // test is resolved either way.
+  const { data: signedUpload, error: signError } = await supabase.storage
     .from("plant-photos")
-    .upload(finalPath, stripped, { contentType: "image/jpeg" });
+    .createSignedUploadUrl(finalPath);
 
-  if (uploadError) {
+  if (signError) {
     await storageAdmin.remove([rawPath]);
-    return NextResponse.json({ error: uploadError.message }, { status: 500 });
+    return NextResponse.json({ error: signError.message }, { status: 500 });
+  }
+
+  const putRes = await fetch(signedUpload.signedUrl, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "image/jpeg",
+      "Content-Length": String(stripped.length),
+    },
+    body: new Uint8Array(stripped),
+  });
+
+  if (!putRes.ok) {
+    const putErrorText = await putRes.text().catch(() => "");
+    console.error("upload-finalize: raw PUT to signed URL failed", {
+      finalPath,
+      status: putRes.status,
+      body: putErrorText,
+    });
+    await storageAdmin.remove([rawPath]);
+    return NextResponse.json({ error: UPLOAD_FAILED_MESSAGE }, { status: 500 });
   }
 
   // Read the just-written object back and verify it landed intact before
