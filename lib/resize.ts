@@ -23,3 +23,12 @@ export function resizeImage(file: File): Promise<Blob> {
     img.src = url;
   });
 }
+
+// Lets the server verify the upload arrived byte-for-byte intact — see
+// app/api/upload/route.ts's hash checks.
+export async function hashBlob(blob: Blob): Promise<string> {
+  const digest = await crypto.subtle.digest("SHA-256", await blob.arrayBuffer());
+  return Array.from(new Uint8Array(digest))
+    .map((b) => b.toString(16).padStart(2, "0"))
+    .join("");
+}

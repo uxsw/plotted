@@ -12,7 +12,7 @@ import {
   MAX_ORIGINAL_SIZE,
   MAX_ORIGINAL_SIZE_LABEL,
 } from "@/lib/upload";
-import { resizeImage } from "@/lib/resize";
+import { resizeImage, hashBlob } from "@/lib/resize";
 import PhotoIdentification from "@/components/identification/PhotoIdentification";
 import type { IdentifiedPlantFields } from "@/lib/identification/name";
 
@@ -107,9 +107,10 @@ export default function PlantForm() {
     try {
       const formData = new FormData();
       formData.append("file", photoBlob, "photo.jpg");
+      formData.append("fileHash", await hashBlob(photoBlob));
       const res = await fetch("/api/upload", { method: "POST", body: formData });
       const json = await res.json();
-      if (!res.ok) throw new Error(json.error ?? "Upload failed");
+      if (!res.ok) throw new Error(json.error ?? "Photo upload failed. Please try again.");
       return json.url as string;
     } finally {
       setUploading(false);
