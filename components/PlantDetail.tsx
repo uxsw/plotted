@@ -22,7 +22,7 @@ import {
   MAX_ORIGINAL_SIZE,
   MAX_ORIGINAL_SIZE_LABEL,
 } from "@/lib/upload";
-import { resizeImage } from "@/lib/resize";
+import { resizeImage, hashBlob } from "@/lib/resize";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const SUN_OPTIONS: SunNeeds[] = ["full sun", "full sun / partial shade", "partial shade", "full shade"];
@@ -287,9 +287,10 @@ export default function PlantDetail({
 
       const formData = new FormData();
       formData.append("file", blob, "photo.jpg");
+      formData.append("fileHash", await hashBlob(blob));
       const uploadRes = await fetch("/api/upload", { method: "POST", body: formData });
       const uploadData = await uploadRes.json();
-      if (!uploadRes.ok) throw new Error(uploadData.error ?? "Upload failed");
+      if (!uploadRes.ok) throw new Error(uploadData.error ?? "Photo upload failed. Please try again.");
       const newUrl: string = uploadData.url;
 
       const result = await updatePlantField(plant.id, { photo_url: newUrl });

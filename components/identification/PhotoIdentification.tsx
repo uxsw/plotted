@@ -181,7 +181,7 @@ export default function PhotoIdentification({ photoBlob, currentSpecies, onSelec
     return (
       <section className="o-surface-info has-border island o-stack" aria-label="Identification results">
         <p className="long-primer o-type-display">We couldn&apos;t match this photo to a plant.</p>
-        <p className="brevier">You can still save the plant as <em>unidentified</em>. We&apost;re constantly working on our plant identification featues so might be able to give you a better answer in future.</p>
+        <p className="brevier">You can still save the plant as <em>unidentified</em>. We&apos;re constantly working on our plant identification featues so might be able to give you a better answer in future.</p>
         <Button
           type="button"
           className={clsx(
@@ -245,9 +245,9 @@ export default function PhotoIdentification({ photoBlob, currentSpecies, onSelec
         )}
       </div>
 
-      <div className="o-surface-info has-border island o-stack">
+      <div className="o-surface--info has-border island o-stack">
         <p className="long-primer o-type-display">Still not convinced?</p>
-        <p className="brevier">Save the plant as <em>unidentified</em>. We&apost;re constantly working on our plant identification featues so might be able to give you a better answer in future.</p>
+        <p className="brevier">Save the plant as <em>unidentified</em>. We&apos;re constantly working on our plant identification featues so might be able to give you a better answer in future.</p>
         <Button
           type="button"
           onClick={rejectAll}
