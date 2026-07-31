@@ -10,6 +10,22 @@ function sha256(buffer: Buffer): string {
   return createHash("sha256").update(buffer).digest("hex");
 }
 
+function hexSample(buffer: Buffer, length = 32): string {
+  return buffer.subarray(0, length).toString("hex");
+}
+
+// Counts occurrences of the raw UTF-8 replacement-character byte sequence
+// (EF BF BD) — the fingerprint from the original corruption investigation.
+// TEMPORARY forensic instrumentation: remove once a real mismatch has been
+// captured and diagnosed (see _debug/ path below).
+function countReplacementChar(buffer: Buffer): number {
+  let count = 0;
+  for (let i = 0; i <= buffer.length - 3; i++) {
+    if (buffer[i] === 0xef && buffer[i + 1] === 0xbf && buffer[i + 2] === 0xbd) count++;
+  }
+  return count;
+}
+
 export async function POST(request: NextRequest) {
   const supabase = await createClient();
   const {
@@ -81,10 +97,46 @@ export async function POST(request: NextRequest) {
     .from("plant-photos")
     .download(path);
 
-  const verified =
-    !downloadError && sha256(Buffer.from(await downloaded.arrayBuffer())) === writtenHash;
+  if (downloadError || !downloaded) {
+    console.error("upload-verify: read-back failed", { path, error: downloadError?.message });
+    await supabase.storage.from("plant-photos").remove([path]);
+    return NextResponse.json({ error: UPLOAD_FAILED_MESSAGE }, { status: 500 });
+  }
 
-  if (!verified) {
+  const downloadedBuffer = Buffer.from(await downloaded.arrayBuffer());
+  const downloadedHash = sha256(downloadedBuffer);
+
+  if (downloadedHash !== writtenHash) {
+    // TEMPORARY forensic instrumentation: preserve the mismatched bytes at a
+    // debug path and log a detailed comparison instead of deleting outright,
+    // so a real production failure can be inspected before cleanup. Remove
+    // once the root cause behind these mismatches is confirmed.
+    // Nested under the user's own folder (not a top-level "_debug/..." path)
+    // because storage RLS requires the first path segment to equal auth.uid()
+    // — this client is session-scoped, not the service role, so a top-level
+    // debug path would be silently rejected by the same policy that protects
+    // real photos.
+    const debugPath = `${user.id}/_debug/${Date.now()}.jpg`;
+    // contentType must be one of the bucket's allowed_mime_types (it doesn't
+    // include application/octet-stream) — image/jpeg is the closest honest
+    // label even though these bytes may not actually decode as one.
+    const { error: debugUploadError } = await supabase.storage
+      .from("plant-photos")
+      .upload(debugPath, downloadedBuffer, { contentType: "image/jpeg", upsert: true });
+
+    console.error("upload-verify: hash mismatch", {
+      path,
+      debugPath,
+      debugUploadError: debugUploadError?.message ?? null,
+      writtenSize: stripped.length,
+      downloadedSize: downloadedBuffer.length,
+      writtenHash,
+      downloadedHash,
+      writtenSample: hexSample(stripped),
+      downloadedSample: hexSample(downloadedBuffer),
+      replacementCharCount: countReplacementChar(downloadedBuffer),
+    });
+
     await supabase.storage.from("plant-photos").remove([path]);
     return NextResponse.json({ error: UPLOAD_FAILED_MESSAGE }, { status: 500 });
   }
