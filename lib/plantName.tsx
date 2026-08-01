@@ -1,6 +1,18 @@
+import type { ReactNode } from "react";
 import type { Plant } from "@/lib/types";
 
 type NameParts = Pick<Plant, "genus" | "species" | "cultivar">;
+
+/**
+ * Renders a species name, capitalized only when standing alone (no genus
+ * leading it) — once genus is shown, species reverts to lowercase per
+ * normal binomial convention. Shared by ScientificName below and by
+ * components/plants/PlantName.tsx.
+ */
+export function speciesLine(genus: string | null | undefined, species: string): ReactNode {
+  if (genus) return <span>{genus} {species}</span>;
+  return <span>{species[0].toUpperCase() + species.slice(1)}</span>;
+}
 
 /**
  * Renders species and cultivar in standard botanical formatting.
@@ -21,8 +33,7 @@ export function ScientificName({
   if (!species && !cultivar) return null;
   return (
     <span className={className}>
-      {genus && <span>{genus} </span>}
-      {species && <span>{species[0].toUpperCase() + species.slice(1)}</span>}
+      {species && speciesLine(genus, species)}
       {cultivar && <> <em>&apos;{cultivar}&apos;</em></>}
     </span>
   );

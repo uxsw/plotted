@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { speciesLine } from "@/lib/plantName";
 
 interface PlantNameProps {
   genus?: string | null;
@@ -20,15 +20,9 @@ interface PlantNameProps {
  * bare genus alone (a deliberate genus-only identification — see spec's
  * genus-fallback) → "Unnamed plant" when there's truly nothing.
  *
- * Species is only capitalised when standing in alone (no genus to lead the
- * name) — once genus is shown, species reverts to lowercase per normal
- * binomial convention.
+ * Species-line formatting (capitalization, genus prefixing) lives in
+ * lib/plantName.tsx's speciesLine, shared with ScientificName there.
  */
-function speciesLine(genus: string | null | undefined, species: string): ReactNode {
-  if (genus) return <span>{genus} {species}</span>;
-  return <span>{species[0].toUpperCase() + species.slice(1)}</span>;
-}
-
 export function PlantName({ genus, species, cultivar, commonNames, variant = "card" }: PlantNameProps) {
   const hasScientific = !!(species || cultivar);
   const bareGenus = !hasScientific && genus ? genus : null;
