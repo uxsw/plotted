@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import clsx from "clsx";
@@ -52,26 +53,62 @@ function Illustration() {
 }
 
 export default function ForgotPasswordPage() {
+  const router = useRouter();
   const [email, setEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [sent, setSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [focusedField, setFocusedField] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
+  const [code, setCode] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+
+  async function handleRequestCode(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
     const supabase = createClient();
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/auth/reset-password`,
-    });
+    const { error } = await supabase.auth.resetPasswordForEmail(email);
     if (error) {
       setError(error.message);
       setLoading(false);
     } else {
       setSent(true);
+      setLoading(false);
     }
+  }
+
+  async function handleResetPassword(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+
+    if (newPassword !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
+    }
+
+    setLoading(true);
+    const supabase = createClient();
+    const { error: verifyError } = await supabase.auth.verifyOtp({
+      email,
+      token: code,
+      type: "recovery",
+    });
+    if (verifyError) {
+      setError("That code is invalid or has expired.");
+      setLoading(false);
+      return;
+    }
+
+    const { error: updateError } = await supabase.auth.updateUser({ password: newPassword });
+    if (updateError) {
+      setError(updateError.message);
+      setLoading(false);
+      return;
+    }
+
+    router.push("/dashboard");
   }
 
   return (
@@ -85,12 +122,8 @@ export default function ForgotPasswordPage() {
         <h1 className="paragon">Plotted</h1>
         <p className="primer">Find your way back</p>
 
-        {sent ? (
-          <p className="primer">
-            Check your email for a reset link
-          </p>
-        ) : (
-          <form onSubmit={handleSubmit} className="w-full flex flex-col">
+        {!sent ? (
+          <form onSubmit={handleRequestCode} className="w-full flex flex-col">
             {error && (
               <p className="font-display italic text-[14px] text-[#C2603C] mb-4">{error}</p>
             )}
@@ -109,7 +142,77 @@ export default function ForgotPasswordPage() {
 
             <div className="mt-8">
               <Button type="submit" disabled={loading} className="w-full justify-center">
-                {loading ? "Sending…" : "Send reset link"}
+                {loading ? "Sending…" : "Send reset code"}
+              </Button>
+            </div>
+
+            <div className="flex justify-center mt-6">
+              <Link
+                href="/auth/login"
+                className={clsx(
+                  buttonStyles["o-button"],
+                  buttonStyles["o-button--ghost"]
+                )}>
+                Back to sign in
+              </Link>
+            </div>
+          </form>
+        ) : (
+          <form onSubmit={handleResetPassword} className="w-full flex flex-col">
+            <p className="primer mb-6">
+              Enter the code we sent to {email} along with your new password.
+            </p>
+
+            {error && (
+              <p className="font-display italic text-[14px] text-[#C2603C] mb-4">{error}</p>
+            )}
+
+            <UnderlineField label="code" focused={focusedField === "code"}>
+              <input
+                type="text"
+                inputMode="numeric"
+                required
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                onFocus={() => setFocusedField("code")}
+                onBlur={() => setFocusedField(null)}
+                className="o-text-input__underline"
+              />
+            </UnderlineField>
+
+            <div className="mt-6">
+              <UnderlineField label="new password" focused={focusedField === "newPassword"}>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  onFocus={() => setFocusedField("newPassword")}
+                  onBlur={() => setFocusedField(null)}
+                  className="o-text-input__underline"
+                />
+              </UnderlineField>
+            </div>
+
+            <div className="mt-6">
+              <UnderlineField label="confirm password" focused={focusedField === "confirmPassword"}>
+                <input
+                  type="password"
+                  required
+                  minLength={6}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onFocus={() => setFocusedField("confirmPassword")}
+                  onBlur={() => setFocusedField(null)}
+                  className="o-text-input__underline"
+                />
+              </UnderlineField>
+            </div>
+
+            <div className="mt-8">
+              <Button type="submit" disabled={loading} className="w-full justify-center">
+                {loading ? "Updating…" : "Update password"}
               </Button>
             </div>
 
