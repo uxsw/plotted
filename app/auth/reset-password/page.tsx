@@ -7,15 +7,14 @@ import { createClient } from "@/lib/supabase/client";
 function ResetPasswordForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const code = searchParams.get("code");
   const [sessionReady, setSessionReady] = useState(false);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    const code = searchParams.get("code");
     if (!code) {
-      setError("This password reset link is invalid or has expired.");
       return;
     }
     const supabase = createClient();
@@ -26,7 +25,9 @@ function ResetPasswordForm() {
         setSessionReady(true);
       }
     });
-  }, [searchParams]);
+  }, [code]);
+
+  const displayError = error ?? (!code ? "This password reset link is invalid or has expired." : null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -48,7 +49,7 @@ function ResetPasswordForm() {
         <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">Garden Portfolio</h1>
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
           <h2 className="text-lg font-semibold text-gray-800">Set new password</h2>
-          {error && <p className="text-sm text-red-600 bg-red-50 p-2 rounded">{error}</p>}
+          {displayError && <p className="text-sm text-red-600 bg-red-50 p-2 rounded">{displayError}</p>}
           {sessionReady && (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
