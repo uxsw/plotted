@@ -88,29 +88,10 @@ function getAutocompleteItems(plants: Plant[], query: string): AutocompleteItem[
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
-function SearchIcon() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <circle cx="6.5" cy="6.5" r="4" />
-      <line x1="9.8" y1="9.8" x2="13" y2="13" />
-    </svg>
-  );
-}
-
 function XSmallIcon() {
   return (
     <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
       <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
-    </svg>
-  );
-}
-
-function FilterIcon() {
-  return (
-    <svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <line x1="1.5" y1="4" x2="13.5" y2="4" />
-      <line x1="3.5" y1="7.5" x2="11.5" y2="7.5" />
-      <line x1="5.5" y1="11" x2="9.5" y2="11" />
     </svg>
   );
 }
