@@ -28,18 +28,6 @@ function CheckIcon() {
   );
 }
 
-function StampBadge() {
-  return (
-    <div
-      className="absolute top-2 right-2 w-7 h-7 rounded-full bg-paper border-2 border-moss-deep flex items-center justify-center text-moss-deep"
-      style={{ transform: "rotate(-8deg)" }}
-      aria-hidden="true"
-    >
-      <CheckIcon />
-    </div>
-  );
-}
-
 type BirdCardProps = {
   species: SpeciesRow;
   spotted: boolean;

@@ -103,7 +103,7 @@ export default function ForgotPasswordPage() {
         {!sent ? (
           
           <form onSubmit={handleRequestCode} className="o-stack u-w-100">
-             <p className="brevier">Enter your email address and we'll send you a code to reset your password.</p>
+             <p className="brevier">Enter your email address and we&apos;ll send you a code to reset your password.</p>
             {error && (
               <div className="o-row o-surface--error u-island">
                 <Icon name="sprout" aria-label="error" />
