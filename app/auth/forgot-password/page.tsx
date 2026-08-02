@@ -7,6 +7,8 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import clsx from "clsx";
 import buttonStyles from "@/components/ui/Button.module.css";
+import Wordmark from "@/components/Wordmark";
+import { Icon } from "@/components/ui/Icon";
 
 function UnderlineField({ label, focused, children }: {
   label: string;
@@ -24,31 +26,6 @@ function UnderlineField({ label, focused, children }: {
         <div className={`absolute bottom-0 left-0 right-0 h-[2px] bg-moss transition-transform duration-200 ease-out origin-left ${focused ? "scale-x-100" : "scale-x-0"}`} />
       </div>
     </div>
-  );
-}
-
-function Illustration() {
-  return (
-    <svg width="200" height="220" viewBox="0 0 200 220" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <ellipse cx="100" cy="196" rx="50" ry="5" fill="#E8DFC8"/>
-      <path d="M100 194 C100 170 100 140 100 80" stroke="#4F6B4A" strokeWidth="2" strokeLinecap="round"/>
-      <path d="M100 160 C100 160 74 152 70 132 C70 132 94 130 100 152" stroke="#4F6B4A" strokeWidth="1.8" fill="none" strokeLinejoin="round"/>
-      <path d="M100 152 C90 146 78 140 72 134" stroke="#4F6B4A" strokeWidth="0.8" strokeLinecap="round" opacity="0.5"/>
-      <path d="M100 140 C100 140 126 132 130 112 C130 112 106 110 100 132" stroke="#4F6B4A" strokeWidth="1.8" fill="none" strokeLinejoin="round"/>
-      <path d="M100 132 C112 126 122 118 129 114" stroke="#4F6B4A" strokeWidth="0.8" strokeLinecap="round" opacity="0.5"/>
-      <path d="M100 80 C96 68 96 58 100 50 C104 58 104 68 100 80Z" stroke="#4F6B4A" strokeWidth="1.6" fill="none" strokeLinejoin="round"/>
-      <path d="M100 50 C94 42 88 36 86 28 C94 28 100 34 100 42" stroke="#4F6B4A" strokeWidth="1.4" fill="none" strokeLinejoin="round"/>
-      <path d="M100 50 C106 42 112 36 114 28 C106 28 100 34 100 42" stroke="#4F6B4A" strokeWidth="1.4" fill="none" strokeLinejoin="round"/>
-      <circle cx="100" cy="22" r="8" stroke="#4F6B4A" strokeWidth="1.5" fill="none"/>
-      <circle cx="100" cy="22" r="3" fill="#C99A3D"/>
-      <path d="M100 14 C98 10 96 6 100 2 C104 6 102 10 100 14" stroke="#4F6B4A" strokeWidth="1.2" fill="none" strokeLinejoin="round"/>
-      <path d="M108 18 C112 16 116 12 120 14 C118 18 114 20 110 18" stroke="#4F6B4A" strokeWidth="1.2" fill="none" strokeLinejoin="round"/>
-      <path d="M92 18 C88 16 84 12 80 14 C82 18 86 20 90 18" stroke="#4F6B4A" strokeWidth="1.2" fill="none" strokeLinejoin="round"/>
-      <path d="M106 28 C108 24 114 22 118 24 C116 28 110 30 106 28" stroke="#4F6B4A" strokeWidth="1.2" fill="none" strokeLinejoin="round"/>
-      <path d="M94 28 C92 24 86 22 82 24 C84 28 90 30 94 28" stroke="#4F6B4A" strokeWidth="1.2" fill="none" strokeLinejoin="round"/>
-      <path d="M100 194 C93 194 87 200 80 203" stroke="#4F6B4A" strokeWidth="1.4" strokeLinecap="round" fill="none"/>
-      <path d="M100 194 C107 194 113 200 120 203" stroke="#4F6B4A" strokeWidth="1.4" strokeLinecap="round" fill="none"/>
-    </svg>
   );
 }
 
@@ -112,20 +89,26 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-5">
-      <div className="w-full max-w-[500px] flex flex-col items-center">
-
-        <div className="pt-8 pb-5">
-          <Illustration />
-        </div>
-
-        <h1 className="paragon">Plotted</h1>
+    <div className="c-auth-page">
+      <div className="o-stack--compact is-brand">
+        <Wordmark />
         <p className="primer">Find your way back</p>
-
+      </div>
+      <div className="c-auth-page__form o-stack">
+        <h1 className="pica o-type-display kirk o-row is-heading">
+          <Icon name="leafygreen" aria-label="login" />
+          Reset your password
+        </h1>
+       
         {!sent ? (
-          <form onSubmit={handleRequestCode} className="w-full flex flex-col">
+          
+          <form onSubmit={handleRequestCode} className="o-stack u-w-100">
+             <p className="brevier">Enter your email address and we&apos;ll send you a code to reset your password.</p>
             {error && (
-              <p className="font-display italic text-[14px] text-[#C2603C] mb-4">{error}</p>
+              <div className="o-row o-surface--error u-island">
+                <Icon name="sprout" aria-label="error" />
+                <p className="brevier">{error}</p>
+              </div>
             )}
 
             <UnderlineField label="email" focused={focusedField === "email"}>
@@ -136,38 +119,36 @@ export default function ForgotPasswordPage() {
                 onChange={(e) => setEmail(e.target.value)}
                 onFocus={() => setFocusedField("email")}
                 onBlur={() => setFocusedField(null)}
-                className="o-text-input__underline"
+                className="c-auth-page__input"
               />
             </UnderlineField>
 
-            <div className="mt-8">
-              <Button type="submit" disabled={loading} className="w-full justify-center">
-                {loading ? "Sending…" : "Send reset code"}
-              </Button>
-            </div>
+            <Button type="submit" disabled={loading} className="w-full justify-center">
+              {loading ? "Sending…" : "Send reset code"}
+            </Button>
 
-            <div className="flex justify-center mt-6">
-              <Link
-                href="/auth/login"
-                className={clsx(
-                  buttonStyles["o-button"],
-                  buttonStyles["o-button--ghost"]
-                )}>
-                Back to sign in
-              </Link>
-            </div>
+            <Link
+              href="/auth/login"
+              className={clsx(
+                buttonStyles["o-button"],
+                buttonStyles["o-button--ghost"]
+              )}>
+              Back to sign in
+            </Link>
           </form>
         ) : (
-          <form onSubmit={handleResetPassword} className="w-full flex flex-col">
-            <p className="primer mb-6">
-              Enter the code we sent to {email} along with your new password.
+          <form onSubmit={handleResetPassword} className="o-stack u-w-100">
+            <p className="primer">
+              Enter the code we sent to <b>{email}</b> along with your new password.
             </p>
 
             {error && (
-              <p className="font-display italic text-[14px] text-[#C2603C] mb-4">{error}</p>
+              <div className="o-surface--error u-island">
+                <p className="primer">{error}</p>
+              </div>
             )}
 
-            <UnderlineField label="code" focused={focusedField === "code"}>
+            <UnderlineField label="Code" focused={focusedField === "code"}>
               <input
                 type="text"
                 inputMode="numeric"
@@ -176,56 +157,48 @@ export default function ForgotPasswordPage() {
                 onChange={(e) => setCode(e.target.value)}
                 onFocus={() => setFocusedField("code")}
                 onBlur={() => setFocusedField(null)}
-                className="o-text-input__underline"
+                className="c-auth-page__input"
               />
             </UnderlineField>
 
-            <div className="mt-6">
-              <UnderlineField label="new password" focused={focusedField === "newPassword"}>
-                <input
-                  type="password"
-                  required
-                  minLength={6}
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  onFocus={() => setFocusedField("newPassword")}
-                  onBlur={() => setFocusedField(null)}
-                  className="o-text-input__underline"
-                />
-              </UnderlineField>
-            </div>
+            <UnderlineField label="New password" focused={focusedField === "newPassword"}>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                onFocus={() => setFocusedField("newPassword")}
+                onBlur={() => setFocusedField(null)}
+                className="c-auth-page__input"
+              />
+            </UnderlineField>
 
-            <div className="mt-6">
-              <UnderlineField label="confirm password" focused={focusedField === "confirmPassword"}>
-                <input
-                  type="password"
-                  required
-                  minLength={6}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  onFocus={() => setFocusedField("confirmPassword")}
-                  onBlur={() => setFocusedField(null)}
-                  className="o-text-input__underline"
-                />
-              </UnderlineField>
-            </div>
+            <UnderlineField label="Confirm password" focused={focusedField === "confirmPassword"}>
+              <input
+                type="password"
+                required
+                minLength={6}
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                onFocus={() => setFocusedField("confirmPassword")}
+                onBlur={() => setFocusedField(null)}
+                className="c-auth-page__input"
+              />
+            </UnderlineField>
 
-            <div className="mt-8">
-              <Button type="submit" disabled={loading} className="w-full justify-center">
-                {loading ? "Updating…" : "Update password"}
-              </Button>
-            </div>
+            <Button type="submit" disabled={loading} className="w-full justify-center">
+              {loading ? "Updating…" : "Update password"}
+            </Button>
 
-            <div className="flex justify-center mt-6">
-              <Link
-                href="/auth/login"
-                className={clsx(
-                  buttonStyles["o-button"],
-                  buttonStyles["o-button--ghost"]
-                )}>
-                Back to sign in
-              </Link>
-            </div>
+            <Link
+              href="/auth/login"
+              className={clsx(
+                buttonStyles["o-button"],
+                buttonStyles["o-button--ghost"]
+              )}>
+              Back to sign in
+            </Link>
           </form>
         )}
 
