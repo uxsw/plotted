@@ -124,7 +124,7 @@ function EditableName({ schemeId, initialName }: { schemeId: string; initialName
   return (
     <h2
       onClick={() => setEditing(true)}
-      className="w-full font-display italic font-semibold text-[48px] leading-[1.2] text-balance text-white"
+      className="canon o-type-display text-white"
     >
       {value}
     </h2>
@@ -149,7 +149,7 @@ function SuggestionCard({
       initial={{ opacity: 1, scale: 1 }}
       exit={{ opacity: 0, scale: 0.9 }}
       transition={{ duration: 0.2 }}
-      className="flex flex-col rounded-lg overflow-hidden border border-sand-line bg-paper"
+      className="flex flex-col overflow-hidden border border-sand-line bg-paper"
     >
       <div className="relative aspect-square w-full bg-paper-deep">
         {suggestion.wikimedia_image_url ? (
@@ -175,9 +175,9 @@ function SuggestionCard({
         </button>
       </div>
       <div className="flex flex-col gap-1 p-3">
-        <h3 className="font-display font-medium text-sm text-ink leading-snug">{suggestion.common_name}</h3>
+        <h3 className="o-type-display long-primer kirk">{suggestion.common_name}</h3>
         <p className="font-display italic text-xs text-ink-soft leading-snug">{suggestion.latin_name}</p>
-        <p className="font-sans text-xs text-ink leading-relaxed mt-1">{suggestion.why}</p>
+        <p className="brevier">{suggestion.why}</p>
         {(suggestion.height_cm || monthsLabel) && (
           <p className="font-sans text-[11px] text-ink-soft mt-0.5">
             {[suggestion.height_cm ? `${suggestion.height_cm}cm` : null, monthsLabel].filter(Boolean).join(" · ")}
@@ -274,11 +274,9 @@ export default function SchemeResults({
   return (
     <>
       <div
-        className="relative -mt-8"
+        className="relative o-image-display"
         style={{
-          width: "100vw",
-          marginLeft: "calc(50% - 50vw)",
-          marginRight: "calc(50% - 50vw)",
+          
           height: "55vh",
         }}
       >
@@ -288,7 +286,7 @@ export default function SchemeResults({
             alt=""
             fill
             sizes="100vw"
-            className="object-cover object-center"
+            className=""
             priority
           />
         ) : (
@@ -317,7 +315,7 @@ export default function SchemeResults({
           {/* safe: app/(app)/schemes/[id]/page.tsx redirects non-complete schemes before this renders */}
           <EditableName schemeId={scheme.id} initialName={scheme.name!} />
           {scheme.summary && (
-            <p className="font-sans text-[18px] leading-[1.2] text-balance text-white/80">{scheme.summary}</p>
+            <p className="long-primer text-white">{scheme.summary}</p>
           )}
         </div>
       </div>
@@ -329,15 +327,15 @@ export default function SchemeResults({
         </AiNoticePanel>
       )}
       <div className="flex flex-col gap-4 max-w-[680px] mx-auto">
-        <p className="font-display text-[17px] text-ink leading-relaxed">{scheme.narrative_intro}</p>
+        <p className="o-type-display long-primer">{scheme.narrative_intro}</p>
         {narrativeBodyParagraphs.map((para, i) => (
-          <p key={i} className="font-sans text-[17px] leading-[1.75] text-ink">{para}</p>
+          <p key={i} className="primer">{para}</p>
         ))}
       </div>
 
       {featuredSuggestion?.wikimedia_image_url && (
         <figure className="flex flex-col gap-1">
-          <div className="relative aspect-[4/3] w-full rounded-lg overflow-hidden bg-paper-deep">
+          <div className="relative aspect-[4/3] w-full overflow-hidden bg-paper-deep">
             <Image src={featuredSuggestion.wikimedia_image_url} alt={featuredSuggestion.common_name} fill sizes="500px" className="object-cover" />
           </div>
           <Attribution url={featuredSuggestion.wikimedia_attribution} />
@@ -352,10 +350,10 @@ export default function SchemeResults({
         </FeatureNoticePanel>
       )}
 
-      <div className="flex flex-col gap-6">
+      <div className="o-stack">
         {tiers.map(({ tier, items }) => (
-          <div key={tier} className="flex flex-col gap-3">
-            <h2 className="font-display font-medium text-lg text-ink">{TIER_LABELS[tier]}</h2>
+          <div key={tier} className="o-stack--compact">
+            <h2 className="long-primer kirk o-type-display">{TIER_LABELS[tier]}</h2>
             <div className="grid grid-cols-2 gap-3">
               <AnimatePresence initial={false}>
                 {items.map((s) => (
