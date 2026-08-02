@@ -9,16 +9,6 @@ import Wordmark from "@/components/Wordmark";
 import { Icon } from "@/components/ui/Icon";
 
 
-function SprigIcon() {
-  return (
-    <svg width="12" height="14" viewBox="0 0 12 14" fill="none" aria-hidden="true">
-      <line x1="6" y1="13" x2="6" y2="2" stroke="#C2603C" strokeWidth="1.2" strokeLinecap="round"/>
-      <path d="M6 9 C6 9 3 8 2 5 C2 5 5 5 6 8Z" stroke="#C2603C" strokeWidth="1" fill="none" strokeLinejoin="round"/>
-      <path d="M6 6 C6 6 9 5 10 2 C10 2 7 2 6 5Z" stroke="#C2603C" strokeWidth="1" fill="none" strokeLinejoin="round"/>
-    </svg>
-  );
-}
-
 function UnderlineField({ label, focused, hasError, children }: {
   label: string;
   focused: boolean;
@@ -70,12 +60,12 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="c-login-page">
+    <div className="c-auth-page">
       <div className="o-stack--compact is-brand">
         <Wordmark />
-        <p className="primer o-type--center">your garden, recorded</p>
+        <p className="primer o-type--center">Your garden, recorded</p>
       </div>
-      <div className="c-login-page__form o-stack">
+      <div className="c-auth-page__form o-stack">
         <h1 className="pica o-type-display kirk o-row is-heading">
           <Icon name="leafygreen" aria-label="login" />
           Log in
@@ -89,7 +79,7 @@ export default function LoginPage() {
               onChange={(e) => { setEmail(e.target.value); setError(null); }}
               onFocus={() => setFocusedField("email")}
               onBlur={() => setFocusedField(null)}
-              className="c-login-page__input"
+              className="c-auth-page__input"
             />
           </UnderlineField>
 
@@ -102,7 +92,7 @@ export default function LoginPage() {
                 onChange={(e) => { setPassword(e.target.value); setError(null); }}
                 onFocus={() => setFocusedField("password")}
                 onBlur={() => setFocusedField(null)}
-                className="c-login-page__input"
+                className="c-auth-page__input"
               />
             </UnderlineField>
             {error && (
