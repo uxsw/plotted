@@ -1,5 +1,5 @@
 import { SVGProps } from "react";
-import { Trash2, User, ArrowLeft, Plus, Search, ListFilter, ChevronRight, Image, Camera, MessageSquare, Sprout, Leaf } from "lucide-react";
+import { Trash2, User, ArrowLeft, Plus, Search, ListFilter, ChevronRight, Image, Camera, MessageSquare, Sprout, Leaf, Check } from "lucide-react";
 import styles from "./Icon.module.css";
 
 
@@ -18,6 +18,7 @@ const icons = {
   message: MessageSquare,
   sprout: Sprout,
   leaf: Leaf,
+  check: Check,
 } as const;
 
 type IconName = keyof typeof icons;

@@ -1,0 +1,52 @@
+// Base typography rules
+.canon {
+font-size: clamp(2.244rem, 1.767vw + 1.930rem, 3.815rem);
+font-weight: 600;
+}
+.long-paragon {
+font-size: clamp(1.907rem, 1.287vw + 1.679rem, 3.052rem);
+font-weight: 600;
+}
+
+.paragon {
+font-size: clamp(1.627rem, 0.915vw + 1.465rem, 2.441rem);
+font-weight: 600;
+}
+
+.long-pica {
+font-size: clamp(1.395rem, 0.628vw + 1.283rem, 1.953rem);
+}
+
+.pica {
+font-size: clamp(1.202rem, 0.406vw + 1.130rem, 1.563rem);
+}
+
+.long-primer {
+font-size: clamp(1.042rem, 0.234vw + 1.000rem, 1.250rem);
+}
+
+.primer {
+font-size: clamp(0.909rem, 0.102vw + 0.891rem, 1.000rem);
+line-height: 1.5;
+}
+
+.brevier,
+.o-brevier {
+  font-size: clamp(0.813rem, 0.092vw + 0.797rem, 0.894rem);
+  line-height: 1.5;
+}
+
+.minion,
+.o-minion {
+font-size: clamp(0.728rem, 0.082vw + 0.713rem, 0.800rem);
+line-height: 1.5;
+}
+
+.o-type-display {
+  font-family: var(--font-display);
+}
+
+.o-type-weight--bold,
+.kirk {
+  font-weight: 600;
+}

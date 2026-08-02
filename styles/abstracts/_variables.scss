@@ -1,0 +1,82 @@
+// Design tokens: colors, spacing, typography scale
+
+// Palette
+:root {
+    /* Red */
+    --color-r-white: oklch(98.0% 0.01 29.5); 
+    --color-r-red: oklch(70.172% 0.11901 7.0907);
+    --color-r-marigold: oklch(65.809% 0.15943 31.855);
+    --color-r-smoke-red: oklch(83.547% 0.04691 4.6691);
+    --color-r-dusty-pink: oklch(84.983% 0.07832 9.9344);
+
+    /* Yellow */
+    --color-y-gold: oklch(89.589% 0.11806 89.132);
+    --color-y-lemon-yellow: oklch(94.749% 0.13225 103.52);
+    --color-y-sherbert-yellow: oklch(93.173% 0.11826 106.4);
+    --color-y-mimosa-yellow: oklch(84.25% 0.06996 103.26);
+    --color-y-yellow: oklch(94.577% 0.10215 110.6);
+
+    /* Blue */
+    --color-b-cyan: oklch(78.91% 0.07815 206.15);
+
+    /* Green */
+    --color-g-summer-green: oklch(73.657% 0.09242 175.58);
+    /* Orange */
+    --color-o-vermillion: oklch(80.309% 0.11551 37.858);
+    --color-o-apricot: oklch(80.598% 0.11099 63.836);
+    --color-o-orange: oklch(91.996% 0.0651 74.369);
+    --color-o-surface: oklch(0.9677 0.0158 73.68);
+
+    /* Purple */
+    --color-p-lavender: oklch(52.839% 0.09034 282.87);
+    --color-p-white: oklch(98.0% 0.09034 282.87);
+
+    /* Grey */
+    --color-g-cool-grey: oklch(86.236% 0.0068 106.54);
+    --color-g-grey: oklch(82.105% 0.01173 176.24);
+    --color-g-dark-grey: oklch(60.535% 0.01045 100.09);
+    --color-g-deep-grey: oklch(29.716% 0 0);
+}
+
+// Semantic
+:root {
+    --sem-border-color: var(--color-paper-line);
+    --sem-color-error-bg: #ad0018;
+    --sem-color-error-fg: #ffe5e9;
+}
+
+:root {
+    --transition-time-default: 0.4s;
+    --transition-time-slow: 0.8s;
+    --transition-time-x-slow: 1s;
+    --transition-easing-default: ease;
+}
+
+// Typography
+:root {
+    --font-display: var(--font-fraunces), serif;
+    --font-sans: var(--font-inter), sans-serif;
+    --font-mono: var(--font-spline-mono), monospace;
+    --border-width-hairline: 1px;
+    --border-width-thin: 2px;
+}
+
+//  Radius
+:root {
+    --radius-s: 2px;
+    --radius-m: 4px;
+    --radius-l: 8px;
+    --radius-pill: 32px;
+    --radius-roundel: 50%;
+}
+
+// Space {
+:root {
+    --space-base: 1rem;
+
+    --space-xs: calc(var(--space-base) * 0.25); /* 4px */
+    --space-sm: calc(var(--space-base) * 0.5); /* 8px */
+    --space-md: var(--space-base);  /* 16px */
+    --space-lg: calc(var(--space-base) * 1.5); /* 24px */
+    --space-xl: calc(var(--space-base) * 2); /* 32px */
+}

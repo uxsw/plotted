@@ -1,0 +1,13 @@
+.surface-info,
+.o-surface--info {
+  background-color: var(--color-y-yellow);
+
+  &.has-border {
+    border-color: var(--color-y-mimosa-yellow);
+  }
+}
+
+.o-surface--error {
+  background-color: var(--sem-color-error-bg);
+  color: var(--sem-color-error-fg);
+}

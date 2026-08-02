@@ -1,0 +1,16 @@
+.o-row {
+    align-items: center;
+    display: flex;
+    gap: var(--space-sm);
+
+    &.space-between {
+        justify-content: space-between;
+    }
+}
+
+/* refactor - can't remember what this is doing now ...
+ */
+.expand {
+    flex: 1;
+    min-width: 0;
+}

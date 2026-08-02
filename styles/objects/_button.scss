@@ -1,0 +1,21 @@
+.o-button--text {
+    background-color: transparent;
+    border: none;
+    color: var(--color-g-dark-grey);
+    cursor: pointer;
+    font-size: inherit;
+    outline: none;
+    padding: 0;
+    transition:
+        background-color var(--transition-time-default) var(--transition-easing-default),
+        padding var(--transition-time-default) var(--transition-easing-default);
+
+    &:hover {
+        background-color: var(--color-y-yellow);
+        padding-inline: var(--space-xs);
+    }
+
+    &:focus-visible {
+        outline: var(--border-width--thin) solid var(--color-b-cyan);
+    }
+}

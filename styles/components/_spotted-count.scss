@@ -1,0 +1,40 @@
+.c-spotted-count-scroller {
+    display: flex;
+    gap: var(--space-sm);
+    overflow-x: auto;
+    padding-inline: var(--space-md);
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    scroll-padding-inline: 20%;
+    margin-inline: calc(var(--space-md) * -1);
+}
+
+.c-spotted-count__count {
+    color: var(--color-r-marigold);
+}
+
+.c-spotted-count__card {
+    background-color: var(--color-white);
+    scroll-snap-align: center;
+    flex: none;
+    position: relative;
+    width: 60%;
+}
+
+.c-spotted-count__media {
+    position: relative;
+    aspect-ratio: 1;
+    inline-size: 100%;
+    overflow: hidden;
+
+    > img {
+        object-fit: cover;
+    }
+
+    > button {
+        bottom: var(--space-sm);
+        right: var(--space-sm);
+        position: absolute;
+        z-index: 999;
+    }
+}

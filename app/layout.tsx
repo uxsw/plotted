@@ -3,6 +3,7 @@ import { Fraunces, Inter, Spline_Sans_Mono } from "next/font/google";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { PwaInstallPromptProvider } from "@/components/PwaInstallPromptProvider";
 import "./globals.css";
+import "../styles/main.scss";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
