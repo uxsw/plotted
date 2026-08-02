@@ -1,0 +1,29 @@
+.c-login-page {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    justify-content: center;
+    min-height: 100vh;
+    padding-inline: var(--space-md);
+
+    &__form {
+        border-radius: var(--radius-l);
+        display: flex;
+        flex-direction: column;
+        inline-size: 100%;
+        max-width: 500px;
+
+        background-color: var(--color-y-yellow);
+        padding: var(--space-md);
+    }
+
+    &__input {
+        inline-size: 100%;
+        background-color: rgba(255,255,255,50%);
+        border: none;
+        outline: none;
+        padding-block: var(--space-md);
+        padding-inline: var(--space-sm);
+    }
+}
