@@ -1,0 +1,24 @@
+.o-text-input {
+    background-color: transparent;
+    border: 1px solid var(--color-g-deep-grey);
+    color: var(--color-g-deep-grey);
+    font-size: 1rem;
+
+    &::placeholder {
+        color: var(--color-g-dark-grey);
+    }
+
+    &:focus {
+        background-color: var(--color-white);
+        border-color: var(--color-g-summer-green);
+    }
+
+    &__underline {
+        inline-size: 100%;
+        background-color: transparent;
+        outline: none;
+        color: var(--color-g-deep-grey);
+        padding-inline: var(--space-md);
+        padding-block: var(--space-sm);
+    }
+}

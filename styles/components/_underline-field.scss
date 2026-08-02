@@ -1,0 +1,16 @@
+.c-underline-field__line {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--border-width-hairline);
+    background-color: var(--color-g-dark-grey);
+    transition:
+        height var(--transition-time-default) var(--transition-easing-default),
+        background-color var(--transition-time-default) var(--transition-easing-default);
+
+    &.is-active {
+        height: var(--border-width-thin);
+        background-color: var(--color-b-cyan);
+    }
+}

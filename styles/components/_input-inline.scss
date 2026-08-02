@@ -1,0 +1,64 @@
+
+.c-input-inline {
+    background-color: var(--color-white);
+    border: var(--border-width-hairline) solid var(--color-b-cyan);
+    padding: var(--space-sm);
+    font-size: 0.85rem;
+    inline-size: 100%;
+
+    &:focus {
+        border-color: var(--color-b-cyan);
+        outline: var(--border-width-thin) solid var(--color-b-cyan);
+    }
+
+    &__group {
+        align-items: center;
+        display: flex;
+        gap: var(--space-md);
+    }
+
+    &__actions {
+        align-items: center;
+        display: flex;
+        gap: var(--space-xs);
+        flex-shrink: 0;
+    }
+
+    &__button {
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        height: 2.5rem;
+        width: 2.5rem;
+        color: var(--color-g-deep-grey);
+        background-color: transparent;
+        cursor: pointer;
+        transition: background-color var(--transition-time-default) var(--transition-easing-default);
+
+        &:hover {
+            background-color: var(--color-y-yellow);
+        }
+
+        &.is-cancel {
+            &:hover {
+                background-color: var(--color-r-smoke-red);
+            }
+        }
+    }
+}
+
+.c-input-trigger {
+  border:  solid transparent;
+  padding-block: var(--space-xs);
+  padding-inline: 0;
+  font-size: 0.85rem;
+  text-align: left;
+  transition:
+    background-color var(--transition-time-x-slow) var(--transition-easing-default),
+    padding-inline var(--transition-time-default) var(--transition-easing-default);
+
+  &:hover {
+    border-color: var(--color-b-cyan);
+    padding-inline: var(--space-xs);
+  }
+}

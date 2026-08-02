@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/Button";
 import { Toggle } from "@/components/ui/Toggle";
 import type { Plant, SchemeSpace } from "@/lib/types";
 import buttonStyles from "@/components/ui/Button.module.css";
+import { Icon } from "@/components/ui/Icon";
 
 const MAX_PLANTS = 5;
 
@@ -111,9 +112,9 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
 
     return (
       <div className="o-stack">
-        <div>
-          <p className="brevier">Step 1 of 2</p>
-          <h1 className="long-primer">Pick up to 5 plants</h1>
+        <div className="o-stack">
+          <p className="minion">Step 1 of 2</p>
+          <h1 className="long-primer o-type-display kirk">Pick up to 5 plants</h1>
           <p className="primer">
             Choose the plants you&apos;d like companion suggestions for.
           </p>
@@ -230,12 +231,13 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
               buttonStyles["o-button--flush-start"]
             )}
         >
-          ← Back to plant selection
+          <Icon name="back" aria-label="Back" />
+          Back to plant selection
         </button>
         
         <div className="c-scheme-prefs">
           <p className="minion">Step 2 of 2</p>
-          <h1 className="pica">Preferences</h1>
+          <h1 className="pica o-type-display kirk">Preferences</h1>
           <span className="brevier">Space available</span>
           <div className="c-scheme-prefs__opts">
             {SPACE_OPTIONS.map((opt) => {

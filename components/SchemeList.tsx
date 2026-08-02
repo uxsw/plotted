@@ -358,7 +358,7 @@ export default function SchemeList({ schemes: initialSchemes }: { schemes: Schem
             <PlusIcon />
           </div>
           <div className="o-stack u-pad-block">
-            <h3 className="font-display long-primer">
+            <h3 className="o-type-display long-primer kirk">
               Create your first scheme
             </h3>
             <p className="brevier">

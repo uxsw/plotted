@@ -1,0 +1,14 @@
+.o-stack {
+    display: grid;
+    gap: var(--space-md);
+}
+
+.o-stack--spacious {
+    display: grid;
+    gap: var(--space-xl);
+}
+
+.o-stack--compact {
+    display: grid;
+    gap: var(--space-sm);
+}

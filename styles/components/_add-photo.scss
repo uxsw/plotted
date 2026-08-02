@@ -1,0 +1,32 @@
+.c-add-photo {
+    inline-size: 100%;
+    height: 172px;
+    background-color: var(--color-o-orange);
+    border: var(--border-width-thin) dashed var(--color-r-marigold);
+    color: var(--color-g-dark-grey);
+    cursor: pointer;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+        border-color var(--transition-time-default) var(--transition-easing-default),
+        background-color var(--transition-time-default) var(--transition-easing-default),
+        border-radius var(--transition-time-default) var(--transition-easing-default);
+
+    &:hover {
+        border-color: var(--color-b-cyan);
+        background-color: var(--color-y-yellow);
+        border-radius: var(--radius-m);
+        color: var(--color-r-marigold);
+    }
+
+    &__placeholder {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        color: inherit;
+        transition: color var(--transition-time-default) var(--transition-easing-default);
+    }
+}

@@ -8,6 +8,7 @@ import type { SpeciesRow } from "@/components/WildlifeGrid";
 import carouselStyles from "@/components/ui/Carousel.module.css";
 import buttonStyles from "@/components/ui/Button.module.css";
 import progressbarStyles from "@/components/ui/ProgressBar.module.css";
+import { Icon } from "@/components/ui/Icon";
 
 function CheckIcon() {
   return (
@@ -54,25 +55,18 @@ const BirdCard = forwardRef<HTMLDivElement, BirdCardProps>(
       <div
         ref={ref}
         className={[
-          "flex-none w-[60%] snap-center bg-white",
-          spotted ? "border-moss/40" : "border-sand-line",
+          "c-spotted-count__card",
+          spotted ? "is-spotted" : "",
         ].join(" ")}
       >
-        <div className="relative aspect-square w-full overflow-hidden">
+        <div className="c-spotted-count__media">
           <Image
             src={species.image_path}
             alt={species.name}
             fill
             sizes="60vw"
-            className="object-cover"
           />
-          {spotted && <StampBadge />}
-        </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 px-4 pt-3 pb-1">
-          <p className="font-display font-medium text-base leading-snug">
-            {species.name}
-          </p>
           <button
             type="button"
             onClick={onToggle}
@@ -83,18 +77,25 @@ const BirdCard = forwardRef<HTMLDivElement, BirdCardProps>(
             }
             className={clsx(
               buttonStyles["o-button"],
-              spotted ? buttonStyles["o-button--primary"] : buttonStyles["o-button--ghost"]
+              spotted ? buttonStyles["o-button--is-spotted"] : buttonStyles["o-button--not-spotted"]
             )}
           >
-            {spotted && <CheckIcon />}
+            {spotted && <Icon name="check" aria-label="Add plant" />}
             {spotted ? "Spotted" : "Mark as spotted"}
           </button>
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 px-4 pt-3 pb-1">
+          <p className="o-type-display pica kirk">
+            {species.name}
+          </p>
+          
         </div>
 
         <div className="px-4 pb-4 pt-1">
           <p
             className={[
-              "font-sans text-xs text-ink-soft leading-relaxed",
+              "brevier",
               expanded ? "" : "line-clamp-2",
             ].join(" ")}
           >
@@ -103,7 +104,7 @@ const BirdCard = forwardRef<HTMLDivElement, BirdCardProps>(
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
-            className="font-sans text-xs text-moss mt-1 hover:text-moss-deep focus-visible:outline-none"
+            className="o-button--text minion"
           >
             {expanded ? "Less" : "More"}
           </button>
@@ -211,25 +212,22 @@ export function BirdCardScroller({
   }
 
   return (
-    <div>
-      <div className="mb-4">
-        <div className="flex items-baseline gap-1.5">
-          <span className="font-display font-medium text-3xl">{count}</span>
-          <span className="font-sans text-sm">of {total} spotted</span>
-        </div>
-        <div className={clsx(progressbarStyles["o-progress-bar"])}>
-          <div
-            className={clsx(progressbarStyles["o-progress-bar__complete"])}
-            style={{ width: total > 0 ? `${(count / total) * 100}%` : "0%" }}
-          />
-        </div>
+    <div className="c-spotted-count o-stack--compact">
+      <div className="o-row">
+        <span className="c-spotted-count__count paragon kirk">{count}</span>
+        <span className="brevier">of {total} spotted</span>
+      </div>
+      <div className={clsx(progressbarStyles["o-progress-bar"])}>
+        <div
+          className={clsx(progressbarStyles["o-progress-bar__complete"])}
+          style={{ width: total > 0 ? `${(count / total) * 100}%` : "0%" }}
+        />
       </div>
 
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        style={{ scrollPaddingInline: "20%" }}
-        className="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4 snap-x snap-mandatory no-scrollbar"
+        className="c-spotted-count-scroller"
       >
         {sortedSpecies.map((species, i) => (
           <BirdCard
