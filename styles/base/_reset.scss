@@ -13,3 +13,8 @@ body {
 button, [role="button"] {
   cursor: pointer;
 }
+
+.o-image-display {
+  border-radius: 0 0 var(--radius-l) var(--radius-l);
+  overflow: hidden;
+}

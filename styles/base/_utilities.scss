@@ -3,7 +3,7 @@
 }
 
 .u-margin-block-start {
-  margin-block-start: var(--space-md);
+  margin-block-start: var(--space-md) !important;
 }
 
 .u-justify-end {
@@ -12,14 +12,18 @@
 }
 
 .u-pad-block {
-  padding-block: var(--space-md);
+  padding-block: var(--space-md) !important;
+}
+
+.u-pad-block--flush {
+  padding-block: 0 !important;
 }
 
 .island,
 .u-island {
-  padding: var(--space-md);
+  padding: var(--space-md) !important;
 }
 
 .u-w-100 {
-  inline-size: 100%;
+  inline-size: 100% !important;
 }
