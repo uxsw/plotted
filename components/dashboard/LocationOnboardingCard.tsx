@@ -9,6 +9,11 @@ export function LocationOnboardingCard() {
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "success" | "skipped">("idle");
+  // Remounts LocationSearch to clear its internal query/results on
+  // Escape or the search box's own Cancel button — those are low-stakes,
+  // reversible actions and must never trigger handleSkip (which writes
+  // onboarding_location_seen_at and permanently dismisses this card).
+  const [searchResetKey, setSearchResetKey] = useState(0);
 
   function handleSelect(latitude: number, longitude: number, label: string) {
     setError(null);
@@ -52,7 +57,11 @@ export function LocationOnboardingCard() {
       {error && <p className="o-surface--error u-island">{error}</p>}
 
       <div className={isPending ? "opacity-50 pointer-events-none" : ""}>
-        <LocationSearch onSelect={handleSelect} onCancel={handleSkip} />
+        <LocationSearch
+          key={searchResetKey}
+          onSelect={handleSelect}
+          onCancel={() => setSearchResetKey((n) => n + 1)}
+        />
       </div>
 
       <button
