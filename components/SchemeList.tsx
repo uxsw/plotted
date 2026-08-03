@@ -357,7 +357,7 @@ export default function SchemeList({ schemes: initialSchemes }: { schemes: Schem
           <div className="c-first-plant-card__media">
             <PlusIcon />
           </div>
-          <div className="o-stack u-pad-block">
+          <div className="u-island--compact">
             <h3 className="o-type-display long-primer kirk">
               Create your first scheme
             </h3>

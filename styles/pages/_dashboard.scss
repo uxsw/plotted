@@ -1,5 +1,44 @@
 .c-dashboard__container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-xl);
+  gap: var(--space-md);
+}
+
+.c-weather-section {
+  background-color: var(--color-white);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  padding-block-start: var(--space-md);
+}
+
+/*bg-white flex-none w-[60%] snap-start overflow-hidden hover:shadow-md active:scale-[0.98] active:opacity-75 transition-all duration-75 h-[280px] flex flex-col o-card*/
+
+.c-plant-scroller {
+  &__item {
+    background-color: var(--color-white);
+    border-radius: var(--radius-md);
+    box-shadow: none;
+    display: flex;
+    flex-direction: column;
+    flex: none;
+    max-width: 300px;
+    overflow: hidden;
+    scroll-snap-align: start;
+    inline-size: 60%;
+    transition: box-shadow var(--transition-time-default) var(--transition-easing-default);
+
+    &:hover {
+      box-shadow: 0 4px 8px rgba(0,0,0,0.1), 0 4px 4px rgba(0,0,0,0.2);
+    }
+  }
+
+  &__media {
+    background-color: var(--color-y-yellow);
+    color: var(--color-r-red);
+    height: 240px;
+    position: relative;
+    inline-size: 100%;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
 }

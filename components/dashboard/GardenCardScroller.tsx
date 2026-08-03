@@ -7,43 +7,11 @@ import Link from "next/link";
 import { PlantName } from "@/components/plants/PlantName";
 import type { Plant } from "@/lib/types";
 import carouselStyles from "@/components/ui/Carousel.module.css";
+import { Icon } from "@/components/ui/Icon";
 type PlantSummary = Pick<
   Plant,
   "id" | "genus" | "species" | "cultivar" | "common_names" | "photo_url" | "identification_status"
 >;
-
-function BotanicalPlaceholder() {
-  return (
-    <svg
-      viewBox="0 0 96 96"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className="w-14 h-14 text-clay"
-      aria-hidden="true"
-    >
-      <path
-        d="M48 82V46M48 46C48 46 37 38 37 24M48 46C48 46 59 38 59 24"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M48 58C48 58 33 54 26 42M48 58C48 58 63 54 70 42"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      <path
-        d="M28 82h40"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-      />
-    </svg>
-  );
-}
 
 export function GardenCardScroller({ plants }: { plants: PlantSummary[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -59,6 +27,7 @@ export function GardenCardScroller({ plants }: { plants: PlantSummary[] }) {
 
   return (
     <div>
+      <h2 className="pica o-type-display kirk">Garden highlights</h2>
       <div
         ref={scrollRef}
         onScroll={handleScroll}
@@ -69,9 +38,9 @@ export function GardenCardScroller({ plants }: { plants: PlantSummary[] }) {
             key={plant.id}
             href={`/plants/${plant.id}`}
             data-identification-status={plant.identification_status}
-            className="bg-white flex-none w-[60%] snap-start overflow-hidden hover:shadow-md active:scale-[0.98] active:opacity-75 transition-all duration-75 h-[280px] flex flex-col o-card"
+            className="c-plant-scroller__item"
           >
-            <div className="relative h-[160px] shrink-0 w-full overflow-hidden">
+            <div className="c-plant-scroller__media">
               {plant.photo_url ? (
                 <Image
                   src={plant.photo_url}
@@ -82,16 +51,16 @@ export function GardenCardScroller({ plants }: { plants: PlantSummary[] }) {
                 />
               ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
-                  <BotanicalPlaceholder />
+                  <Icon name="sprout" aria-label="Add plant" size={32} />
                 </div>
               )}
             </div>
-            <div className="flex flex-col justify-center flex-1 px-4 py-3 min-h-0">
-              <p className="font-display font-medium text-base leading-snug line-clamp-2">
+            <div className="o-stack u-island">
+              <p className="o-type-display long-primer kirk">
                 <PlantName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} variant="card" />
               </p>
               {plant.common_names?.[0] && (
-                <p className="font-sans text-xs text-ink-soft leading-snug mt-1 truncate">
+                <p className="brevier">
                   {plant.common_names[0]}
                 </p>
               )}

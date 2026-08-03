@@ -7,7 +7,6 @@ import { markSpeciesSpotted, unmarkSpeciesSpotted } from "@/app/actions/wildlife
 import type { SpeciesRow } from "@/components/WildlifeGrid";
 import carouselStyles from "@/components/ui/Carousel.module.css";
 import buttonStyles from "@/components/ui/Button.module.css";
-import progressbarStyles from "@/components/ui/ProgressBar.module.css";
 import { Icon } from "@/components/ui/Icon";
 
 function CheckIcon() {
@@ -73,14 +72,14 @@ const BirdCard = forwardRef<HTMLDivElement, BirdCardProps>(
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5 px-4 pt-3 pb-1">
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
           <p className="o-type-display pica kirk">
             {species.name}
           </p>
           
         </div>
 
-        <div className="px-4 pb-4 pt-1">
+        <div>
           <p
             className={[
               "brevier",
@@ -200,16 +199,18 @@ export function BirdCardScroller({
   }
 
   return (
-    <div className="c-spotted-count o-stack--compact">
-      <div className="o-row">
+    <div className="o-stack--compact">
+      <div className="o-row u-pad-inline">
         <span className="c-spotted-count__count paragon kirk">{count}</span>
         <span className="brevier">of {total} spotted</span>
       </div>
-      <div className={clsx(progressbarStyles["o-progress-bar"])}>
-        <div
-          className={clsx(progressbarStyles["o-progress-bar__complete"])}
-          style={{ width: total > 0 ? `${(count / total) * 100}%` : "0%" }}
-        />
+      <div className="u-pad-inline">
+        <div className="c-spotted-count__progress-bar">
+          <div
+            className="c-spotted-count__progress-bar-complete"
+            style={{ width: total > 0 ? `${(count / total) * 100}%` : "0%" }}
+          />
+        </div>
       </div>
 
       <div

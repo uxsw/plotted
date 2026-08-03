@@ -32,7 +32,7 @@ export function CurrentConditions({ current, locationLabel, onChangeLocation }: 
       {/* Temperature + icon */}
       <div className="flex items-center justify-between px-4 pt-5 pb-3">
         <div className="flex flex-col gap-1">
-          <span className="font-display text-6xl text-ink leading-none">
+          <span className="o-type-display canon kirk">
             {Math.round(current.temperature_2m)}°
           </span>
           <span className="font-sans text-sm text-ink">

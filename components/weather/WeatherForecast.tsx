@@ -107,7 +107,7 @@ export function WeatherForecast({ location, onChangeLocation }: Props) {
 
   const { data } = fetchState;
   return (
-    <div className="bg-white overflow-hidden">
+    <div className="bg-white overflow-hidden u-island--compact">
       <CurrentConditions
         current={data.current}
         locationLabel={location.label}
