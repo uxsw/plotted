@@ -49,6 +49,21 @@ export function WeatherLocation({ initialGarden }: Props) {
   );
   const [isSearching, setIsSearching] = useState(false);
 
+  // Render-time adjustment (not a useEffect — see LocationSearch's
+  // comparable pattern) that re-syncs when garden's location changes
+  // elsewhere on the same page (e.g. the dashboard's onboarding card)
+  // without a full reload. Only applies a resolved (non-null) garden
+  // location — never reverts to the Exeter default this way, so it can't
+  // clobber a location this component just set optimistically in
+  // handleLocationSelect below before that write has round-tripped back
+  // through props.
+  const [prevInitialGarden, setPrevInitialGarden] = useState(initialGarden);
+  if (prevInitialGarden !== initialGarden) {
+    setPrevInitialGarden(initialGarden);
+    const resolved = resolveFromGarden(initialGarden);
+    if (resolved) setLocation(resolved);
+  }
+
   async function handleLocationSelect(latitude: number, longitude: number, label: string) {
     setLocation({ latitude, longitude, label });
     setIsSearching(false);
