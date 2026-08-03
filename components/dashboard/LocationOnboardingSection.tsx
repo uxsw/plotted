@@ -17,8 +17,7 @@ export default async function LocationOnboardingSection() {
       .maybeSingle(),
   ]);
 
-  const show = garden?.latitude == null && !flags?.onboarding_location_seen_at;
-  if (!show) return null;
+  const initiallyVisible = garden?.latitude == null && !flags?.onboarding_location_seen_at;
 
-  return <LocationOnboardingCard />;
+  return <LocationOnboardingCard initiallyVisible={initiallyVisible} />;
 }

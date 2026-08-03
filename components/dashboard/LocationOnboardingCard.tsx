@@ -4,8 +4,22 @@ import { useState, useTransition } from "react";
 import { LocationSearch } from "@/components/weather/LocationSearch";
 import { saveGardenLocation } from "@/app/actions/garden";
 import { markOnboardingLocationSeen } from "@/app/actions/onboarding";
+import clsx from "clsx";
+import buttonStyles from "@/components/ui/Button.module.css";
+import { Icon } from "@/components/ui/Icon";
 
-export function LocationOnboardingCard() {
+type Props = {
+  // Only read on mount. This is deliberate: the section that computes this
+  // is a server component whose gate can re-evaluate on any incidental
+  // re-render of /dashboard (e.g. a cookie mutated by a Server Action).
+  // Reading it once here means this card can't unmount mid-action — it
+  // only ever reflects the visibility computed at page-load time, and a
+  // genuinely resolved location disappears on the next real navigation.
+  initiallyVisible: boolean;
+};
+
+export function LocationOnboardingCard({ initiallyVisible }: Props) {
+  const [isVisible] = useState(initiallyVisible);
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [status, setStatus] = useState<"idle" | "success" | "skipped">("idle");
@@ -35,6 +49,8 @@ export function LocationOnboardingCard() {
     });
   }
 
+  if (!isVisible) return null;
+
   if (status === "success" || status === "skipped") {
     return (
       <section aria-label="Garden location">
@@ -47,14 +63,21 @@ export function LocationOnboardingCard() {
   }
 
   return (
-    <section aria-label="Garden location" className="c-set-location">
-      <h2 className="pica o-type-display kirk">Where&apos;s your garden?</h2>
-      {/* Placeholder copy — for Natalie's review */}
-      <p className="brevier">
-        So we can show accurate weather and planting advice for your area.
-      </p>
-
-      {error && <p className="o-surface--error u-island">{error}</p>}
+    <section aria-label="Garden location" className="c-set-location o-stack">
+      <div className="o-row align-top">
+        <Icon name="mappin" aria-label="Add plant" />
+        <div>
+          <h2 className="pica o-type-display kirk o-row">
+            
+            Where&apos;s your garden?</h2>
+          {/* Placeholder copy — for Natalie's review */}
+          <p className="brevier">
+            So we can show accurate weather and planting advice for your area.
+          </p>
+          {error && <p className="o-surface--error u-island">{error}</p>}
+        </div>
+        
+      </div>
 
       <div className={isPending ? "opacity-50 pointer-events-none" : ""}>
         <LocationSearch
@@ -64,15 +87,21 @@ export function LocationOnboardingCard() {
         />
       </div>
 
-      <button
-        type="button"
-        onClick={handleSkip}
-        disabled={isPending}
-        className="self-start text-sm font-sans text-ink-soft underline underline-offset-2 hover:text-ink transition-colors duration-100 disabled:opacity-50"
-      >
-        {/* Placeholder copy — for Natalie's review */}
-        Skip for now
-      </button>
+      <div className="u-justify-end">
+        <button
+          type="button"
+          onClick={handleSkip}
+          disabled={isPending}
+          className={clsx(
+            buttonStyles["o-button"],
+            buttonStyles["o-button--ghost"],
+            buttonStyles["o-button--flush-start"]
+          )}
+        >
+          {/* Placeholder copy — for Natalie's review */}
+          Skip for now
+        </button>
+      </div>
     </section>
   );
 }
