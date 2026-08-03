@@ -6,6 +6,10 @@
     &.space-between {
         justify-content: space-between;
     }
+
+    &.align-top {
+        align-items: baseline;
+    }
 }
 
 /* refactor - can't remember what this is doing now ...

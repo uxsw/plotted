@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState } from "react";
 import { LocationSearch } from "./LocationSearch";
 import { WeatherForecast } from "./WeatherForecast";
 import { saveGardenLocation } from "@/app/actions/garden";
@@ -27,23 +27,16 @@ function resolveFromGarden(garden: Garden | null): ResolvedLocation | null {
   return null;
 }
 
-// Determines the starting location and geoStatus before any async work.
-// The typeof window guard makes it SSR-safe: on the server navigator is
-// undefined, so we fall through to "pending" (matching the server HTML).
-// The !navigator.geolocation check is only evaluated on the client.
-function computeInitialState(garden: Garden | null): {
-  location: ResolvedLocation | null;
-  geoStatus: "pending" | "denied" | "idle";
-} {
-  const saved = resolveFromGarden(garden);
-  if (saved) return { location: saved, geoStatus: "idle" };
-  if (typeof window !== "undefined" && !navigator.geolocation) {
-    return {
-      location: { latitude: EXETER_LAT, longitude: EXETER_LNG, label: EXETER_LABEL },
-      geoStatus: "denied",
-    };
-  }
-  return { location: null, geoStatus: "pending" };
+// Exeter is a display-only default — never written to garden. A saved
+// garden location always wins; nothing here attempts geolocation.
+function computeInitialLocation(garden: Garden | null): ResolvedLocation {
+  return (
+    resolveFromGarden(garden) ?? {
+      latitude: EXETER_LAT,
+      longitude: EXETER_LNG,
+      label: EXETER_LABEL,
+    }
+  );
 }
 
 type Props = {
@@ -51,35 +44,25 @@ type Props = {
 };
 
 export function WeatherLocation({ initialGarden }: Props) {
-  const [location, setLocation] = useState<ResolvedLocation | null>(
-    () => computeInitialState(initialGarden).location
+  const [location, setLocation] = useState<ResolvedLocation>(() =>
+    computeInitialLocation(initialGarden)
   );
   const [isSearching, setIsSearching] = useState(false);
-  const [geoStatus, setGeoStatus] = useState<"pending" | "granted" | "denied" | "idle">(
-    () => computeInitialState(initialGarden).geoStatus
-  );
 
-  // Captured once from the initial geoStatus so the effect doesn't need to
-  // read state, keeping its dependency array genuinely empty.
-  const needsGeoRef = useRef(geoStatus === "pending");
-
-  useEffect(() => {
-    if (!needsGeoRef.current) return;
-
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const { latitude, longitude } = pos.coords;
-        const label = "Current location";
-        setLocation({ latitude, longitude, label });
-        setGeoStatus("granted");
-        saveGardenLocation(latitude, longitude, label).catch(console.error);
-      },
-      () => {
-        setLocation({ latitude: EXETER_LAT, longitude: EXETER_LNG, label: EXETER_LABEL });
-        setGeoStatus("denied");
-      }
-    );
-  }, []);
+  // Render-time adjustment (not a useEffect — see LocationSearch's
+  // comparable pattern) that re-syncs when garden's location changes
+  // elsewhere on the same page (e.g. the dashboard's onboarding card)
+  // without a full reload. Only applies a resolved (non-null) garden
+  // location — never reverts to the Exeter default this way, so it can't
+  // clobber a location this component just set optimistically in
+  // handleLocationSelect below before that write has round-tripped back
+  // through props.
+  const [prevInitialGarden, setPrevInitialGarden] = useState(initialGarden);
+  if (prevInitialGarden !== initialGarden) {
+    setPrevInitialGarden(initialGarden);
+    const resolved = resolveFromGarden(initialGarden);
+    if (resolved) setLocation(resolved);
+  }
 
   async function handleLocationSelect(latitude: number, longitude: number, label: string) {
     setLocation({ latitude, longitude, label });
@@ -87,12 +70,10 @@ export function WeatherLocation({ initialGarden }: Props) {
     await saveGardenLocation(latitude, longitude, label);
   }
 
+  const isDefaultLocation = location.label === EXETER_LABEL;
+
   return (
     <div className="flex flex-col gap-4">
-      {geoStatus === "pending" && !isSearching && (
-        <p className="font-sans text-sm text-ink-soft">Detecting location…</p>
-      )}
-
       {isSearching && (
         <LocationSearch
           onSelect={handleLocationSelect}
@@ -100,13 +81,14 @@ export function WeatherLocation({ initialGarden }: Props) {
         />
       )}
 
-      {geoStatus === "denied" && !isSearching && location?.label === EXETER_LABEL && (
+      {isDefaultLocation && !isSearching && (
+        // Placeholder copy — for Natalie's review
         <p className="font-sans text-xs text-ink-soft">
-          Location access was denied — showing Exeter as default. Use the Change button to set your location.
+          Showing Exeter as a default. Use the Change button to set your garden&apos;s location.
         </p>
       )}
 
-      {location && !isSearching && (
+      {!isSearching && (
         <WeatherForecast
           location={location}
           onChangeLocation={() => setIsSearching(true)}

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
   title: "My Garden | Plotted",
@@ -22,13 +21,9 @@ export default async function PlantsPage() {
       .order("date_planted", { ascending: false, nullsFirst: false }),
     supabase
       .from("user_flags")
-      .select("pwa_prompt_dismiss_count, pwa_installed_at, onboarding_location_seen_at")
+      .select("pwa_prompt_dismiss_count, pwa_installed_at")
       .maybeSingle(),
   ]);
-
-  if (!flags?.onboarding_location_seen_at) {
-    redirect("/onboarding/location");
-  }
 
   if (error) {
     return (

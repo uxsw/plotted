@@ -47,3 +47,12 @@ Separate from the PWA shell itself (see above) — this is the discoverability l
 - Closing the overlay early (via X) does not affect `pwa_prompt_dismiss_count` or `pwa_installed_at` — it's treated as a softer exit than dismissing the trigger card itself.
 
 **Structured for future A/B testing, not yet built:** the trigger card takes a `variant` field (currently hardcoded `"default"`), and scheduling logic is fully decoupled from content/variant selection. No actual experimentation framework exists yet — build that as its own piece when needed, loop in Natalie for the analytics side.
+
+## Garden location: no silent auto-geolocation
+
+`WeatherLocation.tsx` used to attempt browser geolocation on mount and save the result to `garden` with no user confirmation. This was deliberately removed (see `components/weather/WeatherLocation.tsx` history) and should not be reintroduced.
+
+- It raced with `LocationOnboardingSection` on `/dashboard`: the silent auto-save could resolve within a second or two of page load, changing `garden.latitude` from null to set and disappearing the onboarding card before the user had done anything.
+- It also wrote a meaningless `"Current location"` label to `garden.location_label`, which quietly violated the same principle that already governs the Exeter fallback in the other direction — only an explicitly confirmed location should ever be written to `garden`.
+- Exeter is now the unconditional, display-only default whenever nothing is saved (never written to `garden`). Setting a real location happens only via the existing manual search (`LocationSearch` / `saveGardenLocation`) — a one-time action, since gardens don't move.
+- This reverses the original [onboarding-location-mvp.md](docs/location/onboarding-location-mvp.md) spec's non-goal of leaving `WeatherLocation.tsx` untouched. That reversal was deliberate and considered, not an unexplained deviation — noted here for anyone reading the spec later.

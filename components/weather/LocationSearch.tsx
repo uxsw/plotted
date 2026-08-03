@@ -121,7 +121,7 @@ export function LocationSearch({ onSelect, onCancel }: Props) {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           className={[
-            "c-location-search__input",
+            "o-text-input",
           ].join(" ")}
         />
         {loading && (
@@ -156,17 +156,6 @@ export function LocationSearch({ onSelect, onCancel }: Props) {
           ))}
         </ul>
       )}
-
-      <button
-        type="button"
-        onClick={onCancel}
-        className={clsx(
-          buttonStyles["o-button"],
-          buttonStyles["o-button--ghost"]
-        )}
-      >
-        Cancel
-      </button>
     </div>
   );
 }

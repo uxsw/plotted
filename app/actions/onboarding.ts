@@ -23,4 +23,5 @@ export async function markOnboardingLocationSeen(): Promise<void> {
   }
 
   revalidatePath("/plants");
+  revalidatePath("/dashboard");
 }

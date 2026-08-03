@@ -38,5 +38,6 @@ export async function saveGardenLocation(
 
   revalidatePath("/weather");
   revalidatePath("/account");
+  revalidatePath("/dashboard");
   return {};
 }

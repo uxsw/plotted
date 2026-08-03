@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import clsx from "clsx";
 import buttonStyles from "@/components/ui/Button.module.css";
+import { Icon } from "@/components/ui/Icon";
 
 export const metadata: Metadata = {
   title: "Add Plant | Plotted",
@@ -19,7 +20,9 @@ export default function NewPlantPage() {
             buttonStyles["o-button--ghost"],
             buttonStyles["o-button--flush-start"]
           )}
-        >← My Plants</Link>
+        >
+          <Icon name="back" aria-label="back" />
+          My Plants</Link>
         <h1 className="pica o-type-display o-type-weight--bold">Add a plant</h1>
       </div>
       <PlantForm />

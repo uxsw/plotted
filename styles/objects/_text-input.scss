@@ -1,16 +1,27 @@
 .o-text-input {
-    background-color: transparent;
+    background-color: var(--color-white);
     border: 1px solid var(--color-g-deep-grey);
     color: var(--color-g-deep-grey);
     font-size: 1rem;
+    width: 100%;
+    padding-inline: var(--space-sm);
+    padding-block: var(--space-sm);
+    transition:
+        background-color var(--transition-time-default) var(--transition-easing-default),
+        border-color var(--transition-time-default) var(--transition-easing-default);
 
     &::placeholder {
         color: var(--color-g-dark-grey);
     }
 
+    &:hover,
     &:focus {
         background-color: var(--color-white);
-        border-color: var(--color-g-summer-green);
+        border-color: var(--color-b-cyan);
+    }
+
+    &:focus-visible {
+        outline: var(--border-width-thin) solid var(--color-b-cyan);
     }
 
     &__underline {

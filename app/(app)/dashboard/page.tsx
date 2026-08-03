@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import LocationOnboardingSection from "@/components/dashboard/LocationOnboardingSection";
 import GardenSection from "@/components/dashboard/GardenSection";
 import BirdsSection from "@/components/dashboard/BirdsSection";
 import WeatherSection from "@/components/dashboard/WeatherSection";
@@ -10,6 +11,7 @@ export const metadata: Metadata = {
 };
 
 const SECTIONS = [
+  LocationOnboardingSection,
   GardenSection,
   BirdsSection,
   WeatherSection,
