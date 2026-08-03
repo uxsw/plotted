@@ -42,14 +42,14 @@ export function LocationOnboardingCard() {
   }
 
   return (
-    <section aria-label="Garden location">
+    <section aria-label="Garden location" className="c-set-location">
       <h2 className="pica o-type-display kirk">Where&apos;s your garden?</h2>
       {/* Placeholder copy — for Natalie's review */}
-      <p className="font-sans text-sm text-ink-soft">
+      <p className="brevier">
         So we can show accurate weather and planting advice for your area.
       </p>
 
-      {error && <p className="text-sm font-sans text-clay">{error}</p>}
+      {error && <p className="o-surface--error u-island">{error}</p>}
 
       <div className={isPending ? "opacity-50 pointer-events-none" : ""}>
         <LocationSearch onSelect={handleSelect} onCancel={handleSkip} />
@@ -62,7 +62,7 @@ export function LocationOnboardingCard() {
         className="self-start text-sm font-sans text-ink-soft underline underline-offset-2 hover:text-ink transition-colors duration-100 disabled:opacity-50"
       >
         {/* Placeholder copy — for Natalie's review */}
-        Skip for now, use Exeter as default
+        Skip for now
       </button>
     </section>
   );

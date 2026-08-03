@@ -121,7 +121,7 @@ export function LocationSearch({ onSelect, onCancel }: Props) {
           onChange={(e) => setQuery(e.target.value)}
           onKeyDown={handleKeyDown}
           className={[
-            "c-location-search__input",
+            "o-text-input",
           ].join(" ")}
         />
         {loading && (

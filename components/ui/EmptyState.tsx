@@ -16,7 +16,7 @@ function EmptyState({ illustration, heading, body, action }: EmptyStateProps) {
         </div>
       )}
       <div className="flex flex-col gap-2 max-w-xs">
-        <h2 className="font-display font-medium text-xl text-ink leading-snug">
+        <h2 className="o-type-display kirk paragon text-ink">
           {heading}
         </h2>
         {body && (
