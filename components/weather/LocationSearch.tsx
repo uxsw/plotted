@@ -156,17 +156,6 @@ export function LocationSearch({ onSelect, onCancel }: Props) {
           ))}
         </ul>
       )}
-
-      <button
-        type="button"
-        onClick={onCancel}
-        className={clsx(
-          buttonStyles["o-button"],
-          buttonStyles["o-button--ghost"]
-        )}
-      >
-        Cancel
-      </button>
     </div>
   );
 }

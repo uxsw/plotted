@@ -16,17 +16,7 @@ import { resizeImage } from "@/lib/resize";
 import { uploadPlantPhoto } from "@/lib/uploadPhoto";
 import PhotoIdentification from "@/components/identification/PhotoIdentification";
 import type { IdentifiedPlantFields } from "@/lib/identification/name";
-
-// ─── Icons ───────────────────────────────────────────────────────────────────
-
-function SproutIcon() {
-  return (
-    <svg width="40" height="40" viewBox="0 0 48 48" fill="none" stroke="currentColor"
-      strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M24 8c-4 0-8 4-8 8s4 8 8 8c0 4-2 8-8 12h16c-6-4-8-8-8-12 4 0 8-4 8-8s-4-8-8-8z" />
-    </svg>
-  );
-}
+import { Icon } from "@/components/ui/Icon";
 
 // ─── Sub-components ───────────────────────────────────────────────────────────
 
@@ -222,8 +212,8 @@ export default function PlantForm() {
           </div>
         ) : (
           <div className="c-add-photo__placeholder">
-            <SproutIcon />
-            <span className="minion">add a photo</span>
+            <Icon name="image" aria-label="add image" />
+            <span className="minion">Add a photo</span>
           </div>
         )}
       </div>

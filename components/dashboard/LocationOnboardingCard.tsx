@@ -53,9 +53,10 @@ export function LocationOnboardingCard({ initiallyVisible }: Props) {
 
   if (status === "success" || status === "skipped") {
     return (
-      <section aria-label="Garden location">
+      <section aria-label="Garden location" className="c-set-location o-row">
         {/* Placeholder copy — for Natalie's review */}
-        <p className="font-sans text-sm text-ink-soft">
+        <Icon name="mappincheck" aria-label="location saved" />
+        <p className="primer">
           {status === "success" ? "Location saved." : "No problem — you can add this later in settings."}
         </p>
       </section>
@@ -65,7 +66,7 @@ export function LocationOnboardingCard({ initiallyVisible }: Props) {
   return (
     <section aria-label="Garden location" className="c-set-location o-stack">
       <div className="o-row align-top">
-        <Icon name="mappin" aria-label="Add plant" />
+        <Icon name="mappin" aria-label="location" />
         <div>
           <h2 className="pica o-type-display kirk o-row">
             
