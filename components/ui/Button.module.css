@@ -11,6 +11,7 @@
   font-family: var(--font-sans);
   line-height: 1;
   border: none;
+  border-radius: var(--radius-s);
   text-decoration: none;
   white-space: nowrap;
   cursor: pointer;
@@ -111,16 +112,17 @@
 }
 
 .o-button--danger {
-  background-color: var(--color-clay);
-  color: #fff;
-}
+  background-color: var(--color-g-deep-grey);
+  color: var(--color-white);
 
-.o-button--danger:hover:not(:disabled) {
-  background-color: var(--color-clay-deep);
-}
+  &:hover:not(:disabled) {
+    background-color: var(--color-g-dark-grey);
+  }
 
-.o-button--danger:focus-visible {
-  box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-clay);
+  &:focus-visible {
+    outline: var(--border-width-thin) solid var(--color-r-marigold);
+    outline-offset: var(--border-width-thin);
+  }
 }
 
 /* Ghost with destructive intent: neutral until hovered/focused */

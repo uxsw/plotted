@@ -703,19 +703,25 @@ export default function PlantDetail({
                 {/* Frost tolerance — sourced from species_reference */}
                 {speciesRef?.lookup_status === "pending" && (
                   <div className="px-4 py-3 border-t border-paper-line">
-                    <p className="text-[11px] font-sans font-medium text-ink-soft mb-0.5">Frost tolerance</p>
-                    <p className="text-sm text-ink-soft/60 italic">Looking up…</p>
+                    <p className="minion">Frost tolerance</p>
+                    <p className="minion">Looking up…</p>
                   </div>
                 )}
                 {speciesRef?.lookup_status === "complete" && speciesRef.frost_tolerance_c !== null && (
-                  <div className="px-4 py-3 border-t border-paper-line">
-                    <p className="text-[11px] font-sans font-medium text-ink-soft mb-2">Frost tolerance</p>
-                    <AiNoticePanel>
-                      {speciesRef.frost_tolerance_c}°C
+                  <div className="u-island">
+                    <p className="minion">Frost tolerance</p>
+                    <div className="plant__frost-tolerance">
+                      <Icon name="thermometerSnowflake" aria-label="Add plant" />
+                      <span className="is-temp">
+                        <span className="long-primer kirk">
+                          {speciesRef.frost_tolerance_c}
+                          <span className="brevier">°C</span>
+                        </span>
+                      </span>
                       {speciesRef.frost_tolerance_notice && (
-                        <span className="text-ink-soft">· {speciesRef.frost_tolerance_notice}</span>
+                        <span className="brevier">{speciesRef.frost_tolerance_notice}</span>
                       )}
-                    </AiNoticePanel>
+                    </div>
                   </div>
                 )}
                 {/* lookup_status === 'failed', no row, or complete with null value: render nothing */}

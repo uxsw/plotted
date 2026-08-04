@@ -29,9 +29,9 @@ export function ConfirmDialog({
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="o-stack">
-        <h2 className="long-primer">{title}</h2>
+        <h2 className="long-primer o-type-display kirk">{title}</h2>
         <p className="primer">{message}</p>
-        <div className="flex gap-2 justify-end">
+        <div className="u-justify-end o-row">
           <Button
             type="button"
             onClick={onClose}
