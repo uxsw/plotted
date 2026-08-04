@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import type { ShoppingListItemData } from "@/components/ShoppingList";
 import clsx from "clsx";
 import buttonStyles from "@/components/ui/Button.module.css";
+import { Icon } from "@/components/ui/Icon";
 
 function SproutIcon() {
   return (
@@ -17,26 +18,26 @@ function ShoppingItemCard({ item }: { item: ShoppingListItemData }) {
   const nameLabel = item.common_names?.[0] ?? (item.cultivar ? `'${item.cultivar}'` : null);
 
   const inner = (
-    <div className="flex items-center gap-2.5 bg-white p-2.5 shrink-0 hover:shadow-sm transition-shadow duration-150">
-      <div className="relative w-10 h-10 flex-shrink-0 overflow-hidden">
+    <div className="c-shopping-list__card">
+      <div className="c-shopping-list__media">
         {item.thumbnail_url ? (
           <Image
             src={item.thumbnail_url}
             alt={item.species}
             fill
             sizes="40px"
-            className="object-cover"
+            className="is-image"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-sand-line">
-            <SproutIcon />
+          <div className="is-placeholder">
+            <Icon name="sprout" aria-label="none" />
           </div>
         )}
       </div>
-      <div className="flex flex-col gap-0.5 min-w-0">
-        <p className="font-display italic text-xs leading-snug truncate">{item.species}</p>
+      <div className="">
+        <p className="o-type-display brevier o-type--italic">{item.species}</p>
         {nameLabel && (
-          <p className="font-sans text-[11px] text-ink-soft leading-snug truncate">{nameLabel}</p>
+          <p className="minion">{nameLabel}</p>
         )}
       </div>
     </div>
@@ -85,7 +86,7 @@ export default async function ShoppingListSection() {
   });
 
   return (
-    <section aria-label="Shopping list">
+    <section aria-label="Shopping list" className="c-shopping-list">
       <div className="o-row space-between">
         <h2 className="pica o-type-display kirk">Shopping list</h2>
         <Link
@@ -98,7 +99,7 @@ export default async function ShoppingListSection() {
           View all
         </Link>
       </div>
-      <div className="grid grid-rows-2 grid-flow-col gap-2 overflow-x-auto pb-2 -mx-4 px-4">
+      <div className="c-shopping-list__grid">
         {mapped.map((item) => (
           <ShoppingItemCard key={item.id} item={item} />
         ))}

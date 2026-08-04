@@ -1,3 +1,28 @@
+.c-spotted-count {
+    background-color: #e6e2c7;
+    border-radius: var(--radius-m);
+    overflow: hidden;
+    padding-block-end: var(--space-md);
+
+    &__count {
+        color: var(--color-r-marigold);
+    }
+
+    &__progress-bar {
+        border-radius: var(--radius-pill);
+        background-color: #d8cf96;
+        height: 8px;
+        overflow: hidden;
+    }
+
+    &__progress-bar-complete {
+        background-color: var(--color-r-marigold);
+        height: 100%;
+        transition-duration: var(--transition-time-default);
+        transition-property: background-color;
+    }
+}
+
 .c-spotted-count-scroller {
     display: flex;
     gap: var(--space-sm);
@@ -6,19 +31,17 @@
     scroll-snap-type: x mandatory;
     scrollbar-width: none;
     scroll-padding-inline: 20%;
-    margin-inline: calc(var(--space-md) * -1);
-}
-
-.c-spotted-count__count {
-    color: var(--color-r-marigold);
 }
 
 .c-spotted-count__card {
     background-color: var(--color-white);
+    border-radius: var(--radius-m);
     scroll-snap-align: center;
     flex: none;
+    padding: var(--space-sm);
     position: relative;
-    width: 60%;
+    inline-size: 60%;
+    max-width: 300px;
 }
 
 .c-spotted-count__media {

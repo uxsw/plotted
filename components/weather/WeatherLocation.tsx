@@ -73,7 +73,7 @@ export function WeatherLocation({ initialGarden }: Props) {
   const isDefaultLocation = location.label === EXETER_LABEL;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div>
       {isSearching && (
         <LocationSearch
           onSelect={handleLocationSelect}
@@ -83,7 +83,7 @@ export function WeatherLocation({ initialGarden }: Props) {
 
       {isDefaultLocation && !isSearching && (
         // Placeholder copy — for Natalie's review
-        <p className="font-sans text-xs text-ink-soft">
+        <p className="minion u-pad-inline">
           Showing Exeter as a default. Use the Change button to set your garden&apos;s location.
         </p>
       )}

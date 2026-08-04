@@ -19,9 +19,11 @@ export default async function BirdsSection() {
   const spottedIds = (sightings ?? []).map((s) => s.species_id as string);
 
   return (
-    <section aria-label="Garden visitors">
-      <h2 className="pica o-type-display kirk">Garden visitors</h2>
-      <p className="brevier">Birds you might spot nearby this season. Tick them off as you go.</p>
+    <section aria-label="Garden visitors" className="c-spotted-count">
+      <div className="u-island">
+        <h2 className="pica o-type-display kirk">Garden visitors</h2>
+        <p className="brevier">Birds you might spot nearby this season. Tick them off as you go.</p>
+      </div>
       <BirdCardScroller
         initialSpecies={(species ?? []) as SpeciesRow[]}
         initialSpottedIds={spottedIds}

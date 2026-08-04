@@ -15,6 +15,10 @@
   padding-block: var(--space-md) !important;
 }
 
+.u-pad-inline {
+  padding-inline: var(--space-md) !important;
+}
+
 .u-pad-block--flush {
   padding-block: 0 !important;
 }
@@ -22,6 +26,10 @@
 .island,
 .u-island {
   padding: var(--space-md) !important;
+}
+
+.u-island--compact {
+  padding: var(--space-sm) !important;
 }
 
 .u-w-100 {
