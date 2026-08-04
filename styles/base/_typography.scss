@@ -52,6 +52,10 @@ line-height: 1.5;
   text-align: center;
 }
 
+.o-type-leading--tight {
+  line-height: 1.2;
+}
+
 .o-type--truncate {
   text-overflow: ellipsis;
   white-space: nowrap;

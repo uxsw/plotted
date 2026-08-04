@@ -38,3 +38,42 @@
         }
     }
 }
+
+.o-popover-menu {
+    background-color: var(--color-white);
+    border-radius: var(--radius-m);
+    box-shadow:
+        0 4px 6px -1px #0000001a,
+        0 2px 4px -2px #0000001a;
+    overflow: hidden;
+    margin-block-start: var(--space-xs);
+    inline-size: 220px;
+    padding-block: var(--space-xs);
+    position: absolute;
+    right: 0;
+    top: 100%;
+    
+    z-index: 20;
+
+    &__item {
+        align-items: center;
+        background-color: transparent;
+        cursor: pointer;
+        display: flex;
+        gap: var(--space-sm);
+        transition: background-color var(--transition-time-default) var(--transition-easing-default);
+        inline-size: 100%;
+        outline: none;
+        padding-block: var(--space-sm);
+        padding-inline: var(--space-md);
+        text-align: left;
+
+        &:hover {
+            background-color: var(--color-y-yellow);
+        }
+
+        &.is-active {
+            background-color: var(--color-g-grey);
+        }
+    }
+}

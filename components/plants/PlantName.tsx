@@ -30,7 +30,7 @@ export function PlantName({ genus, species, cultivar, commonNames, variant = "ca
   if (variant === "detail") {
     return (
       <div>
-        <div className="font-display font-semibold text-2xl leading-snug">
+        <div className="o-type-display pica kirk o-type--italic">
           {hasScientific ? (
             <>
               {species && speciesLine(genus, species)}
@@ -43,7 +43,7 @@ export function PlantName({ genus, species, cultivar, commonNames, variant = "ca
           )}
         </div>
         {commonNames && commonNames.length > 0 && (
-          <p className="font-sans text-sm text-ink-soft mt-0.5">
+          <p className="brevier">
             {commonNames.join(", ")}
           </p>
         )}

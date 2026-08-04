@@ -8,7 +8,7 @@ function PlaceholderPlantCard({ opacity = 1 }: { opacity?: number }) {
       style={{ opacity }}
       aria-hidden="true"
     >
-      <div className={cardStyles["o-card__image"]} />
+      <div className={cardStyles["o-card__media"]} />
       <div className={cardStyles["o-card__body"]}>
         <div className={cardStyles["o-card__text-skeleton-lead"]} />
         <div className={cardStyles["o-card__text-skeleton-secondary"]} />
