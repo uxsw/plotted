@@ -49,7 +49,7 @@ export function Modal({ isOpen, onClose, children }: ModalProps) {
         role="dialog"
         aria-modal="true"
         tabIndex={-1}
-        className="w-full max-w-sm rounded-[14px] bg-paper shadow-xl border border-sand-line p-6 focus:outline-none"
+        className="o-dialog"
         style={{
           backgroundImage:
             "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3CfeComponentTransfer%3E%3CfeFuncA type='linear' slope='0.06'/%3E%3C/feComponentTransfer%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23noise)'/%3E%3C/svg%3E\")",

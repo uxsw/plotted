@@ -8,6 +8,7 @@
 
     &__image {
         aspect-ratio: 4 / 3;
+        border-radius: var(--radius-md);
         cursor: pointer;
         overflow: hidden;
         position: relative;
@@ -66,6 +67,7 @@
 
     &__card {
         background-color: var(--color-white);
+        border-radius: var(--radius-md);
         overflow: hidden;   
     }
 
@@ -117,5 +119,20 @@
 
     &__planted-form {
         flex: 1;
+    }
+}
+
+.plant__frost-tolerance {
+    align-items: center;
+    display: flex;
+    gap: var(--space-sm);
+    padding: var(--space-sm);
+
+    > .is-temp {
+        align-items: center;
+        border-radius: var(--radius-s);
+        background-color: var(--color-y-yellow);
+        display: inline-flex;
+        padding-inline: var(--space-xs);
     }
 }

@@ -1,5 +1,5 @@
 import { SVGProps } from "react";
-import { Trash2, User, ArrowLeft, Plus, Search, ListFilter, ChevronRight, Image, Camera, MessageSquare, Sprout, Leaf, Check, LeafyGreen, MapPin, MapPinCheckInside, X } from "lucide-react";
+import { Trash2, User, ArrowLeft, Plus, Search, ListFilter, ChevronRight, Image, Camera, MessageSquare, Sprout, Leaf, Check, LeafyGreen, MapPin, MapPinCheckInside, X, ThermometerSnowflake } from "lucide-react";
 import styles from "./Icon.module.css";
 
 
@@ -23,6 +23,7 @@ const icons = {
   mappin: MapPin,
   mappincheck: MapPinCheckInside,
   close: X,
+  thermometerSnowflake: ThermometerSnowflake,
 } as const;
 
 type IconName = keyof typeof icons;
