@@ -69,25 +69,25 @@ export function SchemeCardScroller({ schemes }: { schemes: SchemeSummary[] }) {
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4 snap-x snap-mandatory no-scrollbar"
+        className="c-carousel"
       >
         {schemes.map((scheme) => (
           <Link
             key={scheme.id}
             href={`/schemes/${scheme.id}`}
-            className="flex-none w-[60%] snap-start overflow-hidden bg-white hover:shadow-md active:scale-[0.98] active:opacity-75 transition-all duration-75 flex flex-col"
+            className="c-carousel__item"
           >
-            <div className="relative h-[130px] shrink-0 w-full overflow-hidden">
+            <div className="c-carousel__media">
               {scheme.source_plant_photos[0] && (
                 <Image
                   src={scheme.source_plant_photos[0]}
                   alt=""
                   fill
                   sizes="80vw"
-                  className="object-cover scale-110 blur-md"
+                  className="is-scheme-image"
                 />
               )}
-              <div className="absolute inset-0 flex items-center justify-center">
+              <div className="c-carousel__scheme-stack">
                 {scheme.source_plant_photos.length > 0 ? (
                   <ThumbnailStack photos={scheme.source_plant_photos} />
                 ) : (
@@ -97,15 +97,15 @@ export function SchemeCardScroller({ schemes }: { schemes: SchemeSummary[] }) {
                 )}
               </div>
             </div>
-            <div className="flex flex-col gap-1 px-4 py-3">
-              <h3 className="font-display font-medium text-base leading-snug truncate">
+            <div className="o-stack--compact u-island--compact">
+              <h3 className="o-type-display primer kirk">
                 {scheme.name ?? "Unnamed scheme"}
               </h3>
               {scheme.narrative_intro && (
-                <p className="font-sans text-xs text-ink-soft leading-snug line-clamp-2">{scheme.narrative_intro}</p>
+                <p className="brevier o-type-line-clamp-2">{scheme.narrative_intro}</p>
               )}
-              <p className="font-sans text-xs text-ink-soft leading-snug">{formatDate(scheme.created_at)}</p>
-              <div className="mt-1">
+              <p className="minion">{formatDate(scheme.created_at)}</p>
+              <div>
                 <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium font-sans leading-none bg-moss-tint text-moss-deep">
                   {scheme.suggestion_count} suggestion{scheme.suggestion_count === 1 ? "" : "s"}
                 </span>

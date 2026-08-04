@@ -31,7 +31,7 @@ export function GardenCardScroller({ plants }: { plants: PlantSummary[] }) {
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="flex gap-3 overflow-x-auto pb-3 -mx-4 px-4 snap-x snap-mandatory no-scrollbar"
+        className="c-plant-scroller"
       >
         {plants.map((plant) => (
           <Link
@@ -47,10 +47,10 @@ export function GardenCardScroller({ plants }: { plants: PlantSummary[] }) {
                   alt={plant.species ?? ""}
                   fill
                   sizes="80vw"
-                  className="object-cover"
+                  className="is-plant-image"
                 />
               ) : (
-                <div className="absolute inset-0 flex items-center justify-center">
+                <div className="is-placeholder">
                   <Icon name="sprout" aria-label="Add plant" size={32} />
                 </div>
               )}

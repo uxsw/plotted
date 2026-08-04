@@ -52,7 +52,24 @@ line-height: 1.5;
   text-align: center;
 }
 
+.o-type--truncate {
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  overflow: hidden;
+}
+
+.o-type--italic {
+  font-style: italic;
+}
+
 .o-type-weight--bold,
 .kirk {
   font-weight: 600;
+}
+
+.o-type-line-clamp-2 {
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  display: -webkit-box;
+  overflow: hidden;
 }
