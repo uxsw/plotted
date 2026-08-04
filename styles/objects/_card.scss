@@ -6,7 +6,7 @@
   flex-direction: column;
   height: 100%;
   overflow: hidden;
-  background-color: #fefdfb;
+  background-color: var(--color-white);
   transition: box-shadow 150ms;
 }
 
@@ -49,6 +49,7 @@
 
   > .is-placeholder{
     align-items: center;
+    color: var(--color-r-red);
     display: flex;
     inset: 0;
     justify-content: center;

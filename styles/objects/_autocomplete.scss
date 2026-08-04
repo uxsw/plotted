@@ -1,0 +1,32 @@
+.o-autocomplete {
+    background-color: var(--color-white);
+    box-shadow: 0 4px 6px -1px #0000001a, 0 2px 4px -2px #0000001a;
+    left: 0;
+    right: 0;
+    top: 100%;
+    margin-block-start: var(--space-xs);
+    overflow: hidden;
+    position: absolute;
+    padding-block: var(--space-xs);
+    z-index: 20;
+
+    &__item {
+        cursor: pointer;
+        display: flex;
+        flex-direction: column;
+        outline-style: none;
+        padding-block: var(--space-sm);
+        padding-inline: var(--space-md);
+        text-align: left;
+        transition: background-color var(--transition-time-default), var(--transition-easing-default);
+        inline-size: 100%;
+
+        &:hover {
+            background-color: var(--color-y-yellow);
+        }
+
+        &:focus-visible {
+            outline: var(--border-width-thin) solid var(--color-b-cyan);
+        }
+    }
+}

@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import styles from "./Card.module.css";
+import { Icon } from "@/components/ui/Icon";
 
 interface CardProps {
   photoUrl?: string | null;
@@ -41,9 +41,9 @@ function Card({
 }: CardProps) {
   const interactive = !!(href || onClick);
   const sharedClassName = [
-    styles["o-card"],
-    variant === "flat" ? styles["o-card--flat"] : "",
-    interactive ? styles["o-card--interactive"] : "",
+    "o-card",
+    variant === "flat" ? "o-card--flat" : "",
+    interactive ? "o-card--interactive" : "",
     className,
   ]
     .filter(Boolean)
@@ -51,49 +51,49 @@ function Card({
 
   const content = (
     <>
-      <div className={styles["o-card__image"]}>
+      <div className="o-card__media">
         {photoUrl ? (
           <Image
             src={photoUrl}
             alt={photoAlt ?? ""}
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover"
+            className="is-image"
             priority={priority}
           />
         ) : placeholder ? (
-          <div className="absolute inset-0 flex items-center justify-center">
+          <div className="is-placeholder">
             {placeholder}
           </div>
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <DefaultPlaceholder />
+          <div className="is-placeholder">
+            <Icon name="sprout" aria-label="none" size={32} /> 
           </div>
         )}
         {sunBadge && (
-          <div className="absolute top-2 left-2">{sunBadge}</div>
+          <div className="is-badge">{sunBadge}</div>
         )}
         {badge && (
-          <div className="absolute top-2 right-2">{badge}</div>
+          <div className="is-badge">{badge}</div>
         )}
       </div>
 
-      <div className={styles["o-card__body"]}>
-        <h3 className="font-display font-medium text-base leading-snug">
+      <div className="o-card__body">
+        <h3 className="o-type-display long-primer o-type-leading--tight o-type--italic kirk">
           {title}
         </h3>
         {subtitle && (
-          <p className="font-sans text-xs text-ink-soft leading-snug">
+          <p className="brevier">
             {subtitle}
           </p>
         )}
         {tags && (
-          <div className="flex flex-wrap gap-1.5 mt-1">{tags}</div>
+          <div className="u-margin-top-auto">{tags}</div>
         )}
       </div>
 
       {footer && (
-        <div className={styles["o-card__footer"]}>{footer}</div>
+        <div className="o-card__footer">{footer}</div>
       )}
     </>
   );
@@ -140,5 +140,5 @@ function DefaultPlaceholder() {
   );
 }
 
-export { Card, styles as cardStyles };
+export { Card };
 export type { CardProps };

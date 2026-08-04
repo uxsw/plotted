@@ -275,7 +275,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
 
   if (plants.length === 0) {
     return (
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+      <div className="c-plant-grid">
         <button
           type="button"
           onClick={() => router.push("/plants/new")}
@@ -301,7 +301,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
   }
 
   const resultLabel =
-    filtered.length === 0 ? "no plants match" :
+    filtered.length === 0 ? "" :
     filtered.length === 1 ? "1 plant" :
     `${filtered.length} plants`;
 
@@ -346,7 +346,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
 
           {/* Autocomplete dropdown */}
           {showAutocomplete && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white shadow-md z-20 overflow-hidden">
+            <div className="o-autocomplete">
               {autocompleteItems.map((item, i) => (
                 <button
                   key={item.plant.id}
@@ -355,19 +355,16 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
                   onMouseDown={e => e.preventDefault()}
                   onClick={() => selectItem(item)}
                   onKeyDown={e => handleItemKeyDown(e, i)}
-                  className={[
-                    "w-full text-left px-3 py-2.5 flex flex-col gap-0.5 outline-none transition-colors",
-                    highlighted === i ? "bg-moss-tint" : "hover:bg-sand",
-                  ].join(" ")}
+                  className="o-autocomplete__item"
                 >
-                  <span className="font-display italic text-[14px] text-ink leading-tight">
+                  <span className="brevier">
                     <Highlight
                       text={item.primaryText}
                       query={item.matchedOn !== "common" ? query : ""}
                     />
                   </span>
                   {item.secondaryText && (
-                    <span className="font-sans text-[12px] text-ink-soft leading-tight">
+                    <span className="minion">
                       <Highlight
                         text={item.secondaryText}
                         query={item.matchedOn === "common" ? query : ""}
@@ -399,7 +396,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
 
           {/* Filter popover */}
           {filterOpen && (
-            <div className="absolute top-full right-0 mt-1 w-52 bg-white shadow-md z-20 overflow-hidden py-1">
+            <div className="o-popover-menu">
               {FILTER_OPTIONS.map(({ id, label, Icon }) => {
                 const isActive = activeFilter === id;
                 return (
@@ -407,18 +404,17 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
                     key={id}
                     type="button"
                     onClick={() => toggleFilter(id)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2.5 text-left hover:bg-sand transition-colors outline-none"
+                    className={[
+                      "o-popover-menu__item",
+                      isActive ? "is-active" : "is-default",
+                    ].join(" ")}
                   >
-                    <span className={isActive ? "text-moss" : "text-ink-soft"}>
+                    <span>
                       <Icon />
                     </span>
-                    <span className={[
-                      "flex-1 font-display italic text-[14px]",
-                      isActive ? "text-moss" : "text-ink",
-                    ].join(" ")}>
+                    <span className="brevier">
                       {label}
                     </span>
-                    {isActive && <span className="text-moss"><CheckIcon /></span>}
                   </button>
                 );
               })}
@@ -429,16 +425,16 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
 
       {/* Active filter pill */}
       {activeFilter && (
-        <div className="flex">
-          <span className="inline-flex items-center gap-1.5 bg-moss-tint border border-moss rounded-full px-3 py-1 font-display italic text-[13px] text-moss-deep">
+        <div className="o-chip-group">
+          <span className="o-chip is-info">
             {FILTER_OPTIONS.find(o => o.id === activeFilter)?.label}
             <button
               type="button"
               onClick={() => setActiveFilter(null)}
               aria-label="Clear filter"
-              className="text-moss hover:text-moss-deep transition-colors leading-none"
+              className="o-chip__action"
             >
-              <XSmallIcon />
+              <Icon name="close" aria-label="remove filter" size={18} />
             </button>
           </span>
         </div>
@@ -449,9 +445,9 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
 
       {/* Plant grid or no-results message */}
       {filtered.length === 0 ? (
-        <p className="font-display italic text-[15px] text-ink-soft text-center py-16">no plants match</p>
+        <p className="o-surface--info brevier u-island--compact">No plants match this search</p>
       ) : (
-        <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+        <div className="c-plant-grid">
           {filtered.map((plant, index) => {
             const sciName = scientificNameString(plant);
             const hasSeason = plant.flowering_season_from !== null && plant.flowering_season_to !== null;
