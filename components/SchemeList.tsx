@@ -8,7 +8,6 @@ import Link from "next/link";
 import * as Popover from "@radix-ui/react-popover";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { PlaceholderSchemeCard } from "@/components/ui/PlaceholderSchemeCard";
-import cardStyles from "@/components/ui/Card.module.css";
 import buttonStyles from "@/components/ui/Button.module.css";
 
 export type SchemeSummary = {
@@ -33,14 +32,14 @@ function formatDate(iso: string): string {
 function ThumbnailStack({ photos }: { photos: string[] }) {
   const shown = photos.slice(0, 5);
   return (
-    <div className="flex w-full items-center justify-center">
+    <div className="is-stack">
       {shown.map((url, i) => (
         <div
           key={i}
-          className="relative aspect-square rounded-full overflow-hidden border-2 border-paper shadow-sm"
+          className="is-frame"
           style={{ width: "19%", marginLeft: i === 0 ? 0 : "-5%", zIndex: shown.length - i }}
         >
-          <Image src={url} alt="" fill sizes="15vw" className="object-cover" />
+          <Image src={url} alt="" fill sizes="15vw" className="is-image" />
         </div>
       ))}
     </div>
@@ -112,17 +111,17 @@ function SchemeCard({
 
   const cardBody = (
     <>
-      <div className="relative h-[190px] w-full overflow-hidden bg-paper-deep">
+      <div className="scheme-media">
         {scheme.source_plant_photos[0] && (
           <Image
             src={scheme.source_plant_photos[0]}
             alt=""
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-            className="object-cover scale-110 blur-md"
+            className="is-image"
           />
         )}
-        <div className="absolute inset-0 flex items-center justify-center">
+        <div className="c-scheme__thumbnail-stack">
           {scheme.source_plant_photos.length > 0 ? (
             <ThumbnailStack photos={scheme.source_plant_photos} />
           ) : (
@@ -147,13 +146,13 @@ function SchemeCard({
             className="font-display font-medium text-base text-ink leading-snug bg-transparent border-b border-moss outline-none w-full"
           />
         ) : (
-          <h3 className="font-display font-medium text-base text-ink leading-snug">{nameValue}</h3>
+          <h3 className="o-type-display long-primer kirk o-type-leading--tight">{nameValue}</h3>
         )}
-        <p className="font-sans text-xs text-ink-soft leading-snug">{formatDate(scheme.created_at)}</p>
+        <p className="minion">{formatDate(scheme.created_at)}</p>
         {scheme.summary && (
-          <p className="font-sans text-xs text-ink-soft leading-snug">{scheme.summary}</p>
+          <p className="brevier">{scheme.summary}</p>
         )}
-        <div className="flex flex-wrap gap-1.5 mt-1">
+        <div className="u-margin-top-auto">
           <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium font-sans leading-none bg-moss-tint text-moss-deep">
             {scheme.suggestion_count} suggestion{scheme.suggestion_count === 1 ? "" : "s"}
           </span>
@@ -163,16 +162,13 @@ function SchemeCard({
   );
 
   return (
-    <div className={`relative flex flex-col overflow-hidden transition-shadow duration-150 ${deleting ? "opacity-50 pointer-events-none" : ""}`}>
+    <div className={`relative ${deleting ? "opacity-50 pointer-events-none" : ""}`}>
       {renaming ? (
-        <div className="flex flex-col flex-1">{cardBody}</div>
+        <div>{cardBody}</div>
       ) : (
         <Link
           href={`/schemes/${scheme.id}`}
-          className={clsx(
-            cardStyles["o-card"],
-            cardStyles["o-card--interactive"]
-          )}
+          className="o-card o-card--interactive"
         >
           {cardBody}
         </Link>
@@ -193,19 +189,19 @@ function SchemeCard({
             <Popover.Content
               align="end"
               sideOffset={6}
-              className="z-50 min-w-[140px] bg-white p-1 shadow-md flex flex-col focus:outline-none"
+              className="o-popover"
             >
               <button
                 type="button"
                 onClick={() => { setMenuOpen(false); setRenaming(true); }}
-                className="text-left px-3 py-2 rounded text-sm font-sans text-ink hover:bg-moss-tint transition-colors"
+                className="o-popover__link brevier"
               >
                 Rename
               </button>
               <button
                 type="button"
                 onClick={() => { setMenuOpen(false); setDeleteOpen(true); }}
-                className="text-left px-3 py-2 rounded text-sm font-sans text-clay hover:bg-clay-tint transition-colors"
+                className="o-popover__link brevier is-danger"
               >
                 Delete
               </button>
@@ -214,7 +210,7 @@ function SchemeCard({
         </Popover.Root>
       </div>
 
-      {error && <p className="px-4 pb-3 text-xs text-clay">{error}</p>}
+      {error && <p className="o-surface--error u-island--compact brevier">{error}</p>}
 
       <ConfirmDialog
         isOpen={deleteOpen}
@@ -348,7 +344,7 @@ export default function SchemeList({ schemes: initialSchemes }: { schemes: Schem
 
   if (schemes.length === 0) {
     return (
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+      <div className="o-card-grid">
         <button
           type="button"
           onClick={() => router.push("/schemes/new")}
@@ -373,7 +369,7 @@ export default function SchemeList({ schemes: initialSchemes }: { schemes: Schem
   }
 
   return (
-    <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
+    <div className="o-card-grid">
       {schemes.map((scheme) =>
         scheme.status === "failed" ? (
           <FailedSchemeCard key={scheme.id} scheme={scheme} onDeleted={handleDeleted} />

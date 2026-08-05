@@ -197,3 +197,45 @@
     block-size: 100px;
     border: var(--border-width-thin) dashed var(--sem-border-color);
 }
+
+.scheme-media {
+    position: relative;
+    height: 190px;
+    inline-size: 100%;
+    overflow: hidden;
+    background-color: var(--color-white);
+
+    > .is-image {
+        object-fit: cover;
+        scale: 110%;
+        filter: blur(5px);
+    }
+}
+
+.c-scheme__thumbnail-stack {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    > .is-stack {
+        display: flex;
+        inline-size: 100%;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .is-frame {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: var(--radius-roundel);
+        border: var(--border-width-thin) solid var(--color-white);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        overflow: hidden;
+    }
+
+    .is-image {
+        object-fit: cover;
+    }
+}
