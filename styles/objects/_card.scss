@@ -1,5 +1,11 @@
 /* o-card — reusable card object */
 
+.o-card-grid {
+  display: grid;
+  gap: var(--space-md);
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+}
+
 .o-card {
   border-radius: var(--radius-md);
   display: flex;
@@ -7,7 +13,10 @@
   height: 100%;
   overflow: hidden;
   background-color: var(--color-white);
-  transition: box-shadow 150ms;
+  position: relative;
+  transition:
+    box-shadow var(--transition-time-default) var(--transition-easing-default),
+    z-index var(--transition-time-default) var(--transition-easing-default);
 }
 
 .o-card--flat {
@@ -23,16 +32,18 @@
   color: inherit;
   /* combine both transitions so hover shadow and active press both work */
   transition: box-shadow 150ms, transform 75ms, opacity 75ms;
+
+  &:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    z-index: 1;
+  }
+
+  &:active {
+    transform: scale(0.98);
+    opacity: 0.75;
+  }
 }
 
-.o-card--interactive:hover {
-  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-}
-
-.o-card--interactive:active {
-  transform: scale(0.98);
-  opacity: 0.75;
-}
 
 /* --- Elements --- */
 
