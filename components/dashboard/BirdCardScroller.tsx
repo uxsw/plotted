@@ -216,7 +216,7 @@ export function BirdCardScroller({
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="c-spotted-count-scroller"
+        className="c-spotted-count-scroller o-scroller"
       >
         {sortedSpecies.map((species, i) => (
           <BirdCard
