@@ -31,7 +31,7 @@ export function GardenCardScroller({ plants }: { plants: PlantSummary[] }) {
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="c-plant-scroller"
+        className="c-plant-scroller o-scroller"
       >
         {plants.map((plant) => (
           <Link

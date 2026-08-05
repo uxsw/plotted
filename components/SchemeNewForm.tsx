@@ -119,9 +119,8 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
             Choose the plants you&apos;d like companion suggestions for.
           </p>
         </div>
-
         <div
-          className="c-scheme-scroller"
+          className="c-scheme-scroller o-scroller"
           style={{ paddingLeft: 24, paddingRight: 24 }}
         >
           {plants.map((plant) => {
@@ -164,7 +163,6 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
             );
           })}
         </div>
-
         <div className="c-scheme-scroller__selected">
           <span className="minion">
             Selected ({selectedIds.length}/5)

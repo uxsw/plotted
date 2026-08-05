@@ -69,7 +69,7 @@ export function SchemeCardScroller({ schemes }: { schemes: SchemeSummary[] }) {
       <div
         ref={scrollRef}
         onScroll={handleScroll}
-        className="c-carousel"
+        className="c-carousel o-scroller"
       >
         {schemes.map((scheme) => (
           <Link

@@ -1,0 +1,23 @@
+.o-scroller {
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+
+    &::-webkit-scrollbar { height: 6px; }
+    &::-webkit-scrollbar-thumb { background: transparent; border-radius: 3px; }
+
+    &:hover, &:focus-within {
+        scrollbar-color: var(--color-r-marigold) transparent;
+        &::-webkit-scrollbar-thumb { background: var(--color-r-marigold); }
+    }
+}
+
+@media (pointer: coarse) {
+    .o-scroller {
+        scrollbar-width: none;
+        padding-bottom: 0;
+        margin-bottom: 0;
+        &::-webkit-scrollbar { display: none; }
+    }
+}
