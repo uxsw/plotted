@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run",
+    "email:build": "tsx scripts/build-email-templates.tsx"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.105.0",
@@ -25,6 +26,8 @@
     "sharp": "^0.35.3"
   },
   "devDependencies": {
+    "@react-email/components": "^1.0.12",
+    "@react-email/render": "^2.1.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -35,6 +38,7 @@
     "eslint-config-next": "16.2.9",
     "sass": "^1.102.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.9",
     "typescript": "^5",
     "vitest": "^4.1.9"
   }

@@ -1,0 +1,10 @@
+# No supabase/config.toml existed prior to this change. This is scoped to
+# what's needed for local email-template testing only — run `supabase init`
+# to scaffold the rest (api/db/studio ports, etc.) before `supabase start`
+# is used for anything beyond previewing this template against Inbucket.
+project_id = "plotted"
+
+[auth.email.template.confirmation]
+# TODO: Natalie — placeholder subject line for review
+subject = "Confirm your email"
+content_path = "./supabase/templates/confirmation.html"

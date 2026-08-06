@@ -56,3 +56,14 @@ Separate from the PWA shell itself (see above) — this is the discoverability l
 - It also wrote a meaningless `"Current location"` label to `garden.location_label`, which quietly violated the same principle that already governs the Exeter fallback in the other direction — only an explicitly confirmed location should ever be written to `garden`.
 - Exeter is now the unconditional, display-only default whenever nothing is saved (never written to `garden`). Setting a real location happens only via the existing manual search (`LocationSearch` / `saveGardenLocation`) — a one-time action, since gardens don't move.
 - This reverses the original [onboarding-location-mvp.md](docs/location/onboarding-location-mvp.md) spec's non-goal of leaving `WeatherLocation.tsx` untouched. That reversal was deliberate and considered, not an unexplained deviation — noted here for anyone reading the spec later.
+
+## Auth confirmation email (React Email)
+
+The Supabase "Confirm signup" email is authored as a React Email component (`emails/ConfirmationEmail.tsx`) instead of being edited directly in the Supabase Dashboard, so it's source-controlled and testable locally.
+
+- After editing `emails/ConfirmationEmail.tsx`, run `npm run email:build` to render it to static HTML at `supabase/templates/confirmation.html` (via `@react-email/render`, script at `scripts/build-email-templates.tsx`).
+- Go template placeholders (`{{ .SiteURL }}`, `{{ .TokenHash }}`) are plain JS string constants in the component, not JSX text — writing them as literal JSX text would make the parser try to evaluate `{{ .Foo }}` as a JS expression. Supabase substitutes these itself at send time; the render step must leave them untouched, which it does (verified in the PR that introduced this).
+- Test locally with `supabase start`, which reads `supabase/config.toml`'s `[auth.email.template.confirmation]` (`content_path` pointing at the rendered HTML) and serves the real signup flow through Inbucket.
+- **Production is a manual step**: there's no CLI push for hosted Supabase email templates. After building, paste the rendered `supabase/templates/confirmation.html` into the Dashboard's Email Templates page by hand.
+- Only the confirmation/signup template is wired up so far. Invite, magic link, and email-change templates still use Supabase's default — `scripts/build-email-templates.tsx` is structured as a list so adding those later is additive, not a rewrite.
+- `supabase/config.toml` in this repo is intentionally minimal (just `project_id` + the email template section) — no `supabase init` has been run for this project, so `supabase start` needs the rest of the config (api/db/studio ports, etc.) scaffolded first.

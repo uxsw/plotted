@@ -1,12 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/Button";
 import Wordmark from "@/components/Wordmark";
 import { Icon } from "@/components/ui/Icon";
+
+// TODO: Natalie — placeholder copy for review
+const QUERY_ERROR_MESSAGES: Record<string, string> = {
+  confirmation_failed: "That confirmation link has expired or has already been used. Try signing up again.",
+  auth_callback_failed: "Something went wrong. Please try again.",
+};
 
 
 function UnderlineField({ label, focused, hasError, children }: {
@@ -36,8 +42,10 @@ function UnderlineField({ label, focused, hasError, children }: {
   );
 }
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const queryError = QUERY_ERROR_MESSAGES[searchParams.get("error") ?? ""] ?? null;
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -71,6 +79,13 @@ export default function LoginPage() {
           Log in
         </h1>
         <form onSubmit={handleSubmit} className="o-stack u-w-100">
+          {queryError && (
+            <div className="o-row o-surface--error u-island">
+              <Icon name="sprout" aria-label="error" />
+              <span className="brevier">{queryError}</span>
+            </div>
+          )}
+
           <UnderlineField label="email" focused={focusedField === "email"}>
             <input
               type="email"
@@ -116,5 +131,13 @@ export default function LoginPage() {
 
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }
