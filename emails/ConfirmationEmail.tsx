@@ -25,11 +25,11 @@ const CONFIRMATION_URL =
 // vs. app/layout.tsx's actual Fraunces/Inter/Spline Sans Mono setup).
 const colors = {
   paper: "#FAF6EC",
-  ink: "#2B2A24",
+  ink: "#2d2d2d",
   inkSoft: "#5B574A",
-  moss: "#4F6B4A",
-  mossDeep: "#34492F",
+  marigold: "#e26650",
   sandLine: "#D9CCAC",
+  deepgrey: "#2d2d2d",
 };
 
 const fontFamily =
@@ -39,7 +39,6 @@ export default function ConfirmationEmail() {
   return (
     <Html lang="en">
       <Head />
-      {/* TODO: Natalie — placeholder copy for review */}
       <Preview>Confirm your email to start your Plotted garden record</Preview>
       <Body style={{ backgroundColor: colors.paper, fontFamily, margin: 0, padding: 0 }}>
         <Container
@@ -54,12 +53,24 @@ export default function ConfirmationEmail() {
               fontFamily,
               fontSize: "20px",
               fontWeight: 600,
-              color: colors.moss,
+              color: colors.deepgrey,
               letterSpacing: "0.02em",
               margin: "0 0 32px",
             }}
           >
             Plotted
+          </Text>
+
+          <Text
+            style={{
+              fontFamily,
+              fontSize: "15px",
+              lineHeight: "1.5",
+              color: colors.inkSoft,
+              margin: "0 0 24px",
+            }}
+          >
+            Thanks so much for signing up for Plotted
           </Text>
 
           <Heading
@@ -72,8 +83,7 @@ export default function ConfirmationEmail() {
               margin: "0 0 16px",
             }}
           >
-            {/* TODO: Natalie — placeholder copy for review */}
-            Confirm your email
+            Please confirm your email.
           </Heading>
 
           <Text
@@ -85,15 +95,45 @@ export default function ConfirmationEmail() {
               margin: "0 0 24px",
             }}
           >
-            {/* TODO: Natalie — placeholder copy for review */}
-            Thanks for signing up for Plotted. Confirm your email address to start recording
-            what&apos;s growing in your garden.
+            Confirm your email address to start recording what's growing in your garden.
+          </Text>
+
+          <Text
+            style={{
+              fontFamily,
+              fontSize: "15px",
+              lineHeight: "1.5",
+              color: colors.inkSoft,
+              margin: "0 0 24px",
+            }}
+          >
+            A quick note before you dive in: Plotted is currently in private beta.
+          </Text>
+
+          <Text
+            style={{
+              fontFamily,
+              fontSize: "15px",
+              lineHeight: "1.5",
+              color: colors.inkSoft,
+              margin: "0 0 24px",
+            }}
+          >
+            What does that mean for you?
+            You're one of a small number of people helping me shape Plotted before
+            it's finished. Some things are still rough around the edges, and you
+            might hit the odd bug or a feature that doesn't quite work as expected
+            yet — that's all part of the process, not a sign something's
+            wrong on your end. If you do spot anything, I'd really appreciate you
+            letting me know. Every bit of feedback from early users like you goes
+            directly into making Plotted better, and I'm very grateful
+            you're willing to test the rough edges!
           </Text>
 
           <Button
             href={CONFIRMATION_URL}
             style={{
-              backgroundColor: colors.moss,
+              backgroundColor: colors.marigold,
               color: "#FFFFFF",
               fontFamily,
               fontSize: "15px",
@@ -104,7 +144,6 @@ export default function ConfirmationEmail() {
               display: "inline-block",
             }}
           >
-            {/* TODO: Natalie — placeholder copy for review */}
             Confirm email
           </Button>
 
@@ -130,7 +169,7 @@ export default function ConfirmationEmail() {
               wordBreak: "break-all",
             }}
           >
-            <Link href={CONFIRMATION_URL} style={{ color: colors.mossDeep }}>
+            <Link href={CONFIRMATION_URL} style={{ color: colors.deepgrey }}>
               {CONFIRMATION_URL}
             </Link>
           </Text>
