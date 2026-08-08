@@ -95,7 +95,7 @@ export default function ConfirmationEmail() {
               margin: "0 0 24px",
             }}
           >
-            Confirm your email address to start recording what's growing in your garden.
+            Confirm your email address to start recording what&apos;s growing in your garden.
           </Text>
 
           <Text
@@ -120,14 +120,14 @@ export default function ConfirmationEmail() {
             }}
           >
             What does that mean for you?
-            You're one of a small number of people helping me shape Plotted before
-            it's finished. Some things are still rough around the edges, and you
-            might hit the odd bug or a feature that doesn't quite work as expected
-            yet — that's all part of the process, not a sign something's
-            wrong on your end. If you do spot anything, I'd really appreciate you
+            You&apos;re one of a small number of people helping me shape Plotted before
+            it&apos;s finished. Some things are still rough around the edges, and you
+            might hit the odd bug or a feature that doesn&apos;t quite work as expected
+            yet — that&apos;s all part of the process, not a sign something&apos;s
+            wrong on your end. If you do spot anything, I&apos;d really appreciate you
             letting me know. Every bit of feedback from early users like you goes
-            directly into making Plotted better, and I'm very grateful
-            you're willing to test the rough edges!
+            directly into making Plotted better, and I&apos;m very grateful
+            you&apos;re willing to test the rough edges!
           </Text>
 
           <Button
