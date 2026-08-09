@@ -22,15 +22,6 @@ export async function POST(request: NextRequest) {
   } = bearerToken ? await supabase.auth.getUser(bearerToken) : await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  try {
-    await enforceDailyIdentifyLimit(supabase, user.id);
-  } catch (err) {
-    if (err instanceof IdentificationLimitError) {
-      return NextResponse.json({ error: "daily_limit_reached" }, { status: 429 });
-    }
-    throw err;
-  }
-
   let formData: FormData;
   try {
     formData = await request.formData();
@@ -77,6 +68,15 @@ export async function POST(request: NextRequest) {
     garden?.latitude != null && garden?.longitude != null
       ? { latitude: garden.latitude, longitude: garden.longitude }
       : null;
+
+  try {
+    await enforceDailyIdentifyLimit(supabase, user.id);
+  } catch (err) {
+    if (err instanceof IdentificationLimitError) {
+      return NextResponse.json({ error: "daily_limit_reached" }, { status: 429 });
+    }
+    throw err;
+  }
 
   try {
     const adapter = getIdentificationAdapter();
