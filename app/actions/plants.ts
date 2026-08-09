@@ -10,6 +10,7 @@ import type { PlantInsert } from "@/lib/types";
 import { performLookup } from "@/lib/plant-lookup";
 import { applyLookupResult } from "@/lib/lookup-apply";
 import { enrichSpeciesReference } from "@/lib/species-reference-enrichment";
+import { manualSpeciesTransition } from "@/lib/species-transition";
 import Anthropic from "@anthropic-ai/sdk";
 
 export async function updatePlantField(
@@ -25,6 +26,7 @@ export async function updatePlantField(
   if ("species" in data) {
     clean.species = data.species ? sanitizeSpecies(data.species) : null;
     if (!clean.species) return { error: "Species is required." };
+    Object.assign(clean, manualSpeciesTransition());
   }
   if ("cultivar" in data) {
     clean.cultivar = data.cultivar ? sanitizePlantName(data.cultivar) : null;
