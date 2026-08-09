@@ -13,6 +13,25 @@ import { enrichSpeciesReference } from "@/lib/species-reference-enrichment";
 import { manualSpeciesTransition } from "@/lib/species-transition";
 import Anthropic from "@anthropic-ai/sdk";
 
+// ─── Version-pinned behaviour: revalidatePath from inside after() ────────────
+//
+// The three enrichSpeciesReference call sites below each call revalidatePath
+// *inside* their after() callback, i.e. after enrichment has actually
+// resolved rather than alongside the surrounding write. This depends on
+// Next.js 16.2.9 behaviour documented in
+// node_modules/next/dist/docs/01-app/03-api-reference/04-functions/revalidatePath.md:
+// "Server Functions: Updates the UI immediately (if viewing the affected
+// path)." That is what lets a client already sitting on a plant's detail
+// page pick up frost tolerance once background enrichment finishes, with no
+// manual reload — see the frost-tolerance-bug fix.
+//
+// This is *not* stock/older Next.js behaviour, where revalidatePath only
+// marks a path stale for its next visit and would silently reintroduce the
+// original race (frost tolerance populated on the server but never pushed to
+// an already-open tab) if this project ever upgrades and the guarantee
+// changes or is scoped differently. Re-verify this specific doc section
+// against the target version on any Next.js major/minor bump before relying
+// on it further.
 export async function updatePlantField(
   plantId: string,
   data: Partial<PlantInsert>
@@ -47,7 +66,15 @@ export async function updatePlantField(
   if (error) return { error: error.message };
 
   if ("species" in clean || "cultivar" in clean) {
-    after(() => enrichSpeciesReference(updated.genus, updated.species, updated.cultivar));
+    // revalidatePath is called after enrichment resolves, not alongside the
+    // write above, so the page picks up frost tolerance itself rather than
+    // whatever was already true when this action started. Relies on
+    // Next.js 16.2.9's "updates the UI immediately" revalidatePath behaviour
+    // from inside after() — see the file-level note above before touching this.
+    after(async () => {
+      await enrichSpeciesReference(updated.genus, updated.species, updated.cultivar);
+      revalidatePath(`/plants/${plantId}`);
+    });
   }
 
   revalidatePath(`/plants/${plantId}`);
@@ -114,7 +141,14 @@ export async function upsertPlant(
     // enriched (a genus-level lookup is a real, if hedged, answer; see spec's
     // "Enrichment of genus-level records").
     if (clean.genus || clean.species) {
-      after(() => enrichSpeciesReference(clean.genus, clean.species, clean.cultivar));
+      // revalidatePath fires post-enrichment, inside the after() callback —
+      // depends on Next.js 16.2.9's "updates the UI immediately" behaviour
+      // for revalidatePath called from a Server Function. See the file-level
+      // note above before touching this.
+      after(async () => {
+        await enrichSpeciesReference(clean.genus, clean.species, clean.cultivar);
+        revalidatePath(`/plants/${plantId}`);
+      });
     }
     revalidatePath("/plants");
     redirect(`/plants/${plantId}`);
@@ -164,7 +198,17 @@ export async function upsertPlant(
     }
 
     if (clean.genus || finalSpecies) {
-      after(() => enrichSpeciesReference(clean.genus, finalSpecies, finalCultivar));
+      // This is the call site the frost-tolerance-bug race actually showed
+      // up on: a freshly-inserted plant, redirected to immediately, with
+      // enrichment for a genuinely new species still running in the
+      // background. revalidatePath fires only once enrichment resolves,
+      // relying on Next.js 16.2.9's "updates the UI immediately" behaviour
+      // for revalidatePath called from a Server Function. See the file-level
+      // note above before touching this.
+      after(async () => {
+        await enrichSpeciesReference(clean.genus, finalSpecies, finalCultivar);
+        revalidatePath(`/plants/${row.id}`);
+      });
     }
 
     revalidatePath("/plants");

@@ -10,6 +10,7 @@ import { SunBadgePill } from "@/components/ui/SunBadge";
 import { FloweringSeasonBadge } from "@/components/ui/FloweringSeasonBadge";
 import type { Plant, PlantInsert, SpeciesRef, SunNeeds } from "@/lib/types";
 import { updatePlantField, markLookupNoticeSeen } from "@/app/actions/plants";
+import { PENDING_STALE_MS } from "@/lib/species-reference-timing";
 import DeletePlantButton from "@/components/DeletePlantButton";
 import { Button } from "@/components/ui/Button";
 import { AiNoticePanel } from "@/components/ui/AiNoticePanel";
@@ -236,6 +237,23 @@ export default function PlantDetail({
   }
 
   const title = plantDisplayTitle(plant);
+
+  // "Looking up frost tolerance…" covers two states that both mean
+  // "enrichment hasn't produced an answer yet": no species_reference row at
+  // all (the after()-backgrounded enrichSpeciesReference call hasn't even
+  // run its initial insert), and a row stuck at 'pending' (the AI call is in
+  // flight, or — rarely — never got to finish). Bounded to recently-added
+  // plants using the same PENDING_STALE_MS the server itself uses to decide
+  // when a pending row is stale enough to retry, so the spinner never
+  // outlives the window in which the row could still plausibly resolve on
+  // its own; past that, a species that's failed or genuinely has no data
+  // renders nothing, matching the existing behaviour below. Once the row
+  // does land, the after()-backgrounded revalidatePath from upsertPlant
+  // pushes fresh props into this page without a manual reload.
+  const plantAgeMs = Date.now() - new Date(plant.created_at).getTime();
+  const recentlyAdded = plantAgeMs < PENDING_STALE_MS;
+  const frostLookingUp =
+    recentlyAdded && (speciesRef === null || speciesRef.lookup_status === "pending");
 
   function open(field: string, val1: string, val2 = "") {
     setEditing(field);
@@ -701,10 +719,9 @@ export default function PlantDetail({
                 </div>
 
                 {/* Frost tolerance — sourced from species_reference */}
-                {speciesRef?.lookup_status === "pending" && (
+                {frostLookingUp && (
                   <div className="px-4 py-3 border-t border-paper-line">
-                    <p className="minion">Frost tolerance</p>
-                    <p className="minion">Looking up…</p>
+                    <p className="minion">Looking up frost tolerance…</p>
                   </div>
                 )}
                 {speciesRef?.lookup_status === "complete" && speciesRef.frost_tolerance_c !== null && (
@@ -724,7 +741,11 @@ export default function PlantDetail({
                     </div>
                   </div>
                 )}
-                {/* lookup_status === 'failed', no row, or complete with null value: render nothing */}
+                {/* Renders nothing: lookup_status === 'failed'; complete with a
+                    null value (a real lookup with no answer); or pending/no-row
+                    outside the recently-added window (frostLookingUp false) —
+                    an indefinitely stuck or never-triggered lookup on an older
+                    plant, not worth a permanent spinner. */}
               </div>
             </section>
 

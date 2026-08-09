@@ -12,6 +12,7 @@ vi.mock("@/lib/species-reference-enrichment", () => ({ enrichSpeciesReference: v
 import { createClient } from "@/lib/supabase/server";
 import { performLookup } from "@/lib/plant-lookup";
 import { enrichSpeciesReference } from "@/lib/species-reference-enrichment";
+import { revalidatePath } from "next/cache";
 import { updatePlantField, upsertPlant } from "@/app/actions/plants";
 
 // A minimal valid plant that passes sanitization and validation
@@ -354,5 +355,87 @@ describe("upsertPlant – species_source", () => {
     const { capturedInsert } = setupInsertCapture();
     await upsertPlant(null, BASE_PLANT, { fromIdentification: false });
     expect(capturedInsert()).toMatchObject({ species_source: "manual" });
+  });
+});
+
+// ─── frost tolerance revalidation (regression: bg enrichment race) ───────────
+//
+// The bug: enrichSpeciesReference runs inside after(), which fires post-
+// response — well after the redirect to the new plant's detail page has
+// already been followed and rendered. The species_reference row (and
+// therefore frost tolerance) frequently doesn't exist yet on that first
+// render; it only shows up if the user navigates away and back once
+// enrichment has finished in the background.
+//
+// The fix makes the after() callback revalidatePath the specific plant's
+// detail path once enrichSpeciesReference resolves, so a client still
+// sitting on that page picks up the frost data without manual navigation
+// (this Next.js version updates an already-rendered page on revalidatePath
+// from a Server Function — see revalidatePath.md).
+//
+// These tests can't observe an already-rendered browser tab updating (that
+// needs an e2e/browser-level test); what they verify is the piece within
+// this unit suite's reach: revalidation is deferred until enrichment
+// actually resolves, not fired eagerly alongside the write. A regression
+// back to `after(() => enrichSpeciesReference(...))` with no revalidation,
+// or a revalidatePath call that races ahead of enrichment, would fail these.
+describe("upsertPlant/updatePlantField – frost tolerance revalidation", () => {
+  beforeEach(() => {
+    vi.mocked(revalidatePath).mockClear();
+  });
+
+  it("insert: revalidates the new plant's detail path only after enrichSpeciesReference resolves", async () => {
+    setupInsertCapture();
+    vi.mocked(performLookup).mockResolvedValue({ ...BASE_LOOKUP });
+
+    let resolveEnrichment: () => void = () => {};
+    vi.mocked(enrichSpeciesReference).mockReturnValue(
+      new Promise<void>((resolve) => {
+        resolveEnrichment = resolve;
+      })
+    );
+
+    await upsertPlant(null, BASE_PLANT); // insert branch; id "new-plant-id" per setupInsertCapture
+
+    // upsertPlant has fully returned (redirect included), but enrichment is
+    // still pending — the detail path must not be revalidated yet.
+    expect(revalidatePath).not.toHaveBeenCalledWith("/plants/new-plant-id");
+
+    resolveEnrichment();
+    // Flush the microtask(s) for the `await enrichSpeciesReference(...)`
+    // continuation inside the after() callback.
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(revalidatePath).toHaveBeenCalledWith("/plants/new-plant-id");
+  });
+
+  it("update (upsertPlant with an id): revalidates that plant's detail path after enrichment resolves", async () => {
+    vi.mocked(performLookup).mockResolvedValue({ ...BASE_LOOKUP });
+    vi.mocked(enrichSpeciesReference).mockResolvedValue(undefined);
+    const mockUpdate = vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
+    });
+    vi.mocked(createClient).mockResolvedValue({
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "user-123" } } }) },
+      from: vi.fn().mockReturnValue({ update: mockUpdate }),
+    } as unknown as Awaited<ReturnType<typeof createClient>>);
+
+    await upsertPlant("existing-plant-id", BASE_PLANT);
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(revalidatePath).toHaveBeenCalledWith("/plants/existing-plant-id");
+  });
+
+  it("updatePlantField: revalidates the plant's detail path after enrichment resolves", async () => {
+    vi.mocked(enrichSpeciesReference).mockResolvedValue(undefined);
+    setupBasicSupabase();
+
+    await updatePlantField("plant-1", { species: "canina" });
+    await Promise.resolve();
+    await Promise.resolve();
+
+    expect(revalidatePath).toHaveBeenCalledWith("/plants/plant-1");
   });
 });

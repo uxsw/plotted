@@ -2,10 +2,10 @@ import Anthropic from "@anthropic-ai/sdk";
 import { createServiceClient } from "@/lib/supabase/server";
 import { computeSpeciesMatchKey } from "@/lib/species-match-key";
 import { sanitizeGenus, sanitizeSpecies, sanitizePlantName } from "@/lib/sanitize";
+import { PENDING_STALE_MS } from "@/lib/species-reference-timing";
 
 const anthropic = new Anthropic();
 
-const PENDING_STALE_MS = 10 * 60 * 1000;   // 10 minutes
 const FAILED_STALE_MS  = 24 * 60 * 60 * 1000; // 24 hours
 
 type FrostLookupResult = {
