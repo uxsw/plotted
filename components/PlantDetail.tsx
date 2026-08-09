@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import Link from "next/link";
 import Image from "next/image";
@@ -208,10 +209,13 @@ function CommonNamesSection({
 export default function PlantDetail({
   plant: init,
   speciesRef,
+  recentlyAdded,
 }: {
   plant: Plant;
   speciesRef: SpeciesRef | null;
+  recentlyAdded: boolean;
 }) {
+  const router = useRouter();
   const [plant, setPlant] = useState(init);
   const [editing, setEditing] = useState<string | null>(null);
   const [v1, setV1] = useState("");
@@ -236,6 +240,48 @@ export default function PlantDetail({
   }
 
   const title = plantDisplayTitle(plant);
+
+  // "Looking up frost tolerance…" covers two states that both mean
+  // "enrichment hasn't produced an answer yet": no species_reference row at
+  // all (the after()-backgrounded enrichSpeciesReference call hasn't even
+  // run its initial insert), and a row stuck at 'pending' (the AI call is in
+  // flight, or — rarely — never got to finish). Bounded to recently-added
+  // plants using the same PENDING_STALE_MS the server itself uses to decide
+  // when a pending row is stale enough to retry, so the spinner never
+  // outlives the window in which the row could still plausibly resolve on
+  // its own; past that, a species that's failed or genuinely has no data
+  // renders nothing, matching the existing behaviour below.
+  //
+  // recentlyAdded is computed server-side (page.tsx) and passed in as a
+  // prop, not derived from Date.now() here — calling Date.now() directly in
+  // a client render body is impure (flagged by react-hooks/purity), and a
+  // Server Component has no such restriction. The polling below re-fetches
+  // that Server Component on every tick anyway, so recentlyAdded is
+  // recomputed against the real current time each time regardless.
+  const frostLookingUp =
+    recentlyAdded && (speciesRef === null || speciesRef.lookup_status === "pending");
+
+  // Polling, not server push: revalidatePath called from inside upsertPlant's
+  // after() callback cannot deliver a live update here — that "updates the
+  // UI immediately" behaviour rides on the invoking Server Function's own
+  // response, and after() only runs once that response is already gone (see
+  // CLAUDE.md's species-reference-enrichment section for the full story).
+  // So instead, while frostLookingUp is true, poll by calling router.refresh()
+  // — a genuinely new request that re-renders this page's Server Component
+  // and merges fresh props in without losing unrelated client state (per
+  // useRouter's docs). That re-render recomputes recentlyAdded server-side
+  // against the real current time on every tick, so this effect's cleanup
+  // stops polling the moment frostLookingUp goes false, whether because the
+  // row completed/failed or because the plant aged out of the recency
+  // window — no separate stop condition needed.
+  useEffect(() => {
+    if (!frostLookingUp) return;
+    const POLL_INTERVAL_MS = 5000;
+    const interval = setInterval(() => {
+      router.refresh();
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [frostLookingUp, router]);
 
   function open(field: string, val1: string, val2 = "") {
     setEditing(field);
@@ -701,10 +747,9 @@ export default function PlantDetail({
                 </div>
 
                 {/* Frost tolerance — sourced from species_reference */}
-                {speciesRef?.lookup_status === "pending" && (
+                {frostLookingUp && (
                   <div className="px-4 py-3 border-t border-paper-line">
-                    <p className="minion">Frost tolerance</p>
-                    <p className="minion">Looking up…</p>
+                    <p className="minion">Looking up frost tolerance…</p>
                   </div>
                 )}
                 {speciesRef?.lookup_status === "complete" && speciesRef.frost_tolerance_c !== null && (
@@ -724,7 +769,11 @@ export default function PlantDetail({
                     </div>
                   </div>
                 )}
-                {/* lookup_status === 'failed', no row, or complete with null value: render nothing */}
+                {/* Renders nothing: lookup_status === 'failed'; complete with a
+                    null value (a real lookup with no answer); or pending/no-row
+                    outside the recently-added window (frostLookingUp false) —
+                    an indefinitely stuck or never-triggered lookup on an older
+                    plant, not worth a permanent spinner. */}
               </div>
             </section>
 
