@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import Link from "next/link";
 import Image from "next/image";
@@ -10,7 +11,6 @@ import { SunBadgePill } from "@/components/ui/SunBadge";
 import { FloweringSeasonBadge } from "@/components/ui/FloweringSeasonBadge";
 import type { Plant, PlantInsert, SpeciesRef, SunNeeds } from "@/lib/types";
 import { updatePlantField, markLookupNoticeSeen } from "@/app/actions/plants";
-import { PENDING_STALE_MS } from "@/lib/species-reference-timing";
 import DeletePlantButton from "@/components/DeletePlantButton";
 import { Button } from "@/components/ui/Button";
 import { AiNoticePanel } from "@/components/ui/AiNoticePanel";
@@ -209,10 +209,13 @@ function CommonNamesSection({
 export default function PlantDetail({
   plant: init,
   speciesRef,
+  recentlyAdded,
 }: {
   plant: Plant;
   speciesRef: SpeciesRef | null;
+  recentlyAdded: boolean;
 }) {
+  const router = useRouter();
   const [plant, setPlant] = useState(init);
   const [editing, setEditing] = useState<string | null>(null);
   const [v1, setV1] = useState("");
@@ -247,13 +250,38 @@ export default function PlantDetail({
   // when a pending row is stale enough to retry, so the spinner never
   // outlives the window in which the row could still plausibly resolve on
   // its own; past that, a species that's failed or genuinely has no data
-  // renders nothing, matching the existing behaviour below. Once the row
-  // does land, the after()-backgrounded revalidatePath from upsertPlant
-  // pushes fresh props into this page without a manual reload.
-  const plantAgeMs = Date.now() - new Date(plant.created_at).getTime();
-  const recentlyAdded = plantAgeMs < PENDING_STALE_MS;
+  // renders nothing, matching the existing behaviour below.
+  //
+  // recentlyAdded is computed server-side (page.tsx) and passed in as a
+  // prop, not derived from Date.now() here — calling Date.now() directly in
+  // a client render body is impure (flagged by react-hooks/purity), and a
+  // Server Component has no such restriction. The polling below re-fetches
+  // that Server Component on every tick anyway, so recentlyAdded is
+  // recomputed against the real current time each time regardless.
   const frostLookingUp =
     recentlyAdded && (speciesRef === null || speciesRef.lookup_status === "pending");
+
+  // Polling, not server push: revalidatePath called from inside upsertPlant's
+  // after() callback cannot deliver a live update here — that "updates the
+  // UI immediately" behaviour rides on the invoking Server Function's own
+  // response, and after() only runs once that response is already gone (see
+  // CLAUDE.md's species-reference-enrichment section for the full story).
+  // So instead, while frostLookingUp is true, poll by calling router.refresh()
+  // — a genuinely new request that re-renders this page's Server Component
+  // and merges fresh props in without losing unrelated client state (per
+  // useRouter's docs). That re-render recomputes recentlyAdded server-side
+  // against the real current time on every tick, so this effect's cleanup
+  // stops polling the moment frostLookingUp goes false, whether because the
+  // row completed/failed or because the plant aged out of the recency
+  // window — no separate stop condition needed.
+  useEffect(() => {
+    if (!frostLookingUp) return;
+    const POLL_INTERVAL_MS = 5000;
+    const interval = setInterval(() => {
+      router.refresh();
+    }, POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [frostLookingUp, router]);
 
   function open(field: string, val1: string, val2 = "") {
     setEditing(field);

@@ -22,6 +22,7 @@ export async function generateMetadata(
 }
 import PlantDetail from "@/components/PlantDetail";
 import { computeSpeciesMatchKey } from "@/lib/species-match-key";
+import { PENDING_STALE_MS } from "@/lib/species-reference-timing";
 import type { SpeciesRef } from "@/lib/types";
 
 export default async function PlantDetailPage({ params }: { params: Promise<{ id: string }> }) {
@@ -44,5 +45,17 @@ export default async function PlantDetailPage({ params }: { params: Promise<{ id
 
   const speciesRef = speciesRefRow as SpeciesRef | null;
 
-  return <PlantDetail plant={plant} speciesRef={speciesRef} />;
+  // Computed here, not in PlantDetail (a client component), so PlantDetail's
+  // render body never needs to call Date.now() itself — that's flagged as
+  // impure by React Compiler's purity lint, and would only get worse once
+  // that render is behind a polling loop. Suppressed here rather than
+  // avoided: this route is already fully dynamic per-request (auth cookies
+  // above force that), not statically prerendered or otherwise cached, so
+  // "impure = stale/wrong under caching" doesn't apply — every request,
+  // including each of PlantDetail's polling-driven router.refresh() calls,
+  // re-runs this against the real current time.
+  // eslint-disable-next-line react-hooks/purity -- see comment above
+  const recentlyAdded = Date.now() - new Date(plant.created_at).getTime() < PENDING_STALE_MS;
+
+  return <PlantDetail plant={plant} speciesRef={speciesRef} recentlyAdded={recentlyAdded} />;
 }
