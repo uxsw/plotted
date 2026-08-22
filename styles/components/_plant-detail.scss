@@ -8,7 +8,7 @@
 
     &__image {
         aspect-ratio: 4 / 3;
-        border-radius: var(--radius-md);
+        border-radius: var(--radius-m);
         cursor: pointer;
         overflow: hidden;
         position: relative;
@@ -67,7 +67,7 @@
 
     &__card {
         background-color: var(--color-white);
-        border-radius: var(--radius-md);
+        border-radius: var(--radius-m);
         overflow: hidden;   
     }
 
@@ -80,7 +80,7 @@
     }
 
     &__label {
-        color: var(--ink-soft);
+        color: var(--color-ink-soft);
         font-size: 0.75rem;
     }
 

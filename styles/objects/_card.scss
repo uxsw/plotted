@@ -7,7 +7,7 @@
 }
 
 .o-card {
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-m);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -91,14 +91,14 @@
 
 .o-card__text-skeleton-lead {
   background-color: var(--color-y-mimosa-yellow);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-m);
   width: 75%;
   height: 10px;
 }
 
 .o-card__text-skeleton-secondary {
   background-color: var(--color-y-mimosa-yellow);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-m);
   width: 50%;
   height: 8px;
 }
