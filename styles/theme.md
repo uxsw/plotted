@@ -56,7 +56,9 @@ Printers'-names scale — closed, ordered sequence. Document it as closed so an 
 
 ## Elevation / shadow scale
 
-*TBD — target 2–3 steps. Audit found five distinct hand-typed shadow values across dialog, popover, card hover, the Card module, and the dashboard, for what reads as two or three real elevation levels visually. Consolidate down, don't just alias the existing five.*
+*TBD — target 2–3 steps.* Audit found five distinct hand-typed shadow values across dialog, popover, card hover, the Card module, and the dashboard, for what reads as two or three real elevation levels visually. Consolidate down, don't just alias the existing five.
+
+**Progress:** `.o-popover` now reuses `.o-autocomplete`'s existing shadow value rather than a new one (2026-08-22, popover migration) — first real consolidation, one fewer hand-typed value to reconcile. Still outstanding: dialog, card hover, the Card module's own value, and the dashboard's value — confirm whether any of these already match `.o-autocomplete`'s or represent a genuinely distinct second step before finalising the scale.
 
 ## Motion
 
