@@ -44,7 +44,7 @@ export function WeatherIcon({ code, size = 24 }: Props) {
 
   if (cat === "clear") {
     return (
-      <svg viewBox="0 0 24 24" aria-hidden="true" style={s} className={`${base} text-gold`}>
+      <svg viewBox="0 0 24 24" aria-hidden="true" style={s} className={`${base} text-yellow`}>
         <circle cx="12" cy="12" r="4" />
         <line x1="12" y1="2" x2="12" y2="5" />
         <line x1="12" y1="19" x2="12" y2="22" />
@@ -61,11 +61,11 @@ export function WeatherIcon({ code, size = 24 }: Props) {
   if (cat === "partly-cloudy") {
     return (
       <svg viewBox="0 0 24 24" aria-hidden="true" style={s} className={base}>
-        <circle cx="10" cy="10" r="3" className="text-gold" />
-        <line x1="10" y1="3" x2="10" y2="5.5" className="text-gold" />
-        <line x1="10" y1="14.5" x2="10" y2="17" className="text-gold" />
-        <line x1="3" y1="10" x2="5.5" y2="10" className="text-gold" />
-        <line x1="16" y1="6.5" x2="14.2" y2="8.3" className="text-gold" />
+        <circle cx="10" cy="10" r="3" className="text-yellow" />
+        <line x1="10" y1="3" x2="10" y2="5.5" className="text-yellow" />
+        <line x1="10" y1="14.5" x2="10" y2="17" className="text-yellow" />
+        <line x1="3" y1="10" x2="5.5" y2="10" className="text-yellow" />
+        <line x1="16" y1="6.5" x2="14.2" y2="8.3" className="text-yellow" />
         <path
           d="M9 17.5a4.5 4.5 0 0 1 0-9h.5a4 4 0 0 1 7.5 1.5 3 3 0 0 1-.5 6H9z"
           className="text-ink-soft"

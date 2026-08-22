@@ -21,7 +21,7 @@ export default function DesignCheckPage() {
           <p className="font-sans text-sm text-ink-soft mt-1">
             Component primitives — visual review against design reference.
           </p>
-          <div className="mt-3 p-3 bg-clay-tint border border-clay/30 rounded text-xs font-sans text-clay">
+          <div className="mt-3 p-3 bg-marigold border border-marigold/30 rounded text-xs font-sans text-marigold">
             ⚠ <strong>Note:</strong> The paper grain texture was approximated — the{" "}
             <code>/design-reference/</code> HTML file was not found in the repo.
             Once the reference file is added, copy the exact{" "}
@@ -53,16 +53,14 @@ export default function DesignCheckPage() {
             {[
               ["paper", "#FAF6EC"],
               ["paper-deep", "#F2ECDB"],
+              ["paper-line", "#E3D8BC"],
               ["ink", "#2B2A24"],
               ["ink-soft", "#5B574A"],
-              ["moss", "#4F6B4A"],
-              ["moss-deep", "#34492F"],
-              ["moss-tint", "#E2EADD"],
-              ["clay", "#C2603C"],
-              ["clay-tint", "#F3E1D7"],
+              ["marigold", "oklch(65.809% 0.15943 31.855)"],
               ["sand", "#E8DFC8"],
               ["sand-line", "#D9CCAC"],
-              ["gold", "#C99A3D"],
+              ["yellow", "oklch(94.577% 0.10215 110.6)"],
+              ["white", "#FFF"],
             ].map(([name, hex]) => (
               <div key={name} className="flex flex-col items-center gap-1">
                 <div

@@ -24,9 +24,9 @@ const BADGE_CONFIG: {
   label: string;
   className: string;
 }[] = [
-  { key: "wildlife_value", label: "Wildlife friendly", className: "bg-moss-tint text-moss-deep" },
-  { key: "drought_tolerant", label: "Drought tolerant", className: "bg-gold-tint text-gold" },
-  { key: "edible", label: "Edible", className: "bg-clay-tint text-clay" },
+  { key: "wildlife_value", label: "Wildlife friendly", className: "bg-marigold text-marigold" },
+  { key: "drought_tolerant", label: "Drought tolerant", className: "bg-yellow text-yellow" },
+  { key: "edible", label: "Edible", className: "bg-marigold text-marigold" },
   { key: "british_native", label: "British native", className: "bg-sand text-ink-soft" },
 ];
 
@@ -290,7 +290,7 @@ export default function SchemeResults({
             priority
           />
         ) : (
-          <div className="absolute inset-0 bg-moss" />
+          <div className="absolute inset-0 bg-marigold" />
         )}
         <div
           className="absolute inset-0"
@@ -342,7 +342,7 @@ export default function SchemeResults({
         </figure>
       )}
 
-      {addError && <p className="text-sm text-clay">{addError}</p>}
+      {addError && <p className="text-sm text-marigold">{addError}</p>}
 
       {!shoppingListNoticeSeen && (
         <FeatureNoticePanel>

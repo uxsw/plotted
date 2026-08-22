@@ -25,14 +25,14 @@ export function DailyForecast({ daily }: Props) {
               className={[
                 "flex-1 flex flex-col items-center gap-1.5 py-3 px-1",
                 isToday
-                  ? "bg-moss-tint"
+                  ? "bg-marigold"
                   : "border border-sand-line",
               ].join(" ")}
             >
               <span
                 className={[
                   "font-sans text-[11px] font-medium leading-none",
-                  isToday ? "text-moss-deep" : "text-ink-soft",
+                  isToday ? "text-marigold" : "text-ink-soft",
                 ].join(" ")}
               >
                 {formatDay(date, i)}
@@ -41,7 +41,7 @@ export function DailyForecast({ daily }: Props) {
               <span
                 className={[
                   "font-sans text-sm font-medium leading-none",
-                  isToday ? "text-moss-deep" : "text-ink",
+                  isToday ? "text-marigold" : "text-ink",
                 ].join(" ")}
               >
                 {Math.round(daily.temperature_2m_max[i])}°
@@ -49,7 +49,7 @@ export function DailyForecast({ daily }: Props) {
               <span
                 className={[
                   "font-sans text-xs leading-none",
-                  isToday ? "text-moss" : "text-ink-soft",
+                  isToday ? "text-marigold" : "text-ink-soft",
                 ].join(" ")}
               >
                 {Math.round(daily.temperature_2m_min[i])}°

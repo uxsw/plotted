@@ -21,9 +21,9 @@ const TYPE_LABELS: Record<FeedbackType, string> = {
 };
 
 const TYPE_CLASSES: Record<FeedbackType, string> = {
-  bug: "bg-clay-tint text-clay",
-  ux: "bg-gold-tint text-gold",
-  other: "bg-moss-tint text-moss-deep",
+  bug: "bg-marigold text-marigold",
+  ux: "bg-yellow text-yellow",
+  other: "bg-marigold text-marigold",
 };
 
 function formatDate(iso: string) {
@@ -87,7 +87,7 @@ export default function FeedbackTable({ rows }: { rows: FeedbackRow[] }) {
                     isOpen ? "bg-sand/40" : "hover:bg-sand/30",
                   ].join(" ")}
                 >
-                  <td className="px-4 py-3 font-mono text-xs text-moss-deep whitespace-nowrap">
+                  <td className="px-4 py-3 font-mono text-xs text-marigold whitespace-nowrap">
                     {row.reference_code}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">

@@ -60,8 +60,8 @@ function Select({
             "focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-paper",
             "disabled:opacity-50 disabled:cursor-not-allowed",
             error
-              ? "border-clay text-clay focus:ring-clay"
-              : "border-sand-line text-ink focus:ring-moss focus:border-moss focus:bg-moss-tint/30",
+              ? "border-marigold text-marigold focus:ring-marigold"
+              : "border-sand-line text-ink focus:ring-marigold focus:border-marigold focus:bg-marigold",
           ].join(" ")}
         >
           <RadixSelect.Value placeholder={<span className="text-ink-soft/50">{placeholder}</span>} />
@@ -100,7 +100,7 @@ function Select({
                   className={[
                     "flex items-center px-3 py-2 text-sm font-sans text-ink rounded cursor-pointer",
                     "select-none outline-none",
-                    "data-[highlighted]:bg-moss-tint data-[highlighted]:text-moss-deep",
+                    "data-[highlighted]:bg-marigold data-[highlighted]:text-marigold",
                     "data-[state=checked]:font-medium",
                   ].join(" ")}
                 >
@@ -112,7 +112,7 @@ function Select({
         </RadixSelect.Portal>
       </RadixSelect.Root>
       {error && (
-        <p id={errorId} role="alert" className="text-xs font-sans text-clay">
+        <p id={errorId} role="alert" className="text-xs font-sans text-marigold">
           {error}
         </p>
       )}

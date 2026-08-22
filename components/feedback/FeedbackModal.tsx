@@ -99,22 +99,22 @@ function SuccessState({ referenceCode, onClose }: { referenceCode: string; onClo
         <p className="text-sm font-sans text-ink-soft">Your report has been received.</p>
       </div>
 
-      <div className="rounded-[10px] bg-moss-tint border border-moss/20 px-5 py-4 flex flex-col items-center gap-2 text-center">
-        <span className="text-xs font-sans font-semibold uppercase tracking-wider text-moss-deep" style={{ fontVariant: "small-caps" }}>
+      <div className="rounded-[10px] bg-marigold border border-marigold/20 px-5 py-4 flex flex-col items-center gap-2 text-center">
+        <span className="text-xs font-sans font-semibold uppercase tracking-wider text-marigold" style={{ fontVariant: "small-caps" }}>
           Reference code
         </span>
         <div className="flex items-center gap-3">
-          <span className="font-mono text-2xl font-semibold text-moss-deep tracking-widest">
+          <span className="font-mono text-2xl font-semibold text-marigold tracking-widest">
             {referenceCode}
           </span>
           {copied ? (
-            <span className="text-xs font-sans text-moss font-medium">Copied!</span>
+            <span className="text-xs font-sans text-marigold font-medium">Copied!</span>
           ) : (
             <button
               type="button"
               onClick={handleCopy}
               aria-label="Copy reference code"
-              className="text-moss-deep/60 hover:text-moss-deep transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss rounded"
+              className="text-marigold/60 hover:text-marigold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold rounded"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <rect x="5" y="5" width="8" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>
@@ -129,7 +129,7 @@ function SuccessState({ referenceCode, onClose }: { referenceCode: string; onClo
         Want to include a screenshot? Email it to{" "}
         <a
           href="mailto:john@johncowen.co.uk"
-          className="text-moss underline underline-offset-2"
+          className="text-marigold underline underline-offset-2"
         >
           john@johncowen.co.uk
         </a>{" "}
@@ -206,12 +206,12 @@ function FormState({
             "bg-paper placeholder:text-ink-soft/50",
             "transition-colors duration-150",
             error
-              ? "border-clay focus:outline-none focus:ring-2 focus:ring-clay focus:ring-offset-1 focus:ring-offset-paper"
-              : "border-sand-line focus:outline-none focus:ring-2 focus:ring-moss focus:ring-offset-1 focus:ring-offset-paper focus:border-moss focus:bg-moss-tint/30",
+              ? "border-marigold focus:outline-none focus:ring-2 focus:ring-marigold focus:ring-offset-1 focus:ring-offset-paper"
+              : "border-sand-line focus:outline-none focus:ring-2 focus:ring-marigold focus:ring-offset-1 focus:ring-offset-paper focus:border-marigold focus:bg-marigold",
           ].join(" ")}
         />
         {error && (
-          <p role="alert" className="text-xs font-sans text-clay">{error}</p>
+          <p role="alert" className="text-xs font-sans text-marigold">{error}</p>
         )}
       </div>
 

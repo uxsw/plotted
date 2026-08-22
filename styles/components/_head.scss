@@ -7,7 +7,7 @@
 
     .is-wordmark {
       height: var(--space-xl);
-      color: var(--color-g-deep-grey);
+      color: var(--color-n-deep-grey);
       inline-size: auto;
     }
 }
@@ -18,7 +18,7 @@
 
   &__item {
     border-bottom: var(--border-width-thin) solid transparent;
-    color: var(--color-g-deep-grey);
+    color: var(--color-n-deep-grey);
     justify-content: center;
     display: flex;
     flex: 1;

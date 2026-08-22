@@ -2,6 +2,16 @@
 
 // Palette
 :root {
+    /* Neutral — relocated from app/globals.css's Tailwind @theme block (kept tokens) */
+    --color-paper: #FAF6EC;
+    --color-paper-deep: #F2ECDB;
+    --color-ink: #2B2A24;
+    --color-ink-soft: #5B574A;
+    --color-sand: #E8DFC8;
+    --color-sand-line: #D9CCAC;
+    --color-white: #FFF;
+    --color-paper-line: #E3D8BC;
+
     /* Red */
     --color-r-white: oklch(98.0% 0.01 29.5); 
     --color-r-red: oklch(70.172% 0.11901 7.0907);
@@ -32,11 +42,11 @@
     --color-p-lavender: oklch(52.839% 0.09034 282.87);
     --color-p-white: oklch(98.0% 0.09034 282.87);
 
-    /* Grey */
-    --color-g-cool-grey: oklch(86.236% 0.0068 106.54);
-    --color-g-grey: oklch(82.105% 0.01173 176.24);
-    --color-g-dark-grey: oklch(60.535% 0.01045 100.09);
-    --color-g-deep-grey: oklch(29.716% 0 0);
+    /* Neutral (grey) — split from the green (g-*) family to remove the g-grey/g-green collision */
+    --color-n-cool-grey: oklch(86.236% 0.0068 106.54);
+    --color-n-grey: oklch(82.105% 0.01173 176.24);
+    --color-n-dark-grey: oklch(60.535% 0.01045 100.09);
+    --color-n-deep-grey: oklch(29.716% 0 0);
 }
 
 // Semantic
@@ -60,6 +70,9 @@
     --font-mono: var(--font-spline-mono), monospace;
     --border-width-hairline: 1px;
     --border-width-thin: 2px;
+
+    --font-weight-regular: 400;
+    --font-weight-bold: 600;
 }
 
 //  Radius

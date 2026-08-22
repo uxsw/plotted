@@ -37,7 +37,7 @@ export function LocationEditor({ initialLabel }: Props) {
           onCancel={() => setIsEditing(false)}
         />
         {error && (
-          <p className="mt-2 text-sm font-sans text-clay">{error}</p>
+          <p className="mt-2 text-sm font-sans text-marigold">{error}</p>
         )}
       </div>
     );

@@ -32,14 +32,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             "bg-paper placeholder:text-ink-soft/50",
             "transition-colors duration-150",
             error
-              ? "border-clay focus:outline-none focus:ring-2 focus:ring-clay focus:ring-offset-1 focus:ring-offset-paper focus:border-clay"
-              : "border-sand-line focus:outline-none focus:ring-2 focus:ring-moss focus:ring-offset-1 focus:ring-offset-paper focus:border-moss focus:bg-moss-tint/30",
+              ? "border-marigold focus:outline-none focus:ring-2 focus:ring-marigold focus:ring-offset-1 focus:ring-offset-paper focus:border-marigold"
+              : "border-sand-line focus:outline-none focus:ring-2 focus:ring-marigold focus:ring-offset-1 focus:ring-offset-paper focus:border-marigold focus:bg-marigold",
             className,
           ].join(" ")}
           {...props}
         />
         {error && (
-          <p id={errorId} role="alert" className="text-xs font-sans text-clay">
+          <p id={errorId} role="alert" className="text-xs font-sans text-marigold">
             {error}
           </p>
         )}

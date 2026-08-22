@@ -172,7 +172,7 @@ export function PwaIosInstallOverlay({ isOpen, onClose }: PwaIosInstallOverlayPr
           type="button"
           onClick={handleClose}
           aria-label="Close"
-          className="p-1.5 -mr-1.5 text-ink-soft hover:text-ink transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss"
+          className="p-1.5 -mr-1.5 text-ink-soft hover:text-ink transition-colors rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold"
         >
           <XIcon />
         </button>
@@ -182,7 +182,7 @@ export function PwaIosInstallOverlay({ isOpen, onClose }: PwaIosInstallOverlayPr
       <div className="flex-1 flex flex-col items-center justify-center px-8 gap-8 min-h-0">
         {/* Illustration */}
         <div className="flex items-center justify-center w-full">
-          <div className="flex items-center justify-center w-36 h-36 rounded-[24px] bg-moss-tint text-moss">
+          <div className="flex items-center justify-center w-36 h-36 rounded-[24px] bg-marigold text-marigold">
             <Illustration />
           </div>
         </div>
@@ -206,7 +206,7 @@ export function PwaIosInstallOverlay({ isOpen, onClose }: PwaIosInstallOverlayPr
             className={[
               "rounded-full transition-all duration-200",
               i === step
-                ? "w-5 h-2 bg-moss"
+                ? "w-5 h-2 bg-marigold"
                 : "w-2 h-2 bg-sand-line",
             ].join(" ")}
           />

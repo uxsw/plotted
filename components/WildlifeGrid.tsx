@@ -35,7 +35,7 @@ function BirdCard({
     <div
       className={[
         "flex gap-3 rounded-lg border bg-paper p-3 transition-colors duration-150",
-        spotted ? "border-moss/40" : "border-sand-line",
+        spotted ? "border-marigold/40" : "border-sand-line",
       ].join(" ")}
     >
       {/* Image — fixed dimensions; no position:absolute inside a button */}
@@ -57,7 +57,7 @@ function BirdCard({
           {species.description}
         </p>
         {error && (
-          <p className="font-sans text-xs text-clay mt-0.5">{error}</p>
+          <p className="font-sans text-xs text-marigold mt-0.5">{error}</p>
         )}
         <div className="mt-2">
           <button
@@ -66,10 +66,10 @@ function BirdCard({
             aria-label={spotted ? `Unmark ${species.name} as spotted` : `Mark ${species.name} as spotted`}
             className={[
               "inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium font-sans transition-colors duration-150",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2 focus-visible:ring-offset-paper",
+              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-paper",
               spotted
-                ? "bg-moss text-white hover:bg-moss-deep"
-                : "bg-moss-tint text-moss hover:bg-moss hover:text-white",
+                ? "bg-marigold text-white hover:bg-marigold"
+                : "bg-marigold text-marigold hover:bg-marigold hover:text-white",
             ].join(" ")}
           >
             {spotted && <CheckIcon />}

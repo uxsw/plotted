@@ -143,7 +143,7 @@ function SchemeCard({
               if (e.key === "Enter") { e.preventDefault(); commitRename(); }
               if (e.key === "Escape") { setNameValue(scheme.name); setRenaming(false); }
             }}
-            className="font-display font-medium text-base text-ink leading-snug bg-transparent border-b border-moss outline-none w-full"
+            className="font-display font-medium text-base text-ink leading-snug bg-transparent border-b border-marigold outline-none w-full"
           />
         ) : (
           <h3 className="o-type-display long-primer kirk o-type-leading--tight">{nameValue}</h3>
@@ -153,7 +153,7 @@ function SchemeCard({
           <p className="brevier">{scheme.summary}</p>
         )}
         <div className="u-margin-top-auto">
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium font-sans leading-none bg-moss-tint text-moss-deep">
+          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium font-sans leading-none bg-marigold text-marigold">
             {scheme.suggestion_count} suggestion{scheme.suggestion_count === 1 ? "" : "s"}
           </span>
         </div>
@@ -292,7 +292,7 @@ function FailedSchemeCard({
         <p className="font-sans text-sm text-ink-soft leading-snug">
           {retrying ? "Trying again…" : "This scheme couldn't be generated."}
         </p>
-        {retryError && <p className="font-sans text-xs text-clay">{retryError}</p>}
+        {retryError && <p className="font-sans text-xs text-marigold">{retryError}</p>}
         {!retrying && (
           <button
             type="button"
@@ -389,7 +389,7 @@ export default function SchemeList({ schemes: initialSchemes }: { schemes: Schem
 function PlusIcon() {
   return (
     <svg
-      className="w-8 h-8 text-clay"
+      className="w-8 h-8 text-marigold"
       fill="none"
       viewBox="0 0 24 24"
       stroke="currentColor"

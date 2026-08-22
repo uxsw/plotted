@@ -10,15 +10,19 @@ Living document. Values and semantic intent for every token referenced across `s
 
 | Token | Origin | Value | Semantic intent |
 |---|---|---|---|
-| `--color-paper` | Tailwind `@theme` | | page background |
-| `--color-ink` | Tailwind `@theme` | | primary text/ink |
-| `--color-ink-soft` | Tailwind `@theme` | | secondary/label text — **this is the correctly-prefixed token**; the audit's `_plant-detail.scss` bug (`var(--ink-soft)`, missing `color-`) resolves against this |
-| `--color-sand` | Tailwind `@theme` | | |
-| `--color-n-*` (neutral scale) | new | | structural — borders, disabled states, chrome |
-| `--color-g-*` (green) | SCSS/OKLCH | | brand / accent |
-| `--color-r-marigold` | SCSS/OKLCH | | replaces `--color-moss` **and** `--color-clay` — both retired |
-| `--color-y-yellow` | SCSS/OKLCH | | replaces `--color-gold` — retired |
-| `--color-b-*` / `o-*` / `p-*` | SCSS/OKLCH | | brand / accent hues |
+| `--color-paper` | Tailwind `@theme` (relocated to `_variables.scss`) | `#FAF6EC` | page background |
+| `--color-ink` | Tailwind `@theme` (relocated to `_variables.scss`) | `#2B2A24` | primary text/ink |
+| `--color-ink-soft` | Tailwind `@theme` (relocated to `_variables.scss`) | `#5B574A` | secondary/label text — **this is the correctly-prefixed token**; the audit's `_plant-detail.scss` bug (`var(--ink-soft)`, missing `color-`) resolves against this |
+| `--color-sand` | Tailwind `@theme` (now relocated to `_variables.scss`) | `#E8DFC8` | |
+| `--color-paper-deep` | Tailwind `@theme` (relocated to `_variables.scss`) | `#F2ECDB` | |
+| `--color-sand-line` | Tailwind `@theme` (relocated to `_variables.scss`) | `#D9CCAC` | |
+| `--color-white` | Tailwind `@theme` (relocated to `_variables.scss`) | `#FFF` | |
+| `--color-paper-line` | Tailwind `@theme` (relocated to `_variables.scss`) | `#E3D8BC` | backs `--sem-border-color` |
+| `--color-n-cool-grey` / `-grey` / `-dark-grey` / `-deep-grey` | SCSS/OKLCH | see `_variables.scss` | structural — borders, disabled states, chrome. Renamed from `--color-g-*` |
+| `--color-g-summer-green` / `-green` | SCSS/OKLCH | see `_variables.scss` | brand / accent |
+| `--color-r-marigold` | SCSS/OKLCH | `oklch(65.809% 0.15943 31.855)` / `#e26650` | replaces `--color-moss` **and** `--color-clay` — both retired. **Flat only — no tint/opacity variants.** |
+| `--color-y-yellow` | SCSS/OKLCH | `oklch(94.577% 0.10215 110.6)` / `#f0f4a3` | replaces `--color-gold` — retired. **Flat only — no tint/opacity variants.** |
+| `--color-b-*` / `o-*` / `p-*` | SCSS/OKLCH | see `_variables.scss` | brand / accent hues, unchanged by this migration |
 
 **Retired — remove from `app/globals.css` and reassign every call site:**
 - `--color-moss` → `--color-r-marigold`
@@ -42,9 +46,11 @@ Printers'-names scale — closed, ordered sequence. Document it as closed so an 
 | *(long- variants)* | | | |
 
 **Weight** is a separate axis, not part of this scale:
-- `--font-weight-regular`
-- `--font-weight-bold`
+- `--font-weight-regular: 400`
+- `--font-weight-bold: 600`
 - `kirk` — standalone bold utility class, kept deliberately outside the size scale (a long-standing convention, not an inconsistency)
+
+**Known, accepted temporary state:** `--font-weight-bold` shares its custom-property name with Tailwind's own theme variable (Tailwind's default resolves to `700`, not `600`). This caused one silent collision during migration (`app/auth/reset-password/page.tsx`, changed to `font-semibold` to preserve intent). Not being resolved with a naming workaround — full Tailwind removal is the actual fix, at which point the collision stops existing. Worth checking `app/auth/reset-password` and anywhere else still on plain Tailwind for the same class of collision before Tailwind is fully gone.
 
 ## Spacing scale
 

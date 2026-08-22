@@ -6,8 +6,8 @@ interface TagProps {
 }
 
 const colorClasses: Record<TagColor, string> = {
-  sun: "bg-gold-tint text-ink border border-gold/30",
-  season: "bg-clay-tint text-clay border border-clay/30",
+  sun: "bg-yellow text-ink border border-yellow/30",
+  season: "bg-marigold text-marigold border border-marigold/30",
   neutral: "bg-sand text-ink-soft border border-sand-line",
 };
 

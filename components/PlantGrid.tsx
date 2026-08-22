@@ -171,7 +171,7 @@ function Highlight({ text, query }: { text: string; query: string }) {
   return (
     <>
       {text.slice(0, idx)}
-      <span className="text-moss font-semibold">{text.slice(idx, idx + query.length)}</span>
+      <span className="text-marigold font-semibold">{text.slice(idx, idx + query.length)}</span>
       {text.slice(idx + query.length)}
     </>
   );
@@ -327,7 +327,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
               onFocus={() => { if (query.length >= 1) setDropdownOpen(true); }}
               onKeyDown={handleInputKeyDown}
               placeholder="search plants…"
-              className="o-text-input w-full pl-9 pr-8 py-2.5 placeholder:text-ink-soft/50 outline-none focus:border-moss transition-colors"
+              className="o-text-input w-full pl-9 pr-8 py-2.5 placeholder:text-ink-soft/50 outline-none focus:border-marigold transition-colors"
             />
             {query && (
               <button
@@ -388,7 +388,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
             >
               <Icon name="filter" aria-label="Filter plants" />
               {activeFilter && !filterOpen && (
-                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-moss" />
+                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-marigold" />
               )}
             </button>
           </Popover.Trigger>

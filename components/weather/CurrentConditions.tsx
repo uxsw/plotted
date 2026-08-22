@@ -23,7 +23,7 @@ export function CurrentConditions({ current, locationLabel, onChangeLocation }: 
         <button
           type="button"
           onClick={onChangeLocation}
-          className="text-xs font-sans text-moss underline underline-offset-2 hover:text-moss-deep transition-colors duration-100 shrink-0"
+          className="text-xs font-sans text-marigold underline underline-offset-2 hover:text-marigold transition-colors duration-100 shrink-0"
         >
           Change
         </button>

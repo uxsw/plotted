@@ -68,7 +68,7 @@ line-height: 1.5;
 
 .o-type-weight--bold,
 .kirk {
-  font-weight: 600;
+  font-weight: var(--font-weight-bold);
 }
 
 .o-type-line-clamp-2 {

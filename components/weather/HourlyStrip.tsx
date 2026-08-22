@@ -54,7 +54,7 @@ export function HourlyStrip({ hourly, current }: Props) {
                 <span
                   className={[
                     "font-sans text-[11px] leading-none",
-                    hasRain ? "text-moss" : "text-ink-soft/40",
+                    hasRain ? "text-marigold" : "text-ink-soft/40",
                   ].join(" ")}
                 >
                   {hasRain ? `${entry.precipitation_probability}%` : "—"}

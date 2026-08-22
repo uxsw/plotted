@@ -465,12 +465,12 @@ export default function PlantDetail({
             {plant.photo_url ? (
               <>
                 <Image src={plant.photo_url} alt={title} fill/>
-                <div className="absolute inset-0 bg-moss-tint/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none text-moss-deep">
+                <div className="absolute inset-0 bg-marigold flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none text-marigold">
                   <Icon name="camera" aria-label="Add photo" />
                 </div>
               </>
             ) : (
-              <div className="w-full h-full bg-moss-tint flex flex-col items-center justify-center gap-2 text-moss-deep/70 group-hover:brightness-95 transition-all">
+              <div className="w-full h-full bg-marigold flex flex-col items-center justify-center gap-2 text-marigold/70 group-hover:brightness-95 transition-all">
                 <Icon name="image" aria-label="Add a photo" size={32} />
                 <span className="brevier">Add a photo</span>
               </div>
@@ -488,7 +488,7 @@ export default function PlantDetail({
 
             {photoUploading && (
               <div className="absolute inset-0 bg-white/60 flex items-center justify-center pointer-events-none">
-                <div className="w-6 h-6 border-2 border-moss border-t-transparent rounded-full animate-spin" />
+                <div className="w-6 h-6 border-2 border-marigold border-t-transparent rounded-full animate-spin" />
               </div>
             )}
           </div>
