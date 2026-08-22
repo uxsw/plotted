@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import clsx from "clsx";
+import * as Popover from "@radix-ui/react-popover";
 import { useRouter } from "next/navigation";
 import type { Plant } from "@/lib/types";
 import { scientificNameString, autocompleteTitle } from "@/lib/plantName";
@@ -187,7 +188,6 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
   const router = useRouter();
 
   const searchRef = useRef<HTMLDivElement>(null);
-  const filterRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const itemRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -204,15 +204,12 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
   );
 
 
-  // Close dropdown / popover on outside click
+  // Close autocomplete dropdown on outside click
   useEffect(() => {
     function onMouseDown(e: MouseEvent) {
       if (searchRef.current && !searchRef.current.contains(e.target as Node)) {
         setDropdownOpen(false);
         setHighlighted(-1);
-      }
-      if (filterRef.current && !filterRef.current.contains(e.target as Node)) {
-        setFilterOpen(false);
       }
     }
     document.addEventListener("mousedown", onMouseDown);
@@ -378,26 +375,31 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
         </div>
 
         {/* Filter button */}
-        <div ref={filterRef} className="relative shrink-0">
-          <button
-            type="button"
-            onClick={() => setFilterOpen(o => !o)}
-            aria-label="Filter plants"
-            className={clsx(
-              buttonStyles["o-button"],
-              buttonStyles["o-button--icon"]
-            )}
-          >
-            <Icon name="filter" aria-label="Filter plants" /> 
-            {activeFilter && !filterOpen && (
-              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-moss" />
-            )}
-          </button>
+        <Popover.Root open={filterOpen} onOpenChange={setFilterOpen}>
+          <Popover.Trigger asChild>
+            <button
+              type="button"
+              aria-label="Filter plants"
+              className={clsx(
+                buttonStyles["o-button"],
+                buttonStyles["o-button--icon"],
+                "relative shrink-0"
+              )}
+            >
+              <Icon name="filter" aria-label="Filter plants" />
+              {activeFilter && !filterOpen && (
+                <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-moss" />
+              )}
+            </button>
+          </Popover.Trigger>
 
-          {/* Filter popover */}
-          {filterOpen && (
-            <div className="o-popover-menu">
-              {FILTER_OPTIONS.map(({ id, label, Icon }) => {
+          <Popover.Portal>
+            <Popover.Content
+              align="end"
+              sideOffset={8}
+              className="o-popover"
+            >
+              {FILTER_OPTIONS.map(({ id, label, Icon: OptionIcon }) => {
                 const isActive = activeFilter === id;
                 return (
                   <button
@@ -405,12 +407,12 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
                     type="button"
                     onClick={() => toggleFilter(id)}
                     className={[
-                      "o-popover-menu__item",
+                      "o-popover__item",
                       isActive ? "is-active" : "is-default",
                     ].join(" ")}
                   >
                     <span>
-                      <Icon />
+                      <OptionIcon />
                     </span>
                     <span className="brevier">
                       {label}
@@ -418,9 +420,9 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
                   </button>
                 );
               })}
-            </div>
-          )}
-        </div>
+            </Popover.Content>
+          </Popover.Portal>
+        </Popover.Root>
       </div>
 
       {/* Active filter pill */}
