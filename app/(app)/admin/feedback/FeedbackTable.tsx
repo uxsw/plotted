@@ -21,9 +21,9 @@ const TYPE_LABELS: Record<FeedbackType, string> = {
 };
 
 const TYPE_CLASSES: Record<FeedbackType, string> = {
-  bug: "bg-marigold text-marigold",
-  ux: "bg-yellow text-yellow",
-  other: "bg-marigold text-marigold",
+  bug: "bg-marigold text-ink",
+  ux: "bg-yellow text-ink",
+  other: "bg-marigold text-ink",
 };
 
 function formatDate(iso: string) {

@@ -100,21 +100,21 @@ function SuccessState({ referenceCode, onClose }: { referenceCode: string; onClo
       </div>
 
       <div className="rounded-[10px] bg-marigold border border-marigold/20 px-5 py-4 flex flex-col items-center gap-2 text-center">
-        <span className="text-xs font-sans font-semibold uppercase tracking-wider text-marigold" style={{ fontVariant: "small-caps" }}>
+        <span className="text-xs font-sans font-semibold uppercase tracking-wider text-ink" style={{ fontVariant: "small-caps" }}>
           Reference code
         </span>
         <div className="flex items-center gap-3">
-          <span className="font-mono text-2xl font-semibold text-marigold tracking-widest">
+          <span className="font-mono text-2xl font-semibold text-ink tracking-widest">
             {referenceCode}
           </span>
           {copied ? (
-            <span className="text-xs font-sans text-marigold font-medium">Copied!</span>
+            <span className="text-xs font-sans text-ink font-medium">Copied!</span>
           ) : (
             <button
               type="button"
               onClick={handleCopy}
               aria-label="Copy reference code"
-              className="text-marigold/60 hover:text-marigold transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold rounded"
+              className="text-ink/60 hover:text-ink transition-colors duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold rounded"
             >
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                 <rect x="5" y="5" width="8" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.25"/>

@@ -100,7 +100,7 @@ function Select({
                   className={[
                     "flex items-center px-3 py-2 text-sm font-sans text-ink rounded cursor-pointer",
                     "select-none outline-none",
-                    "data-[highlighted]:bg-marigold data-[highlighted]:text-marigold",
+                    "data-[highlighted]:bg-marigold data-[highlighted]:text-ink",
                     "data-[state=checked]:font-medium",
                   ].join(" ")}
                 >

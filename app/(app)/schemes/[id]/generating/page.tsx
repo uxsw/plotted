@@ -112,10 +112,10 @@ export default function GeneratingPage() {
             href={`/schemes/${id}`}
             className="block rounded-xl border border-marigold bg-marigold px-6 py-6 text-center hover:bg-marigold transition-colors"
           >
-            <h1 className="font-display font-medium text-2xl text-marigold">
+            <h1 className="font-display font-medium text-2xl text-ink">
               Your planting scheme is ready.
             </h1>
-            <p className="font-sans text-sm text-marigold/80 mt-1">View now →</p>
+            <p className="font-sans text-sm text-ink/80 mt-1">View now →</p>
           </Link>
         )}
 

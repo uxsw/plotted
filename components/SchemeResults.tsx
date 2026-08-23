@@ -24,9 +24,9 @@ const BADGE_CONFIG: {
   label: string;
   className: string;
 }[] = [
-  { key: "wildlife_value", label: "Wildlife friendly", className: "bg-marigold text-marigold" },
-  { key: "drought_tolerant", label: "Drought tolerant", className: "bg-yellow text-yellow" },
-  { key: "edible", label: "Edible", className: "bg-marigold text-marigold" },
+  { key: "wildlife_value", label: "Wildlife friendly", className: "bg-marigold text-ink" },
+  { key: "drought_tolerant", label: "Drought tolerant", className: "bg-yellow text-ink" },
+  { key: "edible", label: "Edible", className: "bg-marigold text-ink" },
   { key: "british_native", label: "British native", className: "bg-sand text-ink-soft" },
 ];
 
