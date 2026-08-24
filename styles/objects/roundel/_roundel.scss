@@ -1,0 +1,33 @@
+.o-roundel {
+    --_roundel-bg-color: var(--color-paper);
+    --_roundel-fg-color: var(--color-ink-soft);
+
+    align-items: center;
+    background-color: var(--_roundel-bg-color);
+    color: var(--_roundel-fg-color);
+    display: inline-flex;
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    justify-content: center;
+    border-radius: var(--radius-roundel);
+
+    &.is-full-sun {
+        --_roundel-bg-color: var(--color-y-gold);
+        --_roundel-fg-color: var(--color-n-dark-grey);
+    }
+
+    &.is-partial-shade {
+        --_roundel-bg-color: var(--color-n-grey);
+        --_roundel-fg-color: var(--color-n-deep-grey);
+    }
+
+    &.is-full-shade {
+        --_roundel-bg-color: var(--color-n-deep-grey);
+        --_roundel-fg-color: var(--color-n-cool-grey);
+    }
+
+    &.is-sun-shade {
+        --_roundel-bg-color: var(--color-o-vermillion);
+        --_roundel-fg-color: var(--color-o-surface);
+    }
+}

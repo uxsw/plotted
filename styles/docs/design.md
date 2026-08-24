@@ -44,9 +44,33 @@ Agents: apply this test before inventing a new block. If it's ambiguous, that's 
 
 **This applies to utility-class composition too, not just custom class names.** Assembling several utility classes (Tailwind or otherwise) into a repeated cluster that visually or structurally behaves like a component — a badge, a chip, a pill — *is* inventing an undocumented component, even though no single new class name was created. If a pattern is being repeated rather than written once, it needs an entry in `components/ui/design.md`, not another ad-hoc utility chain. Stop and flag it the same as any other gap.
 
+## Preferred pattern — private custom properties for modifiers
+
+Objects with color/size modifiers should scope their variable values through object-private custom properties (prefixed `--_`), set once in the base rule and overridden per modifier, rather than repeating full property declarations in every `.is-*`/`--*` rule. Example, from `.o-badge` (first real usage, 2026-08-23):
+
+```scss
+.o-badge {
+  --_badge-bg-color: var(--color-paper);
+  --_badge-fg-color: var(--color-ink-soft);
+  background-color: var(--_badge-bg-color);
+  color: var(--_badge-fg-color);
+
+  &.is-info {
+    --_badge-bg-color: var(--color-y-yellow);
+  }
+}
+```
+
+This keeps each modifier's diff to just the values that actually change, rather than a full re-declaration of every property. Adopt this pattern for new objects/components going forward.
+
 ## Where new work goes
 
-*TBD — file location conventions for new objects/components once migration resumes.*
+Documentation structure, confirmed 2026-08-23:
+
+- **Top-level docs** (`design.md`, `theme.md`, the components index) live together in `styles/docs/`.
+- **Each object or component gets its own folder** under `styles/objects/` (or `components/ui/` once the CSS Modules migration reaches a given component), containing its source file(s) and its own doc file co-located together, keeping the full `<name>.design.md` filename inside the folder rather than shortening to a bare `design.md` — e.g. `styles/objects/badge/_badge.scss` + `styles/objects/badge/badge.design.md`.
+- The components index (in `styles/docs/`) stays a **thin index only** — name, type, location, one-line status, link to the object's own folder. Full detail lives with the source, not centrally.
+- When moving a source file into a new folder, update whatever `@forward`s it from the objects layer's index — confirmed done for the `badge`/`roundel` move, 2026-08-23.
 
 ## Lint rules
 
@@ -71,6 +95,5 @@ Carried forward from `docs/styleguide/naming-convention.md`'s pilot log — keep
 | 2026-08-22 | `.o-popover` hover-highlight geometry | Folding items into `.o-popover`'s own padding changed the filter menu's hover highlight from edge-to-edge to inset. Noted, not treated as a regression — leaving as-is. Flagging here so it reads as a deliberate, known side-effect if it's ever questioned later. |
 | 2026-08-22 | Palette source | Confirmed as a curated mix, not one palette wholesale: `paper`/`ink`/`ink-soft`/`sand` kept from Tailwind; `moss`, `clay` → `--color-r-marigold`; `gold` → `--color-y-yellow`. See `styles/theme.md`. |
 | 2026-08-22 | Marigold/yellow — flat vs. tinted | First migration pass introduced opacity-based tints (`marigold/15` etc., one `color-mix()`) to preserve the old `-tint` variants. Corrected: no tints — flat token only, everywhere. Deliberate simplification; visual distinctions lost by flattening are accepted for now, to be revisited progressively as real styling decisions rather than preserved by default. |
-| 2026-08-22 | ⚠️ **Known bug — text/background contrast** | Flattening surfaced pre-existing pairings of `bg-marigold`+`text-marigold` (or `bg-yellow`+`text-yellow`) that previously read as distinct tint-vs-base and now resolve to the same color — text effectively invisible. Confirmed locations: `generating/page.tsx:113`, `FeedbackModal` success box, badge types in `SchemeResults`/`SchemeList`/`SchemeCardScroller`/`FeedbackTable`, `Select`'s `data-[highlighted]` state. |
-| 2026-08-23 | Text/background contrast bug — stopgap fix | Confirmed locations above switched from `text-marigold`/`text-yellow` to `text-ink` (contrast-checked: ~4.6:1 on marigold, ~12.9:1 on yellow, both pass AA). Explicitly temporary — pending the proper `.o-badge` audit/design work, which may replace these ad-hoc utility clusters entirely. Not a blanket fix: other pre-existing `text-marigold`/`text-yellow` usages elsewhere (borders, `/60`–`/80` opacity variants on non-matching backgrounds) were left untouched as out of scope. |
+| 2026-08-22 | ⚠️ **Known bug — text/background contrast** — **STOPGAP FIXED, 2026-08-23** | Flattening surfaced pre-existing pairings of `bg-marigold`+`text-marigold` (or `bg-yellow`+`text-yellow`) that previously read as distinct tint-vs-base and now resolve to the same color — text effectively invisible. Confirmed locations: `generating/page.tsx`, `FeedbackModal`, badge types in `SchemeResults`/`SchemeList`/`SchemeCardScroller`/`FeedbackTable`, `Select`'s `data-[highlighted]` state. **Temporary fix applied 2026-08-23:** all 7 locations changed to `text-ink` (~4.6:1 contrast on marigold, ~12.9:1 on yellow, both WCAG AA pass). No tint fallback needed. Explicitly provisional — proper fix is the pending `.o-badge` component work (utility-class-composition audit in progress), not this patch. Do not treat `text-ink` here as a final design decision.
 | 2026-08-22 | `app/globals.css` colour evacuation | Complete. Every remaining colour token (including `--color-paper-deep`, `--color-sand-line`, found in a follow-up audit) relocated into `styles/abstracts/_variables.scss`. `app/globals.css`'s `@theme` block now only bridges via `var()` for Tailwind utility generation — verified against compiled build output, not inferred. `--border-color`, `--breakpoint-*`, `--radius*` remain, correctly out of scope (non-colour). |

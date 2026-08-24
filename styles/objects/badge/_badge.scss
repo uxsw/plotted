@@ -1,0 +1,96 @@
+/*  for static labelling only.
+    if you need interactable/click events
+    use a chip.
+
+    Use o-badge with text
+
+    Use o-badge-icon with icon only
+ */
+.o-badge {
+    --_badge-border-color: var(--sem-border-color);
+    align-items: center;
+    --_badge-bg-color: var(--color-paper);
+    --_badge-fg-color: var(--color-ink-soft);
+    --_badge-text-size: 0.85rem;
+
+    align-items: center;
+    background-color: var(--_badge-bg-color);
+    border: var(--border-width-hairline) solid var(--_badge-border-color);
+    color: var(--_badge-fg-color);
+    display: inline-flex;
+    border-radius: var(--radius-pill) ;
+    gap: var(--space-xs);
+    justify-content: center;
+    line-height: 2;
+    font-size: var(--_badge-text-size);
+    padding-inline: var(--space-sm);
+    white-space: nowrap;
+    width: max-content;
+
+    &.is-sm {
+        --_badge-text-size: 0.75rem;
+    }
+
+    &.is-bug,
+    &.is-error {
+        --_badge-border-color: var(--sem-color-error-bg);
+        --_badge-bg-color: var(--sem-color-error-bg);
+        --_badge-fg-color: var(--sem-color-error-fg);
+    }
+
+    &.is-feedback,
+    &.is-info,
+    &.is-suggestion-count {
+        --_badge-bg-color: var(--color-y-yellow);
+        --_badge-border-color: var(--color-y-mimosa-yellow);
+        --_badge-fg-color: var(--color-n-deep-grey);
+    }
+
+    &.is-wildlife-friendly {
+        --_badge-border-color: var(--color-p-lavender);
+        --_badge-bg-color: var(--color-p-lavender);
+        --_badge-fg-color: var(--color-p-white);
+    }
+
+    &.is-drought-tolerant {
+        --_badge-border-color: var(--color-b-cyan);
+        --_badge-bg-color: var(--color-b-cyan);
+        --_badge-fg-color: var(--color-white);
+    }
+
+    &.is-edible {
+        --_badge-border-color: var(--color-g-summer-green);
+        --_badge-bg-color: var(--color-g-summer-green);
+        --_badge-fg-color: var(--color-n-deep-grey);
+    }
+
+    &.is-british-native {
+        --_badge-border-color: var(--color-r-smoke-red);
+        --_badge-bg-color: var(--color-r-smoke-red);
+        --_badge-fg-color: var(--color-n-deep-grey);
+    }
+
+    &.is-full-sun {
+        --_badge-border-color: var(--color-y-gold);
+        --_badge-bg-color: var(--color-y-gold);
+        --_badge-fg-color: var(--color-n-dark-grey);
+    }
+
+    &.is-partial-shade {
+        --_badge-border-color: var(--color-n-grey);
+        --_badge-bg-color: var(--color-n-grey);
+        --_badge-fg-color: var(--color-n-deep-grey);
+    }
+
+    &.is-full-shade {
+        --_badge-border-color: var(--color-n-deep-grey);
+        --_badge-bg-color: var(--color-n-deep-grey);
+        --_badge-fg-color: var(--color-n-cool-grey);
+    }
+
+    &.is-sun-shade {
+        --_badge-border-color: var(--color-o-vermillion);
+        --_badge-bg-color: var(--color-o-vermillion);
+        --_badge-fg-color: var(--color-o-surface);
+    }
+}
