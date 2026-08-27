@@ -35,7 +35,7 @@ function LoadingSpinner() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="text-moss animate-spin"
+      className="text-marigold animate-spin"
       aria-hidden="true"
     >
       <path d="M21 12a9 9 0 1 1-6.219-8.56" />
@@ -110,12 +110,12 @@ export default function GeneratingPage() {
         {status === "complete" && (
           <Link
             href={`/schemes/${id}`}
-            className="block rounded-xl border border-moss bg-moss-tint px-6 py-6 text-center hover:bg-moss-tint/70 transition-colors"
+            className="block rounded-xl border border-marigold bg-marigold px-6 py-6 text-center hover:bg-marigold transition-colors"
           >
-            <h1 className="font-display font-medium text-2xl text-moss-deep">
+            <h1 className="font-display font-medium text-2xl text-ink">
               Your planting scheme is ready.
             </h1>
-            <p className="font-sans text-sm text-moss-deep/80 mt-1">View now →</p>
+            <p className="font-sans text-sm text-ink/80 mt-1">View now →</p>
           </Link>
         )}
 
@@ -124,7 +124,7 @@ export default function GeneratingPage() {
             <h1 className="font-display font-medium text-2xl text-ink">
               Planting scheme couldn&apos;t be generated
             </h1>
-            <Link href="/schemes" className="font-sans text-sm text-clay hover:underline">
+            <Link href="/schemes" className="font-sans text-sm text-marigold hover:underline">
               View details →
             </Link>
           </div>
@@ -139,7 +139,7 @@ export default function GeneratingPage() {
           if (e.key === "ArrowLeft") prev();
           if (e.key === "ArrowRight") next();
         }}
-        className="relative overflow-hidden rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2"
+        className="relative overflow-hidden rounded-xl outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2"
       >
         <div className="relative aspect-[4/3]">
           <Image

@@ -96,7 +96,7 @@ const BirdCard = forwardRef<HTMLDivElement, BirdCardProps>(
             {expanded ? "Less" : "More"}
           </button>
           {error && (
-            <p className="font-sans text-xs text-clay mt-1">{error}</p>
+            <p className="font-sans text-xs text-marigold mt-1">{error}</p>
           )}
         </div>
       </div>

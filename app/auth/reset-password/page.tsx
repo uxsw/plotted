@@ -46,7 +46,7 @@ function ResetPasswordForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6 text-center">Garden Portfolio</h1>
+        <h1 className="text-2xl font-semibold text-gray-900 mb-6 text-center">Garden Portfolio</h1>
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
           <h2 className="text-lg font-semibold text-gray-800">Set new password</h2>
           {displayError && <p className="text-sm text-red-600 bg-red-50 p-2 rounded">{displayError}</p>}

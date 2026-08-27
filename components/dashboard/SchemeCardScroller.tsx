@@ -106,7 +106,7 @@ export function SchemeCardScroller({ schemes }: { schemes: SchemeSummary[] }) {
               )}
               <p className="minion">{formatDate(scheme.created_at)}</p>
               <div>
-                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium font-sans leading-none bg-moss-tint text-moss-deep">
+                <span className="o-badge is-suggestion-count is-sm">
                   {scheme.suggestion_count} suggestion{scheme.suggestion_count === 1 ? "" : "s"}
                 </span>
               </div>

@@ -23,7 +23,7 @@ function UnderlineField({ label, focused, children }: {
       <div className="relative">
         {children}
         <div className="absolute bottom-0 left-0 right-0 h-px bg-sand-line" />
-        <div className={`absolute bottom-0 left-0 right-0 h-[2px] bg-moss transition-transform duration-200 ease-out origin-left ${focused ? "scale-x-100" : "scale-x-0"}`} />
+        <div className={`absolute bottom-0 left-0 right-0 h-[2px] bg-marigold transition-transform duration-200 ease-out origin-left ${focused ? "scale-x-100" : "scale-x-0"}`} />
       </div>
     </div>
   );

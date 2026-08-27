@@ -88,7 +88,7 @@ export function WeatherForecast({ location, onChangeLocation }: Props) {
           <button
             type="button"
             onClick={onChangeLocation}
-            className="text-xs font-sans text-moss underline underline-offset-2 hover:text-moss-deep transition-colors duration-100 shrink-0"
+            className="text-xs font-sans text-marigold underline underline-offset-2 hover:text-marigold transition-colors duration-100 shrink-0"
           >
             Change
           </button>
@@ -97,7 +97,7 @@ export function WeatherForecast({ location, onChangeLocation }: Props) {
         <button
           type="button"
           onClick={() => setRetryCount((n) => n + 1)}
-          className="self-start font-sans text-sm text-moss underline underline-offset-2 hover:text-moss-deep transition-colors duration-100"
+          className="self-start font-sans text-sm text-marigold underline underline-offset-2 hover:text-marigold transition-colors duration-100"
         >
           Try again
         </button>

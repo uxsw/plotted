@@ -194,7 +194,7 @@ export default function PlantForm() {
 
   return (
     <form onSubmit={handleSubmit} className="o-stack">
-      {error && <p className="text-sm text-clay bg-clay-tint p-3 rounded mb-4">{error}</p>}
+      {error && <p className="text-sm text-marigold bg-marigold p-3 rounded mb-4">{error}</p>}
 
       {/* Photo zone */}
       <div
@@ -251,7 +251,7 @@ export default function PlantForm() {
                 className={`${inputCls}`}
               />
             </UnderlineField>
-            {fieldErrors.species && <p className="text-xs text-clay mt-1">{fieldErrors.species}</p>}
+            {fieldErrors.species && <p className="text-xs text-marigold mt-1">{fieldErrors.species}</p>}
           </div>
 
           {/* Cultivar */}

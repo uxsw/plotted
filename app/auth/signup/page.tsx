@@ -17,8 +17,8 @@ function UnderlineField({ label, focused, hasError, children }: {
   const lineCls = hasError
     ? "bg-[#C2603C] scale-x-100"
     : focused
-    ? "bg-moss scale-x-100"
-    : "bg-moss scale-x-0";
+    ? "bg-marigold scale-x-100"
+    : "bg-marigold scale-x-0";
 
   return (
     <div>

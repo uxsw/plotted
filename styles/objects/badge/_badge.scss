@@ -1,0 +1,126 @@
+/*  for static labelling only.
+    if you need interactable/click events
+    use a chip.
+
+    Use o-badge with text
+
+    Use o-roundel with icon only
+ */
+.o-badge {
+    --_badge-border-color: var(--sem-border-color);
+    align-items: center;
+    --_badge-bg-color: var(--color-paper);
+    --_badge-fg-color: var(--color-ink-soft);
+    --_badge-text-size: 0.85rem;
+    --_badge-line-height: 2;
+    --_badge-pad-inline: var(--space-sm);
+
+    align-items: center;
+    background-color: var(--_badge-bg-color);
+    border: var(--border-width-hairline) solid var(--_badge-border-color);
+    color: var(--_badge-fg-color);
+    display: inline-flex;
+    border-radius: var(--radius-pill) ;
+    gap: var(--space-xs);
+    justify-content: center;
+    line-height: var(--_badge-line-height);
+    font-size: var(--_badge-text-size);
+    padding-inline: var(--_badge-pad-inline);
+    white-space: nowrap;
+    width: max-content;
+
+    &.is-sm {
+        --_badge-text-size: 0.65rem;
+        --_badge-line-height: 1.5;
+        --_badge-pad-inline: var(--space-xs);
+
+    }
+
+    &.is-bug,
+    &.is-error {
+        --_badge-border-color: var(--sem-color-error-bg);
+        --_badge-bg-color: var(--sem-color-error-bg);
+        --_badge-fg-color: var(--sem-color-error-fg);
+    }
+
+    &.is-feedback,
+    &.is-info,
+    &.is-suggestion-count {
+        --_badge-bg-color: var(--sem-color-info-bg);
+        --_badge-border-color: var(--sem-color-info-bg);
+        --_badge-fg-color: var(--sem-color-info-fg);
+    }
+
+    &.is-wildlife-friendly {
+        --_badge-border-color: var(--sem-color-wildlife-friendly-bg);
+        --_badge-bg-color: var(--sem-color-wildlife-friendly-bg);
+        --_badge-fg-color: var(--sem-color-wildlife-friendly-fg);
+    }
+
+    &.is-drought-tolerant {
+        --_badge-border-color: var(--sem-drought-tolerant-bg);
+        --_badge-bg-color: var(--sem-drought-tolerant-bg);
+        --_badge-fg-color: var(--sem-drought-tolerant-fg);
+    }
+
+    &.is-edible {
+        --_badge-border-color: var(--sem-edible-bg);
+        --_badge-bg-color: var(--sem-edible-bg);
+        --_badge-fg-color: var(--sem-edible-fg);
+    }
+
+    &.is-british-native {
+        --_badge-border-color: var(--sem-british-native-bg);
+        --_badge-bg-color: var(--sem-british-native-bg);
+        --_badge-fg-color: var(--sem-british-native-fg);
+    }
+
+    &.is-full-sun {
+        --_badge-border-color: var(--sem-full-sun-bg);
+        --_badge-bg-color: var(--sem-full-sun-bg);
+        --_badge-fg-color: var(--sem-full-sun-fg);
+    }
+
+    &.is-partial-shade,
+    &.is-sun-shade {
+        --_badge-border-color: var(--sem-partial-shade-bg);
+        --_badge-bg-color: var(--sem-partial-shade-bg);
+        --_badge-fg-color: var(--sem-partial-shade-fg);
+    }
+
+    &.is-full-shade {
+        --_badge-border-color: var(--sem-full-shade-bg);
+        --_badge-bg-color: var(--sem-full-shade-bg);
+        --_badge-fg-color: var(--sem-full-shade-fg);
+    }
+
+    &.is-flowering-winter {
+        --_badge-border-color: var(--sem-flowering-winter-bg);
+        --_badge-bg-color: var(--sem-flowering-winter-bg);
+        --_badge-fg-color: var(--sem-flowering-winter-fg);
+    }
+
+    &.is-flowering-spring {
+        --_badge-border-color: var(--sem-flowering-spring-bg);
+        --_badge-bg-color: var(--sem-flowering-spring-bg);
+        --_badge-fg-color: var(--sem-flowering-spring-fg);
+    }
+
+    &.is-flowering-early-summer {
+        --_badge-border-color: var(--sem-flowering-early-summer-bg);
+        --_badge-bg-color: var(--sem-flowering-early-summer-bg);
+        --_badge-fg-color: var(--sem-flowering-early-summer-fg);
+    }
+
+    &.is-flowering-summer {
+        --_badge-border-color: var(--sem-flowering-summer-bg);
+        --_badge-bg-color: var(--sem-flowering-summer-bg);
+        --_badge-fg-color: var(--sem-flowering-summer-fg);
+    }
+
+    &.is-flowering-autumn {
+        --_badge-border-color: var(--sem-flowering-autumn-bg);
+        --_badge-bg-color: var(--sem-flowering-autumn-bg);
+        --_badge-fg-color: var(--sem-flowering-autumn-fg);
+    }
+}

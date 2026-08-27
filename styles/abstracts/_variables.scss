@@ -2,17 +2,24 @@
 
 // Palette
 :root {
+    /* Neutral — relocated from app/globals.css's Tailwind @theme block (kept tokens) */
+    --color-paper: #FAF6EC;
+    --color-paper-deep: #F2ECDB;
+    --color-ink: #2B2A24;
+    --color-ink-soft: #5B574A;
+    --color-sand: #E8DFC8;
+    --color-sand-line: #D9CCAC;
+    --color-white: #FFF;
+    --color-paper-line: #E3D8BC;
+
     /* Red */
     --color-r-white: oklch(98.0% 0.01 29.5); 
     --color-r-red: oklch(70.172% 0.11901 7.0907);
     --color-r-marigold: oklch(65.809% 0.15943 31.855);
     --color-r-smoke-red: oklch(83.547% 0.04691 4.6691);
-    --color-r-dusty-pink: oklch(84.983% 0.07832 9.9344);
 
     /* Yellow */
     --color-y-gold: oklch(89.589% 0.11806 89.132);
-    --color-y-lemon-yellow: oklch(94.749% 0.13225 103.52);
-    --color-y-sherbert-yellow: oklch(93.173% 0.11826 106.4);
     --color-y-mimosa-yellow: oklch(84.25% 0.06996 103.26);
     --color-y-yellow: oklch(94.577% 0.10215 110.6);
 
@@ -20,11 +27,9 @@
     --color-b-cyan: oklch(78.91% 0.07815 206.15);
 
     /* Green */
-    --color-g-summer-green: oklch(73.657% 0.09242 175.58);
-    --color-g-green: oklch(82.75% 0.09656 131.48);
+    
     /* Orange */
     --color-o-vermillion: oklch(80.309% 0.11551 37.858);
-    --color-o-apricot: oklch(80.598% 0.11099 63.836);
     --color-o-orange: oklch(91.996% 0.0651 74.369);
     --color-o-surface: oklch(0.9677 0.0158 73.68);
 
@@ -32,11 +37,11 @@
     --color-p-lavender: oklch(52.839% 0.09034 282.87);
     --color-p-white: oklch(98.0% 0.09034 282.87);
 
-    /* Grey */
-    --color-g-cool-grey: oklch(86.236% 0.0068 106.54);
-    --color-g-grey: oklch(82.105% 0.01173 176.24);
-    --color-g-dark-grey: oklch(60.535% 0.01045 100.09);
-    --color-g-deep-grey: oklch(29.716% 0 0);
+    /* Neutral (grey) — split from the green (g-*) family to remove the g-grey/g-green collision */
+    --color-n-cool-grey: oklch(86.236% 0.0068 106.54);
+    --color-n-grey: oklch(82.105% 0.01173 176.24);
+    --color-n-dark-grey: oklch(60.535% 0.01045 100.09);
+    --color-n-deep-grey: oklch(29.716% 0 0);
 }
 
 // Semantic
@@ -44,6 +49,32 @@
     --sem-border-color: var(--color-paper-line);
     --sem-color-error-bg: #ad0018;
     --sem-color-error-fg: #ffe5e9;
+    --sem-color-info-bg: var(--color-y-yellow);
+    --sem-color-info-fg: var(--color-n-deep-grey);
+    --sem-color-wildlife-friendly-bg: #b4b4cd;
+    --sem-color-wildlife-friendly-fg: #1f1f2e;
+    --sem-drought-tolerant-bg: #F4BC86;
+    --sem-drought-tolerant-fg: #5D3209;
+    --sem-edible-bg: #C2EBB8;
+    --sem-edible-fg: #193C11;
+    --sem-british-native-bg: #B8CEED;
+    --sem-british-native-fg: #142E52;
+    --sem-full-sun-bg: #FEEC43;
+    --sem-full-sun-fg: #655B01;
+    --sem-partial-shade-bg: #EBD6B4;
+    --sem-partial-shade-fg: #513A15;
+    --sem-full-shade-bg: var(--color-n-grey);
+    --sem-full-shade-fg: var(--color-n-deep-grey);
+    --sem-flowering-winter-bg: #D8E4ED;
+    --sem-flowering-winter-fg: #3D6278;
+    --sem-flowering-spring-bg: #D4E8D0;
+    --sem-flowering-spring-fg: #3A6438;
+    --sem-flowering-early-summer-bg: #E8EDCC;
+    --sem-flowering-early-summer-fg: #4E5818;
+    --sem-flowering-summer-bg: #F3BADF;
+    --sem-flowering-summer-fg: #68124A;
+    --sem-flowering-autumn-bg: #EDD4BE;
+    --sem-flowering-autumn-fg: #663818;
 }
 
 :root {
@@ -60,6 +91,9 @@
     --font-mono: var(--font-spline-mono), monospace;
     --border-width-hairline: 1px;
     --border-width-thin: 2px;
+
+    --font-weight-regular: 400;
+    --font-weight-bold: 600;
 }
 
 //  Radius

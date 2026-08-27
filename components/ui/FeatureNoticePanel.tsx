@@ -1,5 +1,5 @@
 // Sand/paper-toned notice for general feature introductions.
-// Use AiNoticePanel (gold tint) for AI-content notices; this variant is for
+// Use AiNoticePanel (yellow tint) for AI-content notices; this variant is for
 // UI feature intros that have no AI-content semantic.
 export function FeatureNoticePanel({ children }: { children: React.ReactNode }) {
   return (

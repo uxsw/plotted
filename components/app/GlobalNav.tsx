@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS = [
-  { href: "/dashboard", label: "Home", accent: "moss" },
-  { href: "/plants", label: "Plants", accent: "moss" },
-  { href: "/schemes", label: "Schemes", accent: "clay" },
+  { href: "/dashboard", label: "Home" },
+  { href: "/plants", label: "Plants" },
+  { href: "/schemes", label: "Schemes" },
 ] as const;
 
 export default function GlobalNav() {
@@ -16,7 +16,7 @@ export default function GlobalNav() {
     <nav className="nav-sections" aria-label="Primary">
       {NAV_ITEMS.map((item) => {
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
-        const activeClasses = item.accent === "clay" ? "border-clay text-clay" : "active border-moss text-moss";
+        const activeClasses = "active border-marigold text-marigold";
         return (
           <Link
             key={item.href}

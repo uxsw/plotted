@@ -44,7 +44,7 @@ export function OnboardingLocationStep() {
       </div>
 
       {error && (
-        <p className="text-sm font-sans text-clay">{error}</p>
+        <p className="text-sm font-sans text-marigold">{error}</p>
       )}
 
       <div className={isPending ? "opacity-50 pointer-events-none" : ""}>

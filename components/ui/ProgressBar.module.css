@@ -1,6 +1,6 @@
 .o-progress-bar {
     border-radius: var(--radius-pill);
-    background-color: var(--color-g-grey);
+    background-color: var(--color-n-grey);
     height: 5px;
     overflow:hidden;
 }

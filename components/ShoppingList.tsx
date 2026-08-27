@@ -87,7 +87,7 @@ function ItemCard({
           {item.scheme_id ? (
             <Link
               href={`/schemes/${item.scheme_id}`}
-              className="font-sans text-[11px] text-moss hover:text-moss-deep underline"
+              className="font-sans text-[11px] text-marigold hover:text-marigold underline"
             >
               {item.scheme_name ?? "Planting scheme"}
             </Link>
@@ -101,7 +101,7 @@ function ItemCard({
           <button
             type="button"
             onClick={onPurchase}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium font-sans bg-moss-tint text-moss hover:bg-moss hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-moss focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+            className="o-button--text minion"
           >
             Purchased
           </button>
@@ -113,7 +113,7 @@ function ItemCard({
           type="button"
           onClick={onDelete}
           aria-label={`Remove ${item.species} from shopping list`}
-          className="flex items-center justify-center w-8 h-8 rounded text-ink-soft transition-colors hover:bg-clay-tint hover:text-clay focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-clay focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+          className="flex items-center justify-center w-8 h-8 rounded text-ink-soft transition-colors hover:bg-marigold hover:text-marigold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
         >
           <Icon name="delete" aria-label="Delete" /> 
         </button>
@@ -151,7 +151,7 @@ function PurchaseDialog({
           <p className="text-sm font-sans text-ink-soft">
             Do you want to add <span className="italic">{item?.species}</span> to your garden?
           </p>
-          {error && <p className="text-xs font-sans text-clay mt-1">{error}</p>}
+          {error && <p className="text-xs font-sans text-marigold mt-1">{error}</p>}
         </div>
         <div className="flex gap-2 justify-end">
           <Button
@@ -248,7 +248,7 @@ export default function ShoppingList({ initialItems }: { initialItems: ShoppingL
 
   return (
     <div className="flex flex-col gap-3">
-      {deleteError && <p className="text-sm text-clay">{deleteError}</p>}
+      {deleteError && <p className="text-sm text-marigold">{deleteError}</p>}
       {items.map((item) => (
         <ItemCard
           key={item.id}

@@ -1,0 +1,29 @@
+.o-roundel {
+    --_roundel-bg-color: var(--color-paper);
+    --_roundel-fg-color: var(--color-ink-soft);
+
+    align-items: center;
+    background-color: var(--_roundel-bg-color);
+    color: var(--_roundel-fg-color);
+    display: inline-flex;
+    inline-size: 1.5rem;
+    block-size: 1.5rem;
+    justify-content: center;
+    border-radius: var(--radius-roundel);
+
+    &.is-full-sun {
+        --_roundel-bg-color: var(--sem-full-sun-bg);
+        --_roundel-fg-color: var(--sem-full-sun-fg);
+    }
+
+    &.is-partial-shade,
+    &.is-sun-shade {
+        --_roundel-bg-color: var(--sem-partial-shade-bg);
+        --_roundel-fg-color: var(--sem-partial-shade-fg);
+    }
+
+    &.is-full-shade {
+        --_roundel-bg-color: var(--sem-full-shade-bg);
+        --_roundel-fg-color: var(--sem-full-shade-fg);
+    }
+}

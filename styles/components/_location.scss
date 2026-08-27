@@ -13,10 +13,10 @@
 
     &__input {
         inline-size: 100%;
-        border-color: 1px solid var(--color-g-dark-grey);
+        border-color: 1px solid var(--color-n-dark-grey);
         padding: var(--space-sm);
         background-color: transparent;
-        color: var(--color-g-deep-grey);
+        color: var(--color-n-deep-grey);
         transition:
             border-color var(--transition-time-default) var(--transition-easing-default),
             background-color var(--transition-time-default) var(--transition-easing-default);
@@ -31,7 +31,7 @@
         }
         
         &::placeholder {
-            color: var(--color-g-grey);
+            color: var(--color-n-grey);
         }
     }
 }
@@ -49,7 +49,7 @@
         inline-size: 100%;
         text-align: left;
         padding: var(--space-sm);
-        color: var(--color-g-deep-grey);
+        color: var(--color-n-deep-grey);
         transition:
             box-shadow var(--transition-time-default) var(--transition-easing-default),
             background-color var(--transition-time-default) var(--transition-easing-default);
