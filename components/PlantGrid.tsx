@@ -10,7 +10,7 @@ import { PlantName } from "@/components/plants/PlantName";
 import { Card } from "@/components/ui/Card";
 import { SunBadge } from "@/components/ui/SunBadge";
 import { PlaceholderPlantCard } from "@/components/ui/PlaceholderPlantCard";
-import { SEASON_STYLES, getSeasonBand, formatSeason } from "@/components/ui/FloweringSeasonBadge";
+import { FLOWERING_SEASON_BADGE_MODIFIER, getSeasonBand, formatSeason } from "@/components/ui/FloweringSeasonBadge";
 import buttonStyles from "@/components/ui/Button.module.css";
 import { Icon } from "@/components/ui/Icon";
 
@@ -465,18 +465,9 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
                 sunBadge={plant.sun_needs ? <SunBadge value={plant.sun_needs} /> : undefined}
                 tags={
                   hasSeason ? (
-                    (() => {
-                      const band = getSeasonBand(plant.flowering_season_from!, plant.flowering_season_to!);
-                      const style = SEASON_STYLES[band];
-                      return (
-                        <span
-                          style={{ background: style.background, color: style.color }}
-                          className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium font-sans leading-none"
-                        >
-                          {formatSeason(plant.flowering_season_from!, plant.flowering_season_to!)}
-                        </span>
-                      );
-                    })()
+                    <span className={`o-badge is-sm ${FLOWERING_SEASON_BADGE_MODIFIER[getSeasonBand(plant.flowering_season_from!, plant.flowering_season_to!)]}`}>
+                      {formatSeason(plant.flowering_season_from!, plant.flowering_season_to!)}
+                    </span>
                   ) : undefined
                 }
                 href={`/plants/${plant.id}`}

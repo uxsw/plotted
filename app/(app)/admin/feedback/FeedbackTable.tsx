@@ -20,10 +20,10 @@ const TYPE_LABELS: Record<FeedbackType, string> = {
   other: "Feedback",
 };
 
-const TYPE_CLASSES: Record<FeedbackType, string> = {
-  bug: "bg-marigold text-ink",
-  ux: "bg-yellow text-ink",
-  other: "bg-marigold text-ink",
+const TYPE_MODIFIERS: Record<FeedbackType, string> = {
+  bug: "is-bug",
+  ux: "is-feedback",
+  other: "is-feedback",
 };
 
 function formatDate(iso: string) {
@@ -91,12 +91,7 @@ export default function FeedbackTable({ rows }: { rows: FeedbackRow[] }) {
                     {row.reference_code}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
-                    <span
-                      className={[
-                        "inline-block rounded px-2 py-0.5 text-xs font-medium",
-                        TYPE_CLASSES[row.type] ?? "bg-sand text-ink-soft",
-                      ].join(" ")}
-                    >
+                    <span className={`o-badge ${TYPE_MODIFIERS[row.type] ?? "is-feedback"}`}>
                       {TYPE_LABELS[row.type] ?? row.type}
                     </span>
                   </td>

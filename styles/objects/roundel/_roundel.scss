@@ -12,22 +12,18 @@
     border-radius: var(--radius-roundel);
 
     &.is-full-sun {
-        --_roundel-bg-color: var(--color-y-gold);
-        --_roundel-fg-color: var(--color-n-dark-grey);
+        --_roundel-bg-color: var(--sem-full-sun-bg);
+        --_roundel-fg-color: var(--sem-full-sun-fg);
     }
 
-    &.is-partial-shade {
-        --_roundel-bg-color: var(--color-n-grey);
-        --_roundel-fg-color: var(--color-n-deep-grey);
+    &.is-partial-shade,
+    &.is-sun-shade {
+        --_roundel-bg-color: var(--sem-partial-shade-bg);
+        --_roundel-fg-color: var(--sem-partial-shade-fg);
     }
 
     &.is-full-shade {
-        --_roundel-bg-color: var(--color-n-deep-grey);
-        --_roundel-fg-color: var(--color-n-cool-grey);
-    }
-
-    &.is-sun-shade {
-        --_roundel-bg-color: var(--color-o-vermillion);
-        --_roundel-fg-color: var(--color-o-surface);
+        --_roundel-bg-color: var(--sem-full-shade-bg);
+        --_roundel-fg-color: var(--sem-full-shade-fg);
     }
 }

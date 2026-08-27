@@ -10,8 +10,12 @@ Lives at `styles/objects/_roundel.scss`. Living document.
 
 | Modifier | Represents | Colour status |
 |---|---|---|
-| `is-full-sun` / `is-partial-shade` / `is-full-shade` / `is-sun-shade` | sun requirement, icon-only contexts | provisional — same underlying meaning as `.o-badge`'s sun modifiers; values to be tokenised and shared across both files once settled, not independently maintained |
+| `is-full-sun` | sun requirement, icon-only contexts | ✅ confirmed — shares `--sem-full-sun-bg`/`-fg` with `.o-badge`, exactly as planned |
+| `is-partial-shade` / `is-sun-shade` | sun requirement, icon-only contexts — intentionally merged, same treatment | ✅ confirmed — shares `--sem-partial-shade-bg`/`-fg` with `.o-badge` |
+| `is-full-shade` | sun requirement, icon-only contexts | ✅ confirmed — shares `--sem-full-shade-bg`/`-fg` with `.o-badge`, reuses existing neutral tokens |
+
+**Status:** confirmed following visual review, 2026-08-23. Values are genuinely shared with `.o-badge` via the `--sem-*` semantic layer (see `theme.md`), not independently maintained — the original plan held.
 
 ## Migration status
 
-Icon-only sun indicators (separate from `SunBadgePill`, which has text and belongs to `.o-badge`) — instances not yet confirmed. Locate and confirm before migrating; don't assume placement.
+`PlantGrid.tsx`'s `SunBadge` (icon-only, distinct from `SunBadgePill` which has text and belongs to `.o-badge`) — ✅ migrated 2026-08-23, confirmed and live.

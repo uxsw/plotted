@@ -101,7 +101,7 @@ function ItemCard({
           <button
             type="button"
             onClick={onPurchase}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium font-sans bg-marigold text-marigold hover:bg-marigold hover:text-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
+            className="o-button--text minion"
           >
             Purchased
           </button>

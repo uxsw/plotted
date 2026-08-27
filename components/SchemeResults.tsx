@@ -22,12 +22,12 @@ const TIER_LABELS: Record<SchemeTier, string> = {
 const BADGE_CONFIG: {
   key: keyof Pick<SchemeSuggestion, "wildlife_value" | "drought_tolerant" | "edible" | "british_native">;
   label: string;
-  className: string;
+  modifier: string;
 }[] = [
-  { key: "wildlife_value", label: "Wildlife friendly", className: "bg-marigold text-ink" },
-  { key: "drought_tolerant", label: "Drought tolerant", className: "bg-yellow text-ink" },
-  { key: "edible", label: "Edible", className: "bg-marigold text-ink" },
-  { key: "british_native", label: "British native", className: "bg-sand text-ink-soft" },
+  { key: "wildlife_value", label: "Wildlife friendly", modifier: "is-wildlife-friendly" },
+  { key: "drought_tolerant", label: "Drought tolerant", modifier: "is-drought-tolerant" },
+  { key: "edible", label: "Edible", modifier: "is-edible" },
+  { key: "british_native", label: "British native", modifier: "is-british-native" },
 ];
 
 function formatMonths(months: number[] | null): string | null {
@@ -186,10 +186,7 @@ function SuggestionCard({
         {badges.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
             {badges.map((b) => (
-              <span
-                key={b.key}
-                className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-medium font-sans leading-none ${b.className}`}
-              >
+              <span key={b.key} className={`o-badge is-sm ${b.modifier}`}>
                 {b.label}
               </span>
             ))}

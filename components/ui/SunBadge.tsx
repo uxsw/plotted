@@ -1,31 +1,22 @@
-const SUN_CONFIG = {
-  "full sun": {
-    bg: "#f7d800",
-    stroke: "#5c4e00",
-    icon: "sun",
-  },
-  "full sun / partial shade": {
-    bg: "#B88C38",
-    stroke: "#FFF0C0",
-    icon: "sun-cloud",
-  },
-  "partial shade": {
-    bg: "#8FAE88",
-    stroke: "#EEF5EC",
-    icon: "cloud",
-  },
-  "full shade": {
-    bg: "#5A6E78",
-    stroke: "#D8E8EE",
-    icon: "moon",
-  },
+const SUN_ICON = {
+  "full sun": "sun",
+  "full sun / partial shade": "sun-cloud",
+  "partial shade": "cloud",
+  "full shade": "moon",
 } as const;
 
-type SunNeeds = keyof typeof SUN_CONFIG;
+const SUN_MODIFIER = {
+  "full sun": "is-full-sun",
+  "full sun / partial shade": "is-sun-shade",
+  "partial shade": "is-partial-shade",
+  "full shade": "is-full-shade",
+} as const;
 
-function SunIconSvg({ stroke }: { stroke: string }) {
+type SunNeeds = keyof typeof SUN_ICON;
+
+function SunIconSvg() {
   return (
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke={stroke} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <circle cx="6.5" cy="6.5" r="2" />
       <line x1="6.5" y1="1" x2="6.5" y2="2.5" />
       <line x1="6.5" y1="10.5" x2="6.5" y2="12" />
@@ -39,9 +30,9 @@ function SunIconSvg({ stroke }: { stroke: string }) {
   );
 }
 
-function SunCloudIconSvg({ stroke }: { stroke: string }) {
+function SunCloudIconSvg() {
   return (
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke={stroke} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <circle cx="4.5" cy="4.5" r="1.8" />
       <line x1="4.5" y1="1" x2="4.5" y2="2" />
       <line x1="1" y1="4.5" x2="2" y2="4.5" />
@@ -52,55 +43,53 @@ function SunCloudIconSvg({ stroke }: { stroke: string }) {
   );
 }
 
-function CloudIconSvg({ stroke }: { stroke: string }) {
+function CloudIconSvg() {
   return (
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke={stroke} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M2.5 9.5a2.5 2.5 0 0 1 0-5 3 3 0 0 1 6 .5A2 2 0 0 1 9 9.5H2.5z" />
     </svg>
   );
 }
 
-function MoonIconSvg({ stroke }: { stroke: string }) {
+function MoonIconSvg() {
   return (
-    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke={stroke} strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M10.5 9A5.5 5.5 0 0 1 4 2.5a5 5 0 1 0 6.5 6.5z" />
     </svg>
   );
 }
 
+function SunIcon({ icon }: { icon: (typeof SUN_ICON)[SunNeeds] }) {
+  return (
+    <>
+      {icon === "sun" && <SunIconSvg />}
+      {icon === "sun-cloud" && <SunCloudIconSvg />}
+      {icon === "cloud" && <CloudIconSvg />}
+      {icon === "moon" && <MoonIconSvg />}
+    </>
+  );
+}
+
 export function SunBadge({ value }: { value: string }) {
-  if (!(value in SUN_CONFIG)) return null;
-  const { bg, stroke, icon } = SUN_CONFIG[value as SunNeeds];
+  if (!(value in SUN_ICON)) return null;
+  const sun = value as SunNeeds;
+  const label = value[0].toUpperCase() + value.slice(1);
 
   return (
-    <div
-      role="img"
-      aria-label={value[0].toUpperCase() + value.slice(1)}
-      style={{ backgroundColor: bg, width: 24, height: 24 }}
-      className="rounded-full flex items-center justify-center shrink-0"
-    >
-      {icon === "sun" && <SunIconSvg stroke={stroke} />}
-      {icon === "sun-cloud" && <SunCloudIconSvg stroke={stroke} />}
-      {icon === "cloud" && <CloudIconSvg stroke={stroke} />}
-      {icon === "moon" && <MoonIconSvg stroke={stroke} />}
+    <div role="img" aria-label={label} className={`o-roundel ${SUN_MODIFIER[sun]}`}>
+      <SunIcon icon={SUN_ICON[sun]} />
     </div>
   );
 }
 
 export function SunBadgePill({ value }: { value: string }) {
-  if (!(value in SUN_CONFIG)) return null;
-  const { bg, stroke, icon } = SUN_CONFIG[value as SunNeeds];
+  if (!(value in SUN_ICON)) return null;
+  const sun = value as SunNeeds;
   const label = value[0].toUpperCase() + value.slice(1);
 
   return (
-    <span
-      style={{ backgroundColor: bg, color: stroke }}
-      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium font-sans leading-none"
-    >
-      {icon === "sun" && <SunIconSvg stroke={stroke} />}
-      {icon === "sun-cloud" && <SunCloudIconSvg stroke={stroke} />}
-      {icon === "cloud" && <CloudIconSvg stroke={stroke} />}
-      {icon === "moon" && <MoonIconSvg stroke={stroke} />}
+    <span className={`o-badge ${SUN_MODIFIER[sun]}`}>
+      <SunIcon icon={SUN_ICON[sun]} />
       {label}
     </span>
   );

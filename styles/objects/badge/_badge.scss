@@ -4,7 +4,7 @@
 
     Use o-badge with text
 
-    Use o-badge-icon with icon only
+    Use o-roundel with icon only
  */
 .o-badge {
     --_badge-border-color: var(--sem-border-color);
@@ -12,6 +12,8 @@
     --_badge-bg-color: var(--color-paper);
     --_badge-fg-color: var(--color-ink-soft);
     --_badge-text-size: 0.85rem;
+    --_badge-line-height: 2;
+    --_badge-pad-inline: var(--space-sm);
 
     align-items: center;
     background-color: var(--_badge-bg-color);
@@ -21,14 +23,17 @@
     border-radius: var(--radius-pill) ;
     gap: var(--space-xs);
     justify-content: center;
-    line-height: 2;
+    line-height: var(--_badge-line-height);
     font-size: var(--_badge-text-size);
-    padding-inline: var(--space-sm);
+    padding-inline: var(--_badge-pad-inline);
     white-space: nowrap;
     width: max-content;
 
     &.is-sm {
-        --_badge-text-size: 0.75rem;
+        --_badge-text-size: 0.65rem;
+        --_badge-line-height: 1.5;
+        --_badge-pad-inline: var(--space-xs);
+
     }
 
     &.is-bug,
@@ -41,56 +46,81 @@
     &.is-feedback,
     &.is-info,
     &.is-suggestion-count {
-        --_badge-bg-color: var(--color-y-yellow);
-        --_badge-border-color: var(--color-y-mimosa-yellow);
-        --_badge-fg-color: var(--color-n-deep-grey);
+        --_badge-bg-color: var(--sem-color-info-bg);
+        --_badge-border-color: var(--sem-color-info-bg);
+        --_badge-fg-color: var(--sem-color-info-fg);
     }
 
     &.is-wildlife-friendly {
-        --_badge-border-color: var(--color-p-lavender);
-        --_badge-bg-color: var(--color-p-lavender);
-        --_badge-fg-color: var(--color-p-white);
+        --_badge-border-color: var(--sem-color-wildlife-friendly-bg);
+        --_badge-bg-color: var(--sem-color-wildlife-friendly-bg);
+        --_badge-fg-color: var(--sem-color-wildlife-friendly-fg);
     }
 
     &.is-drought-tolerant {
-        --_badge-border-color: var(--color-b-cyan);
-        --_badge-bg-color: var(--color-b-cyan);
-        --_badge-fg-color: var(--color-white);
+        --_badge-border-color: var(--sem-drought-tolerant-bg);
+        --_badge-bg-color: var(--sem-drought-tolerant-bg);
+        --_badge-fg-color: var(--sem-drought-tolerant-fg);
     }
 
     &.is-edible {
-        --_badge-border-color: var(--color-g-summer-green);
-        --_badge-bg-color: var(--color-g-summer-green);
-        --_badge-fg-color: var(--color-n-deep-grey);
+        --_badge-border-color: var(--sem-edible-bg);
+        --_badge-bg-color: var(--sem-edible-bg);
+        --_badge-fg-color: var(--sem-edible-fg);
     }
 
     &.is-british-native {
-        --_badge-border-color: var(--color-r-smoke-red);
-        --_badge-bg-color: var(--color-r-smoke-red);
-        --_badge-fg-color: var(--color-n-deep-grey);
+        --_badge-border-color: var(--sem-british-native-bg);
+        --_badge-bg-color: var(--sem-british-native-bg);
+        --_badge-fg-color: var(--sem-british-native-fg);
     }
 
     &.is-full-sun {
-        --_badge-border-color: var(--color-y-gold);
-        --_badge-bg-color: var(--color-y-gold);
-        --_badge-fg-color: var(--color-n-dark-grey);
+        --_badge-border-color: var(--sem-full-sun-bg);
+        --_badge-bg-color: var(--sem-full-sun-bg);
+        --_badge-fg-color: var(--sem-full-sun-fg);
     }
 
-    &.is-partial-shade {
-        --_badge-border-color: var(--color-n-grey);
-        --_badge-bg-color: var(--color-n-grey);
-        --_badge-fg-color: var(--color-n-deep-grey);
+    &.is-partial-shade,
+    &.is-sun-shade {
+        --_badge-border-color: var(--sem-partial-shade-bg);
+        --_badge-bg-color: var(--sem-partial-shade-bg);
+        --_badge-fg-color: var(--sem-partial-shade-fg);
     }
 
     &.is-full-shade {
-        --_badge-border-color: var(--color-n-deep-grey);
-        --_badge-bg-color: var(--color-n-deep-grey);
-        --_badge-fg-color: var(--color-n-cool-grey);
+        --_badge-border-color: var(--sem-full-shade-bg);
+        --_badge-bg-color: var(--sem-full-shade-bg);
+        --_badge-fg-color: var(--sem-full-shade-fg);
     }
 
-    &.is-sun-shade {
-        --_badge-border-color: var(--color-o-vermillion);
-        --_badge-bg-color: var(--color-o-vermillion);
-        --_badge-fg-color: var(--color-o-surface);
+    &.is-flowering-winter {
+        --_badge-border-color: var(--sem-flowering-winter-bg);
+        --_badge-bg-color: var(--sem-flowering-winter-bg);
+        --_badge-fg-color: var(--sem-flowering-winter-fg);
+    }
+
+    &.is-flowering-spring {
+        --_badge-border-color: var(--sem-flowering-spring-bg);
+        --_badge-bg-color: var(--sem-flowering-spring-bg);
+        --_badge-fg-color: var(--sem-flowering-spring-fg);
+    }
+
+    &.is-flowering-early-summer {
+        --_badge-border-color: var(--sem-flowering-early-summer-bg);
+        --_badge-bg-color: var(--sem-flowering-early-summer-bg);
+        --_badge-fg-color: var(--sem-flowering-early-summer-fg);
+    }
+
+    &.is-flowering-summer {
+        --_badge-border-color: var(--sem-flowering-summer-bg);
+        --_badge-bg-color: var(--sem-flowering-summer-bg);
+        --_badge-fg-color: var(--sem-flowering-summer-fg);
+    }
+
+    &.is-flowering-autumn {
+        --_badge-border-color: var(--sem-flowering-autumn-bg);
+        --_badge-bg-color: var(--sem-flowering-autumn-bg);
+        --_badge-fg-color: var(--sem-flowering-autumn-fg);
     }
 }

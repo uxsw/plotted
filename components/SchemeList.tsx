@@ -153,7 +153,7 @@ function SchemeCard({
           <p className="brevier">{scheme.summary}</p>
         )}
         <div className="u-margin-top-auto">
-          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium font-sans leading-none bg-marigold text-ink">
+          <span className="o-badge is-suggestion-count is-sm">
             {scheme.suggestion_count} suggestion{scheme.suggestion_count === 1 ? "" : "s"}
           </span>
         </div>

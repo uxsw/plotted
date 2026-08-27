@@ -4,7 +4,6 @@ import { useState } from "react";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
-import { Tag } from "@/components/ui/Tag";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 
@@ -144,16 +143,16 @@ export default function DesignCheckPage() {
           </div>
         </section>
 
-        {/* ── Tag ── */}
+        {/* ── Badge ── */}
         <section className="space-y-4">
-          <SectionTitle>Tag</SectionTitle>
+          <SectionTitle>Badge</SectionTitle>
           <div className="flex flex-wrap gap-2">
-            <Tag color="sun">Full sun</Tag>
-            <Tag color="sun">Partial shade</Tag>
-            <Tag color="season">Spring</Tag>
-            <Tag color="season">Summer</Tag>
-            <Tag color="neutral">Perennial</Tag>
-            <Tag color="neutral">Climber</Tag>
+            <span className="o-badge is-full-sun">Full sun</span>
+            <span className="o-badge is-partial-shade">Partial shade</span>
+            <span className="o-badge is-flowering-spring">Spring</span>
+            <span className="o-badge is-flowering-summer">Summer</span>
+            <span className="o-badge">Perennial</span>
+            <span className="o-badge">Climber</span>
           </div>
         </section>
 
@@ -166,11 +165,11 @@ export default function DesignCheckPage() {
               subtitle="Rosa canina"
               tags={
                 <>
-                  <Tag color="sun">Full sun</Tag>
-                  <Tag color="season">Summer</Tag>
+                  <span className="o-badge is-full-sun">Full sun</span>
+                  <span className="o-badge is-flowering-summer">Summer</span>
                 </>
               }
-              badge={<Tag color="neutral">Active</Tag>}
+              badge={<span className="o-badge">Active</span>}
               onClick={() => {}}
             />
             <Card
@@ -178,7 +177,7 @@ export default function DesignCheckPage() {
               photoAlt="Rose in bloom"
               title="Climbing Rose"
               subtitle="Rosa 'Compassion'"
-              tags={<Tag color="season">Spring</Tag>}
+              tags={<span className="o-badge is-flowering-spring">Spring</span>}
               footer={
                 <span className="text-xs font-sans text-ink-soft">Planted 2022</span>
               }
