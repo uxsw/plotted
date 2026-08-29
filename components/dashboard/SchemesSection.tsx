@@ -56,7 +56,7 @@ export default async function SchemesSection() {
           )}
         >
           View all
-          <Icon name="right" aria-label="View all" /> 
+          <Icon name="right" size={16} />
         </Link>
         <Link
           href="/schemes/new"
@@ -65,7 +65,7 @@ export default async function SchemesSection() {
             buttonStyles["o-button--primary"]
           )}
         >
-          <Icon name="add" aria-label="Add plants" /> 
+          <Icon name="add" size={16} />
           New scheme
         </Link>
       </div>

@@ -6,14 +6,6 @@ import clsx from "clsx";
 import buttonStyles from "@/components/ui/Button.module.css";
 import { Icon } from "@/components/ui/Icon";
 
-function SproutIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M24 8c-4 0-8 4-8 8s4 8 8 8c0 4-2 8-8 12h16c-6-4-8-8-8-12 4 0 8-4 8-8s-4-8-8-8z" />
-    </svg>
-  );
-}
-
 function ShoppingItemCard({ item }: { item: ShoppingListItemData }) {
   const nameLabel = item.common_names?.[0] ?? (item.cultivar ? `'${item.cultivar}'` : null);
 
@@ -30,7 +22,7 @@ function ShoppingItemCard({ item }: { item: ShoppingListItemData }) {
           />
         ) : (
           <div className="is-placeholder">
-            <Icon name="sprout" aria-label="none" />
+            <Icon name="sprout" />
           </div>
         )}
       </div>
@@ -87,22 +79,24 @@ export default async function ShoppingListSection() {
 
   return (
     <section aria-label="Shopping list" className="c-shopping-list">
-      <div className="o-row o-row--space-between">
-        <h2 className="pica o-type-display kirk">Shopping list</h2>
-        <Link
-          href="/shopping-list"
-          className={clsx(
-            buttonStyles["o-button"],
-            buttonStyles["o-button--ghost"]
-          )}
-        >
-          View all
-        </Link>
-      </div>
+      <h2 className="pica o-type-display kirk">Shopping list</h2>
       <div className="c-shopping-list__grid">
         {mapped.map((item) => (
           <ShoppingItemCard key={item.id} item={item} />
         ))}
+      </div>
+      <div className="flex mt-3">
+        <Link
+          href="/shopping-list"
+          className={clsx(
+            buttonStyles["o-button"],
+            buttonStyles["o-button--ghost"],
+            buttonStyles["o-button--flush-start"]
+          )}
+        >
+          View all
+          <Icon name="right" size={16} />
+        </Link>
       </div>
     </section>
   );

@@ -1,14 +1,30 @@
+// Companion measure — the dashboard is the single sanctioned exception to the
+// Narrow Column Rule (see DESIGN.md "Layout"). One centred stream, never
+// multi-column; the extra width lets card rows and scrollers breathe.
+.o-page:has(> .c-dashboard__container) {
+  max-width: 1000px;
+}
+
 .c-dashboard__container {
   display: flex;
   flex-direction: column;
-  gap: var(--space-md);
+  gap: var(--space-lg);
 }
 
-.c-weather-section {
-  background-color: var(--color-white);
-  border-radius: var(--radius-m);
-  overflow: hidden;
-  padding-block-start: var(--space-md);
+// Shared block heading: bold-roman title + optional one-line subtitle,
+// with the gap before the block's content baked in.
+.c-dash-heading {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-xs);
+  margin-block-end: var(--space-sm);
+}
+
+.c-weather-section,
+.c-shopping-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
 }
 
 .c-plant-scroller,
@@ -36,7 +52,8 @@
     transition: box-shadow var(--transition-time-default) var(--transition-easing-default);
 
     &:hover {
-      box-shadow: 0 4px 8px rgba(0,0,0,0.1), 0 4px 4px rgba(0,0,0,0.2);
+      // menu-raised step — see DESIGN.md Elevation & Depth
+      box-shadow: 0 4px 6px -1px #0000001a, 0 2px 4px -2px #0000001a;
     }
   }
 
@@ -81,6 +98,34 @@
   }
 }
 
+// Desktop: the plant-lead scroller resolves into an inline row of the first
+// four cards; the rest stay behind "View all". Birds keeps its scroller —
+// that one is a deck to flip through, not a preview.
+@media (min-width: 860px) {
+  .c-plant-scroller {
+    margin-inline: 0;
+    padding-inline: 0;
+    overflow: visible;
+    scroll-snap-type: none;
+
+    > .c-plant-scroller__item {
+      inline-size: auto;
+      max-width: none;
+      flex: 1 1 0;
+      min-width: 0;
+      scroll-snap-align: none;
+
+      &:nth-child(n + 5) {
+        display: none;
+      }
+    }
+  }
+
+  .c-plant-scroller__dots {
+    display: none;
+  }
+}
+
 .c-shopping-list {
   &__grid {
     display: grid;
@@ -98,10 +143,10 @@
     display: flex;
     gap: var(--space-sm);
     align-items: center;
-    transition: border-color var(--transition-time-default) var(--transition-easing-default);
+    transition: background-color var(--transition-time-default) var(--transition-easing-default);
 
     &:hover {
-      border-color: var(--color-b-cyan);
+      background-color: var(--color-paper-deep);
     }
   }
 

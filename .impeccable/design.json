@@ -1,0 +1,274 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-29T00:00:00Z",
+  "title": "Design System: Plotted",
+  "extensions": {
+    "colorMeta": {
+      "marigold": {
+        "role": "primary",
+        "displayName": "Marigold",
+        "canonical": "oklch(65.809% 0.15943 31.855)",
+        "tonalRamp": [
+          "oklch(20% 0.080 31.9)",
+          "oklch(30% 0.110 31.9)",
+          "oklch(40% 0.140 31.9)",
+          "oklch(50% 0.160 31.9)",
+          "oklch(58% 0.165 31.9)",
+          "oklch(65.8% 0.159 31.9)",
+          "oklch(78% 0.120 31.9)",
+          "oklch(91% 0.050 31.9)"
+        ]
+      },
+      "highlight-yellow": {
+        "role": "secondary",
+        "displayName": "Highlight Yellow",
+        "canonical": "oklch(94.577% 0.10215 110.6)",
+        "tonalRamp": [
+          "oklch(35% 0.060 110.6)",
+          "oklch(48% 0.080 110.6)",
+          "oklch(60% 0.100 110.6)",
+          "oklch(72% 0.110 110.6)",
+          "oklch(82% 0.110 110.6)",
+          "oklch(89% 0.108 110.6)",
+          "oklch(94.6% 0.102 110.6)",
+          "oklch(97.5% 0.050 110.6)"
+        ]
+      },
+      "lavender": {
+        "role": "tertiary",
+        "displayName": "Scheme Lavender",
+        "canonical": "oklch(52.839% 0.09034 282.87)",
+        "tonalRamp": [
+          "oklch(20% 0.060 282.9)",
+          "oklch(30% 0.080 282.9)",
+          "oklch(40% 0.090 282.9)",
+          "oklch(52.8% 0.090 282.9)",
+          "oklch(64% 0.090 282.9)",
+          "oklch(76% 0.080 282.9)",
+          "oklch(87% 0.050 282.9)",
+          "oklch(96% 0.030 282.9)"
+        ]
+      },
+      "cyan": {
+        "role": "tertiary",
+        "displayName": "Focus Cyan",
+        "canonical": "oklch(78.91% 0.07815 206.15)",
+        "tonalRamp": [
+          "oklch(25% 0.050 206.2)",
+          "oklch(37% 0.065 206.2)",
+          "oklch(48% 0.075 206.2)",
+          "oklch(60% 0.080 206.2)",
+          "oklch(70% 0.080 206.2)",
+          "oklch(78.9% 0.078 206.2)",
+          "oklch(88% 0.050 206.2)",
+          "oklch(96% 0.025 206.2)"
+        ]
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "Warm Paper",
+        "canonical": "#FAF6EC",
+        "tonalRamp": [
+          "oklch(20% 0.010 95)",
+          "oklch(32% 0.012 95)",
+          "oklch(45% 0.013 95)",
+          "oklch(58% 0.014 95)",
+          "oklch(72% 0.015 95)",
+          "oklch(84% 0.015 95)",
+          "oklch(92% 0.014 95)",
+          "oklch(97.2% 0.012 95)"
+        ]
+      },
+      "sand": {
+        "role": "neutral",
+        "displayName": "Sand Panel",
+        "canonical": "#E8DFC8",
+        "tonalRamp": [
+          "oklch(22% 0.015 92)",
+          "oklch(34% 0.020 92)",
+          "oklch(47% 0.025 92)",
+          "oklch(60% 0.028 92)",
+          "oklch(73% 0.030 92)",
+          "oklch(83% 0.030 92)",
+          "oklch(90% 0.028 92)",
+          "oklch(95% 0.020 92)"
+        ]
+      },
+      "ink": {
+        "role": "neutral",
+        "displayName": "Ink",
+        "canonical": "#2B2A24",
+        "tonalRamp": [
+          "oklch(15% 0.004 95)",
+          "oklch(22% 0.005 95)",
+          "oklch(26% 0.006 95)",
+          "oklch(38% 0.007 95)",
+          "oklch(50% 0.008 95)",
+          "oklch(64% 0.008 95)",
+          "oklch(80% 0.006 95)",
+          "oklch(93% 0.004 95)"
+        ]
+      },
+      "n-deep-grey": {
+        "role": "neutral",
+        "displayName": "Deep Grey (body text)",
+        "canonical": "oklch(29.716% 0 0)",
+        "tonalRamp": [
+          "oklch(15% 0 0)",
+          "oklch(22% 0 0)",
+          "oklch(29.7% 0 0)",
+          "oklch(40% 0 0)",
+          "oklch(52% 0 0)",
+          "oklch(65% 0 0)",
+          "oklch(80% 0 0)",
+          "oklch(93% 0 0)"
+        ]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "The big statement headline. Italic 400 on the marketing hero; roman 600 for the equivalent in-app heading. Fluid clamp on the .canon step." },
+      "headline": { "displayName": "Headline", "purpose": "App page titles, section headers, empty-state and dialog titles. Fraunces bold roman 600 (.kirk), .paragon step. Marketing section headings take italic 400 instead." },
+      "title": { "displayName": "Title", "purpose": "Card titles and sub-section headers. Fraunces bold roman 600 (.kirk), .pica / .long-primer step. Botanical Latin inside is additionally italicised." },
+      "body": { "displayName": "Body", "purpose": "All running text. Inter 400, .primer step, line-height 1.5. Colour is n-deep-grey, not ink." },
+      "label": { "displayName": "Mono Label", "purpose": "Eyebrows, plate numbers, field labels, botanical metadata. Spline Sans Mono, uppercase, 0.12-0.16em tracking." }
+    },
+    "shadows": [
+      { "name": "menu-raised", "value": "0 4px 6px -1px #0000001a, 0 2px 4px -2px #0000001a", "purpose": "Popovers and the autocomplete menu. The one consolidated low step." },
+      { "name": "card-hover", "value": "0 8px 24px rgba(0,0,0,0.15)", "purpose": "Lift on interactive cards on hover (also z-index:1) and on scheme frame panels. The raised step." },
+      { "name": "dialog", "value": "0 20px 25px -5px #0000001a, 0 8px 10px -6px #0000001a", "purpose": "Modal dialogs only. The deepest step, for content that stops the page." },
+      { "name": "focus-ring-lavender", "value": "0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-p-lavender)", "purpose": "Button-component focus-visible ring, floated off the paper ground." }
+    ],
+    "motion": [
+      { "name": "transition-default", "value": "0.4s ease", "purpose": "Token default (--transition-time-default). Colour/padding transitions on objects." },
+      { "name": "transition-slow", "value": "0.8s ease", "purpose": "--transition-time-slow, for larger reveals." },
+      { "name": "micro-150", "value": "150ms", "purpose": "Hardcoded in Button and .o-card--interactive for tight hover/press feedback. A known divergence from the 0.4s token." },
+      { "name": "press-75", "value": "75ms", "purpose": "transform/opacity on :active press (card scale 0.98, opacity 0.75)." },
+      { "name": "reduced-motion", "value": "@media (prefers-reduced-motion: reduce) { animation: none }", "purpose": "Every keyframe animation (plant-sway, leaf-droop, mkt-caret, mkt-dot) opts out here." }
+    ],
+    "breakpoints": [
+      { "name": "mobile", "value": "480px" },
+      { "name": "tablet", "value": "860px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "The single primary action per view. Marigold fill, warm off-white text, near-square corners.",
+      "html": "<button class=\"ds-btn-primary\">Add plant</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem; border: none; border-radius: var(--radius-s, 2px); font-family: var(--font-inter), sans-serif; font-size: 0.875rem; line-height: 1; white-space: nowrap; inline-size: max-content; cursor: pointer; background-color: var(--color-r-marigold); color: var(--color-r-white); transition: background-color 150ms, color 150ms, border-color 150ms; } .ds-btn-primary:hover { background-color: var(--color-o-vermillion); color: var(--color-n-deep-grey); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-p-lavender); } .ds-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Secondary Button",
+      "kind": "button",
+      "refersTo": "button-secondary",
+      "description": "Neutral-weight action. Transparent with a thin near-black border; hover fills highlight-yellow.",
+      "html": "<button class=\"ds-btn-secondary\">Edit</button>",
+      "css": ".ds-btn-secondary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem; border-radius: var(--radius-s, 2px); font-family: var(--font-inter), sans-serif; font-size: 0.875rem; line-height: 1; white-space: nowrap; inline-size: max-content; cursor: pointer; background-color: transparent; color: var(--color-n-deep-grey); border: 1px solid var(--color-n-deep-grey); transition: background-color 150ms, color 150ms, border-color 150ms; } .ds-btn-secondary:hover { background-color: var(--color-y-yellow); border-color: var(--color-y-yellow); } .ds-btn-secondary:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-p-lavender); } .ds-btn-secondary:disabled { opacity: 0.5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Ghost Button",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "Lowest-stakes inline action. No border; hover fills highlight-yellow.",
+      "html": "<button class=\"ds-btn-ghost\">Cancel</button>",
+      "css": ".ds-btn-ghost { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem; border: none; border-radius: var(--radius-s, 2px); font-family: var(--font-inter), sans-serif; font-size: 0.875rem; line-height: 1; white-space: nowrap; inline-size: max-content; cursor: pointer; background-color: transparent; color: var(--color-n-deep-grey); transition: background-color 150ms, color 150ms; } .ds-btn-ghost:hover { background-color: var(--color-y-yellow); } .ds-btn-ghost:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-p-lavender); }"
+    },
+    {
+      "name": "Text Input",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Standard field. Mono-idea small-caps label above; paper fill, sand-line border, strong marigold focus (border, ring and fill all shift).",
+      "html": "<div class=\"ds-field\"><label class=\"ds-field__label\" for=\"ds-species\">Species</label><input class=\"ds-field__input\" id=\"ds-species\" type=\"text\" placeholder=\"e.g. canina\" /></div>",
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 0.375rem; } .ds-field__label { font-family: var(--font-inter), sans-serif; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-variant: small-caps; color: var(--color-ink-soft); } .ds-field__input { border: 1px solid var(--color-sand-line); border-radius: var(--radius-m, 4px); padding: 0.5rem 0.75rem; font-family: var(--font-inter), sans-serif; font-size: 0.875rem; color: var(--color-ink); background-color: var(--color-paper); transition: background-color 150ms, border-color 150ms, box-shadow 150ms; } .ds-field__input::placeholder { color: color-mix(in srgb, var(--color-ink-soft) 50%, transparent); } .ds-field__input:focus { outline: none; border-color: var(--color-r-marigold); background-color: var(--color-r-marigold); box-shadow: 0 0 0 1px var(--color-paper), 0 0 0 3px var(--color-r-marigold); }"
+    },
+    {
+      "name": "Trait Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "Static, non-interactive label. Pill, 1px border, colour set per trait via the --sem-* semantic layer. Shown here in the 'edible' variant.",
+      "html": "<span class=\"ds-badge ds-badge--edible\">Edible</span>",
+      "css": ".ds-badge { --_bg: var(--color-paper); --_fg: var(--color-ink-soft); --_bd: var(--sem-border-color); display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs, 4px); border-radius: var(--radius-pill, 32px); border: 1px solid var(--_bd); background-color: var(--_bg); color: var(--_fg); font-family: var(--font-inter), sans-serif; font-size: 0.85rem; line-height: 2; padding-inline: var(--space-sm, 8px); white-space: nowrap; width: max-content; } .ds-badge--edible { --_bg: var(--sem-edible-bg); --_fg: var(--sem-edible-fg); --_bd: var(--sem-edible-bg); } .ds-badge--sm { font-size: 0.65rem; line-height: 1.5; padding-inline: var(--space-xs, 4px); }"
+    },
+    {
+      "name": "Chip",
+      "kind": "chip",
+      "refersTo": "chip",
+      "description": "Interactive tag (filter / dismissible). Pill, asymmetric padding to seat a trailing circular action; hover warms to gold.",
+      "html": "<span class=\"ds-chip\">Foxglove<button class=\"ds-chip__action\" aria-label=\"Remove\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 12 12\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\"><path d=\"M3 3l6 6M9 3l-6 6\"/></svg></button></span>",
+      "css": ".ds-chip { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-xs, 4px); border-radius: var(--radius-pill, 32px); font-family: var(--font-inter), sans-serif; font-size: 0.85rem; line-height: 2; padding-inline-start: var(--space-sm, 8px); padding-inline-end: var(--space-xs, 4px); white-space: nowrap; width: max-content; background-color: transparent; color: var(--color-ink-soft); transition: background-color 0.4s ease; } .ds-chip:hover { background-color: var(--color-y-gold); } .ds-chip__action { display: flex; align-items: center; justify-content: center; height: 24px; width: 24px; padding: 0; border: none; border-radius: 50%; background-color: transparent; color: inherit; cursor: pointer; transition: background-color 0.4s ease; } .ds-chip__action:hover { background-color: var(--color-white); }"
+    },
+    {
+      "name": "Plant Card",
+      "kind": "card",
+      "refersTo": "card",
+      "description": "The core content unit. White raised surface on grained paper, 4px corners, flat at rest, lifts on hover; 4:3 media well with badge slot, italic Fraunces title.",
+      "html": "<a class=\"ds-card\" href=\"#\"><div class=\"ds-card__media\"><span class=\"ds-card__badge\">Full sun</span></div><div class=\"ds-card__body\"><h3 class=\"ds-card__title\">Digitalis purpurea</h3><p class=\"ds-card__sub\">Foxglove</p></div></a>",
+      "css": ".ds-card { display: flex; flex-direction: column; height: 100%; overflow: hidden; border-radius: var(--radius-m, 4px); background-color: var(--color-white); text-decoration: none; color: inherit; transition: box-shadow 150ms, transform 75ms, opacity 75ms; } .ds-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 1; } .ds-card:active { transform: scale(0.98); opacity: 0.75; } .ds-card__media { position: relative; width: 100%; aspect-ratio: 4 / 3; background-color: var(--color-y-yellow); } .ds-card__badge { position: absolute; top: var(--space-xs, 4px); right: var(--space-xs, 4px); display: inline-flex; align-items: center; border-radius: var(--radius-pill, 32px); border: 1px solid var(--sem-full-sun-bg); background-color: var(--sem-full-sun-bg); color: var(--sem-full-sun-fg); font-family: var(--font-inter), sans-serif; font-size: 0.65rem; line-height: 1.5; padding-inline: var(--space-xs, 4px); } .ds-card__body { display: flex; flex-direction: column; gap: 0.375rem; padding: var(--space-md, 16px); flex: 1; } .ds-card__title { margin: 0; font-family: var(--font-fraunces), serif; font-style: italic; font-weight: 600; font-size: 1.05rem; line-height: 1.2; color: var(--color-ink); } .ds-card__sub { margin: 0; font-family: var(--font-inter), sans-serif; font-size: 0.85rem; color: var(--color-ink-soft); }"
+    },
+    {
+      "name": "Primary Nav",
+      "kind": "nav",
+      "refersTo": "nav-item",
+      "description": "Equal-width tab strip under the app header. Transparent 2px bottom border; hover shows a marigold underline, active adds marigold text and medium weight.",
+      "html": "<nav class=\"ds-nav\" aria-label=\"Primary\"><a class=\"ds-nav__item ds-nav__item--active\" href=\"#\" aria-current=\"page\">Home</a><a class=\"ds-nav__item\" href=\"#\">Plants</a><a class=\"ds-nav__item\" href=\"#\">Schemes</a></nav>",
+      "css": ".ds-nav { display: flex; border-bottom: 1px solid var(--sem-border-color); } .ds-nav__item { flex: 1; display: flex; justify-content: center; padding-top: var(--space-sm, 8px); margin-bottom: -1px; font-family: var(--font-inter), sans-serif; font-size: 0.9rem; text-decoration: none; color: var(--color-n-deep-grey); border-bottom: 2px solid transparent; transition: color 0.4s ease, border-bottom-color 0.4s ease; } .ds-nav__item:hover { border-bottom-color: var(--color-r-marigold); } .ds-nav__item--active { color: var(--color-r-marigold); border-bottom-color: var(--color-r-marigold); font-weight: 500; }"
+    },
+    {
+      "name": "Popover Menu",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "The single shared dropdown shell (user menu, scheme actions, plant filter). White, hairline border, 4px radius, low menu shadow; items fill highlight-yellow on hover, danger items fill smoke-red.",
+      "html": "<div class=\"ds-popover\"><button class=\"ds-popover__item\">Rename scheme</button><button class=\"ds-popover__item\">Duplicate</button><button class=\"ds-popover__item ds-popover__item--danger\">Delete scheme</button></div>",
+      "css": ".ds-popover { display: flex; flex-direction: column; gap: var(--space-sm, 8px); min-width: 200px; padding: var(--space-xs, 4px); background-color: var(--color-white); border: 1px solid var(--sem-border-color); border-radius: var(--radius-m, 4px); box-shadow: 0 4px 6px -1px #0000001a, 0 2px 4px -2px #0000001a; } .ds-popover__item { display: flex; align-items: center; gap: var(--space-sm, 8px); width: 100%; padding: var(--space-sm, 8px) var(--space-md, 16px); border: none; background-color: transparent; color: var(--color-n-deep-grey); font-family: var(--font-inter), sans-serif; font-size: 0.9rem; text-align: left; cursor: pointer; transition: background-color 0.4s ease; } .ds-popover__item:hover { background-color: var(--color-y-yellow); } .ds-popover__item:focus-visible { outline: 2px solid var(--color-b-cyan); } .ds-popover__item--danger:hover { background-color: var(--color-r-smoke-red); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Living Catalogue",
+    "overview": "Plotted takes the rigour of a printed nursery plant catalogue — plate numbers, italic botanical Latin, hairline rules, warm paper stock, a faint printed grain — and pulls it forward into something brighter and unmistakably software. It is a knowingly AI-assisted gardening companion, so the surface is allowed to feel technical and tactile at the same time: real texture and warmth, but crisp edges and no nostalgic cosplay. The Nursery Catalogue is a reference for precision and calm, not for period styling.\n\nColour is drawn from the garden itself and used through the interface to echo that richness — sun needs, flowering seasons, plant traits all carry their own hue — but it is held in restraint so it never competes with the gardener's own plant photographs, which are always the brightest thing on the page. Chrome stays quiet; content brings the colour. The single brand accent, a warm marigold, is spent sparingly on primary action and active navigation.\n\nThe atmosphere to protect is alive, bright, warm, friendly, supportive; simple, informative, and never chaotic or clinical. Depth is achieved with tonal paper layers and 1px hairlines rather than shadow — surfaces are flat at rest, and a shadow only ever appears as a response to interaction.",
+    "keyCharacteristics": [
+      "Warm paper ground (#FAF6EC) with a faint multiply-blended noise grain — never flat white; white is reserved for raised cards.",
+      "Fraunces for every display and heading level — bold roman (600) in the product UI, italic 400 on marketing/editorial surfaces; Inter for UI text; Spline Sans Mono for labels, plate numbers and botanical metadata.",
+      "Structure carried by 1px hairline borders and paper/sand tonal layering; flat by default.",
+      "One brand accent (marigold) used on ≤10% of a screen; a broad --sem-* semantic-colour system carries all trait, sun, season and status colour.",
+      "Print-catalogue devices retained: specimen/plate numbers, italic Latin, caption lines, framed image plates.",
+      "Two registers: a wide editorial marketing surface (~1120px) and a narrow product measure (~800px)."
+    ],
+    "rules": [
+      { "name": "The One Accent Rule", "body": "Marigold is the only brand accent in product chrome and appears on ≤10% of any screen — primary action and active nav. Anywhere the interface is more colourful than that, the colour is coming from plant content (photos, traits, seasons) via the semantic layer, not from chrome.", "section": "colors" },
+      { "name": "The Semantic Layer Rule", "body": "Trait, sun, season and status colours are declared as --sem-* tokens that reference the palette. Components read --sem-* through object-private --_* custom properties — never raw --color-* — for any stateful colour. New state colours go through this layer.", "section": "colors" },
+      { "name": "The Highlight-Yellow convention", "body": "Established pattern, not an invariant. --color-y-yellow is the one reactive colour that marks whatever the pointer is on. Keep every new interactive object consistent with it on hover/active.", "section": "colors" },
+      { "name": "The Two-Register Rule", "body": "Fraunces headings are bold roman (600) in the product UI and italic (400) on marketing/editorial surfaces — never mixed within one surface. Weight and style are chosen by surface mode (Operate -> roman 600; Persuade/Read editorial -> italic 400), not by taste per screen.", "section": "typography" },
+      { "name": "The Mono Label Rule", "body": "Eyebrows, specimen/plate numbers, field labels and botanical metadata are Spline Sans Mono, uppercase, letter-spacing 0.12-0.16em. This is the type element that carries the tech-aware half of the identity.", "section": "typography" },
+      { "name": "The Latin-in-Italic Rule", "body": "Botanical names (genus, species, cultivar) are always rendered italic, whatever the surrounding type.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest. A shadow appears only as a reaction to state — hover, open, overlay — and never as ambient decoration. If a resting element needs to stand out, reach for a tonal layer or a hairline first.", "section": "elevation" },
+      { "name": "The Grain Rule", "body": "The page ground always carries its feTurbulence noise texture at ~8% alpha, multiply blended. A pure flat #FFF or un-grained #FAF6EC fill at page level is a regression.", "section": "elevation" },
+      { "name": "The Narrow Column Rule", "body": "App pages hold to the ~800px .o-page measure -- one readable column, one task. The 1120px editorial container is a marketing device and never appears in the app. The single sanctioned exception is the dashboard, which runs a ~1000px companion measure (still one centred column, never multi-column) because it is a stack of peer check-in blocks rather than a single task. A new app route wanting extra width is drift, not a precedent.", "section": "layout" }
+    ],
+    "dos": [
+      "Do keep the page ground #FAF6EC with its noise grain (multiply, ~8%). White is for raised cards, dialogs and menus only.",
+      "Do set product-UI headings in Fraunces bold roman (.kirk / 600); use Fraunces italic 400 only on marketing/editorial surfaces (the Two-Register Rule).",
+      "Do use Spline Sans Mono, uppercase, 0.12-0.16em tracking for eyebrows, plate numbers, field labels and botanical meta.",
+      "Do render botanical Latin italic, always.",
+      "Do carry structure with 1px hairlines (--sem-border-color) and tonal paper layers; add shadow only on hover / open / overlay.",
+      "Do route every stateful colour through a --sem-* token and an object-private --_* property — never a raw --color-* in a modifier.",
+      "Do keep marigold rare: primary action and active nav, ≤10% of a screen.",
+      "Do let colour enter through plant content — photos and the trait/sun/season badge families — while chrome stays calm.",
+      "Do hold app pages to the ~800px .o-page measure; the 1120px container is a marketing device and the ~1000px companion measure is the dashboard's alone (the Narrow Column Rule).",
+      "Do honour prefers-reduced-motion for every animation (all current keyframes already opt out)."
+    ],
+    "donts": [
+      "Don't introduce a third palette or bring the marketing moss / terra / sage greens into product UI — styles/abstracts/_variables.scss is the single source of truth.",
+      "Don't use --color-ink for body copy — running text is --color-n-deep-grey; ink / ink-soft are for headings and labels.",
+      "Don't drift toward the plant-ID app look: no dark UI, neon accents, camera-first chrome, or gamified score badges. The N/12 spotted hook is a gentle prompt, not a scoreboard.",
+      "Don't drift twee: no script or hand-lettered fonts, watercolour blobs, floral borders, or pastel whimsy.",
+      "Don't mix heading registers within a surface — no italic-400 section header inside the app, no bold-roman headline on a marketing page.",
+      "Don't add dashboards, KPI tiles, stat walls or streak counters (a PRODUCT.md commitment).",
+      "Don't hardcode radius, spacing or colour values — use the scale tokens; Stylelint checks them.",
+      "Don't put a resting shadow on a surface to make it pop — use a tonal step or a hairline.",
+      "Don't touch styles/objects/plant-detail.scss or the .plant / .plant-detail / .plant__frost-tolerance selectors — they're fenced off for a dedicated refactor.",
+      "Don't add new component CSS as components/ui/*.module.css — global SCSS/ITCSS is the settled architecture."
+    ]
+  }
+}

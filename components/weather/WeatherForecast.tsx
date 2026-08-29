@@ -25,7 +25,7 @@ type FetchState =
 function ForecastSkeleton() {
   return (
     <div
-      className="bg-white border border-sand-line rounded-[10px] overflow-hidden animate-pulse"
+      className="bg-white border border-sand-line rounded-[8px] overflow-hidden animate-pulse"
       aria-hidden="true"
     >
       <div className="flex items-center px-4 py-2.5 border-b border-sand-line">
@@ -80,7 +80,7 @@ export function WeatherForecast({ location, onChangeLocation }: Props) {
 
   if (fetchState.status === "error") {
     return (
-      <div className="bg-paper border border-sand-line px-4 py-5 flex flex-col gap-3">
+      <div className="bg-white border border-sand-line rounded-[8px] px-4 py-5 flex flex-col gap-3">
         <div className="flex items-center justify-between">
           <span className="text-xs font-sans text-ink-soft truncate pr-2">
             {location.label}
@@ -107,7 +107,7 @@ export function WeatherForecast({ location, onChangeLocation }: Props) {
 
   const { data } = fetchState;
   return (
-    <div className="bg-white overflow-hidden u-island--compact">
+    <div className="bg-white border border-sand-line rounded-[8px] overflow-hidden">
       <CurrentConditions
         current={data.current}
         locationLabel={location.label}

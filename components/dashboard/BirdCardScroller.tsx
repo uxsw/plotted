@@ -9,24 +9,6 @@ import carouselStyles from "@/components/ui/Carousel.module.css";
 import buttonStyles from "@/components/ui/Button.module.css";
 import { Icon } from "@/components/ui/Icon";
 
-function CheckIcon() {
-  return (
-    <svg
-      width="13"
-      height="13"
-      viewBox="0 0 13 13"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2.5"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <polyline points="1.5,6.5 4.5,9.5 11.5,2.5" />
-    </svg>
-  );
-}
-
 type BirdCardProps = {
   species: SpeciesRow;
   spotted: boolean;
@@ -67,17 +49,14 @@ const BirdCard = forwardRef<HTMLDivElement, BirdCardProps>(
               spotted ? buttonStyles["o-button--is-spotted"] : buttonStyles["o-button--not-spotted"]
             )}
           >
-            {spotted && <Icon name="check" aria-label="Add plant" />}
+            {spotted && <Icon name="check" />}
             {spotted ? "Spotted" : "Mark as spotted"}
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1.5">
-          <p className="o-type-display pica kirk">
-            {species.name}
-          </p>
-          
-        </div>
+        <p className="o-type-display pica kirk">
+          {species.name}
+        </p>
 
         <div>
           <p
