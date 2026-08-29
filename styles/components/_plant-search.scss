@@ -1,0 +1,55 @@
+/* c-plant-search — search field with a leading icon and a trailing clear button.
+   Wraps .o-text-input; the padding here is what actually clears the icons,
+   since .o-text-input sets `padding-inline` and would otherwise win the cascade. */
+
+.c-plant-search {
+    position: relative;
+    flex: 1;
+    min-inline-size: 0;
+
+    &__field {
+        padding-inline-start: calc(var(--space-xl) + var(--space-xs));
+        padding-inline-end: var(--space-md);
+
+        &.is-clearable {
+            padding-inline-end: calc(var(--space-xl) + var(--space-xs));
+        }
+    }
+
+    &__icon {
+        position: absolute;
+        inset-block-start: 50%;
+        inset-inline-start: var(--space-sm);
+        transform: translateY(-50%);
+        display: flex;
+        color: var(--color-n-dark-grey);
+        pointer-events: none;
+    }
+
+    &__clear {
+        position: absolute;
+        inset-block-start: 50%;
+        inset-inline-end: var(--space-xs);
+        transform: translateY(-50%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        inline-size: var(--space-lg);
+        block-size: var(--space-lg);
+        border-radius: var(--radius-roundel);
+        color: var(--color-n-dark-grey);
+        cursor: pointer;
+        transition:
+            background-color var(--transition-time-default) var(--transition-easing-default),
+            color var(--transition-time-default) var(--transition-easing-default);
+
+        &:hover {
+            background-color: var(--color-y-yellow);
+            color: var(--color-n-deep-grey);
+        }
+
+        &:focus-visible {
+            outline: var(--border-width-thin) solid var(--color-b-cyan);
+        }
+    }
+}

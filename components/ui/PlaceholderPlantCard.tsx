@@ -1,8 +1,16 @@
 // Skeleton card matching Card's shell structure. Used for loading states.
-function PlaceholderPlantCard({ opacity = 1 }: { opacity?: number }) {
+// `pulse` adds the opacity breathe for genuine in-flight loading; leave it off
+// for the static ghost cards behind an empty state.
+function PlaceholderPlantCard({
+  opacity = 1,
+  pulse = false,
+}: {
+  opacity?: number;
+  pulse?: boolean;
+}) {
   return (
     <div
-      className="o-card"
+      className={pulse ? "o-card o-pulse" : "o-card"}
       style={{ opacity }}
       aria-hidden="true"
     >
