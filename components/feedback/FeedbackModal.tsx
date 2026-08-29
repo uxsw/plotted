@@ -95,20 +95,20 @@ function SuccessState({ referenceCode, onClose }: { referenceCode: string; onClo
   return (
     <>
       <div className="flex flex-col gap-1">
-        <h2 className="font-display text-xl font-semibold text-ink">Thanks for the feedback</h2>
-        <p className="text-sm font-sans text-ink-soft">Your report has been received.</p>
+        <h2 className="o-type-display pica kirk text-ink">Thanks for the feedback</h2>
+        <p className="brevier text-ink-soft">Your report has been received.</p>
       </div>
 
       <div className="rounded-[10px] bg-marigold border border-marigold/20 px-5 py-4 flex flex-col items-center gap-2 text-center">
-        <span className="text-xs font-sans font-semibold uppercase tracking-wider text-ink" style={{ fontVariant: "small-caps" }}>
+        <span className="o-type-label text-ink">
           Reference code
         </span>
         <div className="flex items-center gap-3">
-          <span className="font-mono text-2xl font-semibold text-ink tracking-widest">
+          <span className="font-mono long-pica kirk text-ink tracking-widest">
             {referenceCode}
           </span>
           {copied ? (
-            <span className="text-xs font-sans text-ink font-medium">Copied!</span>
+            <span className="minion text-ink o-type-weight--medium">Copied!</span>
           ) : (
             <button
               type="button"
@@ -125,7 +125,7 @@ function SuccessState({ referenceCode, onClose }: { referenceCode: string; onClo
         </div>
       </div>
 
-      <p className="text-xs font-sans text-ink-soft leading-relaxed">
+      <p className="minion text-ink-soft o-type-leading--relaxed">
         Want to include a screenshot? Email it to{" "}
         <a
           href="mailto:john@johncowen.co.uk"
@@ -160,13 +160,13 @@ function FormState({
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-5">
       <div className="flex flex-col gap-1">
-        <h2 className="font-display text-xl font-semibold text-ink">Send feedback</h2>
-        <p className="text-sm font-sans text-ink-soft">Tell us what&apos;s wrong or what could be better.</p>
+        <h2 className="o-type-display pica kirk text-ink">Send feedback</h2>
+        <p className="brevier text-ink-soft">Tell us what&apos;s wrong or what could be better.</p>
       </div>
 
       {/* Segmented control */}
       <div className="flex flex-col gap-1.5">
-        <span className="text-xs font-semibold font-sans uppercase tracking-wider text-ink-soft" style={{ fontVariant: "small-caps" }}>
+        <span className="o-type-label text-ink-soft">
           Type
         </span>
         <div className="flex rounded-[10px] border border-sand-line bg-paper-deep overflow-hidden">
@@ -190,8 +190,7 @@ function FormState({
       <div className="flex flex-col gap-1.5">
         <label
           htmlFor="feedback-description"
-          className="text-xs font-semibold font-sans uppercase tracking-wider text-ink-soft"
-          style={{ fontVariant: "small-caps" }}
+          className="o-type-label text-ink-soft"
         >
           Description
         </label>
@@ -202,7 +201,7 @@ function FormState({
           rows={4}
           placeholder="Describe what happened…"
           className={[
-            "rounded border px-3 py-2 text-sm font-sans text-ink resize-none",
+            "rounded border px-3 py-2 brevier text-ink resize-none",
             "bg-paper placeholder:text-ink-soft/50",
             "transition-colors duration-150",
             error
@@ -211,7 +210,7 @@ function FormState({
           ].join(" ")}
         />
         {error && (
-          <p role="alert" className="text-xs font-sans text-marigold">{error}</p>
+          <p role="alert" className="minion text-marigold">{error}</p>
         )}
       </div>
 

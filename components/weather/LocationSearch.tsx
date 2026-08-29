@@ -1,6 +1,4 @@
 "use client";
-import clsx from "clsx";
-import buttonStyles from "@/components/ui/Button.module.css";
 
 import { useState, useEffect, useRef } from "react";
 
@@ -125,7 +123,7 @@ export function LocationSearch({ onSelect, onCancel }: Props) {
           ].join(" ")}
         />
         {loading && (
-          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-ink-soft bosco">
+          <span className="absolute right-3 top-1/2 -translate-y-1/2 minion text-ink-soft">
             …
           </span>
         )}

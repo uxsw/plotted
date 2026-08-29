@@ -37,7 +37,7 @@ export function HourlyStrip({ hourly, current }: Props) {
 
   return (
     <div className="px-4 py-3 border-t border-sand-line">
-      <p className="font-sans text-xs text-ink-soft font-medium mb-2">Next 24 hours</p>
+      <p className="minion text-ink-soft o-type-weight--medium mb-2">Next 24 hours</p>
       {/* Negative right margin lets the strip bleed to the card edge on overflow */}
       <div className="overflow-x-auto -mr-4">
         <div className="flex gap-1.5 pr-4 pb-1">
@@ -48,18 +48,18 @@ export function HourlyStrip({ hourly, current }: Props) {
                 key={entry.time}
                 className="flex flex-col items-center gap-1 border border-sand-line px-2 py-2 min-w-[48px]"
               >
-                <span className="font-sans text-[11px] text-ink-soft leading-none">
+                <span className="minion text-ink-soft o-type-leading--none">
                   {formatHour(entry.time)}
                 </span>
                 <span
                   className={[
-                    "font-sans text-[11px] leading-none",
+                    "minion o-type-leading--none o-type-tabular",
                     hasRain ? "text-marigold" : "text-ink-soft/40",
                   ].join(" ")}
                 >
                   {hasRain ? `${entry.precipitation_probability}%` : "—"}
                 </span>
-                <span className="font-sans text-sm font-medium text-ink leading-none">
+                <span className="brevier o-type-weight--medium text-ink o-type-leading--none o-type-tabular">
                   {Math.round(entry.temperature_2m)}°
                 </span>
               </div>

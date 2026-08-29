@@ -23,7 +23,7 @@ export default function NewPlantPage() {
         >
           <Icon name="back" aria-label="back" />
           My Plants</Link>
-        <h1 className="pica o-type-display o-type-weight--bold">Add a plant</h1>
+        <h1 className="pica o-type-display kirk">Add a plant</h1>
       </div>
       <PlantForm />
     </div>

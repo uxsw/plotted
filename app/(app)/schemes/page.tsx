@@ -24,7 +24,7 @@ export default async function SchemesPage() {
 
   if (error) {
     return (
-      <p className="text-sm font-sans text-marigold">
+      <p className="brevier text-marigold">
         Failed to load planting schemes: {error.message}
       </p>
     );

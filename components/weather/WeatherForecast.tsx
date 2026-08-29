@@ -82,22 +82,22 @@ export function WeatherForecast({ location, onChangeLocation }: Props) {
     return (
       <div className="bg-white border border-sand-line rounded-[8px] px-4 py-5 flex flex-col gap-3">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-sans text-ink-soft truncate pr-2">
+          <span className="minion text-ink-soft truncate pr-2">
             {location.label}
           </span>
           <button
             type="button"
             onClick={onChangeLocation}
-            className="text-xs font-sans text-marigold underline underline-offset-2 hover:text-marigold transition-colors duration-100 shrink-0"
+            className="minion text-marigold underline underline-offset-2 hover:text-marigold transition-colors duration-100 shrink-0"
           >
             Change
           </button>
         </div>
-        <p className="font-sans text-sm text-ink-soft">{fetchState.message}</p>
+        <p className="brevier text-ink-soft">{fetchState.message}</p>
         <button
           type="button"
           onClick={() => setRetryCount((n) => n + 1)}
-          className="self-start font-sans text-sm text-marigold underline underline-offset-2 hover:text-marigold transition-colors duration-100"
+          className="self-start brevier text-marigold underline underline-offset-2 hover:text-marigold transition-colors duration-100"
         >
           Try again
         </button>

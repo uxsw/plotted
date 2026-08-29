@@ -26,7 +26,7 @@ export default class ErrorBoundary extends React.Component<Props, State> {
     if (this.state.hasError) {
       if (this.props.fallback) return this.props.fallback;
       return (
-        <p className="font-display italic text-ink-soft text-sm py-8 text-center">
+        <p className="o-type-display o-type--italic text-ink-soft brevier py-8 text-center">
           Something went wrong loading your plants. Try refreshing the page.
         </p>
       );

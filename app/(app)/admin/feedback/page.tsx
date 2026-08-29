@@ -24,7 +24,7 @@ export default async function FeedbackAdminPage() {
 
   if (error) {
     return (
-      <p className="text-sm font-sans text-marigold">
+      <p className="brevier text-marigold">
         Failed to load feedback: {error.message}
       </p>
     );

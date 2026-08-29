@@ -46,27 +46,27 @@ function ResetPasswordForm() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-sm">
-        <h1 className="text-2xl font-semibold text-gray-900 mb-6 text-center">Garden Portfolio</h1>
+        <h1 className="long-pica kirk text-gray-900 mb-6 text-center">Garden Portfolio</h1>
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
-          <h2 className="text-lg font-semibold text-gray-800">Set new password</h2>
-          {displayError && <p className="text-sm text-red-600 bg-red-50 p-2 rounded">{displayError}</p>}
+          <h2 className="long-primer kirk text-gray-800">Set new password</h2>
+          {displayError && <p className="brevier text-red-600 bg-red-50 p-2 rounded">{displayError}</p>}
           {sessionReady && (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">New password</label>
+                <label className="block o-type-label text-gray-700 mb-1">New password</label>
                 <input
                   type="password"
                   required
                   minLength={6}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full border border-gray-300 rounded px-3 py-2 brevier focus:outline-none focus:ring-2 focus:ring-green-500"
                 />
               </div>
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-green-700 text-white py-2 rounded text-sm font-medium hover:bg-green-800 disabled:opacity-50"
+                className="w-full bg-green-700 text-white py-2 rounded brevier o-type-weight--medium hover:bg-green-800 disabled:opacity-50"
               >
                 {loading ? "Updating…" : "Update password"}
               </button>

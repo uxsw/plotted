@@ -36,11 +36,7 @@ function Select({
 
   return (
     <div className="flex flex-col gap-1.5">
-      <span
-        id={labelId}
-        className="text-xs font-semibold font-sans uppercase tracking-wider text-ink-soft"
-        style={{ fontVariant: "small-caps" }}
-      >
+      <span id={labelId} className="o-type-label text-ink-soft">
         {label}
       </span>
       <RadixSelect.Root
@@ -55,7 +51,7 @@ function Select({
           aria-describedby={error ? errorId : undefined}
           className={[
             "flex items-center justify-between rounded border px-3 py-2",
-            "text-sm font-sans text-left w-full",
+            "brevier text-left w-full",
             "bg-paper transition-colors duration-150",
             "focus:outline-none focus:ring-2 focus:ring-offset-1 focus:ring-offset-paper",
             "disabled:opacity-50 disabled:cursor-not-allowed",
@@ -98,7 +94,7 @@ function Select({
                   key={opt.value}
                   value={opt.value}
                   className={[
-                    "flex items-center px-3 py-2 text-sm font-sans text-ink rounded cursor-pointer",
+                    "flex items-center px-3 py-2 brevier text-ink rounded cursor-pointer",
                     "select-none outline-none",
                     "data-[highlighted]:bg-marigold data-[highlighted]:text-ink",
                     "data-[state=checked]:font-medium",
@@ -112,7 +108,7 @@ function Select({
         </RadixSelect.Portal>
       </RadixSelect.Root>
       {error && (
-        <p id={errorId} role="alert" className="text-xs font-sans text-marigold">
+        <p id={errorId} role="alert" className="minion text-marigold">
           {error}
         </p>
       )}

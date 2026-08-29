@@ -68,7 +68,7 @@ function Attribution({ url }: { url: string | null }) {
       href={url}
       target="_blank"
       rel="noopener noreferrer"
-      className="text-[10px] font-sans text-ink-soft/70 hover:text-ink-soft underline"
+      className="minion text-ink-soft/70 hover:text-ink-soft underline"
     >
       Image: Wikimedia Commons
     </a>
@@ -116,7 +116,7 @@ function EditableName({ schemeId, initialName }: { schemeId: string; initialName
           if (e.key === "Enter") { e.preventDefault(); commit(); }
           if (e.key === "Escape") { setValue(saved); setEditing(false); }
         }}
-        className="w-full font-display italic font-semibold text-[48px] leading-[1.2] text-white bg-transparent border-b border-white/70 outline-none px-2 py-1.5 -ml-2"
+        className="w-full o-type-display o-type--italic long-paragon o-type-leading--tight text-white bg-transparent border-b border-white/70 outline-none px-2 py-1.5 -ml-2"
       />
     );
   }
@@ -176,10 +176,10 @@ function SuggestionCard({
       </div>
       <div className="flex flex-col gap-1 p-3">
         <h3 className="o-type-display long-primer kirk">{suggestion.common_name}</h3>
-        <p className="font-display italic text-xs text-ink-soft leading-snug">{suggestion.latin_name}</p>
+        <p className="o-type-display o-type--italic minion text-ink-soft o-type-leading--snug">{suggestion.latin_name}</p>
         <p className="brevier">{suggestion.why}</p>
         {(suggestion.height_cm || monthsLabel) && (
-          <p className="font-sans text-[11px] text-ink-soft mt-0.5">
+          <p className="minion text-ink-soft mt-0.5">
             {[suggestion.height_cm ? `${suggestion.height_cm}cm` : null, monthsLabel].filter(Boolean).join(" · ")}
           </p>
         )}
@@ -339,7 +339,7 @@ export default function SchemeResults({
         </figure>
       )}
 
-      {addError && <p className="text-sm text-marigold">{addError}</p>}
+      {addError && <p className="brevier text-marigold">{addError}</p>}
 
       {!shoppingListNoticeSeen && (
         <FeatureNoticePanel>

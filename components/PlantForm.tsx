@@ -27,7 +27,7 @@ function UnderlineField({ label, focused, children }: {
 }) {
   return (
     <div className="c-underline-field">
-      <label className="minion">
+      <label className="o-type-label text-ink-soft">
         {label}
       </label>
       <div className="relative">
@@ -194,7 +194,7 @@ export default function PlantForm() {
 
   return (
     <form onSubmit={handleSubmit} className="o-stack">
-      {error && <p className="text-sm text-marigold bg-marigold p-3 rounded mb-4">{error}</p>}
+      {error && <p className="brevier text-marigold bg-marigold p-3 rounded mb-4">{error}</p>}
 
       {/* Photo zone */}
       <div
@@ -207,7 +207,7 @@ export default function PlantForm() {
           <div className="relative w-full h-full ">
             <Image src={photoPreview} alt="Preview" fill className="object-cover" />
             <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
-              <span className="text-white text-sm font-medium font-sans">Click to change</span>
+              <span className="text-white brevier o-type-weight--medium">Click to change</span>
             </div>
           </div>
         ) : (
@@ -251,7 +251,7 @@ export default function PlantForm() {
                 className={`${inputCls}`}
               />
             </UnderlineField>
-            {fieldErrors.species && <p className="text-xs text-marigold mt-1">{fieldErrors.species}</p>}
+            {fieldErrors.species && <p className="minion text-marigold mt-1">{fieldErrors.species}</p>}
           </div>
 
           {/* Cultivar */}

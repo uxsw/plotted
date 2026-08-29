@@ -27,7 +27,7 @@ export default function DeletePlantButton({ id, name }: { id: string; name: stri
 
   return (
     <div className="flex flex-col items-end gap-1">
-      {error && <p className="text-xs text-marigold">{error}</p>}
+      {error && <p className="minion text-marigold">{error}</p>}
       <button
         type="button"
         onClick={() => setOpen(true)}

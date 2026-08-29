@@ -7,6 +7,7 @@ line-height: 1;
 .long-paragon {
 font-size: clamp(1.907rem, 1.287vw + 1.679rem, 3.052rem);
 font-weight: 600;
+line-height: 1.05;
 }
 
 .paragon {
@@ -17,14 +18,17 @@ line-height: 1;
 
 .long-pica {
 font-size: clamp(1.395rem, 0.628vw + 1.283rem, 1.953rem);
+line-height: 1.1;
 }
 
 .pica {
 font-size: clamp(1.202rem, 0.406vw + 1.130rem, 1.563rem);
+line-height: 1.15;
 }
 
 .long-primer {
 font-size: clamp(1.042rem, 0.234vw + 1.000rem, 1.250rem);
+line-height: 1.3;
 }
 
 .primer {
@@ -48,12 +52,37 @@ line-height: 1.5;
   font-family: var(--font-display);
 }
 
+// Mono label role — eyebrows, plate numbers, field labels, metadata.
+// The single label treatment (see DESIGN.md "The Mono Label Rule"); sits at
+// the .minion step. Replaces ad-hoc `text-xs font-semibold uppercase tracking-wider`.
+.o-type-label {
+  font-family: var(--font-mono);
+  font-size: clamp(0.728rem, 0.082vw + 0.713rem, 0.800rem);
+  font-weight: var(--font-weight-medium);
+  line-height: 1.4;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
 .o-type--center {
   text-align: center;
 }
 
+// Line-height utilities — the closed set that real usage needs.
+.o-type-leading--none {
+  line-height: 1;
+}
+
 .o-type-leading--tight {
   line-height: 1.2;
+}
+
+.o-type-leading--snug {
+  line-height: 1.4;
+}
+
+.o-type-leading--relaxed {
+  line-height: 1.6;
 }
 
 .o-type--truncate {
@@ -66,9 +95,22 @@ line-height: 1.5;
   font-style: italic;
 }
 
-.o-type-weight--bold,
+// Tabular figures — for aligned columns of numerals (weather strips, data rows).
+.o-type-tabular {
+  font-variant-numeric: tabular-nums;
+}
+
+.o-type-weight--medium {
+  font-weight: var(--font-weight-medium);
+}
+
 .kirk {
   font-weight: var(--font-weight-bold);
+}
+
+// Cap running prose near 65ch even inside wide containers.
+.o-measure {
+  max-width: var(--measure);
 }
 
 .o-type-line-clamp-2 {

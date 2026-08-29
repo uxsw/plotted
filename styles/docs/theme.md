@@ -51,24 +51,38 @@ Living document. Values and semantic intent for every token referenced across `s
 
 ## Type scale
 
-Printers'-names scale — closed, ordered sequence. Document it as closed so an agent doesn't assume there's room to invent a step.
+**Filled in 2026-08-29 (typeset pass).** Printers'-names scale in `styles/base/_typography.scss` — closed, ordered sequence, fluid `clamp()` steps. Closed means an agent must not invent a step; map any new size need onto the nearest existing one. The Tailwind default type scale (`text-xs`/`text-sm`/…) and arbitrary `text-[Npx]` values are **not** part of this system and are being replaced by these classes.
 
-| Step | Token | Size | Use |
+| Step | Class | Size (min → max) | Role / use |
 |---|---|---|---|
-| minion | | | |
-| brevier | | | |
-| primer | | | |
-| pica | | | |
-| paragon | | | |
-| canon | | | |
-| *(long- variants)* | | | |
+| canon | `.canon` | 2.244 → 3.815rem | **Display** — page/hero headline (marketing hero; large in-app titles). Ships `font-weight: 600`, `line-height: 1`. |
+| long-paragon | `.long-paragon` | 1.907 → 3.052rem | Display, long-heading variant. Ships 600, `line-height: 1.05`. |
+| paragon | `.paragon` | 1.627 → 2.441rem | **Headline** — section headers, app `<h1>`, empty-state headings. Ships 600, `line-height: 1`. |
+| long-pica | `.long-pica` | 1.395 → 1.953rem | Headline, long-heading variant. `line-height: 1.1`. |
+| pica | `.pica` | 1.202 → 1.563rem | **Title** — card titles, dialog titles, sub-section headers. `line-height: 1.15`. Add `.kirk` for the bold-roman product voice. |
+| long-primer | `.long-primer` | 1.042 → 1.250rem | Large body / lead paragraph / editorial narrative in the display face. `line-height: 1.3`. |
+| primer | `.primer` | 0.909 → 1.000rem | **Body** — all running UI text. `line-height: 1.5`. |
+| brevier | `.brevier` (`.o-brevier`) | 0.813 → 0.894rem | **Body-sm** — secondary text, card subtitles, hints, helper copy. `line-height: 1.5`. |
+| minion | `.minion` (`.o-minion`) | 0.728 → 0.800rem | **Caption / data** — metadata, timestamps, dense numerals, badge text. `line-height: 1.5`. Also the size of `.o-type-label`. |
 
-**Weight** is a separate axis, not part of this scale:
-- `--font-weight-regular: 400`
-- `--font-weight-bold: 600`
-- `kirk` — standalone bold utility class, kept deliberately outside the size scale (a long-standing convention, not an inconsistency)
+**Role classes & utilities** (also in `_typography.scss`):
+- `.o-type-display` — sets the Fraunces family; pair with a size step.
+- `.o-type-label` — the single label treatment: Spline Sans Mono, `.minion` size, weight 500, `uppercase`, `letter-spacing: 0.14em`. Replaces ad-hoc `text-xs font-semibold uppercase tracking-wider`. See DESIGN.md "The Mono Label Rule".
+- `.o-type-tabular` — `font-variant-numeric: tabular-nums` for aligned numeral columns.
+- `.o-type--italic`, `.o-type--truncate`, `.o-type--center`, `.o-type-line-clamp-2` — unchanged.
+- Line-height: `.o-type-leading--none` (1) / `--tight` (1.2) / `--snug` (1.4) / `--relaxed` (1.6). Closed set matching real usage; replaces Tailwind `leading-*`.
+- `.o-measure` — `max-width: var(--measure)` (34rem ≈ 65ch), for running prose in wide containers.
 
-**Known, accepted temporary state:** `--font-weight-bold` shares its custom-property name with Tailwind's own theme variable (Tailwind's default resolves to `700`, not `600`). This caused one silent collision during migration (`app/auth/reset-password/page.tsx`, changed to `font-semibold` to preserve intent). Not being resolved with a naming workaround — full Tailwind removal is the actual fix, at which point the collision stops existing. Worth checking `app/auth/reset-password` and anywhere else still on plain Tailwind for the same class of collision before Tailwind is fully gone.
+**Weight** is a separate axis, not part of the size scale:
+- `--font-weight-regular: 400` (body default)
+- `--font-weight-medium: 500` → `.o-type-weight--medium`. Added 2026-08-29. Inter 500 and Spline Mono 500 are loaded; this is the weight for mono labels and subtle UI emphasis (replaces Tailwind `font-medium`).
+- `--font-weight-bold: 600` → `.kirk` (the bold-roman product-heading voice; replaces Tailwind `font-semibold`). The old `.o-type-weight--bold` alias (1 call site) was removed in favour of `.kirk`.
+
+**Two-Register Rule (from DESIGN.md):** Fraunces headings are `.kirk` bold roman (600) in the product UI, italic 400 on marketing/editorial surfaces — never mixed within one surface.
+
+**Tailwind `--font-weight-bold` name collision (theme-var, resolves to 700):** still a real landmine while any plain-Tailwind `font-bold` exists, but the typeset pass confirmed **zero `font-bold`/`font-black` usages** in `app/` and `components/`, so nothing currently trips it. `app/auth/reset-password/page.tsx` uses `font-semibold` and is on the deferred conversion list.
+
+**Fonts loaded** (`app/layout.tsx`): Fraunces 400/500/600 normal+italic; Inter 400/500/600 (700 dropped 2026-08-29, unused); Spline Sans Mono 400/500.
 
 ## Spacing scale
 

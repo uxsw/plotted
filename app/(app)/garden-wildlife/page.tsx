@@ -25,8 +25,8 @@ export default async function GardenWildlifePage() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="font-display font-medium text-2xl text-ink">Garden birds</h1>
-        <p className="font-sans text-sm text-ink-soft">
+        <h1 className="o-type-display pica kirk text-ink">Garden birds</h1>
+        <p className="brevier text-ink-soft">
           Tick off the birds you&apos;ve spotted in your garden.
         </p>
       </div>

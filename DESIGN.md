@@ -188,8 +188,10 @@ A warm, low-glare neutral base — bone and sand paper tones under near-black te
 ## Typography
 
 **Display Font:** Fraunces (with `'Fraunces Fallback'`, Georgia, serif) — loaded weights 400/500/600, normal + italic.
-**Body Font:** Inter (with `'Inter Fallback'`, system-ui) — weights 400/500/600/700.
+**Body Font:** Inter (with `'Inter Fallback'`, system-ui) — weights 400/500/600.
 **Label / Mono Font:** Spline Sans Mono (with `ui-monospace`) — weights 400/500.
+
+**Weight axis** (`styles/abstracts/_variables.scss`): `--font-weight-regular: 400` (body) · `--font-weight-medium: 500` → `.o-type-weight--medium` (mono labels, subtle UI emphasis) · `--font-weight-bold: 600` → `.kirk` (the product-heading voice). No 700 anywhere.
 
 **Character:** A high-contrast pairing that reads two ways by surface. In the **product UI** Fraunces is set *bold roman* (`.kirk` / weight 600) — headings are firm, confident, quietly authoritative, the voice of a well-made reference tool. On **marketing and editorial surfaces** the same face turns *italic at weight 400* — the cadence of an engraved catalogue caption, warm and a little literary. Inter keeps the working text plain, neutral and quiet; Spline Sans Mono adds a technical, plate-number register that signals the AI/tech side of the product without shouting. Sizes follow a closed printers'-names scale (`minion → brevier → primer → pica → paragon → canon`, with `long-` variants) defined as fluid `clamp()` steps in `styles/base/_typography.scss`; `.canon` / `.paragon` / `.long-paragon` carry `font-weight: 600` built in, the smaller steps inherit 400.
 
@@ -198,13 +200,17 @@ A warm, low-glare neutral base — bone and sand paper tones under near-black te
 - **Headline** (Fraunces roman 600 [`.kirk`], `clamp(1.63rem → 2.44rem)` [`.paragon`], line-height 1): app page titles (`<h1>` on `/plants`, `/schemes`, `/shopping-list`, auth), section headers, empty-state headings, dialog titles. This is the workhorse app heading. Marketing section headings instead take italic 400.
 - **Title** (Fraunces roman 600 [`.kirk`], `clamp(1.20rem → 1.56rem)` [`.pica` / `.long-primer`], line-height ~1.15): card titles and sub-section headers. Botanical Latin inside a title is additionally italicised (`.o-type--italic`), so a plant card reads as bold-roman with an italic species — see the Latin-in-Italic Rule.
 - **Editorial display-body** (Fraunces roman 400, no `.kirk`, `.long-primer`/`.primer` size): long narrative-intro paragraphs rendered in the display face rather than Inter — e.g. a scheme's `narrative_intro`. Not a heading; the absence of `.kirk` is what separates it.
-- **Body** (Inter 400, `clamp(0.91rem → 1.00rem)` [`.primer`], line-height 1.5): all running text. Marketing lead paragraphs step up to ~18–19px at a ~470–520px measure.
-- **Label** (Spline Sans Mono 500, `clamp(0.73rem → 0.80rem)` [`.minion`], letter-spacing `0.12–0.16em`, uppercase): eyebrows, plate numbers, field labels, status pills, botanical metadata. Form-field labels (`Input.tsx`) use an Inter small-caps variant of the same idea (`text-xs font-semibold uppercase tracking-wider`, `font-variant: small-caps`) — acceptable, but mono is the signature.
+- **Body** (Inter 400, `clamp(0.91rem → 1.00rem)` [`.primer`], line-height 1.5): all running text. Running prose is capped near 65ch via `.o-measure` (`max-width: var(--measure)`, 34rem) so it stays readable in the wide dashboard and marketing containers. Marketing lead paragraphs step up to ~18–19px at a ~470–520px measure.
+- **Body-sm** (Inter 400, `clamp(0.81rem → 0.89rem)` [`.brevier`], line-height 1.5): secondary text, card subtitles, helper and hint copy.
+- **Caption / data** (Inter, `clamp(0.73rem → 0.80rem)` [`.minion`]): metadata, timestamps, badge text, and — with `.o-type-tabular` — dense numeral columns (weather strips).
+- **Label** (`.o-type-label` — Spline Sans Mono 500, `.minion` size, letter-spacing `0.14em`, uppercase): eyebrows, plate numbers, **all field labels**, status pills, botanical metadata. This is now the single label treatment — the earlier Inter small-caps variant on form fields is retired.
 
 ### Named Rules
 **The Two-Register Rule.** Fraunces headings are **bold roman (600)** in the product UI and **italic (400)** on marketing/editorial surfaces — never mixed within one surface. Adding an app section header in italic, or a marketing headline in bold roman, is drift. Weight and style are chosen by surface mode (Operate → roman 600; Persuade/Read editorial → italic 400), not by taste per screen.
 
-**The Mono Label Rule.** Eyebrows, specimen/plate numbers, field labels and botanical metadata are Spline Sans Mono, uppercase, letter-spacing `0.12–0.16em`. This is the type element that carries the "tech-aware" half of the identity.
+**The Mono Label Rule.** Eyebrows, specimen/plate numbers, field labels and botanical metadata all use `.o-type-label` — Spline Sans Mono, uppercase, `letter-spacing: 0.14em`, weight 500, `.minion` size. One class, no per-context variants; it is the type element that carries the "tech-aware" half of the identity.
+
+**The One Scale Rule.** Type size comes only from the printers'-names step classes (`minion → canon` + `long-` variants) in `styles/base/_typography.scss`, and line-height only from `.o-type-leading--*`. Tailwind `text-*` / `font-*` / `leading-*` and arbitrary `text-[Npx]` are not part of this system — they are being converted out. Never introduce a new size value; map the need onto the nearest step.
 
 **The Latin-in-Italic Rule.** Botanical names (genus, species, cultivar) are always rendered italic, whatever the surrounding type.
 

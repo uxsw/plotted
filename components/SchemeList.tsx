@@ -143,7 +143,7 @@ function SchemeCard({
               if (e.key === "Enter") { e.preventDefault(); commitRename(); }
               if (e.key === "Escape") { setNameValue(scheme.name); setRenaming(false); }
             }}
-            className="font-display font-medium text-base text-ink leading-snug bg-transparent border-b border-marigold outline-none w-full"
+            className="o-type-display long-primer kirk text-ink o-type-leading--snug bg-transparent border-b border-marigold outline-none w-full"
           />
         ) : (
           <h3 className="o-type-display long-primer kirk o-type-leading--tight">{nameValue}</h3>
@@ -289,10 +289,10 @@ function FailedSchemeCard({
       </div>
 
       <div className="flex flex-col gap-3 p-4 flex-1">
-        <p className="font-sans text-sm text-ink-soft leading-snug">
+        <p className="brevier text-ink-soft o-type-leading--snug">
           {retrying ? "Trying again…" : "This scheme couldn't be generated."}
         </p>
-        {retryError && <p className="font-sans text-xs text-marigold">{retryError}</p>}
+        {retryError && <p className="minion text-marigold">{retryError}</p>}
         {!retrying && (
           <button
             type="button"
@@ -305,14 +305,14 @@ function FailedSchemeCard({
             Try again
           </button>
         )}
-        <p className="font-sans text-xs text-ink-soft">{formatDate(scheme.created_at)}</p>
+        <p className="minion text-ink-soft">{formatDate(scheme.created_at)}</p>
       </div>
 
       <button
         type="button"
         aria-label="Dismiss this failed scheme"
         onClick={() => setDeleteOpen(true)}
-        className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white text-base leading-none"
+        className="absolute top-2 right-2 z-10 w-7 h-7 rounded-full bg-black/40 text-white flex items-center justify-center hover:bg-black/60 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white primer o-type-leading--none"
       >
         ×
       </button>

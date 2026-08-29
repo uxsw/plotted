@@ -25,7 +25,7 @@ export default async function WeatherPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="font-display font-medium text-2xl text-ink">Weather</h1>
+      <h1 className="o-type-display pica kirk text-ink">Weather</h1>
       <WeatherLocation initialGarden={garden} />
     </div>
   );

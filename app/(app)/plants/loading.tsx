@@ -16,7 +16,7 @@ export default function PlantsLoading() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="o-type-display pica kirk">My plants</h1>
-        <div className="inline-flex items-center justify-center rounded px-4 py-2 text-sm font-medium font-sans bg-marigold text-white opacity-40 pointer-events-none select-none">
+        <div className="inline-flex items-center justify-center rounded px-4 py-2 brevier o-type-weight--medium bg-marigold text-white opacity-40 pointer-events-none select-none">
           + Add plant
         </div>
       </div>

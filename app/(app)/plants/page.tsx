@@ -27,7 +27,7 @@ export default async function PlantsPage() {
 
   if (error) {
     return (
-      <p className="text-sm font-sans text-marigold">
+      <p className="brevier text-marigold">
         Failed to load plants: {error.message}
       </p>
     );
