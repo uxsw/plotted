@@ -715,7 +715,7 @@ export default function PlantDetail({
                     {editing === "flowering_season" ? (
                       <>
                         <div ref={containerRef} className="o-row">
-                          <div className="o-row expand">
+                          <div className="o-row u-expand">
                             <select autoFocus value={v1} onChange={e => setV1(e.target.value)} onBlur={blurCancel} onKeyDown={esc} className={INPUT}>
                               <option value="">— from —</option>
                               {MONTHS.map((m, i) => <option key={m} value={String(i + 1)}>{m}</option>)}

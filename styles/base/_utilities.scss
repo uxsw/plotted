@@ -39,3 +39,8 @@
 .u-w-100 {
   inline-size: 100% !important;
 }
+
+.u-expand {
+    flex: 1 !important;
+    min-width: 0 !important;
+}

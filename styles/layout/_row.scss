@@ -3,18 +3,11 @@
     display: flex;
     gap: var(--space-sm);
 
-    &.space-between {
+    &.o-row--space-between {
         justify-content: space-between;
     }
 
-    &.align-top {
+    &.o-row--align-top {
         align-items: baseline;
     }
-}
-
-/* refactor - can't remember what this is doing now ...
- */
-.expand {
-    flex: 1;
-    min-width: 0;
 }

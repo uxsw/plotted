@@ -69,7 +69,7 @@ export function PwaInstallTriggerCard({
 
   return (
     <>
-      <div className="flex gap-3 surface-info p-4">
+      <div className="flex gap-3 o-surface--info p-4">
         <div className="shrink-0 mt-0.5">
           <PhoneDownloadIcon />
         </div>

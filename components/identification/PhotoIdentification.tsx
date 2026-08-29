@@ -179,7 +179,7 @@ export default function PhotoIdentification({ photoBlob, currentSpecies, onSelec
   // manual entry rather than leaving the user at a dead end.
   if (shown.length === 0) {
     return (
-      <section className="o-surface-info has-border island o-stack" aria-label="Identification results">
+      <section className="o-surface--info has-border island o-stack" aria-label="Identification results">
         <p className="long-primer o-type-display">We couldn&apos;t match this photo to a plant.</p>
         <p className="brevier">You can still save the plant as <em>unidentified</em>. We&apos;re constantly working on our plant identification featues so might be able to give you a better answer in future.</p>
         <Button
