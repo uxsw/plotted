@@ -9,6 +9,8 @@ interface CardProps {
   placeholder?: ReactNode;
   badge?: ReactNode;
   sunBadge?: ReactNode;
+  /** Overlay pinned top-left of the media well, opposite the sun badge. */
+  marker?: ReactNode;
   title: React.ReactNode;
   subtitle?: React.ReactNode;
   tags?: ReactNode;
@@ -28,6 +30,7 @@ function Card({
   placeholder,
   badge,
   sunBadge,
+  marker,
   title,
   subtitle,
   tags,
@@ -75,6 +78,9 @@ function Card({
         )}
         {badge && (
           <div className="is-badge">{badge}</div>
+        )}
+        {marker && (
+          <div className="is-marker">{marker}</div>
         )}
       </div>
 

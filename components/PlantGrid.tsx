@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import type { Plant } from "@/lib/types";
 import { scientificNameString, autocompleteTitle } from "@/lib/plantName";
 import { PlantName } from "@/components/plants/PlantName";
+import { SpecimenPlate } from "@/components/plants/SpecimenPlate";
+import { InBloomMark } from "@/components/plants/InBloomMark";
 import { Card } from "@/components/ui/Card";
 import { SunBadge } from "@/components/ui/SunBadge";
 import { PlaceholderPlantCard } from "@/components/ui/PlaceholderPlantCard";
@@ -30,19 +32,15 @@ type FilterId = typeof FILTER_OPTIONS[number]["id"];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function wrapMonth(m: number): number {
-  if (m < 1) return m + 12;
-  if (m > 12) return m - 12;
-  return m;
-}
-
-function isFloweringNow(plant: Plant): boolean {
+// The current calendar month sits inside the plant's flowering window. Drives
+// both the "In bloom" mark on each card and the "Flowering now" filter, so the
+// count in the tally, the marks on the grid, and the filtered result all agree.
+function isInBloomThisMonth(plant: Plant): boolean {
   const { flowering_season_from: from, flowering_season_to: to } = plant;
   if (from === null || to === null) return false;
-  const window = [wrapMonth(CURRENT_MONTH - 1), CURRENT_MONTH, wrapMonth(CURRENT_MONTH + 1)];
-  return window.some(m =>
-    from <= to ? m >= from && m <= to : m >= from || m <= to
-  );
+  return from <= to
+    ? CURRENT_MONTH >= from && CURRENT_MONTH <= to
+    : CURRENT_MONTH >= from || CURRENT_MONTH <= to;
 }
 
 function matchesSearch(plant: Plant, q: string): boolean {
@@ -56,7 +54,7 @@ function matchesSearch(plant: Plant, q: string): boolean {
 
 function applyFilter(plant: Plant, filter: FilterId | null): boolean {
   if (!filter) return true;
-  if (filter === "flowering-now") return isFloweringNow(plant);
+  if (filter === "flowering-now") return isInBloomThisMonth(plant);
   return plant.sun_needs === filter;
 }
 
@@ -187,6 +185,19 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
     [plants, query, activeFilter]
   );
 
+  // Plate numbers run over the full portfolio in its sort order (most recently
+  // planted = Pl. 01), so a specimen keeps its number through any search/filter.
+  const plateNumbers = useMemo(() => {
+    const m = new Map<string, number>();
+    plants.forEach((p, i) => m.set(p.id, i + 1));
+    return m;
+  }, [plants]);
+
+  const bloomCount = useMemo(
+    () => plants.filter(isInBloomThisMonth).length,
+    [plants]
+  );
+
 
   // Close autocomplete dropdown on outside click
   useEffect(() => {
@@ -254,6 +265,13 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
     setFilterOpen(false);
   }
 
+  function resetView() {
+    setQuery("");
+    setActiveFilter(null);
+    setDropdownOpen(false);
+    setHighlighted(-1);
+  }
+
   if (plants.length === 0) {
     return (
       <div className="c-plant-grid">
@@ -281,10 +299,12 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
     );
   }
 
-  const resultLabel =
-    filtered.length === 0 ? "" :
-    filtered.length === 1 ? "1 plant" :
-    `${filtered.length} plants`;
+  const isFiltering = query.trim().length > 0 || activeFilter !== null;
+  const countText = isFiltering
+    ? `${filtered.length} of ${plants.length}`
+    : plants.length === 1
+      ? "1 plant"
+      : `${plants.length} plants`;
 
   return (
     <div className="o-stack">
@@ -424,17 +444,39 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
         </div>
       )}
 
-      {/* Result count */}
-      {resultLabel && <p className="minion text-ink-soft">{resultLabel}</p>}
+      {/* Catalogue index line */}
+      {filtered.length > 0 && (
+        <div className="c-plant-tally o-type-label">
+          <span>{countText}</span>
+          {!isFiltering && bloomCount > 0 && (
+            <button
+              type="button"
+              className="c-plant-tally__bloom"
+              onClick={() => setActiveFilter("flowering-now")}
+            >
+              {bloomCount} in bloom
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Plant grid or no-results message */}
       {filtered.length === 0 ? (
-        <p className="o-surface--info brevier u-island--compact">No plants match</p>
+        <div className="o-surface--info u-island--compact c-plant-empty">
+          <p className="brevier">Nothing in your garden matches that.</p>
+          <button type="button" className="c-plant-empty__reset brevier" onClick={resetView}>
+            Show all plants
+          </button>
+        </div>
       ) : (
         <div className="c-plant-grid">
           {filtered.map((plant, index) => {
             const sciName = scientificNameString(plant);
             const hasSeason = plant.flowering_season_from !== null && plant.flowering_season_to !== null;
+            const seasonBand = hasSeason
+              ? getSeasonBand(plant.flowering_season_from!, plant.flowering_season_to!)
+              : undefined;
+            const inBloom = isInBloomThisMonth(plant);
             return (
               <Card
                 key={plant.id}
@@ -442,12 +484,23 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
                 photoAlt={sciName}
                 priority={index === 0}
                 identificationStatus={plant.identification_status}
+                placeholder={
+                  <SpecimenPlate
+                    genus={plant.genus}
+                    species={plant.species}
+                    cultivar={plant.cultivar}
+                    commonName={plant.common_names?.[0]}
+                    plateNumber={plateNumbers.get(plant.id) ?? index + 1}
+                    seasonBand={seasonBand}
+                  />
+                }
+                marker={inBloom && seasonBand ? <InBloomMark seasonBand={seasonBand} /> : undefined}
                 title={<PlantName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} variant="card" />}
                 subtitle={plant.common_names?.[0]}
                 sunBadge={plant.sun_needs ? <SunBadge value={plant.sun_needs} /> : undefined}
                 tags={
                   hasSeason ? (
-                    <span className={`o-badge is-sm ${FLOWERING_SEASON_BADGE_MODIFIER[getSeasonBand(plant.flowering_season_from!, plant.flowering_season_to!)]}`}>
+                    <span className={`o-badge is-sm ${FLOWERING_SEASON_BADGE_MODIFIER[seasonBand!]}`}>
                       {formatSeason(plant.flowering_season_from!, plant.flowering_season_to!)}
                     </span>
                   ) : undefined
