@@ -68,9 +68,7 @@ export function LocationOnboardingCard({ initiallyVisible }: Props) {
       <div className="o-row o-row--align-top">
         <Icon name="mappin" aria-label="location" />
         <div>
-          <h2 className="pica o-type-display kirk o-row">
-            
-            Where&apos;s your garden?</h2>
+          <h2 className="pica o-type-display kirk">Where&apos;s your garden?</h2>
           {/* Placeholder copy — for Natalie's review */}
           <p className="brevier">
             So we can show accurate weather and planting advice for your area.

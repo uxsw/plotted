@@ -1,5 +1,5 @@
 .c-spotted-count {
-    background-color: #e6e2c7;
+    background-color: var(--color-sand);
     border-radius: var(--radius-m);
     overflow: hidden;
     padding-block-end: var(--space-md);
@@ -10,7 +10,7 @@
 
     &__progress-bar {
         border-radius: var(--radius-pill);
-        background-color: #d8cf96;
+        background-color: var(--color-sand-line);
         height: 8px;
         overflow: hidden;
     }
@@ -41,6 +41,12 @@
     position: relative;
     inline-size: 60%;
     max-width: 300px;
+    transition: box-shadow var(--transition-time-default) var(--transition-easing-default);
+
+    &:hover {
+        // menu-raised step — see DESIGN.md Elevation & Depth
+        box-shadow: 0 4px 6px -1px #0000001a, 0 2px 4px -2px #0000001a;
+    }
 }
 
 .c-spotted-count__media {
@@ -57,6 +63,6 @@
         bottom: var(--space-sm);
         right: var(--space-sm);
         position: absolute;
-        z-index: 999;
+        z-index: 2;
     }
 }

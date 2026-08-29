@@ -59,7 +59,11 @@ export function SchemeCardScroller({ schemes }: { schemes: SchemeSummary[] }) {
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const cardWidth = el.clientWidth * 0.8 + 12; // 80% width + gap-3
+    // Measure the real card + gap rather than assuming a fixed ratio — the
+    // item is 60% wide but clamps at max-width, so a ratio drifts on wide screens.
+    const firstCard = el.firstElementChild as HTMLElement | null;
+    const gap = parseFloat(getComputedStyle(el).columnGap) || 8;
+    const cardWidth = firstCard ? firstCard.offsetWidth + gap : el.clientWidth * 0.6 + gap;
     const index = Math.round(el.scrollLeft / cardWidth);
     setActiveIndex(Math.min(index, schemes.length - 1));
   }, [schemes.length]);

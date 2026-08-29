@@ -83,7 +83,7 @@ export function WeatherLocation({ initialGarden }: Props) {
 
       {isDefaultLocation && !isSearching && (
         // Placeholder copy — for Natalie's review
-        <p className="minion u-pad-inline">
+        <p className="minion">
           Showing Exeter as a default. Use the Change button to set your garden&apos;s location.
         </p>
       )}

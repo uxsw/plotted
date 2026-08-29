@@ -20,14 +20,21 @@ export function GardenCardScroller({ plants }: { plants: PlantSummary[] }) {
   const handleScroll = useCallback(() => {
     const el = scrollRef.current;
     if (!el) return;
-    const cardWidth = el.clientWidth * 0.8 + 12; // 80% width + gap-3
+    // Measure the real card + gap rather than assuming a fixed ratio — the
+    // item is 60% wide but clamps at max-width, so a ratio drifts on wide screens.
+    const firstCard = el.firstElementChild as HTMLElement | null;
+    const gap = parseFloat(getComputedStyle(el).columnGap) || 8;
+    const cardWidth = firstCard ? firstCard.offsetWidth + gap : el.clientWidth * 0.6 + gap;
     const index = Math.round(el.scrollLeft / cardWidth);
     setActiveIndex(Math.min(index, plants.length - 1));
   }, [plants.length]);
 
   return (
     <div>
-      <h2 className="pica o-type-display kirk">Garden highlights</h2>
+      <div className="c-dash-heading">
+        <h2 className="pica o-type-display kirk">Lately in your garden</h2>
+        <p className="brevier">The plants you&apos;ve added or updated most recently.</p>
+      </div>
       <div
         ref={scrollRef}
         onScroll={handleScroll}
@@ -51,12 +58,12 @@ export function GardenCardScroller({ plants }: { plants: PlantSummary[] }) {
                 />
               ) : (
                 <div className="is-placeholder">
-                  <Icon name="sprout" aria-label="Add plant" size={32} />
+                  <Icon name="sprout" size={32} />
                 </div>
               )}
             </div>
-            <div className="o-stack u-island">
-              <p className="o-type-display long-primer kirk">
+            <div className="o-stack--compact u-island">
+              <p className="o-type-display long-primer o-type--italic kirk">
                 <PlantName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} variant="card" />
               </p>
               {plant.common_names?.[0] && (
@@ -70,7 +77,7 @@ export function GardenCardScroller({ plants }: { plants: PlantSummary[] }) {
       </div>
 
       {plants.length > 1 && (
-        <div className="flex justify-center gap-1.5 mt-1" aria-hidden="true">
+        <div className="c-plant-scroller__dots flex justify-center gap-1.5 mt-1" aria-hidden="true">
           {plants.map((_, i) => (
             <span
               key={i}

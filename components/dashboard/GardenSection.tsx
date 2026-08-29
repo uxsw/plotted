@@ -7,28 +7,16 @@ import { GardenCardScroller } from "@/components/dashboard/GardenCardScroller";
 import buttonStyles from "@/components/ui/Button.module.css";
 import { Icon } from "@/components/ui/Icon";
 
-function PlusIcon() {
-  return (
-    <svg
-      className="w-4 h-4"
-      fill="none"
-      viewBox="0 0 24 24"
-      stroke="currentColor"
-      strokeWidth={2}
-      aria-hidden="true"
-    >
-      <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4" />
-    </svg>
-  );
-}
-
 export default async function GardenSection() {
   const supabase = await createClient();
+  // "Lately in your garden" — ordered by last touch (the plants_updated_at
+  // trigger bumps updated_at on any edit, including a new photo), so recently
+  // added *and* recently changed plants surface here, not just the newest.
   const { data } = await supabase
     .from("plants")
     .select("id, genus, species, cultivar, common_names, photo_url, sun_needs, identification_status")
     .eq("status", "active")
-    .order("created_at", { ascending: false })
+    .order("updated_at", { ascending: false })
     .limit(6);
 
   const plants = (data ?? []) as Pick<
@@ -37,9 +25,7 @@ export default async function GardenSection() {
   >[];
 
   return (
-    <section
-      aria-label="Your garden"
-    >
+    <section aria-label="Lately in your garden">
       {plants.length === 0 ? (
         <div className="hero-card--empty">
           <EmptyState
@@ -53,7 +39,7 @@ export default async function GardenSection() {
                   buttonStyles["o-button--primary"]
                 )}
               >
-                <PlusIcon />
+                <Icon name="add" size={16} />
                 Add plant
               </Link>
             }
@@ -72,7 +58,7 @@ export default async function GardenSection() {
               )}
             >
               View all
-              <Icon name="right" aria-label="View all" /> 
+              <Icon name="right" size={16} />
             </Link>
             <Link
               href="/plants/new"
@@ -81,7 +67,7 @@ export default async function GardenSection() {
                 buttonStyles["o-button--primary"]
               )}
             >
-              <Icon name="add" aria-label="Add plants" /> 
+              <Icon name="add" size={16} />
               Add plant
             </Link>
           </div>
