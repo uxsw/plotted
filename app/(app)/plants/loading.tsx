@@ -1,31 +1,43 @@
-function SkeletonCard() {
-  return (
-    <div className="flex flex-col overflow-hidden border border-sand-line bg-paper">
-      <div className="aspect-[4/3] w-full bg-sand animate-pulse" />
-      <div className="flex flex-col gap-1.5 p-4">
-        <div className="h-4 w-3/4 rounded bg-sand animate-pulse" />
-        <div className="h-3 w-1/2 rounded bg-sand animate-pulse" />
-        <div className="mt-1 h-5 w-16 rounded-full bg-sand animate-pulse" />
-      </div>
-    </div>
-  );
-}
+import clsx from "clsx";
+import buttonStyles from "@/components/ui/Button.module.css";
+import { Icon } from "@/components/ui/Icon";
+import { PlaceholderPlantCard } from "@/components/ui/PlaceholderPlantCard";
 
 export default function PlantsLoading() {
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <h1 className="o-type-display pica kirk">My plants</h1>
-        <div className="inline-flex items-center justify-center rounded px-4 py-2 brevier o-type-weight--medium bg-marigold text-white opacity-40 pointer-events-none select-none">
-          + Add plant
-        </div>
+    <div className="o-stack" aria-busy="true">
+      <div className="o-row o-row--space-between">
+        <h1 className="pica o-type-display kirk">My plants</h1>
+        <span
+          className={clsx(buttonStyles["o-button"], buttonStyles["o-button--primary"])}
+          style={{ opacity: 0.4, pointerEvents: "none" }}
+          aria-hidden="true"
+        >
+          <Icon name="add" aria-label="none" /> Add plant
+        </span>
       </div>
 
-      <div className="grid grid-cols-[repeat(auto-fill,minmax(200px,1fr))] gap-4">
-        <SkeletonCard />
-        <SkeletonCard />
-        <SkeletonCard />
-        <SkeletonCard />
+      <div className="o-row">
+        <div className="c-plant-search">
+          <div
+            className="o-text-input c-plant-search__field o-pulse"
+            style={{ height: "2.625rem" }}
+            aria-hidden="true"
+          />
+        </div>
+        <span
+          className={clsx(buttonStyles["o-button"], buttonStyles["o-button--icon"])}
+          style={{ pointerEvents: "none" }}
+          aria-hidden="true"
+        >
+          <Icon name="filter" aria-label="none" />
+        </span>
+      </div>
+
+      <div className="c-plant-grid">
+        {Array.from({ length: 6 }).map((_, i) => (
+          <PlaceholderPlantCard key={i} pulse />
+        ))}
       </div>
     </div>
   );

@@ -89,14 +89,6 @@ function getAutocompleteItems(plants: Plant[], query: string): AutocompleteItem[
 
 // ─── Icons ────────────────────────────────────────────────────────────────────
 
-function XSmallIcon() {
-  return (
-    <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-      <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
-    </svg>
-  );
-}
-
 function FlowerIcon() {
   return (
     <svg width="13" height="13" viewBox="0 0 13 13" fill="none" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -295,43 +287,41 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
     `${filtered.length} plants`;
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="o-stack">
 
       {/* ── Filter bar ── */}
-      <div className="flex items-center gap-2">
+      <div className="o-row">
 
         {/* Search input */}
-        <div ref={searchRef} className="relative flex-1">
-          <div className="relative flex items-center">
-            <span className="absolute left-3 text-ink-soft pointer-events-none">
-              <Icon name="search" aria-label="Search plants" /> 
-            </span>
-            <input
-              ref={inputRef}
-              type="text"
-              value={query}
-              onChange={e => {
-                const val = e.target.value;
-                setQuery(val);
-                setHighlighted(-1);
-                setDropdownOpen(val.length >= 1);
-              }}
-              onFocus={() => { if (query.length >= 1) setDropdownOpen(true); }}
-              onKeyDown={handleInputKeyDown}
-              placeholder="search plants…"
-              className="o-text-input w-full pl-9 pr-8 py-2.5 placeholder:text-ink-soft/50 outline-none focus:border-marigold transition-colors"
-            />
-            {query && (
-              <button
-                type="button"
-                onClick={clearSearch}
-                aria-label="Clear search"
-                className="absolute right-3 text-ink-soft hover:text-ink transition-colors"
-              >
-                <XSmallIcon />
-              </button>
-            )}
-          </div>
+        <div ref={searchRef} className="c-plant-search">
+          <span className="c-plant-search__icon">
+            <Icon name="search" aria-label="Search plants" />
+          </span>
+          <input
+            ref={inputRef}
+            type="text"
+            value={query}
+            onChange={e => {
+              const val = e.target.value;
+              setQuery(val);
+              setHighlighted(-1);
+              setDropdownOpen(val.length >= 1);
+            }}
+            onFocus={() => { if (query.length >= 1) setDropdownOpen(true); }}
+            onKeyDown={handleInputKeyDown}
+            placeholder="Search plants…"
+            className={clsx("o-text-input", "c-plant-search__field", query && "is-clearable")}
+          />
+          {query && (
+            <button
+              type="button"
+              onClick={clearSearch}
+              aria-label="Clear search"
+              className="c-plant-search__clear"
+            >
+              <Icon name="close" size={16} aria-label="Clear search" />
+            </button>
+          )}
 
           {/* Autocomplete dropdown */}
           {showAutocomplete && (
@@ -435,11 +425,11 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
       )}
 
       {/* Result count */}
-      <p className="minion text-ink-soft -mt-1">{resultLabel}</p>
+      {resultLabel && <p className="minion text-ink-soft">{resultLabel}</p>}
 
       {/* Plant grid or no-results message */}
       {filtered.length === 0 ? (
-        <p className="o-surface--info brevier u-island--compact">No plants match this search</p>
+        <p className="o-surface--info brevier u-island--compact">No plants match</p>
       ) : (
         <div className="c-plant-grid">
           {filtered.map((plant, index) => {
