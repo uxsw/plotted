@@ -12,6 +12,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Vendored tooling scripts — not part of the app, not linted against its ruleset.
+    ".claude/**",
+    ".github/**",
+    // Supabase CLI-generated temp files (git-ignored; flat config doesn't read .gitignore).
+    "supabase/.temp/**",
   ]),
 ]);
 

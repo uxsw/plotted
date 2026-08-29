@@ -1,4 +1,6 @@
+import type { CSSProperties } from "react";
 import type { Metadata } from "next";
+import DashboardDateline from "@/components/dashboard/DashboardDateline";
 import LocationOnboardingSection from "@/components/dashboard/LocationOnboardingSection";
 import GardenSection from "@/components/dashboard/GardenSection";
 import BirdsSection from "@/components/dashboard/BirdsSection";
@@ -23,8 +25,19 @@ const SECTIONS = [
 export default function DashboardPage() {
   return (
     <div className="c-dashboard__container">
+      <div className="c-dashboard__block" style={{ "--dash-i": 0 } as CSSProperties}>
+        <DashboardDateline />
+      </div>
       {SECTIONS.map((Section, i) => (
-        <Section key={i} />
+        // A conditional section can render nothing — :empty on the block keeps
+        // it out of the flex flow so no phantom gap opens up.
+        <div
+          key={i}
+          className="c-dashboard__block"
+          style={{ "--dash-i": i + 1 } as CSSProperties}
+        >
+          <Section />
+        </div>
       ))}
     </div>
   );

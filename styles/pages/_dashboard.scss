@@ -11,6 +11,104 @@
   gap: var(--space-lg);
 }
 
+// Each section sits in a block wrapper. A conditional section can render
+// nothing — :empty drops the wrapper so the flex gap doesn't double up.
+.c-dashboard__block:empty {
+  display: none;
+}
+
+// One authored moment: on load the stream settles into place, a short rise
+// from an already-near-visible baseline, gently staggered top to bottom.
+// The delay tail stays under the fold; nothing above it waits long.
+@media (prefers-reduced-motion: no-preference) {
+  .c-dashboard__block {
+    animation: c-dashboard-settle 460ms cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: calc(var(--dash-i, 0) * 60ms);
+  }
+}
+
+@keyframes c-dashboard-settle {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+// Masthead: today's date, the season, a hairline beneath. A running header
+// for a page that is always "today".
+.c-dash-dateline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-xs) var(--space-md);
+  padding-block: var(--space-sm) var(--space-sm);
+  border-block-end: var(--border-width-hairline) solid var(--sem-border-color);
+
+  &__season {
+    flex: none;
+    color: var(--color-ink-soft);
+  }
+}
+
+// First-run garden block: a blank catalogue plate. Sand panel, a hairline
+// frame with an inset mat rule, a mono folio number, and a faint sprig
+// pressed into the page where a specimen photo would sit.
+.c-garden-plate {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-md);
+  min-height: 260px;
+  padding: var(--space-xl) var(--space-lg);
+  text-align: center;
+  background-color: var(--color-sand);
+  border: var(--border-width-hairline) solid var(--color-sand-line);
+  border-radius: var(--radius-m);
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: var(--space-sm);
+    border: var(--border-width-hairline) solid var(--color-sand-line);
+    border-radius: var(--radius-s);
+    pointer-events: none;
+  }
+
+  &__folio {
+    position: absolute;
+    inset-block-start: var(--space-md);
+    inset-inline-start: var(--space-md);
+    color: var(--color-ink-soft);
+  }
+
+  &__sprig {
+    inline-size: 84px;
+    block-size: 84px;
+    color: var(--color-ink-soft);
+    opacity: 0.22;
+  }
+
+  &__body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-sm);
+    max-width: 34ch;
+
+    .o-button {
+      margin-block-start: var(--space-sm);
+    }
+  }
+}
+
 // Shared block heading: bold-roman title + optional one-line subtitle,
 // with the gap before the block's content baked in.
 .c-dash-heading {
@@ -172,6 +270,30 @@
       align-items: center;
       justify-content: center;
       color: var(--color-r-red);
+    }
+  }
+}
+
+// Interaction character on the plant scroller: the photo leans in a touch on
+// hover, and the card gives a small press acknowledgement on tap. Movement is
+// motion-gated; the resting hover shadow is not. Placed after the base
+// `.c-plant-scroller__item` rule above so this transition wins.
+@media (prefers-reduced-motion: no-preference) {
+  .c-plant-scroller__item {
+    transition:
+      box-shadow var(--transition-time-default) var(--transition-easing-default),
+      transform 120ms cubic-bezier(0.16, 1, 0.3, 1);
+
+    .is-plant-image {
+      transition: scale var(--transition-time-slow) cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    &:hover .is-plant-image {
+      scale: 1.04;
+    }
+
+    &:active {
+      transform: scale(0.985);
     }
   }
 }

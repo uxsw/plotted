@@ -110,6 +110,20 @@ export function BirdCardScroller({
 
   const total = initialSpecies.length;
   const count = spottedIds.size;
+  const pct = total > 0 ? (count / total) * 100 : 0;
+
+  // The progress fill eases from 0 to its value once the component is mounted,
+  // so the collection reads as "filling in" on arrival rather than snapping to
+  // a number. The short delay puts the width change on a later frame than mount
+  // so the CSS transition catches it; a plain timeout also survives a
+  // backgrounded tab, where requestAnimationFrame would stay parked. Under
+  // prefers-reduced-motion the width transition is dropped in CSS
+  // (_spotted-count.scss), so the bar just snaps to its value with no travel.
+  const [barWidth, setBarWidth] = useState("0%");
+  useEffect(() => {
+    const id = setTimeout(() => setBarWidth(`${pct}%`), 60);
+    return () => clearTimeout(id);
+  }, [pct]);
 
   // On mount, instantly scroll to center the first unspotted card (boundary between groups).
   useEffect(() => {
@@ -180,14 +194,20 @@ export function BirdCardScroller({
   return (
     <div className="o-stack--compact">
       <div className="o-row u-pad-inline">
-        <span className="c-spotted-count__count paragon kirk">{count}</span>
-        <span className="brevier">of {total} spotted</span>
+        {count === total && total > 0 ? (
+          <span className="brevier">You&apos;ve spotted all {total}</span>
+        ) : (
+          <>
+            <span className="c-spotted-count__count paragon kirk">{count}</span>
+            <span className="brevier">of {total} spotted</span>
+          </>
+        )}
       </div>
       <div className="u-pad-inline">
         <div className="c-spotted-count__progress-bar">
           <div
             className="c-spotted-count__progress-bar-complete"
-            style={{ width: total > 0 ? `${(count / total) * 100}%` : "0%" }}
+            style={{ width: barWidth }}
           />
         </div>
       </div>
