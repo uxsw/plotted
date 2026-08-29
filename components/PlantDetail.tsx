@@ -440,13 +440,13 @@ export default function PlantDetail({
 
       {plant.lookup_status === "error" && (
         <div className="o-row">
-          <p className="font-display italic text-[14px] text-[#C2603C]">
+          <p className="o-type-display o-type--italic brevier text-[#C2603C]">
             Something went wrong looking this up.
           </p>
           <Button
             type="button"
             variant="secondary"
-            className="text-xs px-3 py-1"
+            className="minion px-3 py-1"
             onClick={retryLookup}
             disabled={retrying}
           >
@@ -517,7 +517,7 @@ export default function PlantDetail({
 
         <div className="o-stack">
           {photoError && (
-            <p className="font-display italic text-[14px] text-[#C2603C]">{photoError}</p>
+            <p className="o-type-display o-type--italic brevier text-[#C2603C]">{photoError}</p>
           )}
           {!noticeSeen && (plant.lookup_status === "success" || plant.lookup_status === "not_found") && (
             <AiNoticePanel>
@@ -578,7 +578,7 @@ export default function PlantDetail({
                             className={INPUT_FLEX} />
                           <SaveCancel onSave={speciesSave} onCancel={cancel} />
                         </div>
-                        {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                        {err && <p className="minion text-red-600 mt-1">{err}</p>}
                       </>
                     ) : (
                       <Tap
@@ -600,7 +600,7 @@ export default function PlantDetail({
                             className={INPUT_FLEX} />
                           <SaveCancel onSave={() => textSave("cultivar")} onCancel={cancel} />
                         </div>
-                        {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                        {err && <p className="minion text-red-600 mt-1">{err}</p>}
                       </>
                     ) : (
                       <Tap
@@ -646,7 +646,7 @@ export default function PlantDetail({
                             className={INPUT_FLEX} />
                           <SaveCancel onSave={() => numSave("eventual_height_cm")} onCancel={cancel} />
                         </div>
-                        {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                        {err && <p className="minion text-red-600 mt-1">{err}</p>}
                       </>
                     ) : (
                       <Tap
@@ -668,7 +668,7 @@ export default function PlantDetail({
                             className={INPUT_FLEX} />
                           <SaveCancel onSave={() => numSave("eventual_spread_cm")} onCancel={cancel} />
                         </div>
-                        {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                        {err && <p className="minion text-red-600 mt-1">{err}</p>}
                       </>
                     ) : (
                       <Tap
@@ -700,7 +700,7 @@ export default function PlantDetail({
                           </select>
                           <SaveCancel onSave={() => commit({ sun_needs: (v1 as SunNeeds) || null })} onCancel={cancel} />
                         </div>
-                        {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                        {err && <p className="minion text-red-600 mt-1">{err}</p>}
                       </>
                     ) : (
                       <Tap
@@ -730,7 +730,7 @@ export default function PlantDetail({
                             onCancel={cancel}
                           />
                         </div>
-                        {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                        {err && <p className="minion text-red-600 mt-1">{err}</p>}
                       </>
                     ) : (
                       <Tap
@@ -803,7 +803,7 @@ export default function PlantDetail({
                             onCancel={cancel}
                           />
                         </div>
-                        {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                        {err && <p className="minion text-red-600 mt-1">{err}</p>}
                       </>
                     ) : (
                       <Tap
@@ -833,7 +833,7 @@ export default function PlantDetail({
                   <div className="u-justify-end">
                     <SaveCancel onSave={() => commit({ notes: v1.trim() || null })} onCancel={cancel} />
                   </div>
-                  {err && <p className="text-xs text-red-600 mt-1">{err}</p>}
+                  {err && <p className="minion text-red-600 mt-1">{err}</p>}
                 </div>
               ) : (
                 <button

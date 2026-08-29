@@ -50,14 +50,14 @@ function BirdCard({
       </div>
 
       <div className="flex flex-col gap-1 flex-1 min-w-0">
-        <p className="font-display font-medium text-base text-ink leading-snug">
+        <p className="o-type-display long-primer kirk text-ink o-type-leading--snug">
           {species.name}
         </p>
-        <p className="font-sans text-xs text-ink-soft leading-relaxed">
+        <p className="minion text-ink-soft o-type-leading--relaxed">
           {species.description}
         </p>
         {error && (
-          <p className="font-sans text-xs text-marigold mt-0.5">{error}</p>
+          <p className="minion text-marigold mt-0.5">{error}</p>
         )}
         <div className="mt-2">
           <button
@@ -65,7 +65,7 @@ function BirdCard({
             onClick={onToggle}
             aria-label={spotted ? `Unmark ${species.name} as spotted` : `Mark ${species.name} as spotted`}
             className={[
-              "inline-flex items-center gap-1.5 px-2.5 py-1 rounded text-xs font-medium font-sans transition-colors duration-150",
+              "inline-flex items-center gap-1.5 px-2.5 py-1 rounded minion o-type-weight--medium transition-colors duration-150",
               "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-paper",
               spotted
                 ? "bg-marigold text-white hover:bg-marigold"
@@ -131,8 +131,8 @@ export default function WildlifeGrid({
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="font-sans text-sm text-ink-soft -mt-2">
-        <span className="font-medium text-ink">{count}</span>/{total} spotted
+      <p className="brevier text-ink-soft -mt-2">
+        <span className="o-type-weight--medium text-ink">{count}</span>/{total} spotted
       </p>
       {initialSpecies.map((species) => (
         <BirdCard

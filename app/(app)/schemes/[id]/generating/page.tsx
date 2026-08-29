@@ -97,10 +97,10 @@ export default function GeneratingPage() {
           <div className="flex flex-col items-center text-center gap-3 py-4">
             <LoadingSpinner />
             <div>
-              <h1 className="font-display font-medium text-2xl text-ink">
+              <h1 className="o-type-display pica kirk text-ink">
                 Planting scheme being generated
               </h1>
-              <p className="font-sans text-sm text-ink-soft mt-1">
+              <p className="brevier text-ink-soft mt-1">
                 This usually takes around 30 seconds.
               </p>
             </div>
@@ -112,19 +112,19 @@ export default function GeneratingPage() {
             href={`/schemes/${id}`}
             className="block rounded-xl border border-marigold bg-marigold px-6 py-6 text-center hover:bg-marigold transition-colors"
           >
-            <h1 className="font-display font-medium text-2xl text-ink">
+            <h1 className="o-type-display pica kirk text-ink">
               Your planting scheme is ready.
             </h1>
-            <p className="font-sans text-sm text-ink/80 mt-1">View now →</p>
+            <p className="brevier text-ink/80 mt-1">View now →</p>
           </Link>
         )}
 
         {status === "failed" && (
           <div className="flex flex-col items-center text-center gap-3 py-4">
-            <h1 className="font-display font-medium text-2xl text-ink">
+            <h1 className="o-type-display pica kirk text-ink">
               Planting scheme couldn&apos;t be generated
             </h1>
-            <Link href="/schemes" className="font-sans text-sm text-marigold hover:underline">
+            <Link href="/schemes" className="brevier text-marigold hover:underline">
               View details →
             </Link>
           </div>
@@ -156,7 +156,7 @@ export default function GeneratingPage() {
           type="button"
           onClick={prev}
           aria-label="Previous photo"
-          className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 text-white text-lg flex items-center justify-center hover:bg-black/60 transition-colors"
+          className="absolute left-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 text-white long-primer flex items-center justify-center hover:bg-black/60 transition-colors"
         >
           ‹
         </button>
@@ -164,7 +164,7 @@ export default function GeneratingPage() {
           type="button"
           onClick={next}
           aria-label="Next photo"
-          className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 text-white text-lg flex items-center justify-center hover:bg-black/60 transition-colors"
+          className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-black/40 text-white long-primer flex items-center justify-center hover:bg-black/60 transition-colors"
         >
           ›
         </button>

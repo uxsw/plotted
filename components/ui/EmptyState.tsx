@@ -20,7 +20,7 @@ function EmptyState({ illustration, heading, body, action }: EmptyStateProps) {
           {heading}
         </h2>
         {body && (
-          <p className="font-sans text-sm text-ink-soft leading-relaxed">{body}</p>
+          <p className="brevier text-ink-soft o-type-leading--relaxed">{body}</p>
         )}
       </div>
       {action && <div className="mt-2">{action}</div>}

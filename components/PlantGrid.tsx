@@ -154,14 +154,6 @@ function SunCloudIcon() {
   );
 }
 
-function CheckIcon() {
-  return (
-    <svg width="11" height="11" viewBox="0 0 11 11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="1,5.5 4,8.5 10,2" />
-    </svg>
-  );
-}
-
 // ─── Highlight helper ─────────────────────────────────────────────────────────
 
 function Highlight({ text, query }: { text: string; query: string }) {
@@ -171,7 +163,7 @@ function Highlight({ text, query }: { text: string; query: string }) {
   return (
     <>
       {text.slice(0, idx)}
-      <span className="text-marigold font-semibold">{text.slice(idx, idx + query.length)}</span>
+      <span className="text-marigold kirk">{text.slice(idx, idx + query.length)}</span>
       {text.slice(idx + query.length)}
     </>
   );
@@ -282,10 +274,10 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
             <PlusIcon />
           </div>
           <div className="flex flex-col gap-1.5 p-4 flex-1">
-            <h3 className="font-display font-medium text-base text-ink leading-snug">
+            <h3 className="o-type-display long-primer kirk text-ink o-type-leading--snug">
               Add your first plant
             </h3>
-            <p className="font-sans text-xs text-ink-soft leading-snug">
+            <p className="minion text-ink-soft o-type-leading--snug">
               Start building your garden portfolio.
             </p>
           </div>
@@ -443,7 +435,7 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
       )}
 
       {/* Result count */}
-      <p className="font-sans text-xs text-ink-soft -mt-1">{resultLabel}</p>
+      <p className="minion text-ink-soft -mt-1">{resultLabel}</p>
 
       {/* Plant grid or no-results message */}
       {filtered.length === 0 ? (

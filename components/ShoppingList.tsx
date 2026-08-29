@@ -37,7 +37,7 @@ function EmptyState() {
       <div className="text-sand-line">
         <SproutIcon />
       </div>
-      <p className="font-sans text-sm text-ink-soft">
+      <p className="brevier text-ink-soft">
         Your shopping list is empty — add plants from your planting schemes using the cart icon.
       </p>
     </div>
@@ -79,20 +79,20 @@ function ItemCard({
       </div>
 
       <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-        <p className="font-display italic text-sm text-ink leading-snug truncate">{item.species}</p>
+        <p className="o-type-display o-type--italic brevier text-ink o-type-leading--snug truncate">{item.species}</p>
         {nameLabel && (
-          <p className="font-sans text-xs text-ink-soft leading-snug truncate">{nameLabel}</p>
+          <p className="minion text-ink-soft o-type-leading--snug truncate">{nameLabel}</p>
         )}
         <div className="mt-1">
           {item.scheme_id ? (
             <Link
               href={`/schemes/${item.scheme_id}`}
-              className="font-sans text-[11px] text-marigold hover:text-marigold underline"
+              className="minion text-marigold hover:text-marigold underline"
             >
               {item.scheme_name ?? "Planting scheme"}
             </Link>
           ) : (
-            <p className="font-sans text-[11px] text-ink-soft/60 italic">
+            <p className="minion text-ink-soft/60 o-type--italic">
               This planting scheme has been deleted
             </p>
           )}
@@ -147,11 +147,11 @@ function PurchaseDialog({
     <Modal isOpen={isOpen} onClose={onDismiss}>
       <div className="flex flex-col gap-5">
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-xl font-semibold text-ink">Plant purchased!</h2>
-          <p className="text-sm font-sans text-ink-soft">
+          <h2 className="o-type-display pica kirk text-ink">Plant purchased!</h2>
+          <p className="brevier text-ink-soft">
             Do you want to add <span className="italic">{item?.species}</span> to your garden?
           </p>
-          {error && <p className="text-xs font-sans text-marigold mt-1">{error}</p>}
+          {error && <p className="minion text-marigold mt-1">{error}</p>}
         </div>
         <div className="flex gap-2 justify-end">
           <Button
@@ -248,7 +248,7 @@ export default function ShoppingList({ initialItems }: { initialItems: ShoppingL
 
   return (
     <div className="flex flex-col gap-3">
-      {deleteError && <p className="text-sm text-marigold">{deleteError}</p>}
+      {deleteError && <p className="brevier text-marigold">{deleteError}</p>}
       {items.map((item) => (
         <ItemCard
           key={item.id}

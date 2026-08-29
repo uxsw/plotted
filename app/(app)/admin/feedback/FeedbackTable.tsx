@@ -53,7 +53,7 @@ export default function FeedbackTable({ rows }: { rows: FeedbackRow[] }) {
 
   if (rows.length === 0) {
     return (
-      <p className="text-sm font-sans text-ink-soft text-center py-12">
+      <p className="brevier text-ink-soft text-center py-12">
         No feedback submitted yet.
       </p>
     );
@@ -61,14 +61,13 @@ export default function FeedbackTable({ rows }: { rows: FeedbackRow[] }) {
 
   return (
     <div className="overflow-x-auto -mx-4">
-      <table className="w-full text-sm font-sans border-collapse min-w-[520px]">
+      <table className="w-full brevier border-collapse min-w-[520px]">
         <thead>
           <tr className="border-b border-sand-line">
             {["Reference", "Type", "Description", "Page", "Date"].map((h) => (
               <th
                 key={h}
-                className="px-4 py-2.5 text-left text-xs font-semibold uppercase tracking-wider text-ink-soft"
-                style={{ fontVariant: "small-caps" }}
+                className="px-4 py-2.5 text-left o-type-label text-ink-soft"
               >
                 {h}
               </th>
@@ -87,7 +86,7 @@ export default function FeedbackTable({ rows }: { rows: FeedbackRow[] }) {
                     isOpen ? "bg-sand/40" : "hover:bg-sand/30",
                   ].join(" ")}
                 >
-                  <td className="px-4 py-3 font-mono text-xs text-marigold whitespace-nowrap">
+                  <td className="px-4 py-3 font-mono minion text-marigold whitespace-nowrap">
                     {row.reference_code}
                   </td>
                   <td className="px-4 py-3 whitespace-nowrap">
@@ -101,11 +100,11 @@ export default function FeedbackTable({ rows }: { rows: FeedbackRow[] }) {
                     </span>
                   </td>
                   <td className="px-4 py-3 text-ink-soft max-w-[100px]">
-                    <span className="block truncate font-mono text-xs" title={row.page_url ?? ""}>
+                    <span className="block truncate font-mono minion" title={row.page_url ?? ""}>
                       {truncate(pathOnly(row.page_url), 24)}
                     </span>
                   </td>
-                  <td className="px-4 py-3 text-ink-soft whitespace-nowrap text-xs">
+                  <td className="px-4 py-3 text-ink-soft whitespace-nowrap minion">
                     {formatDate(row.created_at)}
                   </td>
                 </tr>
@@ -114,22 +113,22 @@ export default function FeedbackTable({ rows }: { rows: FeedbackRow[] }) {
                     <td colSpan={5} className="px-4 py-4">
                       <div className="flex flex-col gap-3">
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-wider text-ink-soft mb-1" style={{ fontVariant: "small-caps" }}>
+                          <p className="o-type-label text-ink-soft mb-1">
                             Description
                           </p>
-                          <p className="text-sm text-ink leading-relaxed whitespace-pre-wrap">{row.description}</p>
+                          <p className="brevier text-ink o-type-leading--relaxed whitespace-pre-wrap">{row.description}</p>
                         </div>
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-wider text-ink-soft mb-1" style={{ fontVariant: "small-caps" }}>
+                          <p className="o-type-label text-ink-soft mb-1">
                             Page URL
                           </p>
-                          <p className="text-xs font-mono text-ink-soft break-all">{row.page_url ?? "—"}</p>
+                          <p className="minion font-mono text-ink-soft break-all">{row.page_url ?? "—"}</p>
                         </div>
                         <div>
-                          <p className="text-xs font-semibold uppercase tracking-wider text-ink-soft mb-1" style={{ fontVariant: "small-caps" }}>
+                          <p className="o-type-label text-ink-soft mb-1">
                             User Agent
                           </p>
-                          <p className="text-xs font-mono text-ink-soft break-all">{row.user_agent ?? "—"}</p>
+                          <p className="minion font-mono text-ink-soft break-all">{row.user_agent ?? "—"}</p>
                         </div>
                       </div>
                     </td>

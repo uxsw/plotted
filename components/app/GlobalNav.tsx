@@ -24,7 +24,7 @@ export default function GlobalNav() {
             aria-current={isActive ? "page" : undefined}
             className={`nav-sections__item ${
               isActive
-                ? `${activeClasses} font-medium`
+                ? `${activeClasses} o-type-weight--medium`
                 : "border-transparent hover:text-ink"
             }`}
           >

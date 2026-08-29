@@ -15,11 +15,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
     return (
       <div className="flex flex-col gap-1.5">
-        <label
-          htmlFor={id}
-          className="text-xs font-semibold font-sans uppercase tracking-wider text-ink-soft"
-          style={{ fontVariant: "small-caps" }}
-        >
+        <label htmlFor={id} className="o-type-label text-ink-soft">
           {label}
         </label>
         <input
@@ -28,7 +24,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           aria-invalid={!!error}
           aria-describedby={error ? errorId : undefined}
           className={[
-            "rounded border px-3 py-2 text-sm font-sans text-ink",
+            "rounded border px-3 py-2 brevier text-ink",
             "bg-paper placeholder:text-ink-soft/50",
             "transition-colors duration-150",
             error
@@ -39,7 +35,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
           {...props}
         />
         {error && (
-          <p id={errorId} role="alert" className="text-xs font-sans text-marigold">
+          <p id={errorId} role="alert" className="minion text-marigold">
             {error}
           </p>
         )}

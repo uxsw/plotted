@@ -3,7 +3,7 @@
 // UI feature intros that have no AI-content semantic.
 export function FeatureNoticePanel({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex items-center gap-3 bg-sand border border-sand-line rounded-[10px] px-4 py-3 text-[13px] font-sans text-ink">
+    <div className="flex items-center gap-3 bg-sand border border-sand-line rounded-[10px] px-4 py-3 brevier text-ink">
       {children}
     </div>
   );

@@ -93,7 +93,12 @@
     --border-width-thin: 2px;
 
     --font-weight-regular: 400;
+    --font-weight-medium: 500;
     --font-weight-bold: 600;
+
+    // Prose measure — cap running text near 65ch so long-form copy stays readable
+    // even in the wide dashboard / marketing containers.
+    --measure: 34rem;
 }
 
 //  Radius

@@ -165,7 +165,7 @@ export function PwaIosInstallOverlay({ isOpen, onClose }: PwaIosInstallOverlayPr
     >
       {/* Header */}
       <div className="flex items-center justify-between px-5 pt-5 pb-2 shrink-0">
-        <span className="text-[13px] font-sans text-ink-soft">
+        <span className="brevier text-ink-soft">
           Step {step + 1} of {STEPS.length}
         </span>
         <button
@@ -189,10 +189,10 @@ export function PwaIosInstallOverlay({ isOpen, onClose }: PwaIosInstallOverlayPr
 
         {/* Text */}
         <div className="flex flex-col items-center gap-3 text-center max-w-xs">
-          <h2 className="font-display font-medium text-[26px] text-ink leading-tight">
+          <h2 className="o-type-display kirk pica text-ink o-type-leading--tight">
             {headline}
           </h2>
-          <p className="font-sans text-[15px] text-ink-soft leading-relaxed">
+          <p className="primer text-ink-soft o-type-leading--relaxed">
             {body}
           </p>
         </div>
@@ -218,7 +218,7 @@ export function PwaIosInstallOverlay({ isOpen, onClose }: PwaIosInstallOverlayPr
         <Button
           variant="primary"
           onClick={handleCta}
-          className="w-full justify-center py-3 text-[15px]"
+          className="w-full justify-center py-3 primer"
         >
           {cta}
         </Button>

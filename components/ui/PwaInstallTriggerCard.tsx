@@ -74,10 +74,10 @@ export function PwaInstallTriggerCard({
           <PhoneDownloadIcon />
         </div>
         <div className="flex-1 min-w-0">
-          <p className="text-[14px] font-sans font-medium leading-snug">
+          <p className="brevier o-type-weight--medium o-type-leading--snug">
             Add Plotted to your home screen
           </p>
-          <p className="text-[13px] font-sans mt-0.5 leading-snug">
+          <p className="brevier mt-0.5 o-type-leading--snug">
             Quick access to your garden, anytime.
           </p>
           <div className="flex items-center gap-4 mt-3">
@@ -93,7 +93,7 @@ export function PwaInstallTriggerCard({
             <button
               type="button"
               onClick={dismiss}
-              className="text-[13px] font-sans hover:text-ink transition-colors"
+              className="brevier hover:text-ink transition-colors"
             >
               Not now
             </button>

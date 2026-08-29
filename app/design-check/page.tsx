@@ -17,10 +17,10 @@ export default function DesignCheckPage() {
 
         <header>
           <h1 className="font-display text-3xl font-medium text-ink">Plotted Design Reference</h1>
-          <p className="font-sans text-sm text-ink-soft mt-1">
+          <p className="brevier text-ink-soft mt-1">
             Component primitives — visual review against design reference.
           </p>
-          <div className="mt-3 p-3 bg-marigold border border-marigold/30 rounded text-xs font-sans text-marigold">
+          <div className="mt-3 p-3 bg-marigold border border-marigold/30 rounded minion text-marigold">
             ⚠ <strong>Note:</strong> The paper grain texture was approximated — the{" "}
             <code>/design-reference/</code> HTML file was not found in the repo.
             Once the reference file is added, copy the exact{" "}
@@ -34,11 +34,10 @@ export default function DesignCheckPage() {
           <div className="space-y-2">
             <p className="font-display text-3xl font-medium text-ink">Display — Fraunces medium</p>
             <p className="font-display italic text-xl text-ink-soft">Display italic — scientific name</p>
-            <p className="font-sans text-base text-ink">Body — Inter regular</p>
-            <p className="font-sans text-sm text-ink-soft">Small body — ink-soft</p>
+            <p className="primer text-ink">Body — Inter regular</p>
+            <p className="brevier text-ink-soft">Small body — ink-soft</p>
             <p
-              className="font-sans text-xs font-semibold uppercase tracking-wider text-ink-soft"
-              style={{ fontVariant: "small-caps" }}
+              className="font-sans o-type-label text-ink-soft"
             >
               Label — small caps uppercase
             </p>
@@ -66,7 +65,7 @@ export default function DesignCheckPage() {
                   className="w-12 h-12 rounded border border-sand-line"
                   style={{ backgroundColor: hex }}
                 />
-                <span className="font-sans text-xs text-ink-soft">{name}</span>
+                <span className="minion text-ink-soft">{name}</span>
               </div>
             ))}
           </div>
@@ -179,7 +178,7 @@ export default function DesignCheckPage() {
               subtitle="Rosa 'Compassion'"
               tags={<span className="o-badge is-flowering-spring">Spring</span>}
               footer={
-                <span className="text-xs font-sans text-ink-soft">Planted 2022</span>
+                <span className="minion text-ink-soft">Planted 2022</span>
               }
               onClick={() => {}}
             />
@@ -206,7 +205,7 @@ export default function DesignCheckPage() {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="font-sans text-xs font-semibold uppercase tracking-widest text-ink-soft border-b border-sand-line pb-2">
+    <h2 className="o-type-label text-ink-soft border-b border-sand-line pb-2">
       {children}
     </h2>
   );

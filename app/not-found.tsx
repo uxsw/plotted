@@ -22,24 +22,24 @@ export default function NotFound() {
         </svg>
 
         <div className="flex flex-col items-center gap-2">
-          <p className="font-sans text-xs font-semibold tracking-widest uppercase text-ink-soft">
+          <p className="o-type-label text-ink-soft">
             Page not found
           </p>
-          <p className="font-display text-[120px] leading-none text-ink font-medium">
+          <p className="font-display text-[120px] o-type-leading--none text-ink o-type-weight--medium">
             404
           </p>
         </div>
 
         <div className="flex flex-col items-center gap-1">
-          <p className="font-display font-semibold text-[28px] leading-tight text-ink">
+          <p className="font-display kirk paragon o-type-leading--tight text-ink">
             This page seems to have wandered off
           </p>
-          <p className="font-display italic text-ink-soft text-base">
+          <p className="o-type-display o-type--italic text-ink-soft primer">
             pagina errante &lsquo;Lost Path&rsquo;
           </p>
         </div>
 
-        <p className="font-sans text-ink-soft text-base leading-relaxed">
+        <p className="text-ink-soft primer o-type-leading--relaxed">
           The path you followed must have overgrown. It happens — gardens are
           always changing. Head back to your collection and pick up where you
           left off.
@@ -47,7 +47,7 @@ export default function NotFound() {
 
         <Link
           href="/plants"
-          className="bg-ink text-paper font-sans font-medium text-sm px-6 py-3 rounded-full hover:bg-ink-soft transition-colors"
+          className="bg-ink text-paper o-type-weight--medium brevier px-6 py-3 rounded-full hover:bg-ink-soft transition-colors"
         >
           ← Back to my plant collection
         </Link>

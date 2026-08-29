@@ -34,17 +34,17 @@ export function OnboardingLocationStep() {
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-col gap-1">
-        <h1 className="font-display font-medium text-2xl text-ink">
+        <h1 className="o-type-display pica kirk text-ink">
           Where&apos;s your garden?
         </h1>
-        <p className="text-sm font-sans text-ink-soft">
+        <p className="brevier text-ink-soft">
           Used for local weather forecasts. You can change this later in your
           account settings.
         </p>
       </div>
 
       {error && (
-        <p className="text-sm font-sans text-marigold">{error}</p>
+        <p className="brevier text-marigold">{error}</p>
       )}
 
       <div className={isPending ? "opacity-50 pointer-events-none" : ""}>
@@ -55,7 +55,7 @@ export function OnboardingLocationStep() {
         type="button"
         onClick={handleSkip}
         disabled={isPending}
-        className="self-start text-sm font-sans text-ink-soft underline underline-offset-2 hover:text-ink transition-colors duration-100 disabled:opacity-50"
+        className="self-start brevier text-ink-soft underline underline-offset-2 hover:text-ink transition-colors duration-100 disabled:opacity-50"
       >
         Skip for now
       </button>

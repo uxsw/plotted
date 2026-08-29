@@ -146,7 +146,7 @@ export default function PhotoIdentification({ photoBlob, currentSpecies, onSelec
   if (status === "saving") {
     return (
       <div className="c-identify" role="status">
-        <p className="text-sm text-ink-soft">Saving your plant…</p>
+        <p className="brevier text-ink-soft">Saving your plant…</p>
       </div>
     );
   }
