@@ -114,19 +114,13 @@ export function BirdCardScroller({
 
   // The progress fill eases from 0 to its value once the component is mounted,
   // so the collection reads as "filling in" on arrival rather than snapping to
-  // a number. Reduced-motion users get the final width with no travel.
+  // a number. The short delay puts the width change on a later frame than mount
+  // so the CSS transition catches it; a plain timeout also survives a
+  // backgrounded tab, where requestAnimationFrame would stay parked. Under
+  // prefers-reduced-motion the width transition is dropped in CSS
+  // (_spotted-count.scss), so the bar just snaps to its value with no travel.
   const [barWidth, setBarWidth] = useState("0%");
   useEffect(() => {
-    const reduce =
-      typeof window !== "undefined" &&
-      window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (reduce) {
-      setBarWidth(`${pct}%`);
-      return;
-    }
-    // A short delay puts the width change on a later frame than mount, so the
-    // CSS transition animates it; a plain timeout also survives a background
-    // tab, where requestAnimationFrame would stay parked.
     const id = setTimeout(() => setBarWidth(`${pct}%`), 60);
     return () => clearTimeout(id);
   }, [pct]);
