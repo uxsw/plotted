@@ -37,7 +37,7 @@ export default async function PlantsPage() {
 
   return (
     <div className="o-stack">
-      <div className="o-row space-between">
+      <div className="o-row o-row--space-between">
         <h1 className="pica o-type-display kirk">My plants</h1>
         {plantCount > 0 && (
           <Link

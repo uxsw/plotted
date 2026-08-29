@@ -171,7 +171,6 @@ Reference existing design tokens (`var(--space-md)`, `var(--color-surface)`, etc
 ### Files created
 
 - `components/ui/Button.module.css` — `o-button` base + all variants below
-- `components/ui/Card.module.css` — `o-card` base + elements + variants below
 
 ### `o-button` — elements and modifiers found in practice
 

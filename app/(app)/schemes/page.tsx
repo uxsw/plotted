@@ -46,7 +46,7 @@ export default async function SchemesPage() {
 
   return (
     <div className="o-stack">
-      <div className="o-row space-between">
+      <div className="o-row o-row--space-between">
         <h1 className="pica o-type-display kirk">Planting schemes</h1>
         {schemes.length > 0 && (
           <Link

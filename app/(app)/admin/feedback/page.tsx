@@ -33,7 +33,7 @@ export default async function FeedbackAdminPage() {
   return (
 
     <div className="o-stack">
-      <div className="o-row space-between">
+      <div className="o-row o-row--space-between">
         <h1 className="pica">Feedback</h1>
         <span className="minion">
           {rows?.length ?? 0} {rows?.length === 1 ? "entry" : "entries"}

@@ -7,5 +7,5 @@ Thin index only — name, type, location, one-line status, link. Full detail liv
 | `.o-chip` | object | `styles/objects/_chip.scss` | correct, in use — reference pattern | *not yet split out — worth doing next since it's the reference pattern others should match* |
 | `.o-badge` | object | `styles/objects/badge/_badge.scss` | built, colours provisional, call sites migrated | `styles/objects/badge.design.md` |
 | `.o-roundel` | object | `styles/objects/roundel/_roundel.scss` | built, colours provisional, call sites migrated | `styles/objects/roundel.design.md` |
-| `Card` | component (SCSS ↔ CSS Modules, dual-live) | `styles/objects/_card.scss` / `components/ui/Card.module.css` | drifted fork, reconciliation pending | *not yet documented — next calibration case per `styles/design.md`* |
+| `Card` | object | `styles/objects/_card.scss` | consolidated onto global SCSS; `Card.module.css` deleted 2026-08-23 (see `styles/docs/design.md` gaps log) | *not yet documented* |
 | `Button` | component | `components/ui/Button.module.css` | migrated, partially reused by other objects (badge migration references `o-button--text`) | *not yet documented* |

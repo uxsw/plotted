@@ -84,7 +84,7 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
 
   if (plants.length === 0) {
     return (
-      <div className="surface-info island o-stack">
+      <div className="o-surface--info island o-stack">
         <div className="text-marigold">
           <SproutIcon />
         </div>

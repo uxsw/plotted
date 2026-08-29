@@ -86,6 +86,16 @@ Printers'-names scale — closed, ordered sequence. Document it as closed so an 
 
 **Progress:** `.o-popover` now reuses `.o-autocomplete`'s existing shadow value rather than a new one (2026-08-22, popover migration) — first real consolidation, one fewer hand-typed value to reconcile. Still outstanding: dialog, card hover, the Card module's own value, and the dashboard's value — confirm whether any of these already match `.o-autocomplete`'s or represent a genuinely distinct second step before finalising the scale.
 
+**Update, 2026-08-23 (Card investigation):** the "Card module" value in the original five is not a distinct value at all — `Card.module.css`'s `0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)` is byte-for-byte the same as `.o-autocomplete`/`.o-popover`'s already-consolidated step, just written in `rgb()` instead of hex-with-alpha. It's also currently dead code (nothing renders the module's `.o-card--interactive`). This drops the real count of distinct hand-typed values from five toward three, with no design decision needed — it was already the same value, just uncounted.
+
+Real distinct values found so far:
+- **Consolidated step** (popover/autocomplete/dead card-module value): `0 4px 6px -1px #0000001a, 0 2px 4px -2px #0000001a`
+- **Card hover** (`_card.scss:37`): `0 8px 24px rgba(0, 0, 0, 0.15)` — also independently used by `_planting-schemes.scss`'s `.is-frame`, so this is already a de-facto second shared "raised" step, not card-specific
+- **Dialog** (`_dialog.scss:4`): `0 20px 25px -5px #0000001a, 0 8px 10px -6px #0000001a` — still distinct, not yet checked against the other two
+- **Onboarding card** (`_onboarding-card.scss:8`): separate rest/hover pair, not yet reconciled
+
+Genuinely close to the audit's original "2-3 real steps" estimate now — dialog and the onboarding pair are the remaining unknowns.
+
 ## Motion
 
 *TBD — transition/easing pairing convention (fixes the malformed two-declaration bug found in `_autocomplete.scss`).*

@@ -65,7 +65,7 @@ export function LocationOnboardingCard({ initiallyVisible }: Props) {
 
   return (
     <section aria-label="Garden location" className="c-set-location o-stack">
-      <div className="o-row align-top">
+      <div className="o-row o-row--align-top">
         <Icon name="mappin" aria-label="location" />
         <div>
           <h2 className="pica o-type-display kirk o-row">

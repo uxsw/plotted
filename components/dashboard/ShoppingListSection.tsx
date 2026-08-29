@@ -87,7 +87,7 @@ export default async function ShoppingListSection() {
 
   return (
     <section aria-label="Shopping list" className="c-shopping-list">
-      <div className="o-row space-between">
+      <div className="o-row o-row--space-between">
         <h2 className="pica o-type-display kirk">Shopping list</h2>
         <Link
           href="/shopping-list"
