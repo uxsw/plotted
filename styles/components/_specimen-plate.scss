@@ -1,0 +1,76 @@
+/* c-specimen-plate — the photo-less plant card's media well, treated as a
+   nursery-catalogue specimen plate rather than an empty state: a matted
+   hairline frame, a faint italic genus monogram (Latin-in-Italic Rule), and
+   a mono plate number where the plate caption would sit. It hosts inside
+   .o-card__media > .is-placeholder (absolute, inset 0). Calm by construction —
+   a whole grid of these has to stay quiet under the plant photos that will
+   eventually replace them. */
+
+.c-specimen-plate {
+    position: absolute;
+    inset: 0;
+    container-type: inline-size;
+    padding: var(--space-sm);
+    background-color: var(--color-paper-deep);
+
+    /* A hair of the flowering-season colour mixed into the mat, when known —
+       enough to sort the grid by season out of the corner of your eye, not
+       enough to read as a coloured tile. */
+    &[data-season="winter"]        { background-color: color-mix(in srgb, var(--sem-flowering-winter-bg) 22%, var(--color-paper-deep)); }
+    &[data-season="spring"]        { background-color: color-mix(in srgb, var(--sem-flowering-spring-bg) 22%, var(--color-paper-deep)); }
+    &[data-season="early-summer"]  { background-color: color-mix(in srgb, var(--sem-flowering-early-summer-bg) 22%, var(--color-paper-deep)); }
+    &[data-season="summer"]        { background-color: color-mix(in srgb, var(--sem-flowering-summer-bg) 16%, var(--color-paper-deep)); }
+    &[data-season="autumn"]        { background-color: color-mix(in srgb, var(--sem-flowering-autumn-bg) 22%, var(--color-paper-deep)); }
+
+    &__frame {
+        position: relative;
+        block-size: 100%;
+        inline-size: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+        border: var(--border-width-hairline) solid color-mix(in srgb, var(--color-ink-soft) 26%, transparent);
+        border-radius: var(--radius-s);
+    }
+
+    /* Bottom-right, where a catalogue plate carries its number — and clear of
+       the sun badge (top-right) and the in-bloom mark (top-left). */
+    &__number {
+        position: absolute;
+        inset-block-end: var(--space-xs);
+        inset-inline-end: var(--space-sm);
+        color: color-mix(in srgb, var(--color-ink-soft) 82%, transparent);
+    }
+
+    &__monogram {
+        font-style: italic;
+        font-weight: var(--font-weight-regular);
+        font-size: clamp(2.5rem, 36cqi, 4rem);
+        line-height: 1;
+        color: color-mix(in srgb, var(--color-ink-soft) 24%, transparent);
+        user-select: none;
+        /* exponential ease-out — the plate settling toward the light */
+        transition:
+            transform 420ms cubic-bezier(0.16, 1, 0.3, 1),
+            color 420ms cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    &__mark {
+        inline-size: clamp(2rem, 34cqi, 3.25rem);
+        block-size: auto;
+        color: color-mix(in srgb, var(--color-ink-soft) 30%, transparent);
+    }
+}
+
+/* The one authored moment: on card hover the plate comes into focus — the
+   monogram settles a touch larger and darker. */
+.o-card--interactive:hover .c-specimen-plate__monogram {
+    transform: scale(1.05);
+    color: color-mix(in srgb, var(--color-ink-soft) 40%, transparent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .c-specimen-plate__monogram { transition: none; }
+    .o-card--interactive:hover .c-specimen-plate__monogram { transform: none; }
+}

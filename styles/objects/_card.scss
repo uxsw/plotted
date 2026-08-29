@@ -72,6 +72,13 @@
     right: var(--space-xs);
     top: var(--space-xs);
   }
+
+  > .is-marker {
+    position: absolute;
+    left: var(--space-xs);
+    top: var(--space-xs);
+    z-index: 1;
+  }
 }
 
 .o-card__body {

@@ -1,0 +1,41 @@
+/* c-bloom-mark — a "flowering right now" stamp pinned to a plant card's
+   media well (Card's `marker` slot, top-left). Shown only when the current
+   month is inside the plant's flowering window. It sits on either a photo or
+   the specimen-plate mat, so it carries its own translucent paper ground and
+   takes its ink from the flowering-season family — never the marigold accent. */
+
+.c-bloom-mark {
+    --_bloom-fg: var(--sem-flowering-summer-fg);
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    padding-block: 2px;
+    padding-inline: 6px 8px;
+    border-radius: var(--radius-pill);
+    background-color: color-mix(in srgb, var(--color-paper) 86%, transparent);
+    backdrop-filter: blur(8px);
+    border: var(--border-width-hairline) solid color-mix(in srgb, var(--_bloom-fg) 28%, transparent);
+    color: var(--_bloom-fg);
+    line-height: 1;
+
+    &[data-season="winter"]       { --_bloom-fg: var(--sem-flowering-winter-fg); }
+    &[data-season="spring"]       { --_bloom-fg: var(--sem-flowering-spring-fg); }
+    &[data-season="early-summer"] { --_bloom-fg: var(--sem-flowering-early-summer-fg); }
+    &[data-season="summer"]       { --_bloom-fg: var(--sem-flowering-summer-fg); }
+    &[data-season="autumn"]       { --_bloom-fg: var(--sem-flowering-autumn-fg); }
+
+    &__dot {
+        flex: none;
+        inline-size: 5px;
+        block-size: 5px;
+        border-radius: var(--radius-roundel);
+        background-color: currentColor;
+    }
+
+    &__text {
+        /* matches .o-badge.is-sm — the sanctioned "tiny overlay" size; this is a
+           corner stamp, not a field label */
+        font-size: 0.65rem;
+        line-height: 1;
+    }
+}
