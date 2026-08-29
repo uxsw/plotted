@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-29T00:00:00Z",
+  "generatedAt": "2026-08-29T20:00:00Z",
   "title": "Design System: Plotted",
   "extensions": {
     "colorMeta": {
@@ -129,23 +129,24 @@
       "display": { "displayName": "Display", "purpose": "The big statement headline. Italic 400 on the marketing hero; roman 600 for the equivalent in-app heading. Fluid clamp on the .canon step." },
       "headline": { "displayName": "Headline", "purpose": "App page titles, section headers, empty-state and dialog titles. Fraunces bold roman 600 (.kirk), .paragon step. Marketing section headings take italic 400 instead." },
       "title": { "displayName": "Title", "purpose": "Card titles and sub-section headers. Fraunces bold roman 600 (.kirk), .pica / .long-primer step. Botanical Latin inside is additionally italicised." },
+      "editorial-display-body": { "displayName": "Editorial display-body", "purpose": "Long narrative-intro paragraphs set in Fraunces roman 400 (no .kirk), .long-primer / .primer size — e.g. a scheme's narrative_intro. Not a heading; the absence of .kirk is what separates it." },
       "body": { "displayName": "Body", "purpose": "All running text. Inter 400, .primer step, line-height 1.5. Capped near 65ch with .o-measure. Colour is n-deep-grey, not ink." },
       "body-sm": { "displayName": "Body-sm", "purpose": "Secondary text, card subtitles, helper and hint copy. Inter 400, .brevier step." },
       "caption": { "displayName": "Caption / data", "purpose": "Metadata, timestamps, badge text; dense numeral columns with .o-type-tabular. Inter, .minion step." },
-      "label": { "displayName": "Mono Label", "purpose": "Eyebrows, plate numbers, ALL field labels, botanical metadata. One class: .o-type-label (Spline Sans Mono, .minion, weight 500, uppercase, 0.14em). No Inter small-caps variant." }
+      "label": { "displayName": "Mono Label", "purpose": "Eyebrows, plate numbers, ALL field labels, status pills, botanical metadata. One class: .o-type-label (Spline Sans Mono, .minion, weight 500, uppercase, 0.14em). The earlier Inter small-caps variant on form fields is retired." }
     },
     "shadows": [
       { "name": "menu-raised", "value": "0 4px 6px -1px #0000001a, 0 2px 4px -2px #0000001a", "purpose": "Popovers and the autocomplete menu. The one consolidated low step." },
       { "name": "card-hover", "value": "0 8px 24px rgba(0,0,0,0.15)", "purpose": "Lift on interactive cards on hover (also z-index:1) and on scheme frame panels. The raised step." },
       { "name": "dialog", "value": "0 20px 25px -5px #0000001a, 0 8px 10px -6px #0000001a", "purpose": "Modal dialogs only. The deepest step, for content that stops the page." },
-      { "name": "focus-ring-lavender", "value": "0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-p-lavender)", "purpose": "Button-component focus-visible ring, floated off the paper ground." }
+      { "name": "focus-ring-lavender", "value": "0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-p-lavender)", "purpose": "Button-component focus-visible ring, floated off the paper ground. Fields and menus instead use a 2px cyan outline." }
     ],
     "motion": [
       { "name": "transition-default", "value": "0.4s ease", "purpose": "Token default (--transition-time-default). Colour/padding transitions on objects." },
       { "name": "transition-slow", "value": "0.8s ease", "purpose": "--transition-time-slow, for larger reveals." },
       { "name": "micro-150", "value": "150ms", "purpose": "Hardcoded in Button and .o-card--interactive for tight hover/press feedback. A known divergence from the 0.4s token." },
       { "name": "press-75", "value": "75ms", "purpose": "transform/opacity on :active press (card scale 0.98, opacity 0.75)." },
-      { "name": "reduced-motion", "value": "@media (prefers-reduced-motion: reduce) { animation: none }", "purpose": "Every keyframe animation (plant-sway, leaf-droop, mkt-caret, mkt-dot) opts out here." }
+      { "name": "reduced-motion", "value": "@media (prefers-reduced-motion: reduce) { animation: none }", "purpose": "Every keyframe animation opts out here; spatial entrance/hover motion is also gated behind (prefers-reduced-motion: no-preference)." }
     ],
     "breakpoints": [
       { "name": "mobile", "value": "480px" },
@@ -181,9 +182,9 @@
       "name": "Text Input",
       "kind": "input",
       "refersTo": "input",
-      "description": "Standard field. Mono-idea small-caps label above; paper fill, sand-line border, strong marigold focus (border, ring and fill all shift).",
+      "description": "Standard field. Mono label above (.o-type-label — Spline Sans Mono, uppercase, 0.14em); paper fill, sand-line border, strong marigold focus (border, ring and fill all shift).",
       "html": "<div class=\"ds-field\"><label class=\"ds-field__label\" for=\"ds-species\">Species</label><input class=\"ds-field__input\" id=\"ds-species\" type=\"text\" placeholder=\"e.g. canina\" /></div>",
-      "css": ".ds-field { display: flex; flex-direction: column; gap: 0.375rem; } .ds-field__label { font-family: var(--font-inter), sans-serif; font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; font-variant: small-caps; color: var(--color-ink-soft); } .ds-field__input { border: 1px solid var(--color-sand-line); border-radius: var(--radius-m, 4px); padding: 0.5rem 0.75rem; font-family: var(--font-inter), sans-serif; font-size: 0.875rem; color: var(--color-ink); background-color: var(--color-paper); transition: background-color 150ms, border-color 150ms, box-shadow 150ms; } .ds-field__input::placeholder { color: color-mix(in srgb, var(--color-ink-soft) 50%, transparent); } .ds-field__input:focus { outline: none; border-color: var(--color-r-marigold); background-color: var(--color-r-marigold); box-shadow: 0 0 0 1px var(--color-paper), 0 0 0 3px var(--color-r-marigold); }"
+      "css": ".ds-field { display: flex; flex-direction: column; gap: 0.375rem; } .ds-field__label { font-family: var(--font-spline-mono), ui-monospace, monospace; font-size: 0.75rem; font-weight: 500; text-transform: uppercase; letter-spacing: 0.14em; line-height: 1.4; color: var(--color-ink-soft); } .ds-field__input { border: 1px solid var(--color-sand-line); border-radius: var(--radius-m, 4px); padding: 0.5rem 0.75rem; font-family: var(--font-inter), sans-serif; font-size: 0.875rem; color: var(--color-ink); background-color: var(--color-paper); transition: background-color 150ms, border-color 150ms, box-shadow 150ms; } .ds-field__input::placeholder { color: color-mix(in srgb, var(--color-ink-soft) 50%, transparent); } .ds-field__input:focus { outline: none; border-color: var(--color-r-marigold); background-color: var(--color-r-marigold); box-shadow: 0 0 0 1px var(--color-paper), 0 0 0 3px var(--color-r-marigold); }"
     },
     {
       "name": "Trait Badge",
@@ -205,7 +206,7 @@
       "name": "Plant Card",
       "kind": "card",
       "refersTo": "card",
-      "description": "The core content unit. White raised surface on grained paper, 4px corners, flat at rest, lifts on hover; 4:3 media well with badge slot, italic Fraunces title.",
+      "description": "The core content unit. White raised surface on grained paper, 4px corners, flat at rest, lifts on hover; 4:3 media well with badge slot. Bold-roman Fraunces title with the botanical binomial italicised (a pure-Latin title reads fully italic).",
       "html": "<a class=\"ds-card\" href=\"#\"><div class=\"ds-card__media\"><span class=\"ds-card__badge\">Full sun</span></div><div class=\"ds-card__body\"><h3 class=\"ds-card__title\">Digitalis purpurea</h3><p class=\"ds-card__sub\">Foxglove</p></div></a>",
       "css": ".ds-card { display: flex; flex-direction: column; height: 100%; overflow: hidden; border-radius: var(--radius-m, 4px); background-color: var(--color-white); text-decoration: none; color: inherit; transition: box-shadow 150ms, transform 75ms, opacity 75ms; } .ds-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 1; } .ds-card:active { transform: scale(0.98); opacity: 0.75; } .ds-card__media { position: relative; width: 100%; aspect-ratio: 4 / 3; background-color: var(--color-y-yellow); } .ds-card__badge { position: absolute; top: var(--space-xs, 4px); right: var(--space-xs, 4px); display: inline-flex; align-items: center; border-radius: var(--radius-pill, 32px); border: 1px solid var(--sem-full-sun-bg); background-color: var(--sem-full-sun-bg); color: var(--sem-full-sun-fg); font-family: var(--font-inter), sans-serif; font-size: 0.65rem; line-height: 1.5; padding-inline: var(--space-xs, 4px); } .ds-card__body { display: flex; flex-direction: column; gap: 0.375rem; padding: var(--space-md, 16px); flex: 1; } .ds-card__title { margin: 0; font-family: var(--font-fraunces), serif; font-style: italic; font-weight: 600; font-size: 1.05rem; line-height: 1.2; color: var(--color-ink); } .ds-card__sub { margin: 0; font-family: var(--font-inter), sans-serif; font-size: 0.85rem; color: var(--color-ink-soft); }"
     },
@@ -234,27 +235,26 @@
       "Fraunces for every display and heading level — bold roman (600) in the product UI, italic 400 on marketing/editorial surfaces; Inter for UI text; Spline Sans Mono for labels, plate numbers and botanical metadata.",
       "Structure carried by 1px hairline borders and paper/sand tonal layering; flat by default.",
       "One brand accent (marigold) used on ≤10% of a screen; a broad --sem-* semantic-colour system carries all trait, sun, season and status colour.",
-      "Print-catalogue devices retained: specimen/plate numbers, italic Latin, caption lines, framed image plates.",
-      "Two registers: a wide editorial marketing surface (~1120px) and a narrow product measure (~800px)."
+      "Print-catalogue devices retained: specimen/plate numbers, italic Latin, caption lines, framed image \"plates\".",
+      "Two type-adjacent registers: a wide editorial marketing surface (~1120px) and a narrow product measure (~800px)."
     ],
     "rules": [
       { "name": "The One Accent Rule", "body": "Marigold is the only brand accent in product chrome and appears on ≤10% of any screen — primary action and active nav. Anywhere the interface is more colourful than that, the colour is coming from plant content (photos, traits, seasons) via the semantic layer, not from chrome.", "section": "colors" },
-      { "name": "The Semantic Layer Rule", "body": "Trait, sun, season and status colours are declared as --sem-* tokens that reference the palette. Components read --sem-* through object-private --_* custom properties — never raw --color-* — for any stateful colour. New state colours go through this layer.", "section": "colors" },
-      { "name": "The Highlight-Yellow convention", "body": "Established pattern, not an invariant. --color-y-yellow is the one reactive colour that marks whatever the pointer is on. Keep every new interactive object consistent with it on hover/active.", "section": "colors" },
-      { "name": "The Two-Register Rule", "body": "Fraunces headings are bold roman (600) in the product UI and italic (400) on marketing/editorial surfaces — never mixed within one surface. Weight and style are chosen by surface mode (Operate -> roman 600; Persuade/Read editorial -> italic 400), not by taste per screen.", "section": "typography" },
-      { "name": "The Mono Label Rule", "body": "Eyebrows, specimen/plate numbers, field labels and botanical metadata all use .o-type-label -- Spline Sans Mono, uppercase, letter-spacing 0.14em, weight 500, .minion size. One class, no per-context variants.", "section": "typography" },
-      { "name": "The One Scale Rule", "body": "Type size comes only from the printers'-names step classes (minion to canon plus long- variants) in styles/base/_typography.scss, and line-height only from .o-type-leading--*. Tailwind text-*/font-*/leading-* and arbitrary text-[Npx] are not part of this system and are being converted out. Never introduce a new size value; map the need onto the nearest step.", "section": "typography" },
+      { "name": "The Semantic Layer Rule", "body": "Trait, sun, season and status colours are declared as --sem-* tokens that reference the palette (or a purpose-made hex where the review demanded one). Components read --sem-* through object-private --_* custom properties — never raw --color-* — for any stateful colour. New state colours go through this layer.", "section": "colors" },
+      { "name": "The Highlight-Yellow convention", "body": "Established pattern, not an invariant. highlight-yellow is the one reactive colour that marks whatever the pointer is on. Keep every new interactive object consistent with it on hover/active.", "section": "colors" },
+      { "name": "The Two-Register Rule", "body": "Fraunces headings are bold roman (600) in the product UI and italic (400) on marketing/editorial surfaces — never mixed within one surface. Adding an app section header in italic, or a marketing headline in bold roman, is drift. Weight and style are chosen by surface mode (Operate -> roman 600; Persuade/Read editorial -> italic 400), not by taste per screen.", "section": "typography" },
+      { "name": "The Mono Label Rule", "body": "Eyebrows, specimen/plate numbers, field labels and botanical metadata all use .o-type-label -- Spline Sans Mono, uppercase, letter-spacing 0.14em, weight 500, .minion size. One class, no per-context variants; it is the type element that carries the tech-aware half of the identity.", "section": "typography" },
+      { "name": "The One Scale Rule", "body": "Type size comes only from the printers'-names step classes (minion to canon plus long- variants) in styles/base/_typography.scss, and line-height only from .o-type-leading--*. Tailwind text-*/font-*/leading-* and arbitrary text-[Npx] are not part of this system -- they are being converted out. Never introduce a new size value; map the need onto the nearest step.", "section": "typography" },
       { "name": "The Latin-in-Italic Rule", "body": "Botanical names (genus, species, cultivar) are always rendered italic, whatever the surrounding type.", "section": "typography" },
       { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest. A shadow appears only as a reaction to state — hover, open, overlay — and never as ambient decoration. If a resting element needs to stand out, reach for a tonal layer or a hairline first.", "section": "elevation" },
       { "name": "The Grain Rule", "body": "The page ground always carries its feTurbulence noise texture at ~8% alpha, multiply blended. A pure flat #FFF or un-grained #FAF6EC fill at page level is a regression.", "section": "elevation" },
-      { "name": "The Narrow Column Rule", "body": "App pages hold to the ~800px .o-page measure -- one readable column, one task. The 1120px editorial container is a marketing device and never appears in the app. The single sanctioned exception is the dashboard, which runs a ~1000px companion measure (still one centred column, never multi-column) because it is a stack of peer check-in blocks rather than a single task. A new app route wanting extra width is drift, not a precedent.", "section": "layout" }
+      { "name": "The Narrow Column Rule", "body": "App pages hold to the ~800px .o-page measure -- one readable column, one task. The 1120px editorial container is a marketing device and never appears in the app. The single sanctioned exception is the dashboard, which runs the ~1000px companion measure (still one centred column, never multi-column) because it is a stack of peer check-in blocks rather than a single task. A new app route wanting extra width is drift, not a precedent.", "section": "layout" }
     ],
     "dos": [
       "Do keep the page ground #FAF6EC with its noise grain (multiply, ~8%). White is for raised cards, dialogs and menus only.",
       "Do set product-UI headings in Fraunces bold roman (.kirk / 600); use Fraunces italic 400 only on marketing/editorial surfaces (the Two-Register Rule).",
-      "Do use .o-type-label (Spline Sans Mono, uppercase, 0.14em) for every eyebrow, plate number, field label and metadata label -- one class, no variants.",
-      "Do take type size only from the printers'-names step classes and line-height only from .o-type-leading--* (the One Scale Rule); never a Tailwind text-*/leading-* or an arbitrary text-[Npx].",
-      "Do render botanical Latin italic, always.",
+      "Do use Spline Sans Mono, uppercase, 0.12–0.16em tracking for eyebrows, plate numbers, field labels and botanical meta.",
+      "Do render botanical Latin italic, always — including inside a bold-roman title, where it reads as bold-roman with an italic species.",
       "Do carry structure with 1px hairlines (--sem-border-color) and tonal paper layers; add shadow only on hover / open / overlay.",
       "Do route every stateful colour through a --sem-* token and an object-private --_* property — never a raw --color-* in a modifier.",
       "Do keep marigold rare: primary action and active nav, ≤10% of a screen.",
@@ -270,9 +270,9 @@
       "Don't mix heading registers within a surface — no italic-400 section header inside the app, no bold-roman headline on a marketing page.",
       "Don't add dashboards, KPI tiles, stat walls or streak counters (a PRODUCT.md commitment).",
       "Don't hardcode radius, spacing or colour values — use the scale tokens; Stylelint checks them.",
-      "Don't put a resting shadow on a surface to make it pop — use a tonal step or a hairline.",
+      "Don't put a resting shadow on a surface to make it \"pop\" — use a tonal step or a hairline.",
       "Don't touch styles/objects/plant-detail.scss or the .plant / .plant-detail / .plant__frost-tolerance selectors — they're fenced off for a dedicated refactor.",
-      "Don't add new component CSS as components/ui/*.module.css — global SCSS/ITCSS is the settled architecture."
+      "Don't add new component CSS as components/ui/*.module.css — global SCSS/ITCSS (styles/objects/, styles/components/) is the settled architecture."
     ]
   }
 }

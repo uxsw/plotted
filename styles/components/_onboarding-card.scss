@@ -38,13 +38,3 @@
         }
     }
 }
-
-// First-run lead: a calm panel where the garden will be, not a flourish.
-// (See the dashboard shape brief — the empty state stays restrained.)
-.hero-card--empty {
-    background-color: var(--color-sand);
-    border-radius: var(--radius-m);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}

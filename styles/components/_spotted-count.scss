@@ -18,8 +18,17 @@
     &__progress-bar-complete {
         background-color: var(--color-r-marigold);
         height: 100%;
-        transition-duration: var(--transition-time-default);
-        transition-property: background-color;
+        // Width eases in once on mount (see BirdCardScroller) — the collection
+        // filling in, not a score ticking up. Colour keeps the existing timing.
+        transition:
+            width var(--transition-time-slow) cubic-bezier(0.16, 1, 0.3, 1),
+            background-color var(--transition-time-default) var(--transition-easing-default);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        &__progress-bar-complete {
+            transition: background-color var(--transition-time-default) var(--transition-easing-default);
+        }
     }
 }
 
