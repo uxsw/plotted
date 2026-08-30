@@ -50,7 +50,12 @@ export default function SplitPaneView() {
         <SchemeListPane />
       </div>
 
-      <DebugPanel />
+      {/*
+        State-inspection panel — off by default (including for Paper visual
+        reference). Turn on by setting NEXT_PUBLIC_PLANT_SCHEME_DEBUG=1 in
+        .env.local and restarting the dev server.
+      */}
+      {process.env.NEXT_PUBLIC_PLANT_SCHEME_DEBUG === "1" && <DebugPanel />}
 
       <Link
         href="/schemes"
