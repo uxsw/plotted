@@ -33,7 +33,7 @@ const INTRO_TEXT =
 export default function QuestionFlow() {
   const {
     path,
-    selectedPlantLabels,
+    selectedGardenPlants,
     freeTextPlants,
     questionIndex,
     outcomes,
@@ -46,7 +46,8 @@ export default function QuestionFlow() {
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const startingPlants = path === "existing" ? selectedPlantLabels : freeTextPlants;
+  const startingPlants =
+    path === "existing" ? selectedGardenPlants.map((p) => p.commonName) : freeTextPlants;
   const totalQuestions = MOCK_QUESTIONS.length;
   const currentQuestion = MOCK_QUESTIONS[questionIndex] ?? null;
   const isFirstQuestion = questionIndex === 0;

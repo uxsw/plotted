@@ -39,7 +39,7 @@ function Bubble({ role, text }: { role: "assistant" | "user"; text: string }) {
 export default function ChatPane() {
   const {
     path,
-    selectedPlantLabels,
+    selectedGardenPlants,
     freeTextPlants,
     outcomes,
     transcript,
@@ -52,7 +52,8 @@ export default function ChatPane() {
   const [draft, setDraft] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  const startingPlants = path === "existing" ? selectedPlantLabels : freeTextPlants;
+  const startingPlants =
+    path === "existing" ? selectedGardenPlants.map((p) => p.commonName) : freeTextPlants;
 
   const recap = useMemo<RecapLine[]>(() => {
     const out: RecapLine[] = [{ id: "intro", role: "assistant", text: INTRO_TEXT }];

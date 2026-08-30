@@ -3,22 +3,39 @@
 /**
  * The scheme-list half of the persistent split-pane view.
  *
- * Shows plants the user has explicitly added, grouped by the existing
- * back / mid / ground-cover tiers. Each item has an explicit Remove control and
- * a mocked "add to shopping list" toggle (no network call).
+ * Plants land here two ways:
+ *  - Path A garden plants: pre-populated the moment the split-pane view is
+ *    reached (resolved records the user deliberately selected). They have no
+ *    resolved structural tier, so they sit in their own "From your garden"
+ *    group above the three tier groups.
+ *  - Suggestion-card plants: added explicitly from the chat, grouped into the
+ *    existing back / mid / ground-cover tiers.
+ *
+ * Every item — however it arrived — has the same explicit Remove control and a
+ * mocked "add to shopping list" toggle (no network call).
  */
 
 import { usePlantScheme } from "./PlantSchemeContext";
 import { MOCK_TIER_LABELS, MOCK_TIER_ORDER } from "./mockData";
 import { PlantCard, CartIcon, CheckIcon } from "./PlantCard";
+import type { SchemePlant } from "./PlantSchemeContext";
 
 export default function SchemeListPane() {
   const { schemePlants, removeSchemePlant, toggleShoppingList } = usePlantScheme();
 
-  const tiers = MOCK_TIER_ORDER.map((tier) => ({
+  const gardenPlants = schemePlants.filter((p) => p.origin === "garden");
+  const tierGroups = MOCK_TIER_ORDER.map((tier) => ({
     tier,
+    label: MOCK_TIER_LABELS[tier],
     items: schemePlants.filter((p) => p.tier === tier),
   })).filter((g) => g.items.length > 0);
+
+  const groups: { key: string; label: string; items: SchemePlant[] }[] = [
+    ...(gardenPlants.length > 0
+      ? [{ key: "garden", label: "From your garden", items: gardenPlants }]
+      : []),
+    ...tierGroups.map((g) => ({ key: g.tier, label: g.label, items: g.items })),
+  ];
 
   return (
     <div className="o-stack--compact min-w-0">
@@ -36,11 +53,11 @@ export default function SchemeListPane() {
         </div>
       ) : (
         <div className="o-stack--compact">
-          {tiers.map(({ tier, items }) => (
-            <div key={tier} className="o-stack--compact">
-              <h3 className="brevier text-ink-soft">{MOCK_TIER_LABELS[tier]}</h3>
+          {groups.map((group) => (
+            <div key={group.key} className="o-stack--compact">
+              <h3 className="brevier text-ink-soft">{group.label}</h3>
               <div className="grid gap-2">
-                {items.map((plant) => (
+                {group.items.map((plant) => (
                   <PlantCard
                     key={plant.id}
                     plant={plant}

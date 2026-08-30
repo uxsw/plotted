@@ -70,7 +70,7 @@ function DebugPanel() {
   const {
     path,
     phase,
-    selectedPlantLabels,
+    selectedGardenPlants,
     freeTextPlants,
     outcomes,
     quickAnswered,
@@ -79,7 +79,8 @@ function DebugPanel() {
     schemePlants,
   } = usePlantScheme();
 
-  const startingPlants = path === "existing" ? selectedPlantLabels : freeTextPlants;
+  const startingPlants =
+    path === "existing" ? selectedGardenPlants.map((p) => p.commonName) : freeTextPlants;
 
   const suggestionEntries = transcript.filter(
     (e): e is Extract<typeof e, { kind: "suggestions" }> => e.kind === "suggestions"
@@ -111,7 +112,8 @@ function DebugPanel() {
           {schemePlants.length === 0 && <li>(empty)</li>}
           {schemePlants.map((p) => (
             <li key={p.id}>
-              {p.tier} — {p.commonName} · cart: {p.addedToShoppingList ? "yes" : "no"} · id:{" "}
+              [{p.origin}] {p.tier ?? "no tier"} — {p.commonName} · photo:{" "}
+              {p.photoUrl ? "yes" : "no"} · cart: {p.addedToShoppingList ? "yes" : "no"} · id:{" "}
               {p.id}
             </li>
           ))}

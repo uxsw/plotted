@@ -7,16 +7,22 @@
  *
  * Markup follows the existing scheme suggestion-card style (see the live
  * components/SchemeResults.tsx) so no new visual language is introduced.
+ *
+ * `photoUrl` is only ever set for Path A garden plants, from the garden record's
+ * own stored photo — there is no Wikimedia lookup at this stage. Cards without a
+ * photo render exactly as before.
  */
 
 import type { ReactNode } from "react";
+import Image from "next/image";
 
 export interface PlantCardData {
   commonName: string;
   latinName: string;
-  tier: "back" | "mid" | "ground";
+  tier: "back" | "mid" | "ground" | null;
   note: string;
   badges: string[];
+  photoUrl?: string | null;
 }
 
 export function PlantCard({
@@ -32,6 +38,17 @@ export function PlantCard({
 }) {
   return (
     <div className="flex flex-col overflow-hidden border border-sand-line bg-paper">
+      {plant.photoUrl && (
+        <div className="relative aspect-[3/2] w-full bg-paper-deep">
+          <Image
+            src={plant.photoUrl}
+            alt={plant.commonName}
+            fill
+            sizes="(max-width: 860px) 100vw, 320px"
+            className="object-cover"
+          />
+        </div>
+      )}
       <div className="flex flex-col gap-1 p-3">
         <div className="o-row o-row--space-between">
           <h3 className="o-type-display long-primer kirk">{plant.commonName}</h3>
@@ -40,7 +57,7 @@ export function PlantCard({
         <p className="o-type-display o-type--italic minion text-ink-soft o-type-leading--snug">
           {plant.latinName}
         </p>
-        <p className="brevier">{plant.note}</p>
+        {plant.note && <p className="brevier">{plant.note}</p>}
         {plant.badges.length > 0 && (
           <div className="flex flex-wrap gap-1 mt-1.5">
             {plant.badges.map((b) => (

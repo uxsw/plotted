@@ -18,7 +18,7 @@ import { plantDisplayTitle } from "@/lib/plantName";
 import { Button } from "@/components/ui/Button";
 import buttonStyles from "@/components/ui/Button.module.css";
 import type { Plant } from "@/lib/types";
-import { usePlantScheme } from "./PlantSchemeContext";
+import { usePlantScheme, type GardenPlantRef } from "./PlantSchemeContext";
 
 const MAX_PLANTS = 5;
 
@@ -54,7 +54,7 @@ function XSmallIcon() {
 
 export default function GardenPlantPicker({ plants }: { plants: PickerPlant[] }) {
   const router = useRouter();
-  const { path, choosePath, setSelectedPlants } = usePlantScheme();
+  const { path, choosePath, setSelectedGardenPlants } = usePlantScheme();
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   // Make this path usable on a direct link too, not only via the entry page.
@@ -71,11 +71,22 @@ export default function GardenPlantPicker({ plants }: { plants: PickerPlant[] })
   }
 
   function handleContinue() {
-    const labels = selectedIds
+    const refs: GardenPlantRef[] = selectedIds
       .map((id) => plants.find((p) => p.id === id))
-      .filter(Boolean)
-      .map((p) => plantDisplayTitle(p as PickerPlant));
-    setSelectedPlants(selectedIds, labels);
+      .filter((p): p is PickerPlant => Boolean(p))
+      .map((p) => {
+        const binomial = [p.genus, p.species].filter(Boolean).join(" ").trim();
+        const latinName = p.cultivar
+          ? `${binomial} '${p.cultivar}'`.trim()
+          : binomial;
+        return {
+          plantId: p.id,
+          commonName: plantDisplayTitle(p),
+          latinName: latinName || plantDisplayTitle(p),
+          photoUrl: p.photo_url,
+        };
+      });
+    setSelectedGardenPlants(refs);
     router.push("/plant-scheme/chat");
   }
 

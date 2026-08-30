@@ -46,15 +46,42 @@ export interface SuggestionPlant {
   badges: string[];
 }
 
-/** A plant the user has explicitly added to the scheme list pane. */
-export interface SchemePlant extends SuggestionPlant {
+/**
+ * A Path A garden plant the user explicitly selected in the picker step. These
+ * are resolved records (unlike Path B's typed names), so they're safe to
+ * pre-populate onto the scheme list without an explicit add.
+ */
+export interface GardenPlantRef {
+  plantId: string;
+  commonName: string;
+  latinName: string;
+  /** The garden record's own stored photo, if any — NOT a Wikimedia lookup. */
+  photoUrl: string | null;
+}
+
+export type SchemePlantOrigin = "garden" | "suggestion";
+
+/** A plant on the scheme list pane, however it got there. */
+export interface SchemePlant {
   /**
-   * Composite key `${sourceEntryId}:${plantId}` — unique per originating
-   * suggestion card, so the same plant proposed by two different cards tracks
-   * its added-state independently and can't collide.
+   * garden-origin: `garden:${plantId}`.
+   * suggestion-origin: `${sourceEntryId}:${plantId}` — unique per originating
+   * suggestion card, so the same plant proposed by two cards tracks its
+   * added-state independently. The two namespaces never collide.
    */
   id: string;
-  sourceEntryId: string;
+  origin: SchemePlantOrigin;
+  /** null for garden-origin plants — they don't come from a suggestion card. */
+  sourceEntryId: string | null;
+  plantId: string;
+  commonName: string;
+  latinName: string;
+  /** null for garden-origin plants — no resolved structural role (see spec). */
+  tier: SchemeTier | null;
+  note: string;
+  badges: string[];
+  /** Garden record photo for garden-origin plants; null for suggestions. */
+  photoUrl: string | null;
   /** Mocked "add to shopping list" state — no network call. */
   addedToShoppingList: boolean;
 }
@@ -76,10 +103,8 @@ export interface PlantSchemeState {
   path: SchemePath | null;
   /** "questions" = still in Q1–Q4 flow; "scheme" = persistent split-pane view. */
   phase: SchemePhase;
-  /** Path A: ids of garden plants selected in the picker. */
-  selectedPlantIds: string[];
-  /** Path A: display labels for the selected plants. */
-  selectedPlantLabels: string[];
+  /** Path A: the garden plants selected in the picker step (resolved records). */
+  selectedGardenPlants: GardenPlantRef[];
   /** Path B: free-text plant names the user entered. */
   freeTextPlants: string[];
   /** Index of the question currently being asked. */
@@ -98,7 +123,7 @@ export interface PlantSchemeState {
 
 export interface PlantSchemeContextValue extends PlantSchemeState {
   choosePath: (path: SchemePath) => void;
-  setSelectedPlants: (ids: string[], labels: string[]) => void;
+  setSelectedGardenPlants: (plants: GardenPlantRef[]) => void;
   setFreeTextPlants: (names: string[]) => void;
   answerQuestion: (questionId: string, answer: string) => void;
   skipQuestion: (questionId: string) => void;
@@ -126,8 +151,7 @@ export interface PlantSchemeContextValue extends PlantSchemeState {
 const INITIAL_STATE: PlantSchemeState = {
   path: null,
   phase: "questions",
-  selectedPlantIds: [],
-  selectedPlantLabels: [],
+  selectedGardenPlants: [],
   freeTextPlants: [],
   questionIndex: 0,
   outcomes: [],
@@ -174,8 +198,8 @@ export function PlantSchemeProvider({ children }: { children: React.ReactNode })
     setState((s) => ({ ...s, path }));
   }, []);
 
-  const setSelectedPlants = useCallback((ids: string[], labels: string[]) => {
-    setState((s) => ({ ...s, selectedPlantIds: ids, selectedPlantLabels: labels }));
+  const setSelectedGardenPlants = useCallback((plants: GardenPlantRef[]) => {
+    setState((s) => ({ ...s, selectedGardenPlants: plants }));
   }, []);
 
   const setFreeTextPlants = useCallback((names: string[]) => {
@@ -211,10 +235,31 @@ export function PlantSchemeProvider({ children }: { children: React.ReactNode })
         title: "Placeholder: a starting scheme — pick the ones you want on your list.",
         plants: toSuggestionPlants(MOCK_SUGGESTIONS),
       };
+      // Path A only: the garden plants the user picked in step 1 are resolved
+      // records they deliberately selected, so they start already on the list —
+      // no explicit add. Path B's typed names have no resolved identity and stay
+      // chat-context only (schemePlants stays []).
+      const seededGardenPlants: SchemePlant[] =
+        s.path === "existing"
+          ? s.selectedGardenPlants.map((g) => ({
+              id: `garden:${g.plantId}`,
+              origin: "garden" as const,
+              sourceEntryId: null,
+              plantId: g.plantId,
+              commonName: g.commonName,
+              latinName: g.latinName,
+              tier: null,
+              note: "",
+              badges: [],
+              photoUrl: g.photoUrl,
+              addedToShoppingList: false,
+            }))
+          : [];
       return {
         ...s,
         phase: "scheme",
         finished: true,
+        schemePlants: seededGardenPlants,
         transcript: [
           {
             kind: "text",
@@ -234,13 +279,20 @@ export function PlantSchemeProvider({ children }: { children: React.ReactNode })
     const compositeId = `${sourceEntryId}:${plant.plantId}`;
     setState((s) => {
       if (s.schemePlants.some((p) => p.id === compositeId)) return s;
-      return {
-        ...s,
-        schemePlants: [
-          ...s.schemePlants,
-          { ...plant, id: compositeId, sourceEntryId, addedToShoppingList: false },
-        ],
+      const added: SchemePlant = {
+        id: compositeId,
+        origin: "suggestion",
+        sourceEntryId,
+        plantId: plant.plantId,
+        commonName: plant.commonName,
+        latinName: plant.latinName,
+        tier: plant.tier,
+        note: plant.note,
+        badges: plant.badges,
+        photoUrl: null,
+        addedToShoppingList: false,
       };
+      return { ...s, schemePlants: [...s.schemePlants, added] };
     });
   }, []);
 
@@ -357,7 +409,7 @@ export function PlantSchemeProvider({ children }: { children: React.ReactNode })
     () => ({
       ...state,
       choosePath,
-      setSelectedPlants,
+      setSelectedGardenPlants,
       setFreeTextPlants,
       answerQuestion,
       skipQuestion,
@@ -373,7 +425,7 @@ export function PlantSchemeProvider({ children }: { children: React.ReactNode })
     [
       state,
       choosePath,
-      setSelectedPlants,
+      setSelectedGardenPlants,
       setFreeTextPlants,
       answerQuestion,
       skipQuestion,
