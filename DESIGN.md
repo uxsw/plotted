@@ -185,6 +185,8 @@ A warm, low-glare neutral base — bone and sand paper tones under near-black te
 
 **The Highlight-Yellow convention** *(established pattern, not an invariant).* `highlight-yellow` is the one reactive colour that marks whatever the pointer is on. Keep every new interactive object consistent with it on hover/active.
 
+**The Semantic Field exception** *(scoped to the `/plant-scheme` entry).* The flowering-season hues normally appear only in small badges and roundels — "held in restraint" per the Overview. The scheme-entry choice plates (`.c-scheme-plate.is-established` / `.is-new`) are the one sanctioned place a `--sem-flowering-*` pair carries a **large surface**: an ~8rem colour field (~45% of the card) in `--sem-flowering-summer-*` (an established garden at its peak) or `--sem-flowering-spring-*` (a garden just starting), with the body note tinted from the season `-fg` rather than grey. Colour is still routed through `--_field` / `--_field-deep` / `--_ink` private props per the Semantic Layer Rule. This is a Persuade front door, not a template — an Operate screen wanting a coloured field is drift.
+
 ## Typography
 
 **Display Font:** Fraunces (with `'Fraunces Fallback'`, Georgia, serif) — loaded weights 400/500/600, normal + italic.
@@ -231,7 +233,9 @@ Three containers, chosen by surface intent:
 **Responsive behaviour.** Marketing multi-column grids collapse to a single column at `max-tablet`; hero/ethos two-up layouts stack; display type drops to `clamp()` ladders (`~76px → clamp(34px, 9.6vw, 46px)` at mobile). The product measure is already narrow, so app pages mostly reflow rather than restructure. The dashboard is the one app surface that meaningfully restructures across width: its per-block horizontal card scrollers stay scrollers on mobile and become inline card rows (3–4 shown, overflow behind "View all") once the companion measure has room.
 
 ### Named Rules
-**The Narrow Column Rule.** App pages hold to the ~800px `.o-page` measure — one readable column, one task. The 1120px editorial container is a marketing device and never appears in the app. The **single sanctioned exception** is the dashboard, which runs the ~1000px companion measure (still one centred column, never multi-column) because it is a stack of peer check-in blocks rather than a single task. A new app route wanting extra width is drift, not a precedent.
+**The Narrow Column Rule.** App pages hold to the ~800px `.o-page` measure — one readable column, one task. The 1120px editorial container is a marketing device and never appears in the app. The **sanctioned width exception** is the dashboard, which runs the ~1000px companion measure (still one centred column, never multi-column) because it is a stack of peer check-in blocks rather than a single task. A new app route wanting extra width is drift, not a precedent.
+
+A second, narrower exception buys *immersion, never width*: the `/plant-scheme` entry hero (`.c-scheme-hero`) is a full-bleed photographic band. Its content still respects the ~800px measure; only the band itself breaks the `.o-page` inset — to the viewport edges on a phone (`≤32rem`: `margin-inline: calc(var(--space-md) * -1)`, radius dropped, `aspect-ratio` shifting `2/1` → `4/5`). It stays a single centred column.
 
 ## Elevation & Depth
 
@@ -253,7 +257,7 @@ Restrained, mostly-square corner language. Chrome (buttons, inputs, cards, dialo
 
 Borders are a first-class structural tool: `--border-width-hairline: 1px` for all resting structure, `--border-width-thin: 2px` for active/focus emphasis (active underline field, focus outline, AI-highlight card border).
 
-**Signature silhouette — the image plate.** Photographs on editorial surfaces sit inside a `9px` solid `paper` mat within a `1px rgba(60,70,45,0.3)` frame, captioned below in Fraunces italic with a mono specimen number to the right (`Pl. 01 — …` / `001`). In-app image displays round only their bottom corners (`border-radius: 0 0 8px 8px`) so they sit flush under a header.
+**Signature silhouette — the image plate.** Photographs on editorial surfaces sit inside a `9px` solid `paper` mat within a `1px rgba(60,70,45,0.3)` frame, captioned below in Fraunces italic with a mono specimen number to the right (`Pl. 01 — …` / `001`). In-app image displays round only their bottom corners (`border-radius: 0 0 8px 8px`) so they sit flush under a header. The caption can also ride **over** a photograph rather than below it — on the `/plant-scheme` hero the italic descriptor and mono number are bracketed left and right across the base of the image (`justify-content: space-between`, warm white at ~82% over a bottom ink scrim): a magazine-plate treatment of the same device.
 
 ## Components
 
@@ -304,7 +308,16 @@ Borders are a first-class structural tool: `--border-width-hairline: 1px` for al
 `.o-popover` is the single shared shell for every dropdown (user menu, scheme actions, plant filter). White, `1px` `--sem-border-color`, `4px` radius, the low menu shadow, `--space-xs` padding, `--space-sm` gap. Items (`__link` / `__item`) are full-width, `--space-sm`/`--space-md` padded, hover → highlight-yellow, `.is-danger` hover → smoke-red, focus-visible → `2px` cyan.
 
 ### Image Plate (signature)
-See Shapes. A framed, matted, captioned photograph with a mono specimen number — the device that makes an editorial page read as a catalogue. Reserved for marketing / editorial surfaces; in-app imagery is plainer (bottom-rounded, uncaptioned).
+See Shapes. A framed, matted, captioned photograph with a mono specimen number — the device that makes an editorial page read as a catalogue. Reserved for marketing / editorial surfaces; in-app imagery is otherwise plainer (bottom-rounded, uncaptioned). The one in-app exception is the scheme-entry hero below — a full-bleed, scrim-captioned photograph.
+
+### Scheme entry (`c-scheme-entry`)
+
+The `/plant-scheme` front door — a Persuade surface inside the app, the one place the catalogue turns its cover outward. It replaced a monochrome sand-on-sand card pair; colour enters through the photograph and the flowering-season palette, not through new chrome accents.
+
+- **Hero** (`.c-scheme-hero`): a full-measure `next/image` photograph of a real garden (`/public/garden-hero-2.jpg`, team-supplied), `aspect-ratio: 2/1` on the product measure, `4/5` and edge-bled on a phone (`≤32rem`). A two-gradient warm scrim (`--color-ink` 84% → transparent rising from the base, plus a light top wash) carries the overlaid copy: a `.canon .kirk` headline and `.primer` lead in `--color-r-white`, a `2.5rem` hairline, then the over-photo image-plate caption.
+- **Choice plates** (`.c-scheme-plate`, grid `auto-fit minmax(19rem, 1fr)`, stacking below ~40rem): white raised cards, `18rem` min height, borderless, a `1px` sand-line seat shadow at rest. The top `8rem` is the season colour field (see the Semantic Field exception) — it carries the engraving `__mark` and a hue-neutral tonal deepen toward the hairline divider, so the colour reads as lit rather than as a flat swatch. Body below on white: `.pica .kirk` title, season-tinted `.brevier` note, a mono `START →` affordance pinned to the base.
+- **The hover moment** (`cubic-bezier(0.16, 1, 0.3, 1)`): the season field deepens to `--_field-deep`, the engraving blooms (opacity `0.4 → 0.52`, `scale(1.06)`), the plate lifts (`translateY(-2px)` + the card-hover shadow), the arrow steps `0.25rem`. One orchestrated response, not four separate effects; fully opted out under `prefers-reduced-motion`.
+- **Focus:** the standard button ring (`0 0 0 2px paper, 0 0 0 4px lavender`) layered over the lift — no border swap, no reflow.
 
 ## Do's and Don'ts
 
@@ -317,6 +330,7 @@ See Shapes. A framed, matted, captioned photograph with a mono specimen number �
 - **Do** route every stateful colour through a `--sem-*` token and an object-private `--_*` property — never a raw `--color-*` in a modifier.
 - **Do** keep marigold rare: primary action and active nav, ≤10% of a screen.
 - **Do** let colour enter through plant content — photos and the trait/sun/season badge families — while chrome stays calm.
+- **Do** treat the `/plant-scheme` entry as the app's one sanctioned Persuade surface — a full-bleed garden photograph and large `--sem-flowering-*` colour fields belong *there*; on an Operate screen they are drift.
 - **Do** hold app pages to the ~800px `.o-page` measure; the 1120px container is a marketing device and the ~1000px companion measure is the dashboard's alone (the Narrow Column Rule).
 - **Do** honour `prefers-reduced-motion` for every animation (all current keyframes already opt out).
 
@@ -325,6 +339,7 @@ See Shapes. A framed, matted, captioned photograph with a mono specimen number �
 - **Don't** use `--color-ink` for body copy — running text is `--color-n-deep-grey`; `ink` / `ink-soft` are for headings and labels.
 - **Don't** drift toward the plant-ID app look: no dark UI, neon accents, camera-first chrome, or gamified score badges. The "N/12 spotted" hook is a gentle prompt, not a scoreboard.
 - **Don't** drift twee: no script or hand-lettered fonts, watercolour blobs, floral borders, or pastel whimsy.
+- **Don't** copy the scheme-entry hero photo or its coloured choice fields onto another app route — it is a scoped front-door treatment, not a new app-wide pattern (see Scheme entry).
 - **Don't** mix heading registers within a surface — no italic-400 section header inside the app, no bold-roman headline on a marketing page.
 - **Don't** add dashboards, KPI tiles, stat walls or streak counters (a PRODUCT.md commitment).
 - **Don't** hardcode radius, spacing or colour values — use the scale tokens; Stylelint checks them.

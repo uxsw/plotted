@@ -1,0 +1,291 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   c-scheme-entry — the /plant-scheme entry screen.  "The Opening Plate."
+
+   The front door to the planting-scheme journey, redrawn from a monochrome
+   card pair into the opening spread of a nursery catalogue: one luminous
+   photographic plate at full measure, then two choice plates each washed
+   in a flowering-season colour. Colour enters through the photograph and
+   through the sanctioned --sem-flowering-* palette used as large soft
+   fields ("content brings the colour"); chrome — type, hairlines, paper —
+   is unchanged. Per-plate season colour is routed through object-private
+   --_* props, never a raw --color-* in a modifier (DESIGN.md Semantic
+   Layer Rule). Full contract in EntryChoice.tsx.
+   ───────────────────────────────────────────────────────────────────────── */
+
+$scheme-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+.c-scheme-entry {
+    display: grid;
+    gap: var(--space-xl);
+}
+
+/* ---- Hero plate ------------------------------------------------------------ */
+
+.c-scheme-hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    border-radius: var(--radius-m);
+    /* sit flush under the app nav strip: eat the .o-page top padding */
+    margin-block-start: calc(var(--space-md) * -1);
+    /* a wide cover band on the desktop measure so a choice plate is
+       already in view; a tall immersive crop on a phone */
+    aspect-ratio: 2 / 1;
+    min-block-size: 19rem;
+    background-color: var(--color-paper-deep);
+
+    /* On a phone the plate bleeds to the screen edges — the one immersive
+       moment. Only the .o-page 16px inset is eaten; no viewport-width
+       maths, so no horizontal-scroll risk. */
+    @media (max-width: 32rem) {
+        margin-inline: calc(var(--space-md) * -1);
+        border-radius: 0;
+        aspect-ratio: 4 / 5;
+        min-block-size: 25rem;
+    }
+}
+
+.c-scheme-hero__img {
+    object-fit: cover;
+    object-position: 50% 52%; /* hold the path and the borders, drop foreground */
+}
+
+/* Warm scrim: a strong bottom rise for the display type, a light top wash
+   for the plate number. */
+.c-scheme-hero__scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background:
+        linear-gradient(
+            to top,
+            color-mix(in srgb, var(--color-ink) 84%, transparent) 0%,
+            color-mix(in srgb, var(--color-ink) 44%, transparent) 26%,
+            transparent 56%
+        ),
+        linear-gradient(
+            to bottom,
+            color-mix(in srgb, var(--color-ink) 34%, transparent) 0%,
+            transparent 20%
+        );
+}
+
+.c-scheme-hero__copy {
+    position: absolute;
+    z-index: 2;
+    inset-inline: var(--space-lg);
+    inset-block-end: var(--space-lg);
+    display: grid;
+    gap: var(--space-sm);
+    max-inline-size: 34rem;
+
+    @media (max-width: 32rem) {
+        inset-inline: var(--space-md);
+    }
+}
+
+.c-scheme-hero__title {
+    color: var(--color-r-white);
+    text-wrap: balance;
+}
+
+.c-scheme-hero__lead {
+    color: color-mix(in srgb, var(--color-r-white) 88%, transparent);
+    max-inline-size: 30rem;
+}
+
+.c-scheme-hero__rule {
+    inline-size: 2.5rem;
+    block-size: var(--border-width-hairline);
+    margin-block-start: var(--space-xs);
+    background-color: color-mix(in srgb, var(--color-r-white) 55%, transparent);
+}
+
+/* Italic descriptor + mono plate number, bracketed across one line —
+   the DESIGN.md Image Plate caption, laid over the photograph. */
+.c-scheme-hero__caption {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-md);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    color: color-mix(in srgb, var(--color-r-white) 82%, transparent);
+
+    .o-type--italic {
+        font-family: var(--font-display);
+    }
+}
+
+/* ---- Choice plates ------------------------------------------------------- */
+
+.c-scheme-entry__plates {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 19rem), 1fr));
+    gap: var(--space-md);
+}
+
+.c-scheme-plate {
+    /* neutral fallback; the modifiers below set the real season identity */
+    --_field: var(--color-sand);
+    --_field-deep: var(--color-sand-line);
+    --_ink: var(--color-ink-soft);
+
+    position: relative;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-block-size: 18rem;
+    padding: 0;
+    text-align: start;
+    background-color: var(--color-white);
+    border: none;
+    border-radius: var(--radius-m);
+    cursor: pointer;
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--color-sand-line) 55%, transparent);
+    transition:
+        box-shadow var(--transition-time-default) $scheme-ease,
+        transform var(--transition-time-default) $scheme-ease;
+
+    &.is-established {
+        --_field: var(--sem-flowering-summer-bg);
+        --_field-deep: color-mix(in srgb, var(--sem-flowering-summer-bg) 60%, var(--sem-flowering-summer-fg));
+        --_ink: var(--sem-flowering-summer-fg);
+    }
+
+    &.is-new {
+        --_field: var(--sem-flowering-spring-bg);
+        --_field-deep: color-mix(in srgb, var(--sem-flowering-spring-bg) 62%, var(--sem-flowering-spring-fg));
+        --_ink: var(--sem-flowering-spring-fg);
+    }
+
+    &__field {
+        position: relative;
+        overflow: hidden;
+        flex: none;
+        block-size: 8rem;
+        background-color: var(--_field);
+        border-block-end: var(--border-width-hairline) solid
+            color-mix(in srgb, var(--_field-deep) 65%, transparent);
+        transition: background-color var(--transition-time-default) $scheme-ease;
+
+        /* a soft tonal deepen toward the dividing line — the colour of a
+           garden reads as lit, not as a flat swatch. Hue-neutral so it
+           layers over either season while the fill animates beneath it. */
+        &::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            background: linear-gradient(
+                172deg,
+                transparent 50%,
+                color-mix(in srgb, var(--_ink) 12%, transparent)
+            );
+        }
+    }
+
+    &__mark {
+        position: absolute;
+        inset-block-end: calc(var(--space-md) * -1);
+        inset-inline-end: var(--space-sm);
+        inline-size: 8.5rem;
+        block-size: 8.5rem;
+        color: var(--_ink);
+        opacity: 0.4;
+        transition:
+            opacity var(--transition-time-default) $scheme-ease,
+            transform 520ms $scheme-ease;
+    }
+
+    &__body {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: var(--space-sm);
+        padding: var(--space-md) var(--space-lg) var(--space-lg);
+    }
+
+    &__note {
+        color: var(--_ink); /* tinted from the season, never grey */
+        max-inline-size: 34ch;
+    }
+
+    &__go {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-xs);
+        margin-block-start: auto;
+        padding-block-start: var(--space-sm);
+        color: var(--_ink);
+    }
+
+    &__arrow {
+        transition: transform var(--transition-time-default) $scheme-ease;
+    }
+
+    /* One orchestrated moment: the season deepens, the plant blooms, the
+       plate lifts, the arrow steps forward. */
+    &:hover,
+    &:focus-visible {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        transform: translateY(-2px);
+
+        .c-scheme-plate__field {
+            background-color: var(--_field-deep);
+        }
+
+        .c-scheme-plate__mark {
+            opacity: 0.52;
+            transform: scale(1.06);
+        }
+
+        .c-scheme-plate__arrow {
+            transform: translateX(0.25rem);
+        }
+    }
+
+    /* Standard button focus ring (DESIGN.md Buttons > Focus), over the lift. */
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--border-width-thin) var(--color-paper),
+            0 0 0 calc(var(--border-width-thin) * 2) var(--color-p-lavender),
+            0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    &:active {
+        transform: translateY(0) scale(0.995);
+    }
+}
+
+/* ---- Motion opt-out --------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .c-scheme-plate,
+    .c-scheme-plate__field,
+    .c-scheme-plate__mark,
+    .c-scheme-plate__arrow {
+        transition: none;
+    }
+
+    .c-scheme-plate:hover,
+    .c-scheme-plate:focus-visible {
+        transform: none;
+    }
+
+    .c-scheme-plate:hover .c-scheme-plate__mark,
+    .c-scheme-plate:focus-visible .c-scheme-plate__mark {
+        transform: none;
+    }
+
+    .c-scheme-plate:hover .c-scheme-plate__arrow,
+    .c-scheme-plate:focus-visible .c-scheme-plate__arrow {
+        transform: none;
+    }
+
+    .c-scheme-plate:active {
+        transform: none;
+    }
+}
