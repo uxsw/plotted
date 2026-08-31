@@ -1,9 +1,13 @@
 "use client";
 
 /**
- * The persistent split-pane experience: conversation + current scheme list,
- * visible together, with no terminal "results" screen. Rendered once the
- * question flow completes (context phase === "scheme").
+ * The persistent workspace: conversation + the scheme list building up beside
+ * it, no terminal "results" screen. Rendered once the question flow completes
+ * (context phase === "scheme").
+ *
+ * The .c-scheme-workspace class widens the page to the ~1000px companion
+ * measure (a sanctioned Narrow Column Rule exception — peer panes, not one
+ * task) and, on wide screens, sticks the list beside the scrolling chat.
  */
 
 import { useRouter } from "next/navigation";
@@ -17,7 +21,7 @@ import SchemeListPane from "./SchemeListPane";
 
 export default function SplitPaneView() {
   const router = useRouter();
-  const { reset } = usePlantScheme();
+  const { path, reset } = usePlantScheme();
 
   function startOver() {
     reset();
@@ -25,12 +29,14 @@ export default function SplitPaneView() {
   }
 
   return (
-    <div className="o-stack">
-      <div className="o-row o-row--space-between">
-        <div className="o-stack--compact">
-          <p className="minion">Placeholder · your planting scheme</p>
-          <h1 className="pica o-type-display kirk">Chat &amp; scheme</h1>
-        </div>
+    <div
+      className={clsx(
+        "c-scheme-chat c-scheme-workspace",
+        path === "existing" ? "is-path-existing" : "is-path-scratch"
+      )}
+    >
+      <div className="c-scheme-workspace__head">
+        <h1 className="paragon o-type-display kirk">Your scheme, in progress</h1>
         <button
           type="button"
           onClick={startOver}
@@ -40,33 +46,35 @@ export default function SplitPaneView() {
         </button>
       </div>
 
-      <div className="o-surface--info island brevier">
-        Placeholder: mocked shell — no AI, no image lookup. Assistant replies are canned; the
-        shopping-list toggle doesn&apos;t persist.
-      </div>
+      <p className="o-surface--info island brevier">
+        Preview — assistant replies are canned and the shopping-list toggle isn&apos;t saved yet.
+      </p>
 
-      <div className="grid gap-4 md:grid-cols-[3fr_2fr] md:items-start">
+      <div className="c-scheme-workspace__panes">
         <ChatPane />
-        <SchemeListPane />
+        <div className="c-scheme-workspace__list">
+          <SchemeListPane />
+        </div>
       </div>
 
       {/*
-        State-inspection panel — off by default (including for Paper visual
-        reference). Turn on by setting NEXT_PUBLIC_PLANT_SCHEME_DEBUG=1 in
-        .env.local and restarting the dev server.
+        State-inspection panel — off by default. Turn on with
+        NEXT_PUBLIC_PLANT_SCHEME_DEBUG=1 in .env.local and restart the dev server.
       */}
       {process.env.NEXT_PUBLIC_PLANT_SCHEME_DEBUG === "1" && <DebugPanel />}
 
-      <Link
-        href="/schemes"
-        className={clsx(
-          buttonStyles["o-button"],
-          buttonStyles["o-button--ghost"],
-          buttonStyles["o-button--flush-start"]
-        )}
-      >
-        ← Back to planting schemes
-      </Link>
+      <div className="c-scheme-chat__footer">
+        <Link
+          href="/schemes"
+          className={clsx(
+            buttonStyles["o-button"],
+            buttonStyles["o-button--ghost"],
+            buttonStyles["o-button--flush-start"]
+          )}
+        >
+          ← Back to planting schemes
+        </Link>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-08-29T20:00:00Z",
+  "generatedAt": "2026-08-31T18:30:00Z",
   "title": "Design System: Plotted",
   "extensions": {
     "colorMeta": {
@@ -126,31 +126,112 @@
       }
     },
     "typographyMeta": {
-      "display": { "displayName": "Display", "purpose": "The big statement headline. Italic 400 on the marketing hero; roman 600 for the equivalent in-app heading. Fluid clamp on the .canon step." },
-      "headline": { "displayName": "Headline", "purpose": "App page titles, section headers, empty-state and dialog titles. Fraunces bold roman 600 (.kirk), .paragon step. Marketing section headings take italic 400 instead." },
-      "title": { "displayName": "Title", "purpose": "Card titles and sub-section headers. Fraunces bold roman 600 (.kirk), .pica / .long-primer step. Botanical Latin inside is additionally italicised." },
-      "editorial-display-body": { "displayName": "Editorial display-body", "purpose": "Long narrative-intro paragraphs set in Fraunces roman 400 (no .kirk), .long-primer / .primer size — e.g. a scheme's narrative_intro. Not a heading; the absence of .kirk is what separates it." },
-      "body": { "displayName": "Body", "purpose": "All running text. Inter 400, .primer step, line-height 1.5. Capped near 65ch with .o-measure. Colour is n-deep-grey, not ink." },
-      "body-sm": { "displayName": "Body-sm", "purpose": "Secondary text, card subtitles, helper and hint copy. Inter 400, .brevier step." },
-      "caption": { "displayName": "Caption / data", "purpose": "Metadata, timestamps, badge text; dense numeral columns with .o-type-tabular. Inter, .minion step." },
-      "label": { "displayName": "Mono Label", "purpose": "Eyebrows, plate numbers, ALL field labels, status pills, botanical metadata. One class: .o-type-label (Spline Sans Mono, .minion, weight 500, uppercase, 0.14em). The earlier Inter small-caps variant on form fields is retired." }
+      "display": {
+        "displayName": "Display",
+        "purpose": "The big statement headline. Italic 400 on the marketing hero; roman 600 for the equivalent in-app heading. Fluid clamp on the .canon step."
+      },
+      "headline": {
+        "displayName": "Headline",
+        "purpose": "App page titles, section headers, empty-state and dialog titles. Fraunces bold roman 600 (.kirk), .paragon step. Marketing section headings take italic 400 instead."
+      },
+      "title": {
+        "displayName": "Title",
+        "purpose": "Card titles and sub-section headers. Fraunces bold roman 600 (.kirk), .pica / .long-primer step. Botanical Latin inside is additionally italicised."
+      },
+      "editorial-display-body": {
+        "displayName": "Editorial display-body",
+        "purpose": "Long narrative-intro paragraphs set in Fraunces roman 400 (no .kirk), .long-primer / .primer size — e.g. a scheme's narrative_intro. Not a heading; the absence of .kirk is what separates it."
+      },
+      "body": {
+        "displayName": "Body",
+        "purpose": "All running text. Inter 400, .primer step, line-height 1.5. Capped near 65ch with .o-measure. Colour is n-deep-grey, not ink."
+      },
+      "body-sm": {
+        "displayName": "Body-sm",
+        "purpose": "Secondary text, card subtitles, helper and hint copy. Inter 400, .brevier step."
+      },
+      "caption": {
+        "displayName": "Caption / data",
+        "purpose": "Metadata, timestamps, badge text; dense numeral columns with .o-type-tabular. Inter, .minion step."
+      },
+      "label": {
+        "displayName": "Mono Label",
+        "purpose": "Eyebrows, plate numbers, ALL field labels, status pills, botanical metadata. One class: .o-type-label (Spline Sans Mono, .minion, weight 500, uppercase, 0.14em). The earlier Inter small-caps variant on form fields is retired."
+      }
     },
     "shadows": [
-      { "name": "menu-raised", "value": "0 4px 6px -1px #0000001a, 0 2px 4px -2px #0000001a", "purpose": "Popovers and the autocomplete menu. The one consolidated low step." },
-      { "name": "card-hover", "value": "0 8px 24px rgba(0,0,0,0.15)", "purpose": "Lift on interactive cards on hover (also z-index:1) and on scheme frame panels. The raised step." },
-      { "name": "dialog", "value": "0 20px 25px -5px #0000001a, 0 8px 10px -6px #0000001a", "purpose": "Modal dialogs only. The deepest step, for content that stops the page." },
-      { "name": "focus-ring-lavender", "value": "0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-p-lavender)", "purpose": "Button-component focus-visible ring, floated off the paper ground. Fields and menus instead use a 2px cyan outline." }
+      {
+        "name": "menu-raised",
+        "value": "0 4px 6px -1px #0000001a, 0 2px 4px -2px #0000001a",
+        "purpose": "Popovers and the autocomplete menu. The one consolidated low step."
+      },
+      {
+        "name": "card-hover",
+        "value": "0 8px 24px rgba(0,0,0,0.15)",
+        "purpose": "Lift on interactive cards on hover (also z-index:1) and on scheme frame panels. The raised step."
+      },
+      {
+        "name": "dialog",
+        "value": "0 20px 25px -5px #0000001a, 0 8px 10px -6px #0000001a",
+        "purpose": "Modal dialogs only. The deepest step, for content that stops the page."
+      },
+      {
+        "name": "focus-ring-lavender",
+        "value": "0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-p-lavender)",
+        "purpose": "Button-component focus-visible ring, floated off the paper ground. Fields and menus instead use a 2px cyan outline."
+      }
     ],
     "motion": [
-      { "name": "transition-default", "value": "0.4s ease", "purpose": "Token default (--transition-time-default). Colour/padding transitions on objects." },
-      { "name": "transition-slow", "value": "0.8s ease", "purpose": "--transition-time-slow, for larger reveals." },
-      { "name": "micro-150", "value": "150ms", "purpose": "Hardcoded in Button and .o-card--interactive for tight hover/press feedback. A known divergence from the 0.4s token." },
-      { "name": "press-75", "value": "75ms", "purpose": "transform/opacity on :active press (card scale 0.98, opacity 0.75)." },
-      { "name": "reduced-motion", "value": "@media (prefers-reduced-motion: reduce) { animation: none }", "purpose": "Every keyframe animation opts out here; spatial entrance/hover motion is also gated behind (prefers-reduced-motion: no-preference)." }
+      {
+        "name": "transition-default",
+        "value": "0.4s ease",
+        "purpose": "Token default (--transition-time-default). Colour/padding transitions on objects."
+      },
+      {
+        "name": "transition-slow",
+        "value": "0.8s ease",
+        "purpose": "--transition-time-slow, for larger reveals."
+      },
+      {
+        "name": "transition-emphasis",
+        "value": "cubic-bezier(0.16, 1, 0.3, 1)",
+        "purpose": "--transition-easing-emphasis. The one authored moment on a surface: the scheme-entry plate lift + engraving bloom, the scheme-scratch schedule row easing in as it is added. Exponential ease-out from an already-visible resting state; never for incidental hovers. Degrades to an instant state change under prefers-reduced-motion."
+      },
+      {
+        "name": "chat-typing",
+        "value": "opacity 0.3->1 + a 0.125rem rise, 1.2s ease, dots staggered 0.15s, infinite",
+        "purpose": "_chat.scss keyframe — the typing indicator's three dots while the assistant composes. The chat surface's one authored moment; static (opacity 0.55) under prefers-reduced-motion."
+      },
+      {
+        "name": "the-planting",
+        "value": "scheme-item-in (fade + -0.25rem settle) + scheme-card-wash (--_accent-wash -> white, 0.8s) + scheme-stamp-in (scale 0.6 -> 1) + scheme-elevation-draw/-dot (stroke-dashoffset 1 -> 0, pathLength-normalised; dots bud a beat after their stem), all on the emphasis curve with a shared per-item --_delay",
+        "purpose": "_scheme-chat.scss keyframe family — the scheme workspace's one authored moment: one orchestrated response to a plant joining the scheme (list row, specimen stamp, chat card, and its silhouette drawing up from the elevation's ground line). --_delay is 0 for a single add and staggered ~70–90ms per item when a populated sheet or fresh suggestion panel first arrives, so a scheme lands as a planting, not a dump. Every keyframe is animation: none under prefers-reduced-motion."
+      },
+      {
+        "name": "micro-150",
+        "value": "150ms",
+        "purpose": "Hardcoded in Button and .o-card--interactive for tight hover/press feedback. A known divergence from the 0.4s token."
+      },
+      {
+        "name": "press-75",
+        "value": "75ms",
+        "purpose": "transform/opacity on :active press (card scale 0.98, opacity 0.75)."
+      },
+      {
+        "name": "reduced-motion",
+        "value": "@media (prefers-reduced-motion: reduce) { animation: none }",
+        "purpose": "Every keyframe animation opts out here; spatial entrance/hover motion is also gated behind (prefers-reduced-motion: no-preference)."
+      }
     ],
     "breakpoints": [
-      { "name": "mobile", "value": "480px" },
-      { "name": "tablet", "value": "860px" }
+      {
+        "name": "mobile",
+        "value": "480px"
+      },
+      {
+        "name": "tablet",
+        "value": "860px"
+      }
     ]
   },
   "components": [
@@ -225,6 +306,54 @@
       "description": "The single shared dropdown shell (user menu, scheme actions, plant filter). White, hairline border, 4px radius, low menu shadow; items fill highlight-yellow on hover, danger items fill smoke-red.",
       "html": "<div class=\"ds-popover\"><button class=\"ds-popover__item\">Rename scheme</button><button class=\"ds-popover__item\">Duplicate</button><button class=\"ds-popover__item ds-popover__item--danger\">Delete scheme</button></div>",
       "css": ".ds-popover { display: flex; flex-direction: column; gap: var(--space-sm, 8px); min-width: 200px; padding: var(--space-xs, 4px); background-color: var(--color-white); border: 1px solid var(--sem-border-color); border-radius: var(--radius-m, 4px); box-shadow: 0 4px 6px -1px #0000001a, 0 2px 4px -2px #0000001a; } .ds-popover__item { display: flex; align-items: center; gap: var(--space-sm, 8px); width: 100%; padding: var(--space-sm, 8px) var(--space-md, 16px); border: none; background-color: transparent; color: var(--color-n-deep-grey); font-family: var(--font-inter), sans-serif; font-size: 0.9rem; text-align: left; cursor: pointer; transition: background-color 0.4s ease; } .ds-popover__item:hover { background-color: var(--color-y-yellow); } .ds-popover__item:focus-visible { outline: 2px solid var(--color-b-cyan); } .ds-popover__item--danger:hover { background-color: var(--color-r-smoke-red); }"
+    },
+    {
+      "name": "Scheme Choice Plate",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "The /plant-scheme entry's path choice — a white raised card whose top ~45% is a flowering-season colour field (summer pink = established garden, spring green = from scratch) carrying a faint engraving. The one place a --sem-flowering-* pair owns a large surface. Hover is the surface's authored moment.",
+      "html": "<button class=\"ds-scheme-plate\">\n  <span class=\"ds-scheme-plate__field\">\n    <svg class=\"ds-scheme-plate__mark\" viewBox=\"0 0 120 120\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.5\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M28 104 H92\"/><path d=\"M60 104 C60 84 60 66 60 44\"/><path d=\"M60 88 C44 86 33 76 31 60 C47 60 58 70 60 84\"/><path d=\"M60 74 C76 72 87 62 89 46 C73 46 62 56 60 70\"/><path d=\"M60 58 C48 56 40 47 39 34 C51 35 59 44 60 55\"/><path d=\"M60 50 C71 47 78 39 79 27 C69 29 62 37 60 47\"/></svg>\n  </span>\n  <span class=\"ds-scheme-plate__body\">\n    <span class=\"ds-scheme-plate__title\">From your garden</span>\n    <span class=\"ds-scheme-plate__note\">Build around the plants already in your garden.</span>\n    <span class=\"ds-scheme-plate__go\">Start <span aria-hidden=\"true\">&rarr;</span></span>\n  </span>\n</button>",
+      "css": ".ds-scheme-plate { --_field: var(--sem-flowering-summer-bg); --_field-deep: color-mix(in srgb, var(--sem-flowering-summer-bg) 60%, var(--sem-flowering-summer-fg)); --_ink: var(--sem-flowering-summer-fg); position: relative; overflow: hidden; display: flex; flex-direction: column; inline-size: 20rem; min-block-size: 18rem; text-align: start; background: var(--color-white); border: none; border-radius: var(--radius-m); cursor: pointer; box-shadow: 0 1px 0 color-mix(in srgb, var(--color-sand-line) 55%, transparent); transition: box-shadow 0.4s cubic-bezier(0.16,1,0.3,1), transform 0.4s cubic-bezier(0.16,1,0.3,1); }\n.ds-scheme-plate__field { position: relative; overflow: hidden; flex: none; block-size: 8rem; background: var(--_field); border-block-end: 1px solid color-mix(in srgb, var(--_field-deep) 65%, transparent); transition: background-color 0.4s cubic-bezier(0.16,1,0.3,1); }\n.ds-scheme-plate__field::after { content: \"\"; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(172deg, transparent 50%, color-mix(in srgb, var(--_ink) 12%, transparent)); }\n.ds-scheme-plate__mark { position: absolute; inset-block-end: -1.5rem; inset-inline-end: 0.5rem; inline-size: 8.5rem; block-size: 8.5rem; color: var(--_ink); opacity: 0.4; transition: opacity 0.4s cubic-bezier(0.16,1,0.3,1), transform 520ms cubic-bezier(0.16,1,0.3,1); }\n.ds-scheme-plate__body { display: flex; flex: 1; flex-direction: column; gap: 0.5rem; padding: 1rem 1.5rem 1.5rem; }\n.ds-scheme-plate__title { font-family: var(--font-display); font-weight: 600; font-size: clamp(1.202rem, 0.406vw + 1.130rem, 1.563rem); line-height: 1.15; color: var(--color-ink); }\n.ds-scheme-plate__note { font-family: var(--font-sans); font-size: clamp(0.813rem, 0.092vw + 0.797rem, 0.894rem); line-height: 1.5; color: var(--_ink); max-inline-size: 24ch; }\n.ds-scheme-plate__go { display: inline-flex; align-items: center; gap: 0.25rem; margin-block-start: auto; padding-block-start: 0.5rem; font-family: var(--font-mono); font-size: 0.8rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--_ink); }\n.ds-scheme-plate__go span { transition: transform 0.4s cubic-bezier(0.16,1,0.3,1); }\n.ds-scheme-plate:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.15); transform: translateY(-2px); }\n.ds-scheme-plate:hover .ds-scheme-plate__field { background: var(--_field-deep); }\n.ds-scheme-plate:hover .ds-scheme-plate__mark { opacity: 0.52; transform: scale(1.06); }\n.ds-scheme-plate:hover .ds-scheme-plate__go span { transform: translateX(0.25rem); }\n.ds-scheme-plate:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-p-lavender), 0 8px 24px rgba(0,0,0,0.15); }\n@media (prefers-reduced-motion: reduce) { .ds-scheme-plate, .ds-scheme-plate__field, .ds-scheme-plate__mark, .ds-scheme-plate__go span { transition: none; } .ds-scheme-plate:hover { transform: none; } .ds-scheme-plate:hover .ds-scheme-plate__mark, .ds-scheme-plate:hover .ds-scheme-plate__go span { transform: none; } }"
+    },
+    {
+      "name": "Plant Schedule Row",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "The typed plant list on /plant-scheme/scratch, drawn as a numbered plant schedule: a white raised panel with a spring-washed letterhead, rows of [--_accent roundel stamp] [Fraunces roman name] [44px remove], and faint dashed ghost rows ahead of the entries so a short list still reads as a form taking shape.",
+      "html": "<div class=\"ds-schedule\">\n  <div class=\"ds-schedule__head\"><span class=\"ds-schedule__label\">Your plant list</span><span class=\"ds-schedule__count\">2 plants</span></div>\n  <ol class=\"ds-schedule__rows\">\n    <li class=\"ds-schedule__row\"><span class=\"ds-schedule__no\">01</span><span class=\"ds-schedule__name\">Salvia nemorosa &rsquo;Caradonna&rsquo;</span><button class=\"ds-schedule__remove\" aria-label=\"Remove Salvia nemorosa\"><svg width=\"12\" height=\"12\" viewBox=\"0 0 12 12\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" aria-hidden=\"true\"><line x1=\"2\" y1=\"2\" x2=\"10\" y2=\"10\"/><line x1=\"10\" y1=\"2\" x2=\"2\" y2=\"10\"/></svg></button></li>\n    <li class=\"ds-schedule__row ds-schedule__row--ghost\"><span class=\"ds-schedule__no\">02</span><span class=\"ds-schedule__name\">Add your next plant</span></li>\n  </ol>\n</div>",
+      "css": ".ds-schedule { --_accent: var(--sem-flowering-spring-fg); --_accent-wash: var(--sem-flowering-spring-bg); inline-size: 26rem; background: var(--color-white); border: 1px solid var(--sem-border-color); border-radius: var(--radius-m); overflow: hidden; }\n.ds-schedule__head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: 0.5rem 1rem; background: color-mix(in srgb, var(--_accent-wash) 68%, var(--color-white)); border-block-end: 1px solid color-mix(in srgb, var(--_accent) 22%, var(--sem-border-color)); }\n.ds-schedule__label, .ds-schedule__count { font-family: var(--font-mono); font-size: 0.8rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; }\n.ds-schedule__label { color: var(--_accent); }\n.ds-schedule__count { color: color-mix(in srgb, var(--_accent) 78%, transparent); }\n.ds-schedule__rows { list-style: none; margin: 0; padding: 0; }\n.ds-schedule__row { display: grid; grid-template-columns: 1.75rem 1fr 2.75rem; align-items: center; gap: 0.5rem; min-block-size: 3.25rem; padding-inline: 1rem; border-block-end: 1px solid color-mix(in srgb, var(--sem-border-color) 70%, transparent); }\n.ds-schedule__row:last-child { border-block-end: none; }\n.ds-schedule__no { display: inline-flex; align-items: center; justify-content: center; inline-size: 1.75rem; block-size: 1.75rem; border-radius: 50%; background: var(--_accent); color: var(--color-r-white); font-family: var(--font-mono); font-size: 0.8rem; font-variant-numeric: tabular-nums; }\n.ds-schedule__name { min-inline-size: 0; font-family: var(--font-display); font-size: clamp(1.042rem, 0.234vw + 1rem, 1.25rem); line-height: 1.3; color: var(--color-ink); overflow-wrap: break-word; }\n.ds-schedule__remove { display: inline-flex; align-items: center; justify-content: center; inline-size: 2.75rem; block-size: 2.75rem; border: none; background: none; color: var(--color-ink-soft); border-radius: 50%; cursor: pointer; transition: background-color 0.4s ease, color 0.4s ease; }\n.ds-schedule__remove:hover { background: var(--color-y-yellow); color: var(--color-n-deep-grey); }\n.ds-schedule__remove:focus-visible { outline: 2px solid var(--color-b-cyan); outline-offset: 1px; }\n.ds-schedule__row--ghost { border-block-end-style: dashed; }\n.ds-schedule__row--ghost .ds-schedule__no { background: transparent; border: 1px dashed color-mix(in srgb, var(--_accent) 45%, transparent); color: color-mix(in srgb, var(--_accent) 55%, transparent); }\n.ds-schedule__row--ghost .ds-schedule__name { font-family: var(--font-sans); font-size: 0.9rem; font-style: italic; color: var(--color-ink-soft); }"
+    },
+    {
+      "name": "Chat Bubble",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "One turn in the c-chat conversation surface. Assistant bubbles on paper-deep (borderless), the person's on white with a hairline; each squares one corner toward its speaker. The 'Plotted' attribution with a sprout mark shows once at the head of an assistant run. Role is alignment + fill tone + attribution, never colour alone.",
+      "html": "<div class=\"ds-chat\">\n  <div class=\"ds-chat__msg ds-chat__msg--assistant\">\n    <span class=\"ds-chat__from\"><svg class=\"ds-chat__avatar\" viewBox=\"0 0 20 20\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.4\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M10 18V8\"/><path d=\"M10 11.5C6.4 11 3.8 8.4 3.3 4.8 6.9 5.3 9.5 7.9 10 11.5Z\"/><path d=\"M10 9.5C13 9 15 6.6 15.4 3.6 12.4 4 10.4 6 10 9.5Z\"/></svg>Plotted</span>\n    <div class=\"ds-chat__bubble\">I'll help you turn this into a full planting scheme &mdash; ask for a swap, more options in a direction, or tell me what isn't working.</div>\n  </div>\n  <div class=\"ds-chat__msg ds-chat__msg--user\">\n    <div class=\"ds-chat__bubble\">Full sun, mostly.</div>\n  </div>\n</div>",
+      "css": ".ds-chat { display: flex; flex-direction: column; gap: 16px; }\n.ds-chat__msg { display: flex; flex-direction: column; gap: 4px; max-inline-size: min(100%, 42rem); }\n.ds-chat__msg--assistant { align-self: flex-start; align-items: flex-start; }\n.ds-chat__msg--user { align-self: flex-end; align-items: flex-end; }\n.ds-chat__from { display: inline-flex; align-items: center; gap: 4px; font-family: var(--font-mono); font-size: 0.8rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-ink-soft); }\n.ds-chat__avatar { flex: none; inline-size: 1.25rem; block-size: 1.25rem; color: var(--color-r-marigold); }\n.ds-chat__bubble { padding: 8px 16px; line-height: 1.55; font-size: clamp(0.909rem, 0.102vw + 0.891rem, 1rem); border-radius: 8px; overflow-wrap: break-word; }\n.ds-chat__msg--assistant .ds-chat__bubble { color: var(--color-n-deep-grey); background: var(--color-paper-deep); border-end-start-radius: 2px; }\n.ds-chat__msg--user .ds-chat__bubble { color: var(--color-n-deep-grey); background: var(--color-white); border: 1px solid var(--sem-border-color); border-end-end-radius: 2px; }"
+    },
+    {
+      "name": "Typing Indicator",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "Shown in the c-chat log while the assistant composes a reply. Three dots in a paper-deep bubble; role=status with a visually-hidden 'Plotted is thinking'. The chat surface's one authored moment.",
+      "html": "<div class=\"ds-typing\" role=\"status\" aria-label=\"Plotted is thinking\"><span></span><span></span><span></span></div>",
+      "css": ".ds-typing { align-self: flex-start; display: inline-flex; gap: 0.25rem; align-items: center; padding: 8px 16px; background: var(--color-paper-deep); border-radius: 8px; border-end-start-radius: 2px; }\n.ds-typing span { inline-size: 0.375rem; block-size: 0.375rem; border-radius: 50%; background: var(--color-ink-soft); animation: ds-typing 1.2s ease infinite; }\n.ds-typing span:nth-child(2) { animation-delay: 0.15s; }\n.ds-typing span:nth-child(3) { animation-delay: 0.3s; }\n@keyframes ds-typing { 0%, 60%, 100% { opacity: 0.3; transform: translateY(0); } 30% { opacity: 1; transform: translateY(-0.125rem); } }\n@media (prefers-reduced-motion: reduce) { .ds-typing span { animation: none; opacity: 0.55; } }"
+    },
+    {
+      "name": "Chat Composer",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "The c-chat message input: an auto-growing textarea (field-sizing: content, repeated-entry focus — marigold ring + border, no fill flip, marigold caret) and a 44px roundel send button in the brand accent. Enter sends, Shift+Enter newlines.",
+      "html": "<div class=\"ds-composer\">\n  <textarea class=\"ds-composer__input\" rows=\"1\" placeholder=\"Ask for a swap, more options, a different direction&hellip;\" aria-label=\"Message Plotted\"></textarea>\n  <button class=\"ds-composer__send\" aria-label=\"Send message\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 16 16\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.75\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M8 13.5V3\"/><path d=\"M3.5 7.5 8 3l4.5 4.5\"/></svg></button>\n</div>",
+      "css": ".ds-composer { display: flex; align-items: flex-end; gap: 8px; }\n.ds-composer__input { flex: 1; min-inline-size: 0; resize: none; padding: 8px 16px; font: inherit; font-size: clamp(0.813rem, 0.092vw + 0.797rem, 0.894rem); line-height: 1.5; color: var(--color-ink); background: var(--color-paper); border: 1px solid var(--color-sand-line); border-radius: 8px; caret-color: var(--color-r-marigold); field-sizing: content; max-block-size: 8rem; overflow-y: auto; }\n.ds-composer__input::placeholder { color: color-mix(in srgb, var(--color-ink-soft) 60%, transparent); }\n.ds-composer__input:focus-visible { outline: none; border-color: var(--color-r-marigold); box-shadow: 0 0 0 2px var(--color-r-marigold); }\n.ds-composer__send { flex: none; display: inline-flex; align-items: center; justify-content: center; inline-size: 2.75rem; block-size: 2.75rem; color: var(--color-r-white); background: var(--color-r-marigold); border: none; border-radius: 50%; cursor: pointer; transition: background-color 0.4s ease; }\n.ds-composer__send:hover { background: var(--color-o-vermillion); }\n.ds-composer__send:disabled { opacity: 0.4; cursor: not-allowed; }\n.ds-composer__send:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-p-lavender); }"
+    },
+    {
+      "name": "Living Border Sheet",
+      "kind": "custom",
+      "refersTo": "card",
+      "description": "The head of the /plant-scheme/chat scheme list — the list drawn as a border taking shape, not a list. Under the season-washed letterhead: the border elevation (an engraved cross-section on a shared ground line — every tiered plant one silhouette in the path accent, a dashed ghost holding any empty tier) and the flowering year (twelve month cells filling with their season's --sem-flowering-* pair, a small accent tick under the current month). New silhouettes draw themselves in on the emphasis curve — part of 'the planting' (see motion).",
+      "html": "<div class=\"ds-sheet\">\n  <div class=\"ds-sheet__head\"><span class=\"ds-sheet__label\">Scheme list</span><span class=\"ds-sheet__count\">3 plants</span></div>\n  <svg class=\"ds-sheet__elevation\" viewBox=\"0 0 280 88\" aria-hidden=\"true\">\n    <path class=\"ds-sheet__ground\" d=\"M8 78 H272\"/>\n    <g class=\"ds-sheet__plant\"><path pathLength=\"1\" d=\"M64 78 C 63 58 61 40 54 26\"/><path pathLength=\"1\" d=\"M64 78 C 64 56 63 36 62 22\"/><path pathLength=\"1\" d=\"M64 78 C 65 58 67 40 73 28\"/><path pathLength=\"1\" d=\"M64 78 C 66 60 69 46 78 34\"/></g>\n    <g class=\"ds-sheet__plant\" style=\"--_delay: 0.09s\"><path pathLength=\"1\" d=\"M134 78 C 136 62 142 50 150 50 C 158 50 164 62 166 78\"/><path pathLength=\"1\" d=\"M141 78 C 142 68 146 60 149 59\"/><path pathLength=\"1\" d=\"M159 78 C 158 68 154 61 151 60\"/></g>\n    <g class=\"ds-sheet__plant\" style=\"--_delay: 0.18s\"><path pathLength=\"1\" d=\"M200 78 C 200 70 200 62 200 56\"/><path pathLength=\"1\" d=\"M200 56 L 192 48\"/><path pathLength=\"1\" d=\"M200 56 L 197 46\"/><path pathLength=\"1\" d=\"M200 56 L 203 46\"/><path pathLength=\"1\" d=\"M200 56 L 208 48\"/><circle cx=\"192\" cy=\"46.5\" r=\"1.4\"/><circle cx=\"197\" cy=\"44.5\" r=\"1.4\"/><circle cx=\"203\" cy=\"44.5\" r=\"1.4\"/><circle cx=\"208\" cy=\"46.5\" r=\"1.4\"/></g>\n    <g class=\"ds-sheet__ghost\"><path pathLength=\"1\" d=\"M220 78 C 223 71 227 71 230 78 C 233 71 237 71 240 78 C 243 72 247 72 250 78\"/></g>\n  </svg>\n  <div class=\"ds-sheet__year\"><span class=\"ds-sheet__month\">J</span><span class=\"ds-sheet__month\">F</span><span class=\"ds-sheet__month\">M</span><span class=\"ds-sheet__month\">A</span><span class=\"ds-sheet__month ds-sheet__month--spring\">M</span><span class=\"ds-sheet__month ds-sheet__month--early-summer\">J</span><span class=\"ds-sheet__month ds-sheet__month--summer\">J</span><span class=\"ds-sheet__month ds-sheet__month--summer ds-sheet__month--now\">A</span><span class=\"ds-sheet__month ds-sheet__month--autumn\">S</span><span class=\"ds-sheet__month ds-sheet__month--autumn\">O</span><span class=\"ds-sheet__month\">N</span><span class=\"ds-sheet__month\">D</span></div>\n</div>",
+      "css": ".ds-sheet { --_accent: var(--sem-flowering-spring-fg); --_accent-wash: var(--sem-flowering-spring-bg); inline-size: 22rem; background: var(--color-white); border: 1px solid var(--sem-border-color); border-radius: var(--radius-m, 4px); overflow: hidden; }\n.ds-sheet__head { display: flex; align-items: baseline; justify-content: space-between; gap: 1rem; padding: 0.5rem 1rem; background: color-mix(in srgb, var(--_accent-wash) 60%, var(--color-white)); border-block-end: 1px solid color-mix(in srgb, var(--_accent) 20%, var(--sem-border-color)); }\n.ds-sheet__label, .ds-sheet__count { font-family: var(--font-mono), ui-monospace, monospace; font-size: 0.8rem; font-weight: 500; letter-spacing: 0.14em; text-transform: uppercase; }\n.ds-sheet__label { color: var(--_accent); }\n.ds-sheet__count { color: color-mix(in srgb, var(--_accent) 78%, transparent); }\n.ds-sheet__elevation { display: block; inline-size: 100%; block-size: auto; padding: 0.5rem 1rem 0; box-sizing: border-box; }\n.ds-sheet__ground { fill: none; stroke: color-mix(in srgb, var(--_accent) 40%, var(--sem-border-color)); stroke-width: 1; stroke-linecap: round; }\n.ds-sheet__plant path { fill: none; stroke: var(--_accent); stroke-width: 1.4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; stroke-dashoffset: 0; animation: ds-sheet-draw 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards; animation-delay: var(--_delay, 0s); }\n.ds-sheet__plant circle { fill: var(--_accent); animation: ds-sheet-dot 0.4s ease backwards; animation-delay: calc(var(--_delay, 0s) + 0.4s); }\n.ds-sheet__ghost path { fill: none; stroke: color-mix(in srgb, var(--_accent) 45%, transparent); stroke-width: 1.2; stroke-linecap: round; stroke-dasharray: 0.035 0.045; }\n.ds-sheet__year { display: flex; gap: 4px; padding: 4px 1rem 0.5rem; }\n.ds-sheet__month { position: relative; flex: 1; min-inline-size: 0; padding-block: 0.25rem; text-align: center; font-family: var(--font-inter), sans-serif; font-size: 0.73rem; color: var(--color-ink-soft); background: var(--color-paper-deep); border-radius: 2px; }\n.ds-sheet__month--spring { color: var(--sem-flowering-spring-fg); background: var(--sem-flowering-spring-bg); }\n.ds-sheet__month--early-summer { color: var(--sem-flowering-early-summer-fg); background: var(--sem-flowering-early-summer-bg); }\n.ds-sheet__month--summer { color: var(--sem-flowering-summer-fg); background: var(--sem-flowering-summer-bg); }\n.ds-sheet__month--autumn { color: var(--sem-flowering-autumn-fg); background: var(--sem-flowering-autumn-bg); }\n.ds-sheet__month--now::after { content: \"\"; position: absolute; inset-inline: 35%; inset-block-end: 0; block-size: 2px; border-radius: 2px; background: var(--_accent); }\n@keyframes ds-sheet-draw { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }\n@keyframes ds-sheet-dot { from { opacity: 0; } to { opacity: 1; } }\n@media (prefers-reduced-motion: reduce) { .ds-sheet__plant path, .ds-sheet__plant circle { animation: none; } }"
     }
   ],
   "narrative": {
@@ -239,16 +368,66 @@
       "Two type-adjacent registers: a wide editorial marketing surface (~1120px) and a narrow product measure (~800px)."
     ],
     "rules": [
-      { "name": "The One Accent Rule", "body": "Marigold is the only brand accent in product chrome and appears on ≤10% of any screen — primary action and active nav. Anywhere the interface is more colourful than that, the colour is coming from plant content (photos, traits, seasons) via the semantic layer, not from chrome.", "section": "colors" },
-      { "name": "The Semantic Layer Rule", "body": "Trait, sun, season and status colours are declared as --sem-* tokens that reference the palette (or a purpose-made hex where the review demanded one). Components read --sem-* through object-private --_* custom properties — never raw --color-* — for any stateful colour. New state colours go through this layer.", "section": "colors" },
-      { "name": "The Highlight-Yellow convention", "body": "Established pattern, not an invariant. highlight-yellow is the one reactive colour that marks whatever the pointer is on. Keep every new interactive object consistent with it on hover/active.", "section": "colors" },
-      { "name": "The Two-Register Rule", "body": "Fraunces headings are bold roman (600) in the product UI and italic (400) on marketing/editorial surfaces — never mixed within one surface. Adding an app section header in italic, or a marketing headline in bold roman, is drift. Weight and style are chosen by surface mode (Operate -> roman 600; Persuade/Read editorial -> italic 400), not by taste per screen.", "section": "typography" },
-      { "name": "The Mono Label Rule", "body": "Eyebrows, specimen/plate numbers, field labels and botanical metadata all use .o-type-label -- Spline Sans Mono, uppercase, letter-spacing 0.14em, weight 500, .minion size. One class, no per-context variants; it is the type element that carries the tech-aware half of the identity.", "section": "typography" },
-      { "name": "The One Scale Rule", "body": "Type size comes only from the printers'-names step classes (minion to canon plus long- variants) in styles/base/_typography.scss, and line-height only from .o-type-leading--*. Tailwind text-*/font-*/leading-* and arbitrary text-[Npx] are not part of this system -- they are being converted out. Never introduce a new size value; map the need onto the nearest step.", "section": "typography" },
-      { "name": "The Latin-in-Italic Rule", "body": "Botanical names (genus, species, cultivar) are always rendered italic, whatever the surrounding type.", "section": "typography" },
-      { "name": "The Flat-By-Default Rule", "body": "Surfaces are flat at rest. A shadow appears only as a reaction to state — hover, open, overlay — and never as ambient decoration. If a resting element needs to stand out, reach for a tonal layer or a hairline first.", "section": "elevation" },
-      { "name": "The Grain Rule", "body": "The page ground always carries its feTurbulence noise texture at ~8% alpha, multiply blended. A pure flat #FFF or un-grained #FAF6EC fill at page level is a regression.", "section": "elevation" },
-      { "name": "The Narrow Column Rule", "body": "App pages hold to the ~800px .o-page measure -- one readable column, one task. The 1120px editorial container is a marketing device and never appears in the app. The single sanctioned exception is the dashboard, which runs the ~1000px companion measure (still one centred column, never multi-column) because it is a stack of peer check-in blocks rather than a single task. A new app route wanting extra width is drift, not a precedent.", "section": "layout" }
+      {
+        "name": "The One Accent Rule",
+        "body": "Marigold is the only brand accent in product chrome and appears on ≤10% of any screen — primary action and active nav. Anywhere the interface is more colourful than that, the colour is coming from plant content (photos, traits, seasons) via the semantic layer, not from chrome.",
+        "section": "colors"
+      },
+      {
+        "name": "The Semantic Layer Rule",
+        "body": "Trait, sun, season and status colours are declared as --sem-* tokens that reference the palette (or a purpose-made hex where the review demanded one). Components read --sem-* through object-private --_* custom properties — never raw --color-* — for any stateful colour. New state colours go through this layer.",
+        "section": "colors"
+      },
+      {
+        "name": "The Highlight-Yellow convention",
+        "body": "Established pattern, not an invariant. highlight-yellow is the one reactive colour that marks whatever the pointer is on. Keep every new interactive object consistent with it on hover/active.",
+        "section": "colors"
+      },
+      {
+        "name": "The Two-Register Rule",
+        "body": "Fraunces headings are bold roman (600) in the product UI and italic (400) on marketing/editorial surfaces — never mixed within one surface. An app section header in italic, or a marketing headline in bold roman, is drift. Weight and style are chosen by surface mode (Operate -> roman 600; Persuade/Read editorial -> italic 400), not by taste per screen. The rule governs headings, not the italic voice entirely: in-app, Fraunces italic 400 is allowed for a short editorial aside — a non-heading line that speaks in Plotted's voice or looks ahead, set apart from the working copy (e.g. the what's-next note on a journey step, .c-scheme-scratch__next). One aside per view; never a run of body copy, never a heading.",
+        "section": "typography"
+      },
+      {
+        "name": "The Mono Label Rule",
+        "body": "Eyebrows, specimen/plate numbers, field labels and botanical metadata all use .o-type-label -- Spline Sans Mono, uppercase, letter-spacing 0.14em, weight 500, .minion size. One class, no per-context variants; it is the type element that carries the tech-aware half of the identity.",
+        "section": "typography"
+      },
+      {
+        "name": "The One Scale Rule",
+        "body": "Type size comes only from the printers'-names step classes (minion to canon plus long- variants) in styles/base/_typography.scss, and line-height only from .o-type-leading--*. Tailwind text-*/font-*/leading-* and arbitrary text-[Npx] are not part of this system -- they are being converted out. Never introduce a new size value; map the need onto the nearest step.",
+        "section": "typography"
+      },
+      {
+        "name": "The Latin-in-Italic Rule",
+        "body": "Botanical names (genus, species, cultivar) are always rendered italic, whatever the surrounding type.",
+        "section": "typography"
+      },
+      {
+        "name": "The Flat-By-Default Rule",
+        "body": "Surfaces are flat at rest. A shadow appears only as a reaction to state — hover, open, overlay — and never as ambient decoration. If a resting element needs to stand out, reach for a tonal layer or a hairline first.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Grain Rule",
+        "body": "The page ground always carries its feTurbulence noise texture at ~8% alpha, multiply blended. A pure flat #FFF or un-grained #FAF6EC fill at page level is a regression.",
+        "section": "elevation"
+      },
+      {
+        "name": "The Narrow Column Rule",
+        "body": "App pages hold to the ~800px .o-page measure — one readable column, one task. The 1120px editorial container is a marketing device and never appears in the app. The sanctioned width exception is the dashboard, which runs the ~1000px companion measure (still one centred column, never multi-column) because it is a stack of peer check-in blocks rather than a single task. A new app route wanting extra width is drift, not a precedent. A second, narrower exception buys immersion, never width: the /plant-scheme entry hero (.c-scheme-hero) is a full-bleed photographic band whose content still respects the ~800px measure — only the band breaks the .o-page inset, to the viewport edges on a phone (<=32rem: margin-inline: calc(var(--space-md) * -1), radius dropped, aspect-ratio 2/1 -> 4/5). A third: the /plant-scheme/chat workspace (.c-scheme-workspace) takes the ~1000px companion measure for the same reason — two peer panes (conversation + scheme list), not one task; it never becomes a third column, and the question-flow phase of the same route keeps the 800px measure.",
+        "section": "layout"
+      },
+      {
+        "name": "The Semantic Field exception",
+        "body": "Scoped to the /plant-scheme journey. The flowering-season hues normally appear only in small badges and roundels — held in restraint. The planting-scheme flow is the one sanctioned place a --sem-flowering-* pair carries large surfaces and a whole path's accent: on the entry, the choice plates (.c-scheme-plate.is-established / .is-new) each own an ~8rem colour field (~45% of the card) — --sem-flowering-summer-* for the established garden, --sem-flowering-spring-* for the one just starting — with the body note tinted from the season -fg rather than grey; each path then carries that season forward as its accent through the steps that follow (the from-scratch journey, .c-scheme-scratch, is spring end to end — progress track, plate-number stamps, list letterhead, what's-next aside). Colour still routes through object-private --_field / --_field-deep / --_ink / --_accent / --_accent-wash props per the Semantic Layer Rule. This is the scheme journey's licence, not a template — an ordinary Operate screen wanting a coloured field is drift.",
+        "section": "colors"
+      },
+      {
+        "name": "The One Authored Moment Rule",
+        "body": "A surface gets one motion that is designed — orchestrated, on the emphasis curve (--transition-easing-emphasis, cubic-bezier(0.16, 1, 0.3, 1)), from an already-visible resting state. Everything else is incidental (default curve, ease) or still. A page where every transition uses the emphasis curve has no authored moment, just noise. Every keyframe and transition honours prefers-reduced-motion: reduce — the authored moment degrades to an instant state change, never a jump.",
+        "section": "elevation"
+      }
     ],
     "dos": [
       "Do keep the page ground #FAF6EC with its noise grain (multiply, ~8%). White is for raised cards, dialogs and menus only.",
@@ -259,7 +438,10 @@
       "Do route every stateful colour through a --sem-* token and an object-private --_* property — never a raw --color-* in a modifier.",
       "Do keep marigold rare: primary action and active nav, ≤10% of a screen.",
       "Do let colour enter through plant content — photos and the trait/sun/season badge families — while chrome stays calm.",
-      "Do hold app pages to the ~800px .o-page measure; the 1120px container is a marketing device and the ~1000px companion measure is the dashboard's alone (the Narrow Column Rule).",
+      "Do treat the /plant-scheme entry as the app's one sanctioned Persuade surface — a full-bleed garden photograph and large --sem-flowering-* colour fields belong there; on an Operate screen they are drift.",
+      "Do carry a /plant-scheme path's flowering-season accent through every step of that path, via --_accent / --_accent-wash — and reuse the journey chrome (.c-scheme-journey step marker, the schedule pattern, the path engraving) on the sibling steps rather than reinventing per screen.",
+      "Do hold app pages to the ~800px .o-page measure; the 1120px container is a marketing device and the ~1000px companion measure is reserved (the dashboard, the /plant-scheme/chat workspace — the Narrow Column Rule lists every exception).",
+      "Do build any new conversation on the c-chat primitives (_chat.scss / ChatLog.tsx) — bounded scroll log with role=\"log\" + aria-live, attribution once per run, a typing indicator before a reply, an auto-growing composer, focus back to the composer after send.",
       "Do honour prefers-reduced-motion for every animation (all current keyframes already opt out)."
     ],
     "donts": [
@@ -267,6 +449,8 @@
       "Don't use --color-ink for body copy — running text is --color-n-deep-grey; ink / ink-soft are for headings and labels.",
       "Don't drift toward the plant-ID app look: no dark UI, neon accents, camera-first chrome, or gamified score badges. The N/12 spotted hook is a gentle prompt, not a scoreboard.",
       "Don't drift twee: no script or hand-lettered fonts, watercolour blobs, floral borders, or pastel whimsy.",
+      "Don't copy the scheme-entry hero photo or its coloured choice fields onto another app route — it is a scoped front-door treatment, not a new app-wide pattern (see Scheme entry).",
+      "Don't give chat bubbles a marigold (or any accent) fill, or lean on colour alone to tell assistant from user — the split is alignment + fill tone + the attribution line. Keep the season accent on the wrapper chrome (--_accent on the workspace/list), never inside c-chat.",
       "Don't mix heading registers within a surface — no italic-400 section header inside the app, no bold-roman headline on a marketing page.",
       "Don't add dashboards, KPI tiles, stat walls or streak counters (a PRODUCT.md commitment).",
       "Don't hardcode radius, spacing or colour values — use the scale tokens; Stylelint checks them.",

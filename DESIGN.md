@@ -244,6 +244,8 @@ Three containers, chosen by surface intent:
 
 A second, narrower exception buys *immersion, never width*: the `/plant-scheme` entry hero (`.c-scheme-hero`) is a full-bleed photographic band. Its content still respects the ~800px measure; only the band itself breaks the `.o-page` inset — to the viewport edges on a phone (`≤32rem`: `margin-inline: calc(var(--space-md) * -1)`, radius dropped, `aspect-ratio` shifting `2/1` → `4/5`). It stays a single centred column.
 
+A third: the `/plant-scheme/chat` **workspace** (`.c-scheme-workspace`) takes the dashboard's ~1000px companion measure, for the same reason — two peer panes (conversation + scheme list), not one task. It never becomes a third column, and the question-flow phase of the same route keeps the 800px measure.
+
 ## Elevation & Depth
 
 The system is **flat by default**. At rest, surfaces are separated by tonal paper layers (`paper` → `paper-deep` → `sand` → `white`) and 1px hairlines — not shadow. The paper grain adds a tactile, printed quality that reads as depth without any cast shadow. Shadow is strictly a *state response*: card hover, open dialog, open popover, image overlay.
@@ -265,12 +267,18 @@ Two easing curves, from `styles/abstracts/_variables.scss`:
 - **`--transition-easing-default`** (`ease`), at `--transition-time-default: 0.4s` (also `-slow: 0.8s`, `-x-slow: 1s`): incidental transitions — a hover fill, a border colour, a focus ring settling. Cheap, unremarkable, everywhere.
 - **`--transition-easing-emphasis`** (`cubic-bezier(0.16, 1, 0.3, 1)` — exponential ease-out, "settling toward the light"): the **one authored moment** on a surface. The scheme-entry plate lift and engraving bloom; the scheme-scratch schedule row easing in as it is added. Reserve it for that single deliberate motion — a page where every transition uses the emphasis curve has no authored moment, just noise.
 
+Named keyframes: **`chat-typing`** (`_chat.scss`) — three dots pulsing opacity + a `0.125rem` rise, `1.2s` staggered `0.15s`, `infinite`; the chat surface's authored moment while the assistant composes. Static (`opacity: 0.55`) under reduced motion.
+
+**"The planting"** (`_scheme-chat.scss`) — the scheme workspace's authored moment: one orchestrated response to a plant joining the scheme, on the emphasis curve. `scheme-item-in` (fade + `-0.25rem` settle) eases the list row and the chat suggestion card in, `scheme-card-wash` flashes the card from `--_accent-wash` to white, `scheme-stamp-in` pops the specimen roundel, and `scheme-elevation-draw`/`-dot` draw the plant's silhouette up from the ground line (strokes are `pathLength`-normalised so one dash pair animates any shape; flower-head dots bud a beat after their stem). All share a per-item `--_delay`, `0` for a single add and staggered (~70–90ms per item) when a populated sheet or a fresh suggestion panel first arrives — a scheme lands as a planting, not a dump. Every keyframe is `animation: none` under reduced motion.
+
 ### Named Rules
 **The One Authored Moment Rule.** A surface gets one motion that is designed — orchestrated, on the emphasis curve, from an already-visible resting state. Everything else is incidental (default curve) or still. Every keyframe and transition honours `prefers-reduced-motion: reduce` — the authored moment degrades to an instant state change, never a jump.
 
 ## Shapes
 
 Restrained, mostly-square corner language. Chrome (buttons, inputs, cards, dialogs, popovers, menus) uses the tight radius steps — `s 2px`, `m 4px`, `l 8px` — with `2px` on buttons and `4px` on cards and inputs being the common cases. Fully round forms are reserved for two jobs: `pill 32px` for **badges and chips** (static labels and interactive tags), and `roundel 50%` for **avatars, icon-only actions and sun roundels**.
+
+**Chat bubbles** stay inside the scale: `l 8px` all round, with the **one corner nearest the speaker squared to `s 2px`** (assistant → bottom-left, user → bottom-right). It's the familiar chat tell, done with the existing steps rather than a new rounded value or a tail.
 
 Borders are a first-class structural tool: `--border-width-hairline: 1px` for all resting structure, `--border-width-thin: 2px` for active/focus emphasis (active underline field, focus outline, AI-highlight card border).
 
@@ -338,13 +346,38 @@ The `/plant-scheme` front door — a Persuade surface inside the app, the one pl
 
 ### Scheme journey — steps 2+ (`c-scheme-scratch`)
 
-Past the entry, each path is an Operate surface (the task is to enter data), but it keeps the journey's warmth: its season accent carried through, the catalogue devices, the path engraving. `/plant-scheme/scratch` is the built reference; `/existing` and `/chat` should adopt the same chrome.
+Past the entry, each path is an Operate surface (the task is to enter data), but it keeps the journey's warmth: its season accent carried through, the catalogue devices, the path engraving. `/plant-scheme/scratch` and `/plant-scheme/chat` are the built references; `/existing` should adopt the same chrome.
 
 - **Step marker** (`.c-scheme-journey`): a hairline-ruled row — mono path label left (`From scratch`), a three-segment progress track (reached segments in the path's `--_accent`, `1.75rem`/`2.5rem` bars, `0.25rem` tall), `Step N / 3` mono right. This is the folio device doing wayfinding; because the sequence carries real information it is *not* the banned decorative eyebrow.
 - **Plant schedule** (`.c-scheme-schedule`): the typed list drawn as a numbered plant schedule. A white raised panel; a **season-washed header band** ("letterhead") with a mono label and count; rows of `[stamp] [name] [remove]` — the number is an `--_accent` **roundel stamp** (`1.75rem`, white numerals) so a filling list becomes colour rhythm, the name is Fraunces roman at the `long-primer` step, remove is a `44px` icon button (highlight-yellow hover per convention, `2px` cyan focus). Ahead of the real rows sit faint **ghost rows** — dashed dividers, dashed empty stamps, the first carrying the empty-state prompt — so a short or empty list still reads as a form waiting to be filled, never as a dead panel. The path engraving (`marks.tsx`) sits behind at `~0.08` opacity.
 - **Motion:** a real row eases in on add via `--transition-easing-emphasis` (translate + fade + a brief `--_accent-wash` flash); ghost rows and re-numbering are silent. This is the surface's one authored moment.
 - **Add field:** a repeated-entry field — see Inputs / Fields (ring + border focus, no fill flip).
 - **What's next:** one Fraunces **italic 400** aside in `--_accent` before the footer, setting up the step that follows (here, the LLM conversation) — see the Two-Register Rule's aside carve-out.
+
+### Chat (`c-chat`) — reusable conversation surface
+
+A conversation with Plotted, styled as an exchange of notes in a garden notebook. Domain-neutral and self-contained (styles in `styles/components/_chat.scss`, primitives in `_components/ChatLog.tsx`) so it can be lifted into any Plotted context; a host supplies the messages and wiring. Plotted's scoped planting assistant (`/plant-scheme/chat`) is the built reference — both the Q1–Q4 question flow and the destination workspace run on it.
+
+- **Log** (`.c-chat__log`): a `paper` panel, `1px` hairline, `4px` radius, bounded height (`--bounded` `min(60vh, 40rem)` / `--short` `max min(52vh, 34rem)`) so the composer stays in view; scrolls internally with a **themed thin scrollbar** (`sand-line` thumb). `role="log"` + `aria-live="polite"`; auto-scrolls to newest unless the reader has scrolled up.
+- **Bubbles** (`.c-chat__bubble`, `8px` radius): assistant on `paper-deep`, borderless; user on `white` with a hairline. Each squares **one corner** toward its speaker (`--radius-s`) — the familiar chat tell. Text at the `primer` step, `n-deep-grey`. Distinction is alignment + fill + the attribution line, never colour alone; **marigold is not a bubble colour**.
+- **Attribution** (`.c-chat__from`): a mono "Plotted" with a single-stroke sprout mark in `--color-r-marigold` — the one brand touch, shown once at the head of a run of assistant turns.
+- **Typing indicator** (`.c-chat__typing`): three `ink-soft` dots, `paper-deep` bubble, the `chat-typing` keyframe (see Motion). `role="status"` with a visually-hidden "Plotted is thinking". This is the surface's one authored moment; static under `prefers-reduced-motion`.
+- **Composer** (`.c-chat__composer`): an auto-growing `<textarea>` (`field-sizing: content`, `8px` radius, `paper` fill, marigold `caret-color`, repeated-entry focus — ring + border, no fill flip) and a `44px` **roundel send button** in `--color-r-marigold` (→ `o-vermillion` on hover, `0.4` opacity disabled). Enter sends, Shift+Enter newlines; focus returns to the composer after a send.
+- **Quick replies** (`.c-chat__chips` / `.c-chat__chip`): pill buttons, hairline, `paper` fill, highlight-yellow hover, `2px` cyan focus — real `<button>`s for the current turn only.
+- **Inline attachment** (`.c-chat__panel`): a `paper-deep` group (squared top-left toward the run) holding a plain `brevier` lead-in and cards — plant suggestions (`.c-suggestion`) or choose-one `.c-chat__option` buttons (white, hairline, highlight-yellow hover). Not the mono label treatment; these titles are sentences.
+
+### Scheme workspace (`c-scheme-workspace`) — step 3 destination
+
+The `/plant-scheme/chat` route: `phase: "questions"` runs the chat inside the journey step marker (`.c-scheme-journey`, count slot = `N / 4`); `phase: "scheme"` is the destination — a **two-pane workspace** (`.c-scheme-workspace`) that widens the page to the ~1000px companion measure (see the Narrow Column Rule) and, above `52rem`, sticks the **scheme-list panel** beside the scrolling conversation. Below `52rem` the panes stack, chat then list. The mock assistant delay (`~700ms`) shows the optimistic user message + typing indicator before the reply lands — the rhythm a streamed LLM response will have.
+
+The scheme-list panel (`.c-scheme-list`) is drawn as a **living border sheet**, not a list — the conversation's output made visible as a border taking shape. Top to bottom:
+
+- **Letterhead**: the season-washed head band with mono label and count, as on the scratch schedule.
+- **Border elevation** (`.c-scheme-elevation`, `BorderElevation.tsx`): an engraved cross-section on a shared ground line — every *tiered* plant draws one silhouette in the path's `--_accent` (back → tall grasses/spires/shrub crowns, mid → mounds/flower spikes/umbels, ground → mats/tufts/creepers; three variants per tier, slot + variant chosen by tier index, keyed by plant id so nothing redraws). An empty tier holds a **dashed ghost** silhouette — the schedule's ghost-row idea sketched — so "nothing at ground level yet" is visible, not a stat. A visually-hidden sentence gives the same census to screen readers. Garden-origin plants (no resolved tier) are not sketched.
+- **Flowering year** (`.c-scheme-year`, `FloweringYear.tsx`): twelve month cells (mono initials) that fill with their **flowering-season** `--sem-flowering-*-bg/-fg` pair when any listed plant flowers that month; quiet months stay `paper-deep`/`ink-soft`. The current month carries a small `--_accent` tick — the gardening year is the product's clock. Cell fills are incidental transitions; a visually-hidden "In flower May to October." mirrors it.
+- **Rows** (`.c-scheme-list__item`): each `.c-suggestion` card sits beside a **specimen-number stamp** (`.c-scheme-list__no` — the schedule's `--_accent` roundel device), numbered continuously down the sheet across the "From your garden" and tier groups. Re-numbering after a remove is silent.
+
+Arrivals — a fresh suggestion panel's cards in the chat, and rows/silhouettes/stamps on the sheet — run "the planting" (see Motion). This is the workspace's one authored moment; the elevation and year strip themselves are still surfaces that react, never perform.
 
 ## Do's and Don'ts
 
@@ -359,7 +392,8 @@ Past the entry, each path is an Operate surface (the task is to enter data), but
 - **Do** let colour enter through plant content — photos and the trait/sun/season badge families — while chrome stays calm.
 - **Do** treat the `/plant-scheme` entry as the app's one sanctioned Persuade surface — a full-bleed garden photograph and large `--sem-flowering-*` colour fields belong *there*; on an Operate screen they are drift.
 - **Do** carry a `/plant-scheme` path's flowering-season accent through every step of that path, via `--_accent` / `--_accent-wash` — and reuse the journey chrome (`.c-scheme-journey` step marker, the schedule pattern, the path engraving) on the sibling steps rather than reinventing per screen.
-- **Do** hold app pages to the ~800px `.o-page` measure; the 1120px container is a marketing device and the ~1000px companion measure is the dashboard's alone (the Narrow Column Rule).
+- **Do** hold app pages to the ~800px `.o-page` measure; the 1120px container is a marketing device and the ~1000px companion measure is reserved (the dashboard, the `/plant-scheme/chat` workspace — the Narrow Column Rule lists every exception).
+- **Do** build any new conversation on the `c-chat` primitives (`_chat.scss` / `ChatLog.tsx`) — bounded scroll log with `role="log"` + `aria-live`, attribution once per run, a typing indicator before a reply, an auto-growing composer, focus back to the composer after send.
 - **Do** honour `prefers-reduced-motion` for every animation (all current keyframes already opt out).
 
 ### Don't:
@@ -368,6 +402,7 @@ Past the entry, each path is an Operate surface (the task is to enter data), but
 - **Don't** drift toward the plant-ID app look: no dark UI, neon accents, camera-first chrome, or gamified score badges. The "N/12 spotted" hook is a gentle prompt, not a scoreboard.
 - **Don't** drift twee: no script or hand-lettered fonts, watercolour blobs, floral borders, or pastel whimsy.
 - **Don't** copy the scheme-entry hero photo or its coloured choice fields onto another app route — it is a scoped front-door treatment, not a new app-wide pattern (see Scheme entry).
+- **Don't** give chat bubbles a marigold (or any accent) fill, or lean on colour alone to tell assistant from user — the split is alignment + fill tone + the attribution line. Keep the season accent on the *wrapper* chrome (`--_accent` on the workspace/list), never inside `c-chat`.
 - **Don't** mix heading registers within a surface — no italic-400 section header inside the app, no bold-roman headline on a marketing page.
 - **Don't** add dashboards, KPI tiles, stat walls or streak counters (a PRODUCT.md commitment).
 - **Don't** hardcode radius, spacing or colour values — use the scale tokens; Stylelint checks them.

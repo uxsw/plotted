@@ -22,25 +22,25 @@ export const MOCK_QUESTIONS: MockQuestion[] = [
   {
     id: "aspect",
     prompt:
-      "Placeholder: which way does this bed face, and how much sun does it get through the day?",
+      "Which way does this bed face, and how much sun does it get through the day?",
     suggestions: ["Full sun", "Partial shade", "Full shade", "Not sure"],
   },
   {
     id: "soil",
     prompt:
-      "Placeholder: what's the soil like — heavy and wet, light and dry, or somewhere in between?",
+      "What's the soil like — heavy and wet, light and dry, or somewhere in between?",
     suggestions: ["Free-draining", "Heavy clay", "Stays damp", "Not sure"],
   },
   {
     id: "intent",
     prompt:
-      "Placeholder: what are you hoping this planting adds — colour, structure, wildlife, scent?",
+      "What are you hoping this planting adds — colour, structure, wildlife, scent?",
     suggestions: ["Year-round colour", "Pollinators", "Evergreen structure", "Cut flowers"],
   },
   {
     id: "style",
     prompt:
-      "Placeholder: any style you're drawn to, or plants you'd rather avoid?",
+      "Any style you're drawn to, or plants you'd rather avoid?",
     suggestions: ["Cottage / informal", "Architectural", "Low maintenance"],
   },
 ];
@@ -52,6 +52,8 @@ export interface MockSuggestion {
   tier: "back" | "mid" | "ground";
   note: string;
   badges: string[];
+  /** Months in flower, 1–12 — feeds the scheme list's flowering-year strip. */
+  months: number[];
 }
 
 export const MOCK_TIER_LABELS: Record<MockSuggestion["tier"], string> = {
@@ -66,51 +68,57 @@ export const MOCK_TIER_ORDER: MockSuggestion["tier"][] = ["back", "mid", "ground
 export const MOCK_SUGGESTIONS: MockSuggestion[] = [
   {
     id: "s1",
-    commonName: "Placeholder shrub rose",
-    latinName: "Rosa 'Placeholder'",
+    commonName: "Shrub rose",
+    latinName: "Rosa",
     tier: "back",
-    note: "Placeholder rationale: gives height at the back and repeat flowers into autumn.",
+    note: "Gives height at the back and repeat flowers into autumn.",
     badges: ["Wildlife friendly", "Scented"],
+    months: [6, 7, 8, 9, 10],
   },
   {
     id: "s2",
-    commonName: "Placeholder tall grass",
-    latinName: "Calamagrostis 'Placeholder'",
+    commonName: "Tall grass",
+    latinName: "Calamagrostis",
     tier: "back",
-    note: "Placeholder rationale: vertical movement and winter structure behind the perennials.",
+    note: "Vertical movement and winter structure behind the perennials.",
     badges: ["Drought tolerant"],
+    months: [6, 7, 8, 9],
   },
   {
     id: "s3",
-    commonName: "Placeholder salvia",
-    latinName: "Salvia 'Placeholder'",
+    commonName: "Salvia",
+    latinName: "Salvia",
     tier: "mid",
-    note: "Placeholder rationale: long-flowering mid-height filler that pollinators work heavily.",
+    note: "Long-flowering mid-height filler that pollinators work heavily.",
     badges: ["Pollinators", "Drought tolerant"],
+    months: [6, 7, 8, 9, 10],
   },
   {
     id: "s4",
-    commonName: "Placeholder achillea",
-    latinName: "Achillea 'Placeholder'",
+    commonName: "Achillea",
+    latinName: "Achillea",
     tier: "mid",
-    note: "Placeholder rationale: flat flower heads contrast the salvia spikes; good for cutting.",
+    note: "Flat flower heads contrast the salvia spikes; good for cutting.",
     badges: ["Pollinators", "Cut flowers"],
+    months: [6, 7, 8, 9],
   },
   {
     id: "s5",
-    commonName: "Placeholder hardy geranium",
-    latinName: "Geranium 'Placeholder'",
+    commonName: "Hardy geranium",
+    latinName: "Geranium",
     tier: "ground",
-    note: "Placeholder rationale: weaves through the front edge and suppresses weeds.",
+    note: "Weaves through the front edge and suppresses weeds.",
     badges: ["Wildlife friendly", "Low maintenance"],
+    months: [5, 6, 7, 8, 9],
   },
   {
     id: "s6",
-    commonName: "Placeholder thyme",
-    latinName: "Thymus 'Placeholder'",
+    commonName: "Thyme",
+    latinName: "Thymus",
     tier: "ground",
-    note: "Placeholder rationale: aromatic mat for the sunny front corner; bees love it.",
+    note: "Aromatic mat for the sunny front corner; bees love it.",
     badges: ["Pollinators", "Edible"],
+    months: [5, 6, 7],
   },
 ];
 
@@ -122,19 +130,21 @@ export const MOCK_SUGGESTIONS: MockSuggestion[] = [
 export const MOCK_FOLLOWUP_SUGGESTIONS: MockSuggestion[] = [
   {
     id: "f1",
-    commonName: "Placeholder umbellifer",
-    latinName: "Ammi 'Placeholder'",
+    commonName: "Umbellifer",
+    latinName: "Ammi",
     tier: "mid",
-    note: "Placeholder rationale: airy lace-cap flowers to soften the block planting.",
+    note: "Airy lace-cap flowers to soften the block planting.",
     badges: ["Pollinators", "Cut flowers"],
+    months: [6, 7, 8],
   },
   {
     id: "s3",
-    commonName: "Placeholder salvia",
-    latinName: "Salvia 'Placeholder'",
+    commonName: "Salvia",
+    latinName: "Salvia",
     tier: "mid",
-    note: "Placeholder rationale: re-proposed from the starting scheme — add-state is per card.",
+    note: "Re-proposed from the starting scheme — add-state is per card.",
     badges: ["Pollinators", "Drought tolerant"],
+    months: [6, 7, 8, 9, 10],
   },
 ];
 
@@ -153,22 +163,22 @@ export const MOCK_DIRECTION_OPTIONS: MockDirectionOption[] = [
   {
     id: "d-meadow",
     label: "Loose, meadow-like",
-    blurb: "Placeholder: naturalistic, self-seeding, informal.",
+    blurb: "Naturalistic, self-seeding, informal.",
   },
   {
     id: "d-architectural",
     label: "Bold and architectural",
-    blurb: "Placeholder: strong shapes, evergreen structure, restrained palette.",
+    blurb: "Strong shapes, evergreen structure, restrained palette.",
   },
   {
     id: "d-edible",
     label: "Productive / edible",
-    blurb: "Placeholder: herbs, cut flowers and crops woven through.",
+    blurb: "Herbs, cut flowers and crops woven through.",
   },
   {
     id: "d-something-else",
     label: "Something else — I'll describe it",
-    blurb: "Placeholder: tell me in your own words.",
+    blurb: "Tell me in your own words.",
   },
 ];
 
@@ -177,55 +187,61 @@ export const MOCK_DIRECTION_FOLLOWUP: Record<string, MockSuggestion[]> = {
   "d-meadow": [
     {
       id: "m1",
-      commonName: "Placeholder knautia",
-      latinName: "Knautia 'Placeholder'",
+      commonName: "Knautia",
+      latinName: "Knautia",
       tier: "mid",
-      note: "Placeholder rationale: scrambling pincushion flowers over a long season.",
+      note: "Scrambling pincushion flowers over a long season.",
       badges: ["Pollinators", "Wildlife friendly"],
+      months: [6, 7, 8, 9],
     },
     {
       id: "m2",
-      commonName: "Placeholder molinia",
-      latinName: "Molinia 'Placeholder'",
+      commonName: "Molinia",
+      latinName: "Molinia",
       tier: "back",
-      note: "Placeholder rationale: see-through grass for a hazy meadow layer.",
+      note: "See-through grass for a hazy meadow layer.",
       badges: ["Drought tolerant"],
+      months: [8, 9, 10],
     },
   ],
   "d-architectural": [
     {
       id: "a1",
-      commonName: "Placeholder phormium",
-      latinName: "Phormium 'Placeholder'",
+      commonName: "Phormium",
+      latinName: "Phormium",
       tier: "back",
-      note: "Placeholder rationale: hard vertical accent, evergreen.",
+      note: "Hard vertical accent, evergreen.",
       badges: ["Evergreen"],
+      months: [7, 8],
     },
     {
       id: "a2",
-      commonName: "Placeholder euphorbia",
-      latinName: "Euphorbia 'Placeholder'",
+      commonName: "Euphorbia",
+      latinName: "Euphorbia",
       tier: "mid",
-      note: "Placeholder rationale: acid-green domes that hold their shape.",
+      note: "Acid-green domes that hold their shape.",
       badges: ["Drought tolerant", "Evergreen"],
+      months: [3, 4, 5],
     },
   ],
   "d-edible": [
     {
       id: "e1",
-      commonName: "Placeholder globe artichoke",
-      latinName: "Cynara 'Placeholder'",
+      commonName: "Globe artichoke",
+      latinName: "Cynara",
       tier: "back",
-      note: "Placeholder rationale: dramatic silver foliage and an edible crop.",
+      note: "Dramatic silver foliage and an edible crop.",
       badges: ["Edible", "Pollinators"],
+      months: [7, 8, 9],
     },
     {
       id: "e2",
-      commonName: "Placeholder nasturtium",
-      latinName: "Tropaeolum 'Placeholder'",
+      commonName: "Nasturtium",
+      latinName: "Tropaeolum",
       tier: "ground",
-      note: "Placeholder rationale: edible flowers and leaves, scrambles over bare soil.",
+      note: "Edible flowers and leaves, scrambles over bare soil.",
       badges: ["Edible", "Pollinators"],
+      months: [6, 7, 8, 9, 10],
     },
   ],
 };
