@@ -2,7 +2,7 @@
 
 Living document. Values and semantic intent for every token referenced across `styles/design.md` and `components/ui/design.md`.
 
-**Status:** draft skeleton, 2026-08-22
+**Status:** active, in real use. No longer a skeleton — see `DESIGN.md` at the repo root for the synthesized, tool-facing companion to this file (generated via the Impeccable skill, https://impeccable.style; does **not** auto-sync — refresh it manually via its own commands after meaningful changes here, don't assume it stays current on its own).
 
 ## Palette
 
@@ -86,9 +86,9 @@ Living document. Values and semantic intent for every token referenced across `s
 
 ## Spacing scale
 
-*TBD — define once token unification lands.* Agents should not use raw px/rem values once this exists; only scale tokens.
+**Confirmed as the target scale, 2026-08-30.** `--space-base: 1rem`, with `xs`/`sm`/`md`/`lg`/`xl` as multiples (0.25×/0.5×/1×/1.5×/2×) — `4px`/`8px`/`16px`/`24px`/`32px`. Stylelint validates against this. **All new work must use these tokens, no raw px/rem.**
 
-**Progress:** a real scale exists in `_variables.scss` — `--space-base: 1rem`, with `xs`/`sm`/`md`/`lg`/`xl` as multiples (0.25×/0.5×/1×/1.5×/2×). Confirm this is the final intended scale (values/step count) before marking fully resolved — flagging as progress rather than closing outright since, unlike radius, this wasn't explicitly reviewed and confirmed the way the badge/roundel colours were.
+**Legacy note:** this is confirmed as the going-forward rule, not confirmation that every existing file already conforms. `_card.scss`, for one, still has raw `0.375rem`/`1rem` values off this scale — logged as a known, deferred cleanup item in the gaps log, not yet migrated. Treat any raw spacing value found in older files as legacy debt to flag, not as evidence the scale itself is unsettled.
 
 ## Radius scale
 
@@ -96,19 +96,14 @@ Living document. Values and semantic intent for every token referenced across `s
 
 ## Elevation / shadow scale
 
-*TBD — target 2–3 steps.* Audit found five distinct hand-typed shadow values across dialog, popover, card hover, the Card module, and the dashboard, for what reads as two or three real elevation levels visually. Consolidate down, don't just alias the existing five.
+**Confirmed as the target scale, 2026-08-30** — three steps, closed vocabulary:
+- **Menu / raised-panel** — `0 4px 6px -1px #0000001a, 0 2px 4px -2px #0000001a`. Popovers, the autocomplete menu.
+- **Card hover / frame** — `0 8px 24px rgba(0, 0, 0, 0.15)`. `.o-card--interactive:hover` (also raises `z-index` to 1), and `_planting-schemes.scss`'s `.is-frame` panels.
+- **Dialog** — `0 20px 25px -5px #0000001a, 0 8px 10px -6px #0000001a`. Modal dialogs only — the deepest step, reserved for content that stops the page.
 
-**Progress:** `.o-popover` now reuses `.o-autocomplete`'s existing shadow value rather than a new one (2026-08-22, popover migration) — first real consolidation, one fewer hand-typed value to reconcile. Still outstanding: dialog, card hover, the Card module's own value, and the dashboard's value — confirm whether any of these already match `.o-autocomplete`'s or represent a genuinely distinct second step before finalising the scale.
+Shadow is a *state response* only (hover, open, overlay) — surfaces are flat at rest by design, separated by tonal paper layers and hairlines instead. See `DESIGN.md`'s Flat-By-Default Rule.
 
-**Update, 2026-08-23 (Card investigation):** the "Card module" value in the original five is not a distinct value at all — `Card.module.css`'s `0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)` is byte-for-byte the same as `.o-autocomplete`/`.o-popover`'s already-consolidated step, just written in `rgb()` instead of hex-with-alpha. It's also currently dead code (nothing renders the module's `.o-card--interactive`). This drops the real count of distinct hand-typed values from five toward three, with no design decision needed — it was already the same value, just uncounted.
-
-Real distinct values found so far:
-- **Consolidated step** (popover/autocomplete/dead card-module value): `0 4px 6px -1px #0000001a, 0 2px 4px -2px #0000001a`
-- **Card hover** (`_card.scss:37`): `0 8px 24px rgba(0, 0, 0, 0.15)` — also independently used by `_planting-schemes.scss`'s `.is-frame`, so this is already a de-facto second shared "raised" step, not card-specific
-- **Dialog** (`_dialog.scss:4`): `0 20px 25px -5px #0000001a, 0 8px 10px -6px #0000001a` — still distinct, not yet checked against the other two
-- **Onboarding card** (`_onboarding-card.scss:8`): separate rest/hover pair, not yet reconciled
-
-Genuinely close to the audit's original "2-3 real steps" estimate now — dialog and the onboarding pair are the remaining unknowns.
+**Legacy note:** `_onboarding-card.scss`'s separate rest/hover shadow pair (`_onboarding-card.scss:8`) is **not yet reconciled into this scale** — it predates it and wasn't folded into any of the three steps above. Treat as known legacy debt, not as an open question about what the scale should be; the scale itself is settled, this file just hasn't been migrated onto it yet.
 
 ## Motion
 
@@ -116,4 +111,6 @@ Genuinely close to the audit's original "2-3 real steps" estimate now — dialog
 
 ## Breakpoints
 
-*TBD.*
+**Confirmed as the target values, 2026-08-30.** `--breakpoint-tablet: 860px`, `--breakpoint-mobile: 480px` (consumed as Tailwind `max-tablet`/`max-mobile` during the transition off Tailwind).
+
+**Legacy note:** `Input.tsx` has a stray Tailwind `sm:` (640px) — off-system, doesn't match either confirmed breakpoint. Found during the 2026-08-29 typeset pass, not yet fixed. Logged in `design.md`'s gaps log.
