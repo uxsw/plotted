@@ -185,7 +185,12 @@ A warm, low-glare neutral base — bone and sand paper tones under near-black te
 
 **The Highlight-Yellow convention** *(established pattern, not an invariant).* `highlight-yellow` is the one reactive colour that marks whatever the pointer is on. Keep every new interactive object consistent with it on hover/active.
 
-**The Semantic Field exception** *(scoped to the `/plant-scheme` entry).* The flowering-season hues normally appear only in small badges and roundels — "held in restraint" per the Overview. The scheme-entry choice plates (`.c-scheme-plate.is-established` / `.is-new`) are the one sanctioned place a `--sem-flowering-*` pair carries a **large surface**: an ~8rem colour field (~45% of the card) in `--sem-flowering-summer-*` (an established garden at its peak) or `--sem-flowering-spring-*` (a garden just starting), with the body note tinted from the season `-fg` rather than grey. Colour is still routed through `--_field` / `--_field-deep` / `--_ink` private props per the Semantic Layer Rule. This is a Persuade front door, not a template — an Operate screen wanting a coloured field is drift.
+**The Semantic Field exception** *(scoped to the `/plant-scheme` journey).* The flowering-season hues normally appear only in small badges and roundels — "held in restraint" per the Overview. The planting-scheme flow is the one sanctioned place a `--sem-flowering-*` pair carries **large surfaces and a whole path's accent**:
+
+- On the entry, the choice plates (`.c-scheme-plate.is-established` / `.is-new`) each own an ~8rem colour field (~45% of the card) — `--sem-flowering-summer-*` for the established garden, `--sem-flowering-spring-*` for the one just starting — with the body note tinted from the season `-fg` rather than grey.
+- Each path then **carries that season forward** as its accent through the steps that follow: the "from scratch" journey (`.c-scheme-scratch`) is spring end to end — the progress track, the plate-number stamps, the list "letterhead", the what's-next aside. Routed through `--_accent` / `--_accent-wash` private props.
+
+Colour still goes through object-private `--_*` props per the Semantic Layer Rule. This is the scheme journey's licence, not a template — an ordinary Operate screen wanting a coloured field is drift.
 
 ## Typography
 
@@ -208,7 +213,9 @@ A warm, low-glare neutral base — bone and sand paper tones under near-black te
 - **Label** (`.o-type-label` — Spline Sans Mono 500, `.minion` size, letter-spacing `0.14em`, uppercase): eyebrows, plate numbers, **all field labels**, status pills, botanical metadata. This is now the single label treatment — the earlier Inter small-caps variant on form fields is retired.
 
 ### Named Rules
-**The Two-Register Rule.** Fraunces headings are **bold roman (600)** in the product UI and **italic (400)** on marketing/editorial surfaces — never mixed within one surface. Adding an app section header in italic, or a marketing headline in bold roman, is drift. Weight and style are chosen by surface mode (Operate → roman 600; Persuade/Read editorial → italic 400), not by taste per screen.
+**The Two-Register Rule.** Fraunces *headings* are **bold roman (600)** in the product UI and **italic (400)** on marketing/editorial surfaces — never mixed within one surface. An app section header in italic, or a marketing headline in bold roman, is drift. Weight and style are chosen by surface mode (Operate → roman 600; Persuade/Read editorial → italic 400), not by taste per screen.
+
+The rule governs headings, not the italic voice entirely. In-app, Fraunces **italic 400 is allowed for a short editorial aside** — a *non-heading* line that speaks in Plotted's voice or looks ahead, set apart from the working copy (e.g. the "what's next" note on a journey step, `.c-scheme-scratch__next`). It joins the existing in-app non-heading Fraunces use (the roman-400 "editorial display-body"). One aside per view; never a run of body copy, never a heading.
 
 **The Mono Label Rule.** Eyebrows, specimen/plate numbers, field labels and botanical metadata all use `.o-type-label` — Spline Sans Mono, uppercase, `letter-spacing: 0.14em`, weight 500, `.minion` size. One class, no per-context variants; it is the type element that carries the "tech-aware" half of the identity.
 
@@ -250,6 +257,16 @@ The system is **flat by default**. At rest, surfaces are separated by tonal pape
 **The Flat-By-Default Rule.** Surfaces are flat at rest. A shadow appears only as a reaction to state — hover, open, overlay — and never as ambient decoration. If a resting element needs to stand out, reach for a tonal layer or a hairline first.
 
 **The Grain Rule.** The page ground always carries its `feTurbulence` noise texture at ~8% alpha, `multiply` blended. A pure flat `#FFF` or un-grained `#FAF6EC` fill at page level is a regression.
+
+## Motion
+
+Two easing curves, from `styles/abstracts/_variables.scss`:
+
+- **`--transition-easing-default`** (`ease`), at `--transition-time-default: 0.4s` (also `-slow: 0.8s`, `-x-slow: 1s`): incidental transitions — a hover fill, a border colour, a focus ring settling. Cheap, unremarkable, everywhere.
+- **`--transition-easing-emphasis`** (`cubic-bezier(0.16, 1, 0.3, 1)` — exponential ease-out, "settling toward the light"): the **one authored moment** on a surface. The scheme-entry plate lift and engraving bloom; the scheme-scratch schedule row easing in as it is added. Reserve it for that single deliberate motion — a page where every transition uses the emphasis curve has no authored moment, just noise.
+
+### Named Rules
+**The One Authored Moment Rule.** A surface gets one motion that is designed — orchestrated, on the emphasis curve, from an already-visible resting state. Everything else is incidental (default curve) or still. Every keyframe and transition honours `prefers-reduced-motion: reduce` — the authored moment degrades to an instant state change, never a jump.
 
 ## Shapes
 
@@ -294,7 +311,7 @@ Borders are a first-class structural tool: `--border-width-hairline: 1px` for al
 ### Inputs / Fields
 - **Style:** `1px` `sand-line` border, `paper` fill, `4px` radius, `8px 12px` padding, Inter `0.875rem` `ink` text, placeholder at `ink-soft/50`.
 - **Label:** above the field, Spline-mono-idea in Inter — `text-xs`, semibold, uppercase, `tracking-wider`, `font-variant: small-caps`, `ink-soft`.
-- **Focus:** `2px` marigold ring, `1px` paper offset, border → marigold, **fill → marigold** (a strong, deliberate focus state).
+- **Focus:** `2px` marigold ring, `1px` paper offset, border → marigold, **fill → marigold** (a strong, deliberate focus state) — this suits single-shot forms. For a **repeated-entry field** (add-a-plant, a tag input the user returns to after every submit) drop the fill flip and keep ring + border only: a background flash on each entry fights the text being typed. Reference: `.c-scheme-scratch__field`. Also theme `caret-color` to marigold.
 - **Error:** border → marigold, ring → marigold; message below in `text-xs` marigold with `role="alert"`.
 - **Underline-field variant** (`.c-underline-field`): a bottom-rule field — `1px` `n-dark-grey` line that thickens to `2px` cyan when `.is-active`. Used for the in-place editable values on the plant detail page.
 - **Disabled:** `opacity: 0.5`, `cursor: not-allowed`.
@@ -319,6 +336,16 @@ The `/plant-scheme` front door — a Persuade surface inside the app, the one pl
 - **The hover moment** (`cubic-bezier(0.16, 1, 0.3, 1)`): the season field deepens to `--_field-deep`, the engraving blooms (opacity `0.4 → 0.52`, `scale(1.06)`), the plate lifts (`translateY(-2px)` + the card-hover shadow), the arrow steps `0.25rem`. One orchestrated response, not four separate effects; fully opted out under `prefers-reduced-motion`.
 - **Focus:** the standard button ring (`0 0 0 2px paper, 0 0 0 4px lavender`) layered over the lift — no border swap, no reflow.
 
+### Scheme journey — steps 2+ (`c-scheme-scratch`)
+
+Past the entry, each path is an Operate surface (the task is to enter data), but it keeps the journey's warmth: its season accent carried through, the catalogue devices, the path engraving. `/plant-scheme/scratch` is the built reference; `/existing` and `/chat` should adopt the same chrome.
+
+- **Step marker** (`.c-scheme-journey`): a hairline-ruled row — mono path label left (`From scratch`), a three-segment progress track (reached segments in the path's `--_accent`, `1.75rem`/`2.5rem` bars, `0.25rem` tall), `Step N / 3` mono right. This is the folio device doing wayfinding; because the sequence carries real information it is *not* the banned decorative eyebrow.
+- **Plant schedule** (`.c-scheme-schedule`): the typed list drawn as a numbered plant schedule. A white raised panel; a **season-washed header band** ("letterhead") with a mono label and count; rows of `[stamp] [name] [remove]` — the number is an `--_accent` **roundel stamp** (`1.75rem`, white numerals) so a filling list becomes colour rhythm, the name is Fraunces roman at the `long-primer` step, remove is a `44px` icon button (highlight-yellow hover per convention, `2px` cyan focus). Ahead of the real rows sit faint **ghost rows** — dashed dividers, dashed empty stamps, the first carrying the empty-state prompt — so a short or empty list still reads as a form waiting to be filled, never as a dead panel. The path engraving (`marks.tsx`) sits behind at `~0.08` opacity.
+- **Motion:** a real row eases in on add via `--transition-easing-emphasis` (translate + fade + a brief `--_accent-wash` flash); ghost rows and re-numbering are silent. This is the surface's one authored moment.
+- **Add field:** a repeated-entry field — see Inputs / Fields (ring + border focus, no fill flip).
+- **What's next:** one Fraunces **italic 400** aside in `--_accent` before the footer, setting up the step that follows (here, the LLM conversation) — see the Two-Register Rule's aside carve-out.
+
 ## Do's and Don'ts
 
 ### Do:
@@ -331,6 +358,7 @@ The `/plant-scheme` front door — a Persuade surface inside the app, the one pl
 - **Do** keep marigold rare: primary action and active nav, ≤10% of a screen.
 - **Do** let colour enter through plant content — photos and the trait/sun/season badge families — while chrome stays calm.
 - **Do** treat the `/plant-scheme` entry as the app's one sanctioned Persuade surface — a full-bleed garden photograph and large `--sem-flowering-*` colour fields belong *there*; on an Operate screen they are drift.
+- **Do** carry a `/plant-scheme` path's flowering-season accent through every step of that path, via `--_accent` / `--_accent-wash` — and reuse the journey chrome (`.c-scheme-journey` step marker, the schedule pattern, the path engraving) on the sibling steps rather than reinventing per screen.
 - **Do** hold app pages to the ~800px `.o-page` measure; the 1120px container is a marketing device and the ~1000px companion measure is the dashboard's alone (the Narrow Column Rule).
 - **Do** honour `prefers-reduced-motion` for every animation (all current keyframes already opt out).
 
