@@ -1,16 +1,14 @@
 "use client";
 
 /**
- * One presentational plant card, reused for:
+ * One plant suggestion card. Reused for:
  *  - inline suggestion cards in the chat (action slot = "Add")
  *  - scheme-list items in the list pane (action slot = cart + "Remove")
  *
- * Markup follows the existing scheme suggestion-card style (see the live
- * components/SchemeResults.tsx) so no new visual language is introduced.
+ * Styles: `.c-suggestion` in styles/components/_scheme-chat.scss.
  *
- * `photoUrl` is only ever set for Path A garden plants, from the garden record's
- * own stored photo — there is no Wikimedia lookup at this stage. Cards without a
- * photo render exactly as before.
+ * `photoUrl` is only ever set for Path A garden plants, from the garden
+ * record's own stored photo — there is no Wikimedia lookup at this stage.
  */
 
 import type { ReactNode } from "react";
@@ -25,6 +23,19 @@ export interface PlantCardData {
   photoUrl?: string | null;
 }
 
+/** Map a free-text trait label onto the DESIGN.md `.o-badge` trait colours. */
+const TRAIT_CLASS: Record<string, string> = {
+  "wildlife friendly": "is-wildlife-friendly",
+  pollinators: "is-wildlife-friendly",
+  "drought tolerant": "is-drought-tolerant",
+  edible: "is-edible",
+  "british native": "is-british-native",
+};
+
+function badgeClass(label: string): string {
+  return TRAIT_CLASS[label.trim().toLowerCase()] ?? "";
+}
+
 export function PlantCard({
   plant,
   actions,
@@ -37,37 +48,34 @@ export function PlantCard({
   footer?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col overflow-hidden border border-sand-line bg-paper">
+    <div className="c-suggestion">
       {plant.photoUrl && (
-        <div className="relative aspect-[3/2] w-full bg-paper-deep">
+        <div className="c-suggestion__media">
           <Image
             src={plant.photoUrl}
             alt={plant.commonName}
             fill
             sizes="(max-width: 860px) 100vw, 320px"
-            className="object-cover"
           />
         </div>
       )}
-      <div className="flex flex-col gap-1 p-3">
-        <div className="o-row o-row--space-between">
-          <h3 className="o-type-display long-primer kirk">{plant.commonName}</h3>
-          {actions && <div className="flex items-center gap-1 shrink-0">{actions}</div>}
+      <div className="c-suggestion__body">
+        <div className="c-suggestion__head">
+          <h3 className="c-suggestion__name long-primer">{plant.commonName}</h3>
+          {actions && <div className="c-suggestion__actions">{actions}</div>}
         </div>
-        <p className="o-type-display o-type--italic minion text-ink-soft o-type-leading--snug">
-          {plant.latinName}
-        </p>
-        {plant.note && <p className="brevier">{plant.note}</p>}
+        <p className="c-suggestion__latin minion">{plant.latinName}</p>
+        {plant.note && <p className="c-suggestion__note brevier">{plant.note}</p>}
         {plant.badges.length > 0 && (
-          <div className="flex flex-wrap gap-1 mt-1.5">
+          <div className="c-suggestion__badges">
             {plant.badges.map((b) => (
-              <span key={b} className="o-badge is-sm">
+              <span key={b} className={`o-badge is-sm ${badgeClass(b)}`.trim()}>
                 {b}
               </span>
             ))}
           </div>
         )}
-        {footer && <div className="mt-1">{footer}</div>}
+        {footer && <div className="c-suggestion__footer minion">{footer}</div>}
       </div>
     </div>
   );
@@ -75,7 +83,17 @@ export function PlantCard({
 
 export function CartIcon() {
   return (
-    <svg width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 14 14"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.6"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M1 1.5h1.8l1.4 6.5h6.1l1.4-4.8H4.2" />
       <circle cx="5.8" cy="11.8" r="0.9" fill="currentColor" stroke="none" />
       <circle cx="9.8" cy="11.8" r="0.9" fill="currentColor" stroke="none" />
@@ -85,7 +103,17 @@ export function CartIcon() {
 
 export function CheckIcon() {
   return (
-    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
       <path d="M2 6.5l2.5 2.5 5.5-5.5" />
     </svg>
   );

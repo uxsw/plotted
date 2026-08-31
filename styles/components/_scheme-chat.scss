@@ -1,0 +1,489 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   c-scheme-chat — /plant-scheme/chat, step 3 of the journey.
+
+   Wraps the reusable c-chat surface in the planting-scheme's chrome: the
+   question flow uses the journey step marker; the destination is a two-pane
+   workspace (conversation + the scheme list building up beside it). The
+   path's flowering-season accent (--_accent, set by .is-path-scratch /
+   .is-path-existing) tints only the wrapper chrome — the chat itself stays
+   neutral so it can be lifted into other contexts unchanged.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.c-scheme-chat {
+    --_accent: var(--color-ink-soft);
+    --_accent-wash: var(--color-paper-deep);
+
+    display: grid;
+    gap: var(--space-lg);
+
+    &.is-path-scratch {
+        --_accent: var(--sem-flowering-spring-fg);
+        --_accent-wash: var(--sem-flowering-spring-bg);
+    }
+    &.is-path-existing {
+        --_accent: var(--sem-flowering-summer-fg);
+        --_accent-wash: var(--sem-flowering-summer-bg);
+    }
+}
+
+/* ---- Question flow: the step marker reuses .c-scheme-journey; the count
+   slot carries the per-question progress. --------------------------------- */
+
+.c-scheme-chat__aside {
+    max-inline-size: var(--measure);
+    color: var(--color-ink-soft);
+}
+
+/* ---- The destination workspace ------------------------------------------- */
+
+/* Widen the page for the two-pane workspace — a second sanctioned exception
+   to the Narrow Column Rule, like the dashboard: peer panels, not one task.
+   The question flow keeps the 800px measure. */
+.o-page:has(.c-scheme-workspace) {
+    max-width: 1000px;
+}
+
+.c-scheme-workspace {
+    display: grid;
+    gap: var(--space-lg);
+}
+
+.c-scheme-workspace__head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-sm) var(--space-md);
+    padding-block-end: var(--space-sm);
+    border-block-end: var(--border-width-hairline) solid var(--sem-border-color);
+}
+
+.c-scheme-workspace__panes {
+    display: grid;
+    gap: var(--space-lg);
+    align-items: start;
+
+    @media (min-width: 52rem) {
+        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+    }
+}
+
+/* The scheme-list pane sticks alongside the conversation on wide screens. */
+.c-scheme-workspace__list {
+    @media (min-width: 52rem) {
+        position: sticky;
+        inset-block-start: var(--space-md);
+    }
+}
+
+/* ---- Scheme list panel ------------------------------------------------- */
+
+.c-scheme-list {
+    overflow: hidden;
+    background-color: var(--color-white);
+    border: var(--border-width-hairline) solid var(--sem-border-color);
+    border-radius: var(--radius-m);
+
+    &__head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--space-md);
+        padding: var(--space-sm) var(--space-md);
+        background-color: color-mix(in srgb, var(--_accent-wash) 60%, var(--color-white));
+        border-block-end: var(--border-width-hairline) solid
+            color-mix(in srgb, var(--_accent) 20%, var(--sem-border-color));
+
+        > .o-type-label {
+            color: var(--_accent);
+        }
+    }
+
+    &__count {
+        color: color-mix(in srgb, var(--_accent) 78%, transparent);
+    }
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-md);
+        padding: var(--space-md);
+    }
+
+    &__group {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+
+    &__group-label {
+        color: var(--color-ink-soft);
+    }
+
+    &__empty {
+        padding: var(--space-md);
+        color: var(--color-ink-soft);
+    }
+
+    /* One row of the sheet: a specimen-number stamp beside the card. The
+       stamp is the scratch schedule's plate-number device carried into the
+       workspace — numbered continuously down the sheet, across groups. */
+    &__item {
+        display: grid;
+        grid-template-columns: 1.75rem minmax(0, 1fr);
+        gap: var(--space-sm);
+        align-items: start;
+        animation: scheme-item-in var(--transition-time-default) var(--transition-easing-emphasis)
+            backwards;
+        animation-delay: var(--_delay, 0ms);
+
+        /* The card interior flashes from the accent wash as it roots — the
+           same beat the scratch schedule's rows land with. */
+        .c-suggestion {
+            animation: scheme-card-wash var(--transition-time-slow) var(--transition-easing-default)
+                backwards;
+            animation-delay: var(--_delay, 0ms);
+        }
+    }
+
+    &__no {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        inline-size: 1.75rem;
+        block-size: 1.75rem;
+        margin-block-start: calc(var(--space-md) - var(--space-xs));
+        border-radius: var(--radius-roundel);
+        background-color: var(--_accent);
+        color: var(--color-r-white);
+        font-variant-numeric: tabular-nums;
+        animation: scheme-stamp-in var(--transition-time-default) var(--transition-easing-emphasis)
+            backwards;
+        animation-delay: var(--_delay, 0ms);
+    }
+}
+
+/* ---- Border elevation — the sheet's engraved cross-section ------------ */
+
+/* The border side-on, growing on a shared ground line as plants are added:
+   canes and spires at the back, mounds and spikes mid, mats along the front.
+   Empty tiers hold a dashed ghost (the ghost-row idea, sketched), so a gap in
+   the planting stays visible. Strokes key by plant and draw in once. */
+.c-scheme-elevation {
+    padding: var(--space-sm) var(--space-md) 0;
+
+    svg {
+        display: block;
+        inline-size: 100%;
+        block-size: auto;
+    }
+
+    &__ground {
+        fill: none;
+        stroke: color-mix(in srgb, var(--_accent) 40%, var(--sem-border-color));
+        stroke-width: 1;
+        stroke-linecap: round;
+    }
+
+    &__plant {
+        path {
+            fill: none;
+            stroke: var(--_accent);
+            stroke-width: 1.4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+
+            /* pathLength=1 in the markup normalises every stroke, so one
+               dash pair draws any silhouette from its base upward. */
+            stroke-dasharray: 1;
+            stroke-dashoffset: 0;
+            animation: scheme-elevation-draw var(--transition-time-slow)
+                var(--transition-easing-emphasis) backwards;
+            animation-delay: var(--_delay, 0s);
+        }
+
+        /* Flower heads bud after their stem has drawn. */
+        circle {
+            fill: var(--_accent);
+            animation: scheme-elevation-dot var(--transition-time-default)
+                var(--transition-easing-default) backwards;
+            animation-delay: calc(var(--_delay, 0s) + var(--transition-time-default));
+        }
+    }
+
+    &__ghost path {
+        fill: none;
+        stroke: color-mix(in srgb, var(--_accent) 45%, transparent);
+        stroke-width: 1.2;
+        stroke-linecap: round;
+        stroke-dasharray: 0.035 0.045; /* pathLength-normalised dashes */
+    }
+}
+
+/* ---- Flowering year — twelve months filling in ------------------------ */
+
+/* The gardening year is the product's clock: each month a plant flowers takes
+   its season's badge colour, quiet months stay paper, and today's month
+   carries a small accent tick. Fills are incidental transitions. */
+.c-scheme-year {
+    padding: var(--space-xs) var(--space-md) var(--space-sm);
+    border-block-end: var(--border-width-hairline) solid var(--sem-border-color);
+
+    &__strip {
+        display: flex;
+        gap: var(--space-xs);
+    }
+
+    &__month {
+        position: relative;
+        flex: 1;
+        min-inline-size: 0;
+        padding-block: 0.25rem;
+        text-align: center;
+        font-variant-numeric: tabular-nums;
+        color: var(--color-ink-soft);
+        background-color: var(--color-paper-deep);
+        border-radius: var(--radius-s);
+        transition:
+            background-color var(--transition-time-default) var(--transition-easing-default),
+            color var(--transition-time-default) var(--transition-easing-default);
+
+        &.is-covered {
+            &.is-winter {
+                color: var(--sem-flowering-winter-fg);
+                background-color: var(--sem-flowering-winter-bg);
+            }
+            &.is-spring {
+                color: var(--sem-flowering-spring-fg);
+                background-color: var(--sem-flowering-spring-bg);
+            }
+            &.is-early-summer {
+                color: var(--sem-flowering-early-summer-fg);
+                background-color: var(--sem-flowering-early-summer-bg);
+            }
+            &.is-summer {
+                color: var(--sem-flowering-summer-fg);
+                background-color: var(--sem-flowering-summer-bg);
+            }
+            &.is-autumn {
+                color: var(--sem-flowering-autumn-fg);
+                background-color: var(--sem-flowering-autumn-bg);
+            }
+        }
+
+        &.is-now::after {
+            content: "";
+            position: absolute;
+            inset-inline: 35%;
+            inset-block-end: 0;
+            block-size: var(--border-width-thin);
+            border-radius: var(--radius-s);
+            background-color: var(--_accent);
+        }
+    }
+}
+
+/* ---- Plant suggestion card (in-chat and in the list) ----------------- */
+
+.c-suggestion {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: var(--color-white);
+    border: var(--border-width-hairline) solid var(--sem-border-color);
+    border-radius: var(--radius-m);
+
+    &__media {
+        position: relative;
+        aspect-ratio: 3 / 2;
+        background-color: var(--color-y-yellow); /* the loading well, per DESIGN.md Cards */
+
+        img {
+            object-fit: cover;
+        }
+    }
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+        padding: var(--space-md);
+    }
+
+    &__head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: var(--space-sm);
+    }
+
+    &__name {
+        font-family: var(--font-display);
+        font-weight: var(--font-weight-bold);
+        line-height: 1.2;
+        color: var(--color-ink);
+    }
+
+    &__latin {
+        font-family: var(--font-display);
+        font-style: italic;
+        color: var(--color-ink-soft);
+    }
+
+    &__note {
+        margin-block-start: 0.125rem;
+        color: var(--color-n-deep-grey);
+    }
+
+    &__badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-xs);
+        margin-block-start: var(--space-xs);
+    }
+
+    &__actions {
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-xs);
+    }
+
+    &__footer {
+        margin-block-start: var(--space-xs);
+        color: var(--color-ink-soft);
+    }
+}
+
+/* Cart toggle on a scheme-list item — icon button, roundel. */
+.c-suggestion__cart {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 2.25rem;
+    block-size: 2.25rem;
+    color: var(--color-ink-soft);
+    background-color: transparent;
+    border: var(--border-width-hairline) solid var(--color-sand-line);
+    border-radius: var(--radius-roundel);
+    cursor: pointer;
+    transition:
+        background-color var(--transition-time-default) var(--transition-easing-default),
+        color var(--transition-time-default) var(--transition-easing-default),
+        border-color var(--transition-time-default) var(--transition-easing-default);
+
+    &:hover {
+        background-color: var(--color-y-yellow);
+        color: var(--color-n-deep-grey);
+        border-color: var(--color-y-yellow);
+    }
+    &[aria-pressed="true"] {
+        color: var(--sem-edible-fg);
+        background-color: var(--sem-edible-bg);
+        border-color: transparent;
+    }
+    &:focus-visible {
+        outline: var(--border-width-thin) solid var(--color-b-cyan);
+        outline-offset: 1px;
+    }
+}
+
+.c-suggestion__remove {
+    padding: 0.25rem 0.375rem;
+    color: var(--color-ink-soft);
+    background: none;
+    border: none;
+    cursor: pointer;
+    transition: color var(--transition-time-default) var(--transition-easing-default);
+
+    &:hover {
+        color: var(--color-ink);
+    }
+    &:focus-visible {
+        outline: var(--border-width-thin) solid var(--color-b-cyan);
+        outline-offset: 1px;
+    }
+}
+
+/* ---- Start-over / arrival actions ----------------------------------- */
+
+.c-scheme-chat__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+}
+
+/* ---- The planting: the workspace's one authored moment ---------------- */
+
+/* Cards in a fresh suggestion panel ease in one after another, so a scheme
+   arrives as a planting rather than a dump. Scheme-scoped — c-chat itself
+   stays neutral. */
+.c-scheme-chat__arrive {
+    animation: scheme-item-in var(--transition-time-default) var(--transition-easing-emphasis)
+        backwards;
+    animation-delay: var(--_delay, 0ms);
+}
+
+@keyframes scheme-item-in {
+    from {
+        opacity: 0;
+        transform: translateY(-0.25rem);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes scheme-card-wash {
+    from {
+        background-color: var(--_accent-wash);
+    }
+    to {
+        background-color: var(--color-white);
+    }
+}
+
+@keyframes scheme-stamp-in {
+    from {
+        opacity: 0;
+        transform: scale(0.6);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes scheme-elevation-draw {
+    from {
+        stroke-dashoffset: 1;
+    }
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes scheme-elevation-dot {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* ---- Motion opt-out --------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .c-scheme-chat__arrive,
+    .c-scheme-list__item,
+    .c-scheme-list__item .c-suggestion,
+    .c-scheme-list__no,
+    .c-scheme-elevation__plant path,
+    .c-scheme-elevation__plant circle {
+        animation: none;
+    }
+}

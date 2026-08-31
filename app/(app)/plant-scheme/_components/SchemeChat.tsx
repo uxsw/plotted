@@ -4,8 +4,8 @@
  * Route component for /plant-scheme/chat.
  *
  * Thin switch: the guarded entry check, then the question flow, then the
- * persistent split-pane view once the flow completes. There is no separate
- * results route any more — the split pane IS the destination.
+ * persistent workspace once the flow completes. There is no separate results
+ * route — the workspace IS the destination.
  */
 
 import Link from "next/link";
@@ -20,14 +20,19 @@ export default function SchemeChat() {
 
   if (!path) {
     return (
-      <div className="o-surface--info island o-stack">
-        <h1 className="pica o-type-display kirk">No scheme in progress</h1>
-        <p className="brevier">Placeholder: start a new scheme to begin the questions.</p>
+      <div className="c-scheme-chat">
+        <div className="o-stack">
+          <h1 className="paragon o-type-display kirk">No scheme in progress</h1>
+          <p className="primer o-measure">
+            Start a new planting scheme to answer a few questions and build a scheme with
+            Plotted.
+          </p>
+        </div>
         <Link
           href="/plant-scheme"
           className={clsx(buttonStyles["o-button"], buttonStyles["o-button--primary"])}
         >
-          Start a planting scheme
+          Start a planting scheme →
         </Link>
       </div>
     );

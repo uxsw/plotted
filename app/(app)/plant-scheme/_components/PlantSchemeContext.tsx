@@ -44,6 +44,8 @@ export interface SuggestionPlant {
   tier: SchemeTier;
   note: string;
   badges: string[];
+  /** Months in flower, 1–12 — aggregated into the scheme list's year strip. */
+  months: number[];
 }
 
 /**
@@ -80,6 +82,11 @@ export interface SchemePlant {
   tier: SchemeTier | null;
   note: string;
   badges: string[];
+  /**
+   * Months in flower, 1–12. Empty for garden-origin plants at this stage —
+   * the real integration will derive it from the record's flowering season.
+   */
+  months: number[];
   /** Garden record photo for garden-origin plants; null for suggestions. */
   photoUrl: string | null;
   /** Mocked "add to shopping list" state — no network call. */
@@ -184,6 +191,7 @@ function toSuggestionPlants(mocks: MockSuggestion[]): SuggestionPlant[] {
     tier: m.tier,
     note: m.note,
     badges: m.badges,
+    months: m.months,
   }));
 }
 
@@ -232,7 +240,7 @@ export function PlantSchemeProvider({ children }: { children: React.ReactNode })
       const initialEntry: ChatEntry = {
         kind: "suggestions",
         id: INITIAL_SUGGESTIONS_ENTRY_ID,
-        title: "Placeholder: a starting scheme — pick the ones you want on your list.",
+        title: "A starting scheme — pick the ones you want on your list.",
         plants: toSuggestionPlants(MOCK_SUGGESTIONS),
       };
       // Path A only: the garden plants the user picked in step 1 are resolved
@@ -251,6 +259,7 @@ export function PlantSchemeProvider({ children }: { children: React.ReactNode })
               tier: null,
               note: "",
               badges: [],
+              months: [],
               photoUrl: g.photoUrl,
               addedToShoppingList: false,
             }))
@@ -266,8 +275,8 @@ export function PlantSchemeProvider({ children }: { children: React.ReactNode })
             id: "entry-scheme-intro",
             role: "assistant",
             text: s.quickAnswered
-              ? "Placeholder: here's a starting scheme from what you've told me so far — less tailored than finishing the questions would be. Add what you like, then keep talking to refine it."
-              : "Placeholder: here's a starting scheme based on your answers. Add what you like, then keep talking to refine it.",
+              ? "Here's a starting scheme from what you've told me so far — less tailored than finishing the questions would be. Add what you like, then keep talking to refine it."
+              : "Here's a starting scheme based on your answers. Add what you like, then keep talking to refine it.",
           },
           initialEntry,
         ],
@@ -289,6 +298,7 @@ export function PlantSchemeProvider({ children }: { children: React.ReactNode })
         tier: plant.tier,
         note: plant.note,
         badges: plant.badges,
+        months: plant.months,
         photoUrl: null,
         addedToShoppingList: false,
       };
@@ -329,12 +339,12 @@ export function PlantSchemeProvider({ children }: { children: React.ReactNode })
               kind: "text",
               id: mkId("entry-assistant"),
               role: "assistant",
-              text: "Placeholder: sounds like you want a different direction rather than a tweak. Pick one to explore — nothing already on your list changes.",
+              text: "Sounds like you want a different direction rather than a tweak. Pick one to explore — nothing already on your list changes.",
             },
             {
               kind: "directions",
               id: mkId("entry-directions"),
-              title: "Placeholder: which direction?",
+              title: "Which direction?",
               options: MOCK_DIRECTION_OPTIONS,
             },
           ]
@@ -343,12 +353,12 @@ export function PlantSchemeProvider({ children }: { children: React.ReactNode })
               kind: "text",
               id: mkId("entry-assistant"),
               role: "assistant",
-              text: "Placeholder: here are a couple more that could work — add any you like.",
+              text: "Here are a couple more that could work — add any you like.",
             },
             {
               kind: "suggestions",
               id: mkId("entry-suggestions"),
-              title: "Placeholder: more suggestions",
+              title: "More suggestions",
               plants: toSuggestionPlants(MOCK_FOLLOWUP_SUGGESTIONS),
             },
           ];
@@ -364,7 +374,7 @@ export function PlantSchemeProvider({ children }: { children: React.ReactNode })
         kind: "text",
         id: mkId("entry-user"),
         role: "user",
-        text: `Placeholder: let's try "${option.label}".`,
+        text: `Let's try "${option.label}".`,
       };
 
       const followupMocks = MOCK_DIRECTION_FOLLOWUP[option.id];
@@ -374,12 +384,12 @@ export function PlantSchemeProvider({ children }: { children: React.ReactNode })
               kind: "text",
               id: mkId("entry-assistant"),
               role: "assistant",
-              text: `Placeholder: leaning into "${option.label}", then. Here are some options in that vein — your current list is untouched.`,
+              text: `Leaning into "${option.label}", then. Here are some options in that vein — your current list is untouched.`,
             },
             {
               kind: "suggestions",
               id: mkId("entry-suggestions"),
-              title: `Placeholder: ${option.label} suggestions`,
+              title: `${option.label} suggestions`,
               plants: toSuggestionPlants(followupMocks),
             },
           ]
@@ -388,7 +398,7 @@ export function PlantSchemeProvider({ children }: { children: React.ReactNode })
               kind: "text",
               id: mkId("entry-assistant"),
               role: "assistant",
-              text: "Placeholder: tell me more about the direction you have in mind and I'll suggest some plants.",
+              text: "Tell me more about the direction you have in mind and I'll suggest some plants.",
             },
           ];
 

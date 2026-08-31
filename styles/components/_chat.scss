@@ -1,0 +1,319 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   c-chat — a reusable, domain-neutral conversation surface. "Correspondence."
+
+   A conversation with Plotted reads like an exchange of notes in a well-kept
+   garden notebook: Plotted's replies are editorial (paper-deep, its voice),
+   the person's replies are their own contained hand (a white raised note).
+   Familiar chat mechanics — role alignment, a typing indicator, a composer,
+   quick replies, inline attachments — rendered in the paper-and-hairline
+   world. Carries no feature-specific colour or content; a host composes it
+   with its own messages and slots. Motion is one authored beat (the typing
+   dots); everything else is incidental or still.
+
+   Anatomy:  c-chat  >  c-chat__log ( c-chat__msg | c-chat__typing | c-chat__panel )
+                     +  c-chat__chips ( c-chat__chip )
+                     +  c-chat__composer ( c-chat__input + c-chat__send )
+   ───────────────────────────────────────────────────────────────────────── */
+
+.c-chat {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    min-inline-size: 0;
+    min-block-size: 0;
+}
+
+/* ---- Scrollback ------------------------------------------------------------ */
+
+.c-chat__log {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    min-block-size: 0;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* The log manages its own scroll position (auto-scroll to newest); browser
+       scroll anchoring fights it when a pending bubble + typing indicator are
+       swapped for the landed reply in one commit, leaving the newest message
+       out of view. */
+    overflow-anchor: none;
+    padding: var(--space-md);
+    background-color: var(--color-paper);
+    border: var(--border-width-hairline) solid var(--sem-border-color);
+    border-radius: var(--radius-m);
+
+    /* Theme the scrollbar — a browser surface that otherwise ships a default. */
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-sand-line) transparent;
+
+    &::-webkit-scrollbar {
+        inline-size: 0.5rem;
+    }
+    &::-webkit-scrollbar-thumb {
+        background-color: var(--color-sand-line);
+        border-radius: var(--radius-pill);
+    }
+
+    /* Bound the height so the composer stays in view. `flex: none` so the
+       explicit size wins over the grow used when a host gives .c-chat a
+       fixed height instead. */
+    &--bounded {
+        flex: none;
+        block-size: min(60vh, 40rem);
+    }
+    &--short {
+        flex: none;
+        max-block-size: min(52vh, 34rem);
+    }
+}
+
+/* ---- Messages ------------------------------------------------------------ */
+
+.c-chat__msg {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    max-inline-size: min(100%, 42rem);
+
+    &--assistant {
+        align-self: flex-start;
+        align-items: flex-start;
+    }
+    &--user {
+        align-self: flex-end;
+        align-items: flex-end;
+    }
+}
+
+/* Attribution — rendered once at the head of a run of same-role messages. */
+.c-chat__from {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    color: var(--color-ink-soft);
+}
+
+.c-chat__avatar {
+    flex: none;
+    inline-size: 1.25rem;
+    block-size: 1.25rem;
+    color: var(--color-r-marigold); /* the one brand touch: this is Plotted */
+}
+
+.c-chat__bubble {
+    padding: var(--space-sm) var(--space-md);
+    line-height: 1.55;
+    border-radius: var(--radius-l);
+    overflow-wrap: break-word;
+
+    /* One squared corner toward the speaker — the familiar chat tell. */
+    .c-chat__msg--assistant & {
+        color: var(--color-n-deep-grey);
+        background-color: var(--color-paper-deep);
+        border-end-start-radius: var(--radius-s);
+    }
+    .c-chat__msg--user & {
+        color: var(--color-n-deep-grey);
+        background-color: var(--color-white);
+        border: var(--border-width-hairline) solid var(--sem-border-color);
+        border-end-end-radius: var(--radius-s);
+    }
+}
+
+/* ---- Typing indicator (the authored moment) --------------------------- */
+
+.c-chat__typing {
+    align-self: flex-start;
+    display: inline-flex;
+    gap: 0.25rem;
+    align-items: center;
+    padding: var(--space-sm) var(--space-md);
+    background-color: var(--color-paper-deep);
+    border-radius: var(--radius-l);
+    border-end-start-radius: var(--radius-s);
+
+    span {
+        inline-size: 0.375rem;
+        block-size: 0.375rem;
+        border-radius: var(--radius-roundel);
+        background-color: var(--color-ink-soft);
+        animation: chat-typing 1.2s var(--transition-easing-default) infinite;
+
+        &:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+        &:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+    }
+}
+
+@keyframes chat-typing {
+    0%,
+    60%,
+    100% {
+        opacity: 0.3;
+        transform: translateY(0);
+    }
+    30% {
+        opacity: 1;
+        transform: translateY(-0.125rem);
+    }
+}
+
+/* ---- Inline attachment: a titled group of cards from the assistant ---- */
+
+.c-chat__panel {
+    align-self: flex-start;
+    inline-size: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding: var(--space-md);
+    background-color: var(--color-paper-deep);
+    border-radius: var(--radius-l);
+    border-end-start-radius: var(--radius-s);
+}
+
+.c-chat__panel-title {
+    color: var(--color-ink-soft);
+}
+
+/* A choose-one option inside a panel (e.g. "which direction?"). */
+.c-chat__option {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    padding: var(--space-sm) var(--space-md);
+    text-align: start;
+    background-color: var(--color-white);
+    border: var(--border-width-hairline) solid var(--sem-border-color);
+    border-radius: var(--radius-m);
+    cursor: pointer;
+    transition:
+        background-color var(--transition-time-default) var(--transition-easing-default),
+        border-color var(--transition-time-default) var(--transition-easing-default);
+
+    &:hover {
+        background-color: var(--color-y-yellow);
+        border-color: var(--color-y-yellow);
+    }
+    &:focus-visible {
+        outline: var(--border-width-thin) solid var(--color-b-cyan);
+        outline-offset: 1px;
+    }
+
+    &__label {
+        font-family: var(--font-display);
+        font-weight: var(--font-weight-bold);
+        color: var(--color-ink);
+    }
+    &__blurb {
+        color: var(--color-ink-soft);
+    }
+}
+
+/* ---- Quick replies --------------------------------------------------- */
+
+.c-chat__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs);
+}
+
+.c-chat__chip {
+    padding: var(--space-xs) var(--space-sm);
+    color: var(--color-n-deep-grey);
+    background-color: var(--color-paper);
+    border: var(--border-width-hairline) solid var(--color-sand-line);
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    transition:
+        background-color var(--transition-time-default) var(--transition-easing-default),
+        border-color var(--transition-time-default) var(--transition-easing-default);
+
+    &:hover {
+        background-color: var(--color-y-yellow);
+        border-color: var(--color-y-yellow);
+    }
+    &:focus-visible {
+        outline: var(--border-width-thin) solid var(--color-b-cyan);
+        outline-offset: 1px;
+    }
+}
+
+/* ---- Composer ------------------------------------------------------------ */
+
+.c-chat__composer {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-sm);
+}
+
+.c-chat__input {
+    flex: 1;
+    min-inline-size: 0;
+    resize: none;
+    padding: var(--space-sm) var(--space-md);
+    font: inherit;
+    line-height: 1.5;
+    color: var(--color-ink);
+    background-color: var(--color-paper);
+    border: var(--border-width-hairline) solid var(--color-sand-line);
+    border-radius: var(--radius-l);
+    caret-color: var(--color-r-marigold);
+    /* Auto-grow where supported; the max + scroll is the fallback. */
+    field-sizing: content;
+    max-block-size: 8rem;
+    overflow-y: auto;
+
+    &::placeholder {
+        color: color-mix(in srgb, var(--color-ink-soft) 60%, transparent);
+    }
+
+    /* Repeated-entry field: ring + border only, no fill flip. */
+    &:focus-visible {
+        outline: none;
+        border-color: var(--color-r-marigold);
+        box-shadow: 0 0 0 var(--border-width-thin) var(--color-r-marigold);
+    }
+}
+
+.c-chat__send {
+    flex: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    inline-size: 2.75rem;
+    block-size: 2.75rem;
+    color: var(--color-r-white);
+    background-color: var(--color-r-marigold);
+    border: none;
+    border-radius: var(--radius-roundel);
+    cursor: pointer;
+    transition: background-color var(--transition-time-default) var(--transition-easing-default);
+
+    &:hover {
+        background-color: var(--color-o-vermillion);
+    }
+    &:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+    }
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--border-width-thin) var(--color-paper),
+            0 0 0 calc(var(--border-width-thin) * 2) var(--color-p-lavender);
+    }
+}
+
+/* ---- Motion opt-out --------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .c-chat__typing span {
+        animation: none;
+        opacity: 0.55;
+    }
+}
