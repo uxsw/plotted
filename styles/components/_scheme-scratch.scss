@@ -1,0 +1,258 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   c-scheme-scratch — /plant-scheme/scratch, step 2 of the "from scratch"
+   journey: draft a plant list before the conversation step.
+
+   Carries the entry screen's language forward. The "from scratch" path owns
+   the flowering-spring accent (`--sem-flowering-spring-*`, a garden just
+   beginning); it is routed through object-private --_* props per the
+   Semantic Layer Rule. The catalogue folio device becomes a journey step
+   marker; the bare-plot engraving from the entry card returns as the list's
+   watermark; the list is drawn as a numbered plant schedule with faint
+   upcoming rows so a growing list reads as something taking shape.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.c-scheme-scratch {
+    --_accent: var(--sem-flowering-spring-fg);
+    --_accent-wash: var(--sem-flowering-spring-bg);
+
+    display: grid;
+    gap: var(--space-lg);
+}
+
+/* ---- Journey step marker ---------------------------------------------- */
+
+.c-scheme-journey {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding-block-end: var(--space-sm);
+    border-block-end: var(--border-width-hairline) solid var(--sem-border-color);
+    color: var(--color-ink-soft);
+
+    &__track {
+        display: flex;
+        align-items: center;
+        gap: var(--space-xs);
+    }
+
+    &__track > span {
+        inline-size: 1.75rem;
+        block-size: 0.25rem;
+        border-radius: var(--radius-s);
+        background-color: var(--color-sand-line);
+    }
+
+    &__track > .is-done,
+    &__track > .is-current {
+        background-color: var(--_accent);
+    }
+
+    &__track > .is-current {
+        inline-size: 2.5rem;
+    }
+
+    &__count {
+        margin-inline-start: auto;
+    }
+}
+
+/* ---- Add-a-plant field ---------------------------------------------------- */
+
+.c-scheme-scratch__add {
+    display: flex;
+    align-items: stretch;
+    gap: var(--space-sm);
+}
+
+.c-scheme-scratch__field {
+    flex: 1;
+    min-inline-size: 0;
+    padding: var(--space-sm) var(--space-md);
+    color: var(--color-ink);
+    background-color: var(--color-paper);
+    border: var(--border-width-hairline) solid var(--color-sand-line);
+    border-radius: var(--radius-m);
+    caret-color: var(--color-r-marigold);
+    transition:
+        border-color var(--transition-time-default) var(--transition-easing-default),
+        box-shadow var(--transition-time-default) var(--transition-easing-default);
+
+    &::placeholder {
+        color: color-mix(in srgb, var(--color-ink-soft) 60%, transparent);
+    }
+
+    /* Input convention: 2px marigold ring + border, no fill flip — this
+       field takes repeated entries and a background flash each time would
+       fight what the user is typing. */
+    &:focus-visible {
+        outline: none;
+        border-color: var(--color-r-marigold);
+        box-shadow: 0 0 0 var(--border-width-thin) var(--color-r-marigold);
+    }
+}
+
+/* ---- The plant schedule -------------------------------------------------- */
+
+.c-scheme-schedule {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--color-white);
+    border: var(--border-width-hairline) solid var(--sem-border-color);
+    border-radius: var(--radius-m);
+
+    &__head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--space-md);
+        padding: var(--space-sm) var(--space-md);
+        background-color: color-mix(in srgb, var(--_accent-wash) 68%, var(--color-white));
+        border-block-end: var(--border-width-hairline) solid
+            color-mix(in srgb, var(--_accent) 22%, var(--sem-border-color));
+
+        > .o-type-label {
+            color: var(--_accent);
+        }
+    }
+
+    &__count {
+        color: color-mix(in srgb, var(--_accent) 78%, transparent);
+    }
+
+    &__rows {
+        position: relative;
+        z-index: 1;
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    &__row {
+        display: grid;
+        grid-template-columns: 1.75rem 1fr 2.75rem;
+        align-items: center;
+        gap: var(--space-sm);
+        min-block-size: 3.25rem;
+        padding-inline: var(--space-md);
+        border-block-end: var(--border-width-hairline) solid
+            color-mix(in srgb, var(--sem-border-color) 70%, transparent);
+        animation: scheme-row-in var(--transition-time-default) var(--transition-easing-emphasis);
+
+        &.is-ghost {
+            border-block-end-style: dashed;
+            animation: none;
+
+            .c-scheme-schedule__no {
+                background-color: transparent;
+                border: var(--border-width-hairline) dashed
+                    color-mix(in srgb, var(--_accent) 45%, transparent);
+                color: color-mix(in srgb, var(--_accent) 55%, transparent);
+            }
+
+            .c-scheme-schedule__name {
+                font-family: var(--font-sans);
+                font-size: 0.9rem;
+                font-style: italic;
+                color: var(--color-ink-soft);
+            }
+        }
+
+        &:last-child {
+            border-block-end: none;
+        }
+    }
+
+    /* A stamped plate number — the catalogue device, carried down the list
+       as a spring-green roundel so a filling list reads as colour rhythm. */
+    &__no {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        inline-size: 1.75rem;
+        block-size: 1.75rem;
+        border-radius: var(--radius-roundel);
+        background-color: var(--_accent);
+        color: var(--color-r-white);
+        font-variant-numeric: tabular-nums;
+    }
+
+    &__name {
+        min-inline-size: 0;
+        font-family: var(--font-display);
+        font-size: clamp(1.042rem, 0.234vw + 1rem, 1.25rem); /* long-primer step */
+        line-height: 1.3;
+        color: var(--color-ink);
+        overflow-wrap: break-word;
+    }
+
+    &__remove {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        inline-size: 2.75rem;
+        block-size: 2.75rem;
+        color: var(--color-ink-soft);
+        border-radius: var(--radius-roundel);
+        transition:
+            background-color var(--transition-time-default) var(--transition-easing-default),
+            color var(--transition-time-default) var(--transition-easing-default);
+
+        /* Highlight-Yellow convention: the shared reactive hover colour. */
+        &:hover {
+            background-color: var(--color-y-yellow);
+            color: var(--color-n-deep-grey);
+        }
+
+        &:focus-visible {
+            outline: var(--border-width-thin) solid var(--color-b-cyan);
+            outline-offset: 1px;
+        }
+    }
+
+    &__watermark {
+        position: absolute;
+        inset-block-end: calc(var(--space-lg) * -1);
+        inset-inline-end: calc(var(--space-lg) * -1);
+        inline-size: 12rem;
+        block-size: 12rem;
+        color: var(--_accent);
+        opacity: 0.08;
+        pointer-events: none;
+    }
+}
+
+@keyframes scheme-row-in {
+    from {
+        opacity: 0;
+        transform: translateY(-0.25rem);
+        background-color: var(--_accent-wash);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+        background-color: transparent;
+    }
+}
+
+/* ---- What's next + footer --------------------------------------------- */
+
+.c-scheme-scratch__next {
+    max-inline-size: var(--measure);
+    color: var(--_accent);
+}
+
+.c-scheme-scratch__footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+}
+
+/* ---- Motion opt-out --------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .c-scheme-schedule__row {
+        animation: none;
+    }
+}

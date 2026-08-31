@@ -82,6 +82,10 @@
     --transition-time-slow: 0.8s;
     --transition-time-x-slow: 1s;
     --transition-easing-default: ease;
+    // The "authored moment" curve — exponential ease-out, settling toward
+    // the light. For the one deliberate motion on a surface (a card lift,
+    // a list row easing in), not for incidental hovers.
+    --transition-easing-emphasis: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 // Typography
