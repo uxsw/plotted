@@ -43,9 +43,39 @@
     max-width: none;
 }
 
+/* Full-height shell (>=52rem): the workspace runs as a fixed-height app
+   surface — the composer pins to the base of the viewport and the log fills
+   everything between the app nav and the composer. It's a pure flex
+   pass-down from a 100dvh box: the header (and offline banner, if shown)
+   keep their natural height, and every level below just takes "whatever's
+   left", so there are no height calculations tied to the chrome above.
+   Below 52rem the panes stack and the log keeps its --bounded height. */
+@media (min-width: 52rem) {
+    .min-h-screen:has(.c-scheme-workspace) {
+        block-size: 100vh;
+        block-size: 100dvh;
+        display: flex;
+        flex-direction: column;
+        /* only the log scrolls; the shared app footer isn't surfaced here */
+        overflow: hidden;
+    }
+
+    .min-h-screen:has(.c-scheme-workspace) > .o-page {
+        flex: 1;
+        min-block-size: 0;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+/* Layout only — the grid + gap come from .c-scheme-chat (always paired). */
 .c-scheme-workspace {
-    display: grid;
-    gap: var(--space-lg);
+    @media (min-width: 52rem) {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-block-size: 0;
+    }
 }
 
 .c-scheme-workspace__panes {
@@ -54,21 +84,55 @@
     align-items: start;
 
     @media (min-width: 52rem) {
-        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+        /* The conversation takes all the room it can; the sheet holds to a
+           catalogue-page width so it never scales up with the monitor. */
+        flex: 1;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: stretch;
+        min-block-size: 0;
     }
 }
 
-/* The scheme-list pane sticks alongside the conversation on wide screens. */
+/* Conversation column: the log grows to fill; --bounded is a mobile-only bound. */
+@media (min-width: 52rem) {
+    .c-scheme-workspace .c-chat__log--bounded {
+        flex: 1;
+        block-size: auto;
+    }
+}
+
+/* Scheme-list column scrolls on its own once the page height is fixed
+   (it was position: sticky against the whole-page scroll). Its width is a
+   bounded page measure — wide enough for a two-up card grid, capped so the
+   sheet reads as a page rather than a wall on a large display. */
 .c-scheme-workspace__list {
     @media (min-width: 52rem) {
-        position: sticky;
-        inset-block-start: var(--space-md);
+        inline-size: clamp(20rem, 34vw, 32rem);
+        min-block-size: 0;
+        overflow-y: auto;
+
+        /* Same themed thin scrollbar as the chat log — this pane scrolls now
+           too, and a default bar reads as unfinished. */
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-sand-line) transparent;
+
+        &::-webkit-scrollbar {
+            inline-size: 0.5rem;
+        }
+        &::-webkit-scrollbar-thumb {
+            background-color: var(--color-sand-line);
+            border-radius: var(--radius-pill);
+        }
     }
 }
 
 /* ---- Scheme list panel ------------------------------------------------- */
 
 .c-scheme-list {
+    /* The elevation figure and the month strip share this measure so they
+       align and stay diagram-scale on a wide sheet. */
+    --_figure-measure: 22rem;
+
     overflow: hidden;
     background-color: var(--color-white);
     border: var(--border-width-hairline) solid var(--sem-border-color);
@@ -110,46 +174,35 @@
         color: var(--color-ink-soft);
     }
 
+    /* Cards within a group flow as a responsive grid — the column count
+       follows the pane width and the number of plants in the group. Same
+       recipe as .o-card-grid / .c-plant-grid (DESIGN.md Layout): auto-fill,
+       ~200px track, md gutter. The min() guard lets a single column form
+       when the pane is narrower than one track (mobile, stacked panes). */
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+        gap: var(--space-md);
+    }
+
     &__empty {
         padding: var(--space-md);
         color: var(--color-ink-soft);
     }
 
-    /* One row of the sheet: a specimen-number stamp beside the card. The
-       stamp is the scratch schedule's plate-number device carried into the
-       workspace — numbered continuously down the sheet, across groups. */
+    /* One card of the sheet. The card interior flashes from the accent wash
+       as it roots — the same beat the scratch schedule's rows land with. */
     &__item {
-        display: grid;
-        grid-template-columns: 1.75rem minmax(0, 1fr);
-        gap: var(--space-sm);
-        align-items: start;
         animation: scheme-item-in var(--transition-time-default) var(--transition-easing-emphasis)
             backwards;
         animation-delay: var(--_delay, 0ms);
 
-        /* The card interior flashes from the accent wash as it roots — the
-           same beat the scratch schedule's rows land with. */
         .c-suggestion {
+            block-size: 100%;
             animation: scheme-card-wash var(--transition-time-slow) var(--transition-easing-default)
                 backwards;
             animation-delay: var(--_delay, 0ms);
         }
-    }
-
-    &__no {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        inline-size: 1.75rem;
-        block-size: 1.75rem;
-        margin-block-start: calc(var(--space-md) - var(--space-xs));
-        border-radius: var(--radius-roundel);
-        background-color: var(--_accent);
-        color: var(--color-r-white);
-        font-variant-numeric: tabular-nums;
-        animation: scheme-stamp-in var(--transition-time-default) var(--transition-easing-emphasis)
-            backwards;
-        animation-delay: var(--_delay, 0ms);
     }
 }
 
@@ -162,9 +215,13 @@
 .c-scheme-elevation {
     padding: var(--space-sm) var(--space-md) 0;
 
+    /* The cross-section is a diagram, not content — hold it to a figure width
+       and centre it so it stays diagram-scale on a wide sheet. */
     svg {
         display: block;
         inline-size: 100%;
+        max-inline-size: var(--_figure-measure);
+        margin-inline: auto;
         block-size: auto;
     }
 
@@ -222,6 +279,10 @@
     &__strip {
         display: flex;
         gap: var(--space-xs);
+        /* Match the elevation figure above — same width, centred, so the
+           twelve cells stay legible rather than stretching across the sheet. */
+        max-inline-size: var(--_figure-measure);
+        margin-inline: auto;
     }
 
     &__month {
@@ -436,17 +497,6 @@
     }
 }
 
-@keyframes scheme-stamp-in {
-    from {
-        opacity: 0;
-        transform: scale(0.6);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
 @keyframes scheme-elevation-draw {
     from {
         stroke-dashoffset: 1;
@@ -471,7 +521,6 @@
     .c-scheme-chat__arrive,
     .c-scheme-list__item,
     .c-scheme-list__item .c-suggestion,
-    .c-scheme-list__no,
     .c-scheme-elevation__plant path,
     .c-scheme-elevation__plant circle {
         animation: none;

@@ -28,6 +28,11 @@ export default function SplitPaneView() {
         path === "existing" ? "is-path-existing" : "is-path-scratch"
       )}
     >
+      {/* The destination has no visible page title (the two panes carry their
+          own headings); this anchors the document outline. Matches the route
+          <title>. */}
+      <h1 className="u-visually-hidden">Building your scheme</h1>
+
       <div className="c-scheme-workspace__panes">
         <ChatPane />
         <div className="c-scheme-workspace__list">

@@ -31,6 +31,8 @@
     flex-direction: column;
     gap: var(--space-md);
     min-block-size: 0;
+    /* Sits open on the page ground — no panel, no border. The conversation is
+       the surface here, not something framed inside one. */
     overflow-y: auto;
     overscroll-behavior: contain;
     /* The log manages its own scroll position (auto-scroll to newest); browser
@@ -38,10 +40,6 @@
        swapped for the landed reply in one commit, leaving the newest message
        out of view. */
     overflow-anchor: none;
-    padding: var(--space-md);
-    background-color: var(--color-paper);
-    border: var(--border-width-hairline) solid var(--sem-border-color);
-    border-radius: var(--radius-m);
 
     /* Theme the scrollbar — a browser surface that otherwise ships a default. */
     scrollbar-width: thin;
@@ -57,10 +55,26 @@
 
     /* Bound the height so the composer stays in view. `flex: none` so the
        explicit size wins over the grow used when a host gives .c-chat a
-       fixed height instead. */
+       fixed height instead. This is the always-scrolling variant (the
+       workspace conversation), so it also carries the foot dissolve: the
+       scrollback melts toward the composer rather than butting against it.
+       The end padding keeps the newest message clear of the fade. */
     &--bounded {
         flex: none;
         block-size: min(60vh, 40rem);
+        padding-block-end: var(--space-xl);
+        -webkit-mask-image: linear-gradient(
+            to bottom,
+            #000 0,
+            #000 calc(100% - var(--space-lg)),
+            transparent 100%
+        );
+        mask-image: linear-gradient(
+            to bottom,
+            #000 0,
+            #000 calc(100% - var(--space-lg)),
+            transparent 100%
+        );
     }
     &--short {
         flex: none;
@@ -249,6 +263,10 @@
     display: flex;
     align-items: flex-end;
     gap: var(--space-sm);
+    /* A deliberate step down from the tight title/log interval above — the
+       composer reads as its own persistent zone through rhythm, not a rule
+       or a box. Pairs with the log's foot-fade. */
+    margin-block-start: var(--space-md);
 }
 
 .c-chat__input {
