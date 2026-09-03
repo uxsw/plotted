@@ -28,10 +28,6 @@ export default function SplitPaneView() {
         path === "existing" ? "is-path-existing" : "is-path-scratch"
       )}
     >
-      <p className="o-surface--info island brevier">
-        Preview — assistant replies are canned and the shopping-list toggle isn&apos;t saved yet.
-      </p>
-
       <div className="c-scheme-workspace__panes">
         <ChatPane />
         <div className="c-scheme-workspace__list">
