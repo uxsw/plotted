@@ -225,10 +225,11 @@ The rule governs headings, not the italic voice entirely. In-app, Fraunces **ita
 
 ## Layout
 
-Three containers, chosen by surface intent:
+Four containers, chosen by surface intent:
 
 - **Product measure** — `.o-page`: `max-width: 800px`, centred, `padding: var(--space-md)` (16px). The default for every authenticated app page — a narrow, readable, single-task column.
 - **Companion measure** — the dashboard (`/dashboard`) only: a single vertical stream at `max-width: ~1000px`, still centred, still one column. The dashboard is a check-in surface that stacks four peer content blocks (recent plants, weather, garden visitors, shopping list); it earns the extra width so cards and horizontal scrollers can breathe and, on desktop, resolve into inline rows rather than scroll. It does **not** become multi-column. No other app route uses this measure.
+- **Full-width workspace** — the `/plant-scheme/chat` destination (`phase: "scheme"`) only: `.o-page:has(.c-scheme-workspace)` drops `max-width` entirely, so the two-pane workspace (conversation + scheme-list sheet) fills the viewport with only the `.o-page` `--space-md` gutter kept. Two peer panes that genuinely want the room — not one task, and not a capped stream like the dashboard. The question-flow phase (`phase: "questions"`) of the same route stays at the product measure.
 - **Editorial measure** — marketing `WRAP`: `max-width: 1120px`, `padding: 48px` stepping to `24px` at ≤860px and `18px` at ≤480px. Wider, plate-and-column compositions.
 
 **Grid & rhythm.** Card collections use `grid-template-columns: repeat(auto-fill, minmax(200px, 1fr))` with `gap: var(--space-md)` (both `.o-card-grid` and `.c-plant-grid`). Vertical rhythm is the `.o-stack` object: `display: grid` with `gap` of `--space-sm` / `--space-md` / `--space-xl` (compact / default / spacious). Horizontal groupings use `.o-row` (flex, `align-items: center`, `gap: --space-sm`) with `--space-between` and `--align-top` modifiers.
@@ -244,7 +245,7 @@ Three containers, chosen by surface intent:
 
 A second, narrower exception buys *immersion, never width*: the `/plant-scheme` entry hero (`.c-scheme-hero`) is a full-bleed photographic band. Its content still respects the ~800px measure; only the band itself breaks the `.o-page` inset — to the viewport edges on a phone (`≤32rem`: `margin-inline: calc(var(--space-md) * -1)`, radius dropped, `aspect-ratio` shifting `2/1` → `4/5`). It stays a single centred column.
 
-A third: the `/plant-scheme/chat` **workspace** (`.c-scheme-workspace`) takes the dashboard's ~1000px companion measure, for the same reason — two peer panes (conversation + scheme list), not one task. It never becomes a third column, and the question-flow phase of the same route keeps the 800px measure.
+A third — and the one place the app goes full-bleed for *width*, not immersion: the `/plant-scheme/chat` **workspace** (`.c-scheme-workspace`, `phase: "scheme"`) drops the `.o-page` measure altogether and fills the viewport, keeping only the `--space-md` gutter. Two peer panes (conversation + scheme-list sheet) that want the room, not one task. It never becomes a third column, and the question-flow phase of the same route keeps the 800px measure. This is the sole full-width app surface; a new route wanting it is drift.
 
 ## Elevation & Depth
 
@@ -368,7 +369,7 @@ A conversation with Plotted, styled as an exchange of notes in a garden notebook
 
 ### Scheme workspace (`c-scheme-workspace`) — step 3 destination
 
-The `/plant-scheme/chat` route: `phase: "questions"` runs the chat inside the journey step marker (`.c-scheme-journey`, count slot = `N / 4`); `phase: "scheme"` is the destination — a **two-pane workspace** (`.c-scheme-workspace`) that widens the page to the ~1000px companion measure (see the Narrow Column Rule) and, above `52rem`, sticks the **scheme-list panel** beside the scrolling conversation. Below `52rem` the panes stack, chat then list. The mock assistant delay (`~700ms`) shows the optimistic user message + typing indicator before the reply lands — the rhythm a streamed LLM response will have.
+The `/plant-scheme/chat` route: `phase: "questions"` runs the chat inside the journey step marker (`.c-scheme-journey`, count slot = `N / 4`); `phase: "scheme"` is the destination — a **two-pane workspace** (`.c-scheme-workspace`) that drops the `.o-page` product measure and fills the viewport width (see the Narrow Column Rule) and, above `52rem`, sticks the **scheme-list panel** beside the scrolling conversation. Below `52rem` the panes stack, chat then list. The mock assistant delay (`~700ms`) shows the optimistic user message + typing indicator before the reply lands — the rhythm a streamed LLM response will have.
 
 The scheme-list panel (`.c-scheme-list`) is drawn as a **living border sheet**, not a list — the conversation's output made visible as a border taking shape. Top to bottom:
 
@@ -392,7 +393,7 @@ Arrivals — a fresh suggestion panel's cards in the chat, and rows/silhouettes/
 - **Do** let colour enter through plant content — photos and the trait/sun/season badge families — while chrome stays calm.
 - **Do** treat the `/plant-scheme` entry as the app's one sanctioned Persuade surface — a full-bleed garden photograph and large `--sem-flowering-*` colour fields belong *there*; on an Operate screen they are drift.
 - **Do** carry a `/plant-scheme` path's flowering-season accent through every step of that path, via `--_accent` / `--_accent-wash` — and reuse the journey chrome (`.c-scheme-journey` step marker, the schedule pattern, the path engraving) on the sibling steps rather than reinventing per screen.
-- **Do** hold app pages to the ~800px `.o-page` measure; the 1120px container is a marketing device and the ~1000px companion measure is reserved (the dashboard, the `/plant-scheme/chat` workspace — the Narrow Column Rule lists every exception).
+- **Do** hold app pages to the ~800px `.o-page` measure; the 1120px container is a marketing device, the ~1000px companion measure is the dashboard's alone, and full width is the `/plant-scheme/chat` workspace's alone — the Narrow Column Rule lists every exception.
 - **Do** build any new conversation on the `c-chat` primitives (`_chat.scss` / `ChatLog.tsx`) — bounded scroll log with `role="log"` + `aria-live`, attribution once per run, a typing indicator before a reply, an auto-growing composer, focus back to the composer after send.
 - **Do** honour `prefers-reduced-motion` for every animation (all current keyframes already opt out).
 

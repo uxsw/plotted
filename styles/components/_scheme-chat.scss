@@ -36,26 +36,16 @@
 
 /* ---- The destination workspace ------------------------------------------- */
 
-/* Widen the page for the two-pane workspace — a second sanctioned exception
-   to the Narrow Column Rule, like the dashboard: peer panels, not one task.
-   The question flow keeps the 800px measure. */
+/* The two-pane workspace fills the full viewport width — no product measure.
+   Only the standard .o-page --space-md gutter is kept so content doesn't
+   touch the screen edges. The question flow keeps the 800px measure. */
 .o-page:has(.c-scheme-workspace) {
-    max-width: 1000px;
+    max-width: none;
 }
 
 .c-scheme-workspace {
     display: grid;
     gap: var(--space-lg);
-}
-
-.c-scheme-workspace__head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-sm) var(--space-md);
-    padding-block-end: var(--space-sm);
-    border-block-end: var(--border-width-hairline) solid var(--sem-border-color);
 }
 
 .c-scheme-workspace__panes {

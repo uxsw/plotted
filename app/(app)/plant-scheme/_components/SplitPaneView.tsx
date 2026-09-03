@@ -5,12 +5,11 @@
  * it, no terminal "results" screen. Rendered once the question flow completes
  * (context phase === "scheme").
  *
- * The .c-scheme-workspace class widens the page to the ~1000px companion
- * measure (a sanctioned Narrow Column Rule exception — peer panes, not one
- * task) and, on wide screens, sticks the list beside the scrolling chat.
+ * The .c-scheme-workspace class drops the .o-page product measure so the
+ * two-pane workspace fills the full viewport width, and on wide screens
+ * sticks the list beside the scrolling chat.
  */
 
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 import clsx from "clsx";
 import buttonStyles from "@/components/ui/Button.module.css";
@@ -20,13 +19,7 @@ import ChatPane from "./ChatPane";
 import SchemeListPane from "./SchemeListPane";
 
 export default function SplitPaneView() {
-  const router = useRouter();
-  const { path, reset } = usePlantScheme();
-
-  function startOver() {
-    reset();
-    router.push("/plant-scheme");
-  }
+  const { path } = usePlantScheme();
 
   return (
     <div
@@ -35,17 +28,6 @@ export default function SplitPaneView() {
         path === "existing" ? "is-path-existing" : "is-path-scratch"
       )}
     >
-      <div className="c-scheme-workspace__head">
-        <h1 className="paragon o-type-display kirk">Your scheme, in progress</h1>
-        <button
-          type="button"
-          onClick={startOver}
-          className={clsx(buttonStyles["o-button"], buttonStyles["o-button--ghost"])}
-        >
-          Start over
-        </button>
-      </div>
-
       <p className="o-surface--info island brevier">
         Preview — assistant replies are canned and the shopping-list toggle isn&apos;t saved yet.
       </p>
