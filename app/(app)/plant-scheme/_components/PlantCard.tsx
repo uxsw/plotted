@@ -3,7 +3,12 @@
 /**
  * One plant suggestion card. Reused for:
  *  - inline suggestion cards in the chat (action slot = "Add")
- *  - scheme-list items in the list pane (action slot = cart + "Remove")
+ *  - scheme-list items in the list pane (footer slot = "Remove")
+ *
+ * The title always has the full card width to itself — `actions` is for a
+ * short, compact control only (a badge, an icon button), never anything that
+ * competes with the title for space. A control that needs more room belongs
+ * in `footer` instead, on its own row below the content.
  *
  * Styles: `.c-suggestion` in styles/components/_scheme-chat.scss.
  *
@@ -78,26 +83,6 @@ export function PlantCard({
         {footer && <div className="c-suggestion__footer minion">{footer}</div>}
       </div>
     </div>
-  );
-}
-
-export function CartIcon() {
-  return (
-    <svg
-      width="13"
-      height="13"
-      viewBox="0 0 14 14"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M1 1.5h1.8l1.4 6.5h6.1l1.4-4.8H4.2" />
-      <circle cx="5.8" cy="11.8" r="0.9" fill="currentColor" stroke="none" />
-      <circle cx="9.8" cy="11.8" r="0.9" fill="currentColor" stroke="none" />
-    </svg>
   );
 }
 

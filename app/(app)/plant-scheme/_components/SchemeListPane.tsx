@@ -17,19 +17,19 @@
  * the accent-wash flash — the workspace's one authored moment, staggered into
  * a "planting" when the sheet first arrives populated.
  *
- * Every item has the same Remove control and a mocked shopping-list toggle.
+ * Every item has the same Remove control, on its own row below the content.
  */
 
 import { useState } from "react";
 import { usePlantScheme } from "./PlantSchemeContext";
 import { MOCK_TIER_LABELS, MOCK_TIER_ORDER } from "./mockData";
-import { PlantCard, CartIcon, CheckIcon } from "./PlantCard";
+import { PlantCard } from "./PlantCard";
 import BorderElevation from "./BorderElevation";
 import FloweringYear from "./FloweringYear";
 import type { SchemePlant } from "./PlantSchemeContext";
 
 export default function SchemeListPane() {
-  const { schemePlants, removeSchemePlant, toggleShoppingList } = usePlantScheme();
+  const { schemePlants, removeSchemePlant } = usePlantScheme();
 
   /* Rows present on first render arrive as a staggered planting; a row added
      later eases in alone, immediately. Lazy state, captured once at mount. */
@@ -86,35 +86,16 @@ export default function SchemeListPane() {
                     >
                       <PlantCard
                         plant={plant}
-                        actions={
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => toggleShoppingList(plant.id)}
-                              aria-label={
-                                plant.addedToShoppingList
-                                  ? `${plant.commonName} is on your shopping list`
-                                  : `Add ${plant.commonName} to your shopping list`
-                              }
-                              aria-pressed={plant.addedToShoppingList}
-                              className="c-suggestion__cart"
-                            >
-                              {plant.addedToShoppingList ? <CheckIcon /> : <CartIcon />}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => removeSchemePlant(plant.id)}
-                              aria-label={`Remove ${plant.commonName} from the scheme`}
-                              className="c-suggestion__remove minion"
-                            >
-                              Remove
-                            </button>
-                          </>
-                        }
                         footer={
-                          plant.addedToShoppingList
-                            ? "On your shopping list (preview — not saved)."
-                            : null
+                          <button
+                            type="button"
+                            onClick={() => removeSchemePlant(plant.id)}
+                            aria-label={`Remove ${plant.commonName} from the scheme`}
+                            className="c-suggestion__remove minion"
+                          >
+                            <RemoveIcon />
+                            Remove
+                          </button>
                         }
                       />
                     </div>
@@ -126,5 +107,25 @@ export default function SchemeListPane() {
         </div>
       )}
     </section>
+  );
+}
+
+/** Remove control — a single-weight cross, matching the drawn icons on the
+ *  sibling scheme-scratch schedule and garden picker. */
+function RemoveIcon() {
+  return (
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 12 12"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      aria-hidden="true"
+    >
+      <line x1="2" y1="2" x2="10" y2="10" />
+      <line x1="10" y1="2" x2="2" y2="10" />
+    </svg>
   );
 }
