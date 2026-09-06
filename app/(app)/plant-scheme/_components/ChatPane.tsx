@@ -16,8 +16,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePlantScheme, type ChatEntry, type DirectionOption } from "./PlantSchemeContext";
 import { MOCK_QUESTIONS } from "./mockData";
-import { PlantCard, CheckIcon } from "./PlantCard";
+import { PlantCard } from "./PlantCard";
 import { ChatMessage, ChatComposer, TypingIndicator } from "./ChatLog";
+import { Icon } from "@/components/ui/Icon";
 
 const THINK_MS = 700;
 
@@ -233,13 +234,13 @@ function EntryView({
                   plant={plant}
                   actions={
                     added ? (
-                      <span className="o-badge is-sm is-edible">
-                        <CheckIcon /> Added
+                      <span className="c-suggestion__added minion">
+                        <Icon name="check" size={12} /> Added
                       </span>
                     ) : (
                       <button
                         type="button"
-                        className="c-chat__chip brevier"
+                        className="c-suggestion__add brevier"
                         onClick={() => onAdd(entry.id, plant)}
                       >
                         + Add

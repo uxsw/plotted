@@ -5,33 +5,14 @@
  * styles/components/_chat.scss). No planting-scheme knowledge lives here — a
  * host supplies the messages, the composer wiring, and any inline attachments.
  *
- * Pieces: PlottedMark (assistant identity) · ChatMessage · TypingIndicator ·
+ * Pieces: ChatMessage (carries the assistant identity mark) · TypingIndicator ·
  * QuickReplies · ChatComposer.
  */
 
 import { forwardRef, type ReactNode } from "react";
+import { Icon } from "@/components/ui/Icon";
 
 export type ChatRole = "assistant" | "user";
-
-/** The assistant's identity mark — a single-stroke sprout in the brand accent. */
-export function PlottedMark({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="0 0 20 20"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.4"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M10 18V8" />
-      <path d="M10 11.5C6.4 11 3.8 8.4 3.3 4.8 6.9 5.3 9.5 7.9 10 11.5Z" />
-      <path d="M10 9.5C13 9 15 6.6 15.4 3.6 12.4 4 10.4 6 10 9.5Z" />
-    </svg>
-  );
-}
 
 /**
  * One message. Render `showFrom` on the first of a run of same-role messages so
@@ -52,7 +33,7 @@ export function ChatMessage({
     <div className={`c-chat__msg c-chat__msg--${role}`}>
       {showFrom && role === "assistant" && (
         <span className="c-chat__from o-type-label">
-          <PlottedMark className="c-chat__avatar" />
+          <Icon name="sprout" size={20} className="c-chat__avatar" />
           {fromLabel}
         </span>
       )}
@@ -101,25 +82,6 @@ export function QuickReplies({
   );
 }
 
-function SendIcon() {
-  return (
-    <svg
-      width="16"
-      height="16"
-      viewBox="0 0 16 16"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.75"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M8 13.5V3" />
-      <path d="M3.5 7.5 8 3l4.5 4.5" />
-    </svg>
-  );
-}
-
 /**
  * Auto-growing composer. Enter sends; Shift+Enter inserts a newline. Focus is
  * the host's to manage after a send (keep it here).
@@ -162,7 +124,7 @@ export const ChatComposer = forwardRef<
         disabled={disabled || value.trim().length === 0}
         aria-label="Send message"
       >
-        <SendIcon />
+        <Icon name="send" size={16} />
       </button>
     </div>
   );

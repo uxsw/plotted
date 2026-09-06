@@ -26,6 +26,7 @@ import { MOCK_TIER_LABELS, MOCK_TIER_ORDER } from "./mockData";
 import { PlantCard } from "./PlantCard";
 import BorderElevation from "./BorderElevation";
 import FloweringYear from "./FloweringYear";
+import { Icon } from "@/components/ui/Icon";
 import type { SchemePlant } from "./PlantSchemeContext";
 
 export default function SchemeListPane() {
@@ -93,7 +94,7 @@ export default function SchemeListPane() {
                             aria-label={`Remove ${plant.commonName} from the scheme`}
                             className="c-suggestion__remove minion"
                           >
-                            <RemoveIcon />
+                            <Icon name="close" size={12} />
                             Remove
                           </button>
                         }
@@ -107,25 +108,5 @@ export default function SchemeListPane() {
         </div>
       )}
     </section>
-  );
-}
-
-/** Remove control — a single-weight cross, matching the drawn icons on the
- *  sibling scheme-scratch schedule and garden picker. */
-function RemoveIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      aria-hidden="true"
-    >
-      <line x1="2" y1="2" x2="10" y2="10" />
-      <line x1="10" y1="2" x2="2" y2="10" />
-    </svg>
   );
 }

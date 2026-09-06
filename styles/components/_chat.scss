@@ -112,25 +112,23 @@
     flex: none;
     inline-size: 1.25rem;
     block-size: 1.25rem;
-    color: var(--color-r-marigold); /* the one brand touch: this is Plotted */
+    color: var(--color-mulberry); /* the one brand touch: this is Plotted */
 }
 
 .c-chat__bubble {
     padding: var(--space-sm) var(--space-md);
+    color: var(--color-n-deep-grey);
     line-height: 1.55;
     border-radius: var(--radius-l);
     overflow-wrap: break-word;
 
     /* One squared corner toward the speaker — the familiar chat tell. */
     .c-chat__msg--assistant & {
-        color: var(--color-n-deep-grey);
-        background-color: var(--color-paper-deep);
+        background-color: var(--color-oat);
         border-end-start-radius: var(--radius-s);
     }
     .c-chat__msg--user & {
-        color: var(--color-n-deep-grey);
-        background-color: var(--color-white);
-        border: var(--border-width-hairline) solid var(--sem-border-color);
+        background-color: var(--color-y-hay);
         border-end-end-radius: var(--radius-s);
     }
 }
@@ -185,7 +183,7 @@
     flex-direction: column;
     gap: var(--space-sm);
     padding: var(--space-md);
-    background-color: var(--color-paper-deep);
+    background-color: var(--color-clay);
     border-radius: var(--radius-l);
     border-end-start-radius: var(--radius-s);
 }
@@ -201,7 +199,7 @@
     gap: 0.125rem;
     padding: var(--space-sm) var(--space-md);
     text-align: start;
-    background-color: var(--color-white);
+    background-color: var(--color-oat);
     border: var(--border-width-hairline) solid var(--sem-border-color);
     border-radius: var(--radius-m);
     cursor: pointer;

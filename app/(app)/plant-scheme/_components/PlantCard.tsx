@@ -14,10 +14,16 @@
  *
  * `photoUrl` is only ever set for Path A garden plants, from the garden
  * record's own stored photo — there is no Wikimedia lookup at this stage.
+ * Every AI-suggested plant (the common case, both here and on the scheme
+ * list) has none — this is a text-only card in that case, in both places.
+ * A photo-sized illustrated block was tried here and dropped: too big to
+ * scan/select from in the chat, and too primary a placeholder on the scheme
+ * list for something we know will never be a real image.
  */
 
 import type { ReactNode } from "react";
 import Image from "next/image";
+import { Icon } from "@/components/ui/Icon";
 
 export interface PlantCardData {
   commonName: string;
@@ -28,17 +34,20 @@ export interface PlantCardData {
   photoUrl?: string | null;
 }
 
-/** Map a free-text trait label onto the DESIGN.md `.o-badge` trait colours. */
-const TRAIT_CLASS: Record<string, string> = {
-  "wildlife friendly": "is-wildlife-friendly",
-  pollinators: "is-wildlife-friendly",
-  "drought tolerant": "is-drought-tolerant",
-  edible: "is-edible",
-  "british native": "is-british-native",
+/** Map a free-text trait label onto its field-guide mark. Colour used to carry
+ *  this distinction; a rainbow of pastel fills read as noise once several sat
+ *  on one card, so the badges now share one calm treatment and lead with a
+ *  small icon instead — see the .o-badge trait rules in _badge.scss. */
+const TRAIT_ICON: Record<string, () => ReactNode> = {
+  "wildlife friendly": () => <Icon name="flower" size={10} />,
+  pollinators: () => <Icon name="flower" size={10} />,
+  "drought tolerant": () => <Icon name="dropletOff" size={10} />,
+  edible: () => <Icon name="leaf" size={10} />,
+  "british native": () => <Icon name="mappin" size={10} />,
 };
 
-function badgeClass(label: string): string {
-  return TRAIT_CLASS[label.trim().toLowerCase()] ?? "";
+function traitIcon(label: string): ReactNode {
+  return TRAIT_ICON[label.trim().toLowerCase()]?.() ?? null;
 }
 
 export function PlantCard({
@@ -69,12 +78,13 @@ export function PlantCard({
           <h3 className="c-suggestion__name long-primer">{plant.commonName}</h3>
           {actions && <div className="c-suggestion__actions">{actions}</div>}
         </div>
-        <p className="c-suggestion__latin minion">{plant.latinName}</p>
+        <p className="c-suggestion__latin primer">{plant.latinName}</p>
         {plant.note && <p className="c-suggestion__note brevier">{plant.note}</p>}
         {plant.badges.length > 0 && (
           <div className="c-suggestion__badges">
             {plant.badges.map((b) => (
-              <span key={b} className={`o-badge is-sm ${badgeClass(b)}`.trim()}>
+              <span key={b} className="o-badge is-sm">
+                {traitIcon(b)}
                 {b}
               </span>
             ))}
@@ -83,23 +93,5 @@ export function PlantCard({
         {footer && <div className="c-suggestion__footer minion">{footer}</div>}
       </div>
     </div>
-  );
-}
-
-export function CheckIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d="M2 6.5l2.5 2.5 5.5-5.5" />
-    </svg>
   );
 }

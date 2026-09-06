@@ -11,6 +11,11 @@
     --color-sand-line: #dfd8c3;
     --color-white: #FFF;
     --color-paper-line: #E3D8BC;
+    /* Added for the plant-scheme/chat surface pass — a deeper sand for
+       panel-level grounds and a pale warm neutral for the cards/options that
+       sit on them. */
+    --color-clay: #E1DEC4;
+    --color-oat: #EEECDD;
 
     /* Red */
     --color-r-white: oklch(98.0% 0.01 29.5); 
@@ -20,6 +25,9 @@
 
     /* Yellow */
     --color-y-gold: oklch(89.589% 0.11806 89.132);
+    /* A toned-down tint of gold — the plant-scheme/chat user bubble, where
+       full gold read as too loud. */
+    --color-y-hay: #F5E3B8;
     --color-y-mimosa-yellow: oklch(84.25% 0.06996 103.26);
     --color-y-yellow: oklch(94.577% 0.10215 110.6);
 
@@ -36,6 +44,16 @@
     /* Purple */
     --color-p-lavender: oklch(52.839% 0.09034 282.87);
     --color-p-white: oklch(98.0% 0.09034 282.87);
+
+    /* Wine — a tint ramp from darkest to lightest, used across the plant
+       card (title, latin name, Plotted mark, Add button). --color-plum is
+       the same value as --sem-flowering-summer-fg, given a plain name here
+       so it sits alongside its siblings rather than only under its semantic
+       name. */
+    --color-damson: #570F3E;
+    --color-plum: #68124A;
+    --color-mulberry: #82175D;
+    --color-blossom: #F8D6EC;
 
     /* Neutral (grey) — split from the green (g-*) family to remove the g-grey/g-green collision */
     --color-n-cool-grey: oklch(86.236% 0.0068 106.54);

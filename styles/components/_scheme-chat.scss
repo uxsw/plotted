@@ -134,9 +134,11 @@
     --_figure-measure: 22rem;
 
     overflow: hidden;
-    background-color: var(--color-white);
-    border: var(--border-width-hairline) solid var(--sem-border-color);
-    border-radius: var(--radius-m);
+    /* No fill — the sheet reads as part of the page, not a boxed panel on
+       it. A single left rule is the only structure, plus a small inset so
+       the letterhead and cards don't sit flush against it or the gutter. */
+    padding: var(--space-sm);
+    border-inline-start: var(--border-width-hairline) solid var(--sem-border-color);
 
     &__head {
         display: flex;
@@ -145,6 +147,7 @@
         gap: var(--space-md);
         padding: var(--space-sm) var(--space-md);
         background-color: color-mix(in srgb, var(--_accent-wash) 60%, var(--color-white));
+        border-radius: var(--radius-m);
         border-block-end: var(--border-width-hairline) solid
             color-mix(in srgb, var(--_accent) 20%, var(--sem-border-color));
 
@@ -340,8 +343,11 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background-color: var(--color-white);
-    border: var(--border-width-hairline) solid var(--sem-border-color);
+    /* Fills its grid row (the row's tallest card sets the height, via the
+       grid's default stretch) so a card with little content still lines its
+       footer up with its taller neighbours — see __footer below. */
+    block-size: 100%;
+    background-color: var(--color-oat);
     border-radius: var(--radius-m);
 
     &__media {
@@ -357,13 +363,13 @@
     &__body {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
-        padding: var(--space-md);
+        flex: 1;
+        padding: var(--space-sm);
     }
 
     &__head {
         display: flex;
-        align-items: flex-start;
+        align-items: flex-end;
         gap: var(--space-sm);
     }
 
@@ -376,25 +382,34 @@
         font-family: var(--font-display);
         font-weight: var(--font-weight-bold);
         line-height: 1.2;
-        color: var(--color-ink);
+        color: var(--color-damson);
     }
 
+    /* Rhythm below is deliberate contrast, not one gap repeated: identity
+       (name+latin) sits tight as one unit, the note gets a little more air,
+       the badges row (a distinct metadata zone) gets more again. */
     &__latin {
+        margin-block-start: 0.125rem;
         font-family: var(--font-display);
         font-style: italic;
-        color: var(--color-ink-soft);
+        color: var(--color-mulberry);
     }
 
     &__note {
-        margin-block-start: 0.125rem;
+        margin-block-start: var(--space-xs);
         color: var(--color-n-deep-grey);
     }
 
     &__badges {
         display: flex;
         flex-wrap: wrap;
+        align-items: center;
         gap: var(--space-xs);
-        margin-block-start: var(--space-xs);
+        margin-block-start: var(--space-sm);
+
+        .o-badge svg {
+            flex: none;
+        }
     }
 
     &__actions {
@@ -404,15 +419,55 @@
         gap: var(--space-xs);
     }
 
-    /* A distinct action zone below the content — own row, own hairline, per
-       DESIGN.md Cards (`__footer`: sand-line top border at 60%). */
+    /* Pushed to the bottom of the now full-height card (margin-block-start:
+       auto against __body's flex: 1) rather than sitting directly under
+       whatever content happens to be above it — so Remove lines up at the
+       same height across every card in a row, short or long. */
     &__footer {
         display: flex;
         justify-content: flex-end;
-        margin-block-start: var(--space-sm);
+        margin-block-start: auto;
         padding-block-start: var(--space-xs);
         border-block-start: var(--border-width-hairline) solid
             color-mix(in srgb, var(--color-sand-line) 60%, transparent);
+    }
+}
+
+/* ---- Add / Added — Add is the primary action; Added is a quiet notation */
+
+.c-suggestion__add {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.5rem 0.875rem;
+    /* Fixed to the same wine family as the card's title/latin-name text and
+       the Plotted mark, rather than the path's own accent — Add reads as one
+       consistent colour everywhere, on either path. */
+    color: var(--color-blossom);
+    background-color: var(--color-plum);
+    border: none;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-inter), sans-serif;
+    cursor: pointer;
+    transition: background-color var(--transition-time-default) var(--transition-easing-default);
+
+    &:hover {
+        background-color: color-mix(in srgb, var(--color-blossom) 20%, var(--color-plum));
+    }
+    &:focus-visible {
+        outline: none;
+        box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-plum);
+    }
+}
+
+.c-suggestion__added {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--color-ink-soft);
+
+    svg {
+        flex: none;
     }
 }
 
@@ -420,7 +475,7 @@
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    padding: 0.5rem 0.625rem;
+    padding: 0.3125rem 0.5rem;
     color: var(--color-ink-soft);
     background: none;
     border: none;

@@ -51,29 +51,13 @@
         --_badge-fg-color: var(--sem-color-info-fg);
     }
 
-    &.is-wildlife-friendly {
-        --_badge-border-color: var(--sem-color-wildlife-friendly-bg);
-        --_badge-bg-color: var(--sem-color-wildlife-friendly-bg);
-        --_badge-fg-color: var(--sem-color-wildlife-friendly-fg);
-    }
-
-    &.is-drought-tolerant {
-        --_badge-border-color: var(--sem-drought-tolerant-bg);
-        --_badge-bg-color: var(--sem-drought-tolerant-bg);
-        --_badge-fg-color: var(--sem-drought-tolerant-fg);
-    }
-
-    &.is-edible {
-        --_badge-border-color: var(--sem-edible-bg);
-        --_badge-bg-color: var(--sem-edible-bg);
-        --_badge-fg-color: var(--sem-edible-fg);
-    }
-
-    &.is-british-native {
-        --_badge-border-color: var(--sem-british-native-bg);
-        --_badge-bg-color: var(--sem-british-native-bg);
-        --_badge-fg-color: var(--sem-british-native-fg);
-    }
+    /* wildlife-friendly / drought-tolerant / edible / british-native: a
+       per-trait pastel fill each used to carry this distinction, but several
+       sitting on one plant card as a row of unrelated hues read as noise
+       rather than information — see the plant-scheme card craft pass. They
+       now share the plain default treatment above and lead with a small
+       drawn mark instead (PlantCard.tsx's TRAIT_ICON), so nothing overrides
+       --_badge-* here; the class names stay as semantic hooks only. */
 
     &.is-full-sun {
         --_badge-border-color: var(--sem-full-sun-bg);
