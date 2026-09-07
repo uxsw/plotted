@@ -1,41 +1,67 @@
+/* A real radio group (role="radiogroup" / role="radio" in
+   PhotoIdentification.tsx), so every option must show its own state at rest —
+   not only the chosen one. Previously it showed almost nothing: the resting
+   border was sand-line at 1.28:1, `.is-selected` and `:hover` were both the
+   same light cyan (so hovering a candidate made it read as chosen), and the
+   `::after` radio mark carried `border-color: 2px solid …`, which is not a
+   valid declaration — it was dropped, leaving the unselected mark with no
+   border and a transparent fill, i.e. invisible. This is a phone-in-the-garden
+   surface; the state has to survive bright light. */
 .c-identify-option {
     display: block;
     inline-size: 100%;
     text-align: left;
     overflow: hidden;
-    border: var(--border-width-hairline) solid var(--sem-border-color);
-    transition: border-color var(--transition-time-default) var(--transition-easing-default);
+    border: var(--border-width-hairline) solid var(--color-n-dark-grey);
     position: relative;
+    transition:
+        border-color var(--transition-time-default) var(--transition-easing-default),
+        box-shadow var(--transition-time-default) var(--transition-easing-default);
 
-    &.is-selected {
-        border-color: var(--color-b-cyan);
-    }
-    &.is-default {
-        border-color: var(--color-sand-line);
-    }
-
-    &:hover {
-        border-color: var(--color-b-cyan);
+    /* Hover marks the pointer without impersonating the choice: the card lift
+       from the Elevation vocabulary, edge unchanged. */
+    &:hover:not(.is-selected) {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
     }
 
+    &:focus-visible {
+        outline: var(--border-width-thin) solid var(--sem-focus-color);
+        outline-offset: var(--border-width-thin);
+    }
+
+    /* The radio mark. Always drawn — a white disc with a grey ring when
+       unchosen, filled deep cyan with a white inner ring when chosen. The
+       outer white glow keeps it legible over a reference photograph, which is
+       what sits behind it most of the time. */
     &::after {
-        display: inline-block;
         content: '';
-        height: 12px;
-        width: 12px;
-        border-radius: 50%;
-        border-color: 2px solid var(--color-b-cyan);
-        background-color: transparent;
-        transition: background-color var(--transition-time-default) var(--transition-easing-default);
         position: absolute;
-        right: var(--space-sm);
-        top: var(--space-sm);
+        inset-block-start: var(--space-sm);
+        inset-inline-end: var(--space-sm);
+        inline-size: 1.125rem;
+        block-size: 1.125rem;
+        border-radius: var(--radius-roundel);
+        border: var(--border-width-thin) solid var(--color-n-dark-grey);
+        background-color: var(--color-white);
+        box-shadow: 0 0 0 var(--border-width-hairline) rgba(255, 255, 255, 0.9);
+        transition:
+            background-color var(--transition-time-default) var(--transition-easing-default),
+            border-color var(--transition-time-default) var(--transition-easing-default);
     }
 
+    /* Chosen: a 2px edge made with a ring so the card never reflows, and the
+       mark filled. Stable under hover — the option you picked should not
+       change when the pointer crosses it. */
     &.is-selected {
+        border-color: var(--color-b-cyan-deep);
+        box-shadow: 0 0 0 var(--border-width-hairline) var(--color-b-cyan-deep);
+
         &::after {
-            background-color: var(--color-b-cyan);
-            border-color: var(--color-white);
+            border-color: var(--color-b-cyan-deep);
+            background-color: var(--color-b-cyan-deep);
+            box-shadow:
+                0 0 0 var(--border-width-hairline) rgba(255, 255, 255, 0.9),
+                inset 0 0 0 var(--border-width-thin) var(--color-white);
         }
     }
 

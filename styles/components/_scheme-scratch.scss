@@ -204,7 +204,7 @@
         }
 
         &:focus-visible {
-            outline: var(--border-width-thin) solid var(--color-b-cyan);
+            outline: var(--border-width-thin) solid var(--sem-focus-color);
             outline-offset: 1px;
         }
     }

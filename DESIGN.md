@@ -18,6 +18,7 @@ colors:
   lavender: "oklch(52.839% 0.09034 282.87)"
   lavender-white: "oklch(98.0% 0.09034 282.87)"
   cyan: "oklch(78.91% 0.07815 206.15)"
+  cyan-deep: "oklch(58% 0.095 206.15)"
   red: "oklch(70.172% 0.11901 7.0907)"
   smoke-red: "oklch(83.547% 0.04691 4.6691)"
   off-white-warm: "oklch(98.0% 0.01 29.5)"
@@ -166,7 +167,7 @@ A warm, low-glare neutral base — bone and sand paper tones under near-black te
 
 ### Tertiary
 - **Lavender** (`oklch(52.839% 0.09034 282.87)`) with **Lavender White** (`oklch(98.0% 0.09034 282.87)`): the Planting Schemes accent — the `button-scheme` variant and the `is-wildlife-friendly` badge family relate to it.
-- **Cyan** (`oklch(78.91% 0.07815 206.15)`): focus-only. The 2px focus outline on inputs, popovers, autocomplete and text buttons. Not a decorative colour.
+- **Cyan** — two registers of one hue (206.15), and the split is load-bearing. **Cyan Deep** (`oklch(58% 0.095 206.15)` ≈ `#158A96`) is the *indicator*: read only through `--sem-focus-color`, it carries every `:focus-visible` ring and every "this field has the caret" edge. **Cyan** (`oklch(78.91% 0.07815 206.15)`) is the *surface*: it survives only where it sits **behind dark text**, such as the selected plant card's caption pill (`n-deep-grey` on light cyan = 5.0:1, where the deep value would give 2.8:1). Everything else that was on it is a *line, a mark or an icon* — the checked-toggle track, selected-card boundaries, the check badge, the identify radio mark — so it takes the deep value. Light cyan is only ~1.7:1 against paper, so it cannot legally carry an indicator; the deep value clears 3:1 against every ground in the system (paper 3.7 · white 4.1 · highlight-yellow 3.6 · oat 3.5 · hay 3.2). Neither is a decorative colour.
 - **Red** (`oklch(70.172% 0.11901 7.0907)`) / **Smoke Red** (`oklch(83.547% 0.04691 4.6691)`): placeholder-icon colour inside empty card media, and the soft hover wash on destructive popover items. Hard error colour is a separate fresh `#AD0018` in the semantic layer, not this token.
 
 ### Neutral
@@ -183,7 +184,11 @@ A warm, low-glare neutral base — bone and sand paper tones under near-black te
 
 **The Semantic Layer Rule.** Trait, sun, season and status colours are declared as `--sem-*` tokens that reference the palette (or a purpose-made hex where the review demanded one). Components read `--sem-*` through object-private `--_*` custom properties — never raw `--color-*` — for any stateful colour. New state colours go through this layer.
 
-**The Highlight-Yellow convention** *(established pattern, not an invariant).* `highlight-yellow` is the one reactive colour that marks whatever the pointer is on. Keep every new interactive object consistent with it on hover/active.
+**The Focus Colour Rule.** Every focus ring and every active-field edge in the app reads `--sem-focus-color` — never `--color-b-cyan`, never a per-component value. It resolves to Cyan Deep because a focus indicator is a non-text UI component under WCAG 1.4.11 and must clear 3:1 against whatever it sits on; the app's grounds run from paper to highlight-yellow, so the token is chosen against the lightest of them. A new interactive object gets its focus state from this token, and if the indicator ever needs to change, it changes here once.
+
+**The Highlight-Yellow convention** *(established pattern, not an invariant).* `highlight-yellow` is the one reactive colour that marks whatever the pointer is on. Keep every new interactive object consistent with it on hover/active. It marks the pointer and **nothing else** — see the next rule.
+
+**The Chosen-Is-Filled Rule.** In a choose-one group, hover and selected must never share a treatment. Hover takes the highlight-yellow tint; *chosen* takes a **fill** in the context's accent (lavender in Planting Schemes) with its paired light text. The failure this prevents is specific and was live in `.c-scheme-prefs__choice`: hover and `.is-selected` shared one declaration block, so moving the pointer across the group made every option you touched look like the one you had picked. A fill also survives sitting next to a hovered sibling, which a border-colour swap does not. Where the option is a **photo card**, a fill would bury the photograph, so the job passes to a real radio mark that is drawn in *both* states (see Radio card) and hover falls back to the card lift. Selection must additionally be exposed to assistive tech — `aria-pressed` on a button group, or real radio semantics.
 
 **The Semantic Field exception** *(scoped to the `/plant-scheme` journey).* The flowering-season hues normally appear only in small badges and roundels — "held in restraint" per the Overview. The planting-scheme flow is the one sanctioned place a `--sem-flowering-*` pair carries **large surfaces and a whole path's accent**:
 
@@ -295,7 +300,7 @@ Borders are a first-class structural tool: `--border-width-hairline: 1px` for al
 - **Danger:** near-black (`n-deep-grey`) fill, white text; hover lightens to dark-grey. Focus → 2px marigold outline, 2px offset.
 - **Ghost-danger:** neutral (`ink-soft`) until hover/focus, then marigold. For destructive actions that shouldn't shout at rest.
 - **Scheme:** lavender fill, lavender-white text — the Planting Schemes context only. Hover → vermillion.
-- **Focus (all):** `box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-p-lavender)` — a lavender ring floated off the paper. (Note: some objects instead use a 2px cyan `outline` — the ring is the button-component convention, cyan is the field/menu convention.)
+- **Focus (all):** `box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-p-lavender)` — a lavender ring floated off the paper. (Note: some objects instead use a 2px `--sem-focus-color` `outline` — the ring is the button-component convention, the deep-cyan outline is the field/menu convention.)
 - **Shape modifiers:** `--w100` (full width), `--pill` (fully round), `--icon` / `--avatar` (40×40 square / circle, no padding), `--flush-start` (zero leading padding that grows to `0.5rem` on hover — a catalogue-margin gesture).
 - **Spotting toggle** (`--not-spotted` / `--is-spotted`): pill, `1px` marigold border; unspotted is translucent white with `backdrop-filter: blur(20px)`, spotted is solid marigold with white text. The garden-wildlife signature control.
 
@@ -309,6 +314,9 @@ Borders are a first-class structural tool: `--border-width-hairline: 1px` for al
 - **The trait system:** `.is-edible`, `.is-drought-tolerant`, `.is-british-native`, `.is-wildlife-friendly`, `.is-full-sun` / `.is-partial-shade` / `.is-full-shade`, `.is-flowering-winter … -autumn`, `.is-bug` / `.is-error` / `.is-feedback` / `.is-info` — each maps to a `--sem-*-bg` / `--sem-*-fg` pair. This family is where the "colour of a garden" lives: soft, distinct, legible, AA-checked.
 - **`.o-roundel`** — icon-only, `1.5rem` circle, same `--sem-*` colour families as the sun badges. Use `.o-badge` for text, `.o-roundel` for icon-only.
 
+### Toggle (`.o-toggle`)
+A `44×24` pill switch with a `16px` knob, `role="switch"` + `aria-checked`. **Off** is an outlined track: transparent fill, `1px` `n-dark-grey` border, `n-dark-grey` knob. **On** is a filled track: `--color-b-cyan-deep`, matching border, `white` knob. The two states differ by fill *and* knob position, never colour alone, and the knob sits at a symmetric `5px` inset at both ends. The earlier pairing (grey track / light-cyan track, white knob on both) put the knob at 1.9:1 against the "on" fill — the one part that reports the state was the least visible thing in the control. Deep cyan is referenced through the palette token, not `--sem-focus-color`, so the focus token stays single-purpose.
+
 ### Cards
 - **Corner style:** `4px` (`--radius-m`), `overflow: hidden`.
 - **Background:** white (raised). `--flat` variant is transparent, borderless.
@@ -317,12 +325,18 @@ Borders are a first-class structural tool: `--border-width-hairline: 1px` for al
 - **Structure:** `__media` (4:3, highlight-yellow well before load, badges pinned top-right), `__body` (`padding: var(--space-md)`, `gap: 0.375rem`, bold-roman Fraunces title with the botanical binomial italicised), `__footer` (sand-line top border at 60%).
 - **Internal padding:** `--space-md` (16px) body; `0 16px 16px` footer.
 
+### Photo dropzone (`.c-add-photo`)
+The add-a-plant photo well: a `172px` band, warm `o-orange` fill, `2px` **dashed marigold** edge, `.minion` label in `ink-soft`. Hover takes the highlight-yellow fill, `n-deep-grey` label and a softened `radius-m`; the dashed marigold edge is held in **both** states, because the fill is only 1.15:1 against paper and that edge is the sole thing defining the zone. It is a real `<button type="button">` with an `aria-label` that tracks state ("Add a photo" / "Change photo") — the `<input type="file">` beside it is `display:none`, so this control is the only route to a photo and must be operable from the keyboard.
+
+### Radio card (`.c-identify-option`)
+A photo card acting as one option in a `role="radiogroup"` — the plant-identification suggestions. Because the card is a photograph, selection cannot be a fill, so it is carried by a **mark that is always drawn**: an `18px` disc pinned `--space-sm` from the top-inline-end corner, white with a `2px` `n-dark-grey` ring when unchosen, filled `--color-b-cyan-deep` with a `2px` white inner ring when chosen. A `1px` white outer glow keeps it legible over any reference photograph. The card edge follows: `1px` `n-dark-grey` at rest, `--color-b-cyan-deep` plus a `1px` ring (2px, no reflow) when chosen. **Hover is the card lift only** (`0 8px 24px rgba(0,0,0,0.15)`), edge unchanged — hover previously shared the selected border colour, so crossing the group made every option read as chosen. Focus is the standard `--sem-focus-color` outline at `2px` offset, which reads distinctly from selection because the mark stays empty.
+
 ### Inputs / Fields
 - **Style:** `1px` `sand-line` border, `paper` fill, `4px` radius, `8px 12px` padding, Inter `0.875rem` `ink` text, placeholder at `ink-soft/50`.
 - **Label:** above the field, Spline-mono-idea in Inter — `text-xs`, semibold, uppercase, `tracking-wider`, `font-variant: small-caps`, `ink-soft`.
 - **Focus:** `2px` marigold ring, `1px` paper offset, border → marigold, **fill → marigold** (a strong, deliberate focus state) — this suits single-shot forms. For a **repeated-entry field** (add-a-plant, a tag input the user returns to after every submit) drop the fill flip and keep ring + border only: a background flash on each entry fights the text being typed. Reference: `.c-scheme-scratch__field`. Also theme `caret-color` to marigold.
 - **Error:** border → marigold, ring → marigold; message below in `text-xs` marigold with `role="alert"`.
-- **Underline-field variant** (`.c-underline-field`): a bottom-rule field — `1px` `n-dark-grey` line that thickens to `2px` cyan when `.is-active`. Used for the in-place editable values on the plant detail page.
+- **Underline-field variant** (`.c-underline-field`): a bottom-rule field — `1px` `n-dark-grey` line that thickens to `2px` `--sem-focus-color` when `.is-active`. Used for the in-place editable values on the plant detail page.
 - **Disabled:** `opacity: 0.5`, `cursor: not-allowed`.
 
 ### Navigation
@@ -331,7 +345,7 @@ Borders are a first-class structural tool: `--border-width-hairline: 1px` for al
 - **Mobile:** the nav strip stays horizontal and equal-width (3 short labels fit); the header stays flush.
 
 ### Popover / Menu (signature shell)
-`.o-popover` is the single shared shell for every dropdown (user menu, scheme actions, plant filter). White, `1px` `--sem-border-color`, `4px` radius, the low menu shadow, `--space-xs` padding, `--space-sm` gap. Items (`__link` / `__item`) are full-width, `--space-sm`/`--space-md` padded, hover → highlight-yellow, `.is-danger` hover → smoke-red, focus-visible → `2px` cyan.
+`.o-popover` is the single shared shell for every dropdown (user menu, scheme actions, plant filter). White, `1px` `--sem-border-color`, `4px` radius, the low menu shadow, `--space-xs` padding, `--space-sm` gap. Items (`__link` / `__item`) are full-width, `--space-sm`/`--space-md` padded, hover → highlight-yellow, `.is-danger` hover → smoke-red, focus-visible → `2px` `--sem-focus-color`.
 
 ### Image Plate (signature)
 See Shapes. A framed, matted, captioned photograph with a mono specimen number — the device that makes an editorial page read as a catalogue. Reserved for marketing / editorial surfaces; in-app imagery is otherwise plainer (bottom-rounded, uncaptioned). The one in-app exception is the scheme-entry hero below — a full-bleed, scrim-captioned photograph.
@@ -350,7 +364,7 @@ The `/plant-scheme` front door — a Persuade surface inside the app, the one pl
 Past the entry, each path is an Operate surface (the task is to enter data), but it keeps the journey's warmth: its season accent carried through, the catalogue devices, the path engraving. `/plant-scheme/scratch` and `/plant-scheme/chat` are the built references; `/existing` should adopt the same chrome.
 
 - **Step marker** (`.c-scheme-journey`): a hairline-ruled row — mono path label left (`From scratch`), a three-segment progress track (reached segments in the path's `--_accent`, `1.75rem`/`2.5rem` bars, `0.25rem` tall), `Step N / 3` mono right. This is the folio device doing wayfinding; because the sequence carries real information it is *not* the banned decorative eyebrow.
-- **Plant schedule** (`.c-scheme-schedule`): the typed list drawn as a numbered plant schedule. A white raised panel; a **season-washed header band** ("letterhead") with a mono label and count; rows of `[stamp] [name] [remove]` — the number is an `--_accent` **roundel stamp** (`1.75rem`, white numerals) so a filling list becomes colour rhythm, the name is Fraunces roman at the `long-primer` step, remove is a `44px` icon button (highlight-yellow hover per convention, `2px` cyan focus). Ahead of the real rows sit faint **ghost rows** — dashed dividers, dashed empty stamps, the first carrying the empty-state prompt — so a short or empty list still reads as a form waiting to be filled, never as a dead panel. The path engraving (`marks.tsx`) sits behind at `~0.08` opacity.
+- **Plant schedule** (`.c-scheme-schedule`): the typed list drawn as a numbered plant schedule. A white raised panel; a **season-washed header band** ("letterhead") with a mono label and count; rows of `[stamp] [name] [remove]` — the number is an `--_accent` **roundel stamp** (`1.75rem`, white numerals) so a filling list becomes colour rhythm, the name is Fraunces roman at the `long-primer` step, remove is a `44px` icon button (highlight-yellow hover per convention, `2px` `--sem-focus-color` focus). Ahead of the real rows sit faint **ghost rows** — dashed dividers, dashed empty stamps, the first carrying the empty-state prompt — so a short or empty list still reads as a form waiting to be filled, never as a dead panel. The path engraving (`marks.tsx`) sits behind at `~0.08` opacity.
 - **Motion:** a real row eases in on add via `--transition-easing-emphasis` (translate + fade + a brief `--_accent-wash` flash); ghost rows and re-numbering are silent. This is the surface's one authored moment.
 - **Add field:** a repeated-entry field — see Inputs / Fields (ring + border focus, no fill flip).
 - **What's next:** one Fraunces **italic 400** aside in `--_accent` before the footer, setting up the step that follows (here, the LLM conversation) — see the Two-Register Rule's aside carve-out.
@@ -363,8 +377,8 @@ A conversation with Plotted, styled as an exchange of notes in a garden notebook
 - **Bubbles** (`.c-chat__bubble`, `8px` radius): assistant on `paper-deep`, borderless; user on `white` with a hairline. Each squares **one corner** toward its speaker (`--radius-s`) — the familiar chat tell. Text at the `primer` step, `n-deep-grey`. Distinction is alignment + fill + the attribution line, never colour alone; **marigold is not a bubble colour**.
 - **Attribution** (`.c-chat__from`): a mono "Plotted" with a single-stroke sprout mark in `--color-r-marigold` — the one brand touch, shown once at the head of a run of assistant turns.
 - **Typing indicator** (`.c-chat__typing`): three `ink-soft` dots, `paper-deep` bubble, the `chat-typing` keyframe (see Motion). `role="status"` with a visually-hidden "Plotted is thinking". This is the surface's one authored moment; static under `prefers-reduced-motion`.
-- **Composer** (`.c-chat__composer`): an auto-growing `<textarea>` (`field-sizing: content`, `8px` radius, `paper` fill, marigold `caret-color`, repeated-entry focus — ring + border, no fill flip) and a `44px` **roundel send button** in `--color-r-marigold` (→ `o-vermillion` on hover, `0.4` opacity disabled). Enter sends, Shift+Enter newlines; focus returns to the composer after a send. Set `--space-md` off the log above — a deliberate rhythm step down from the tighter title/log interval, not a rule or a box; it pairs with the log's foot-fade to mark the composer as its own zone.
-- **Quick replies** (`.c-chat__chips` / `.c-chat__chip`): pill buttons, hairline, `paper` fill, highlight-yellow hover, `2px` cyan focus — real `<button>`s for the current turn only.
+- **Composer** (`.c-chat__composer`): **the blank page.** Everything above it is a record of something already said — oat, hay, clay, all tinted paper — so the one place the gardener writes is the only *pure white* surface on the chat, given a real edge and its own attribution. A mono `.o-type-label` heads it (`✎ Your reply` / `✎ Your answer`) — a real `<label htmlFor>`, set in the same mono-and-mark treatment as the assistant's `.c-chat__from`, so the two voices bracket the exchange and a text input, unexpected in a gardening app, is impossible to miss. Below it: an auto-growing `<textarea>` (`field-sizing: content`, `8px` radius, **`white` fill**, marigold `caret-color`) whose edge follows the `.c-underline-field` grammar exactly — `1px` `n-dark-grey` at rest, `2px` `--sem-focus-color` when it has the caret (border + a `1px` ring, no reflow, no fill flip per the repeated-entry rule). Beside it a `44px` **roundel send button**: empty, it is a quiet outline sharing the field's edge with an `n-dark-grey` arrow — *waiting, not broken* — and the `--color-r-marigold` fill **rises into it from the base** (`::before`, `scaleY`, default curve) the moment there is something to say, arrow flipping to `r-white` (→ `o-vermillion` fill + near-black arrow on hover). That rise is the honest signal that this surface is live; it stays an incidental transition, so the typing dots keep the surface's one authored moment. Enter sends, Shift+Enter newlines; focus returns to the composer after a send. Set `--space-md` off the log above — a deliberate rhythm step down from the tighter title/log interval, not a rule or a box; it pairs with the log's foot-fade to mark the composer as its own zone.
+- **Quick replies** (`.c-chat__chips` / `.c-chat__chip`): pill buttons, hairline, `paper` fill, highlight-yellow hover, `2px` `--sem-focus-color` focus — real `<button>`s for the current turn only.
 - **Inline attachment** (`.c-chat__panel`): a `paper-deep` group (squared top-left toward the run) holding a plain `brevier` lead-in and cards — plant suggestions (`.c-suggestion`) or choose-one `.c-chat__option` buttons (white, hairline, highlight-yellow hover). Not the mono label treatment; these titles are sentences.
 
 ### Scheme workspace (`c-scheme-workspace`) — step 3 destination
@@ -383,7 +397,7 @@ Arrivals — a fresh suggestion panel's cards in the chat, and cards and silhoue
 ## Do's and Don'ts
 
 ### Do:
-- **Do** keep the page ground `#FAF6EC` *with* its noise grain (multiply, ~8%). White is for raised cards, dialogs and menus only.
+- **Do** keep the page ground `#FAF6EC` *with* its noise grain (multiply, ~8%). White is for raised cards, dialogs and menus — and for the chat composer, the one field on a tinted surface that has to read as an unwritten page.
 - **Do** set product-UI headings in Fraunces bold roman (`.kirk` / 600); use Fraunces italic 400 only on marketing/editorial surfaces (the Two-Register Rule).
 - **Do** use Spline Sans Mono, uppercase, `0.12–0.16em` tracking for eyebrows, plate numbers, field labels and botanical meta.
 - **Do** render botanical Latin italic, always — including inside a bold-roman title, where it reads as bold-roman with an italic species.
@@ -395,6 +409,7 @@ Arrivals — a fresh suggestion panel's cards in the chat, and cards and silhoue
 - **Do** carry a `/plant-scheme` path's flowering-season accent through every step of that path, via `--_accent` / `--_accent-wash` — and reuse the journey chrome (`.c-scheme-journey` step marker, the schedule pattern, the path engraving) on the sibling steps rather than reinventing per screen.
 - **Do** hold app pages to the ~800px `.o-page` measure; the 1120px container is a marketing device, the ~1000px companion measure is the dashboard's alone, and full width is the `/plant-scheme/chat` workspace's alone — the Narrow Column Rule lists every exception.
 - **Do** build any new conversation on the `c-chat` primitives (`_chat.scss` / `ChatLog.tsx`) — a boxless internally-scrolling log with `role="log"` + `aria-live` (height capped via `--short` / `--bounded` or flexed to fill; `--bounded` foot-fades toward the composer), attribution once per run, a typing indicator before a reply, an auto-growing composer set a rhythm step off the log, focus back to the composer after send.
+- **Do** take every focus ring and active-field edge from `--sem-focus-color` (Cyan Deep) — the light `--color-b-cyan` is a fill/selected tint and is too pale to be an indicator.
 - **Do** honour `prefers-reduced-motion` for every animation (all current keyframes already opt out).
 
 ### Don't:
@@ -406,6 +421,9 @@ Arrivals — a fresh suggestion panel's cards in the chat, and cards and silhoue
 - **Don't** give chat bubbles a marigold (or any accent) fill, or lean on colour alone to tell assistant from user — the split is alignment + fill tone + the attribution line. Keep the season accent on the *wrapper* chrome (`--_accent` on the workspace/list), never inside `c-chat`.
 - **Don't** mix heading registers within a surface — no italic-400 section header inside the app, no bold-roman headline on a marketing page.
 - **Don't** add dashboards, KPI tiles, stat walls or streak counters (a PRODUCT.md commitment).
+- **Don't** put `--color-b-cyan` on a focus ring, a focus outline or an active-field border — that is `--sem-focus-color`'s job (the Focus Colour Rule).
+- **Don't** let a control's boundary get *weaker* when it reacts. Three controls shipped with a hover that swapped a defined edge for pale cyan or for the hover fill itself, leaving the hovered state with less definition than the resting one. Where the highlight-yellow hover also takes the border, the control must already carry a fill at rest; a transparent or lightly-tinted control keeps its edge and changes only the fill.
+- **Don't** build a click target as a `div` with `onClick`. Every one of them in this codebase turned out to be the only path to its action, with no tab stop, no accessible name and nowhere to put a focus state.
 - **Don't** hardcode radius, spacing or colour values — use the scale tokens; Stylelint checks them.
 - **Don't** put a resting shadow on a surface to make it "pop" — use a tonal step or a hairline.
 - **Don't** touch `styles/objects/plant-detail.scss` or the `.plant` / `.plant-detail` / `.plant__frost-tolerance` selectors — they're fenced off for a dedicated refactor.

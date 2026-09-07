@@ -33,6 +33,12 @@
 
     /* Blue */
     --color-b-cyan: oklch(78.91% 0.07815 206.15);
+    /* The deep register of the same hue (206.15). Cyan at 78.9% lightness is
+       only ~1.7:1 against paper, so it cannot carry a focus indicator on its
+       own — this is the value that does, clearing 3:1 against every ground in
+       the system (paper 3.7 · white 4.1 · highlight-yellow 3.6 · oat 3.5 ·
+       hay 3.2). The light cyan stays the fill/selected tint. */
+    --color-b-cyan-deep: oklch(58% 0.095 206.15);
 
     /* Green */
     
@@ -65,6 +71,10 @@
 // Semantic
 :root {
     --sem-border-color: var(--color-paper-line);
+    /* The single focus / active-field colour. Every :focus-visible ring and
+       every "this field has the caret" edge reads this, never a raw
+       --color-* — so the whole app's focus contrast moves in one place. */
+    --sem-focus-color: var(--color-b-cyan-deep);
     --sem-color-error-bg: #ad0018;
     --sem-color-error-fg: #ffe5e9;
     --sem-color-info-bg: var(--color-y-yellow);

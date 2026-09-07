@@ -12,7 +12,9 @@
 
    Anatomy:  c-chat  >  c-chat__log ( c-chat__msg | c-chat__typing | c-chat__panel )
                      +  c-chat__chips ( c-chat__chip )
-                     +  c-chat__composer ( c-chat__input + c-chat__send )
+                     +  c-chat__composer ( c-chat__composer-label
+                                          + c-chat__composer-row
+                                              ( c-chat__input + c-chat__send ) )
    ───────────────────────────────────────────────────────────────────────── */
 
 .c-chat {
@@ -212,7 +214,7 @@
         border-color: var(--color-y-yellow);
     }
     &:focus-visible {
-        outline: var(--border-width-thin) solid var(--color-b-cyan);
+        outline: var(--border-width-thin) solid var(--sem-focus-color);
         outline-offset: 1px;
     }
 
@@ -250,21 +252,54 @@
         border-color: var(--color-y-yellow);
     }
     &:focus-visible {
-        outline: var(--border-width-thin) solid var(--color-b-cyan);
+        outline: var(--border-width-thin) solid var(--sem-focus-color);
         outline-offset: 1px;
     }
 }
 
 /* ---- Composer ------------------------------------------------------------ */
 
+/* The composer is the only *blank* thing on this surface. Everything above it
+   is a record of something already said — oat, hay, clay, all tinted paper —
+   so the one place the gardener writes is drawn as a fresh white sheet with a
+   real edge, headed by its own mono attribution the way Plotted's turns are.
+   A text input is unexpected in a gardening app; it has to read as an
+   invitation, not as chrome that happens to be there. */
 .c-chat__composer {
-    display: flex;
-    align-items: flex-end;
-    gap: var(--space-sm);
+    /* Rest / active edge. Mirrors .c-underline-field exactly — the grammar the
+       rest of Plotted already uses to say "you can write here": an
+       n-dark-grey rule that thickens to cyan when it has the caret. */
+    --_edge: var(--color-n-dark-grey);
+    --_edge-active: var(--sem-focus-color);
+
     /* A deliberate step down from the tight title/log interval above — the
        composer reads as its own persistent zone through rhythm, not a rule
        or a box. Pairs with the log's foot-fade. */
     margin-block-start: var(--space-md);
+}
+
+/* The gardener's side of the correspondence, set in the same mono + mark as
+   the assistant's `.c-chat__from` so the two voices bracket the exchange. */
+.c-chat__composer-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    inline-size: max-content;
+    margin-block-end: var(--space-xs);
+    color: var(--color-ink-soft);
+    cursor: pointer;
+}
+
+.c-chat__composer-mark {
+    flex: none;
+    inline-size: 1rem;
+    block-size: 1rem;
+}
+
+.c-chat__composer-row {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-sm);
 }
 
 .c-chat__input {
@@ -275,28 +310,40 @@
     font: inherit;
     line-height: 1.5;
     color: var(--color-ink);
-    background-color: var(--color-paper);
-    border: var(--border-width-hairline) solid var(--color-sand-line);
+    /* The one pure white on the surface — a fresh page, not another tint. */
+    background-color: var(--color-white);
+    border: var(--border-width-hairline) solid var(--_edge);
     border-radius: var(--radius-l);
     caret-color: var(--color-r-marigold);
+    transition:
+        border-color var(--transition-time-default) var(--transition-easing-default),
+        box-shadow var(--transition-time-default) var(--transition-easing-default);
     /* Auto-grow where supported; the max + scroll is the fallback. */
     field-sizing: content;
     max-block-size: 8rem;
     overflow-y: auto;
 
     &::placeholder {
-        color: color-mix(in srgb, var(--color-ink-soft) 60%, transparent);
+        color: color-mix(in srgb, var(--color-ink-soft) 82%, var(--color-white));
     }
 
-    /* Repeated-entry field: ring + border only, no fill flip. */
+    /* Repeated-entry field: edge only, no fill flip. Border + a 1px ring makes
+       the 2px active rule without reflowing the field. */
     &:focus-visible {
         outline: none;
-        border-color: var(--color-r-marigold);
-        box-shadow: 0 0 0 var(--border-width-thin) var(--color-r-marigold);
+        border-color: var(--_edge-active);
+        box-shadow: 0 0 0 var(--border-width-hairline) var(--_edge-active);
     }
 }
 
+/* Empty, the send button is a quiet outline that shares the field's edge —
+   waiting, not broken. The marigold rises into it from the base the moment
+   there is something to say: the one honest signal that this surface is live.
+   (Incidental transition on the default curve — the log's typing dots keep
+   this surface's authored moment.) */
 .c-chat__send {
+    position: relative;
+    isolation: isolate;
     flex: none;
     display: inline-flex;
     align-items: center;
@@ -304,19 +351,46 @@
     inline-size: 2.75rem;
     block-size: 2.75rem;
     color: var(--color-r-white);
-    background-color: var(--color-r-marigold);
-    border: none;
+    background-color: transparent;
+    border: var(--border-width-hairline) solid var(--_edge);
     border-radius: var(--radius-roundel);
     cursor: pointer;
-    transition: background-color var(--transition-time-default) var(--transition-easing-default);
+    transition:
+        color var(--transition-time-default) var(--transition-easing-default),
+        border-color var(--transition-time-default) var(--transition-easing-default);
 
-    &:hover {
+    &::before {
+        content: "";
+        position: absolute;
+        inset: -1px;
+        z-index: -1;
+        border-radius: inherit;
+        background-color: var(--color-r-marigold);
+        transform: scaleY(1);
+        transform-origin: bottom;
+        transition:
+            transform var(--transition-time-default) var(--transition-easing-default),
+            background-color var(--transition-time-default) var(--transition-easing-default);
+    }
+
+    /* Marigold's documented hover partner: the fill lightens to vermillion and
+       the arrow flips to near-black so it stays legible against it. */
+    &:hover:not(:disabled) {
+        color: var(--color-n-deep-grey);
+    }
+    &:hover::before {
         background-color: var(--color-o-vermillion);
     }
+
     &:disabled {
-        opacity: 0.4;
+        color: var(--color-n-dark-grey);
         cursor: not-allowed;
+
+        &::before {
+            transform: scaleY(0);
+        }
     }
+
     &:focus-visible {
         outline: none;
         box-shadow:
@@ -331,5 +405,12 @@
     .c-chat__typing span {
         animation: none;
         opacity: 0.55;
+    }
+
+    /* The send button still changes state — it just arrives, it doesn't rise. */
+    .c-chat__send,
+    .c-chat__send::before,
+    .c-chat__input {
+        transition: none;
     }
 }

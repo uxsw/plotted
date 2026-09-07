@@ -1,14 +1,14 @@
 
 .c-input-inline {
     background-color: var(--color-white);
-    border: var(--border-width-hairline) solid var(--color-b-cyan);
+    border: var(--border-width-hairline) solid var(--sem-focus-color);
     padding: var(--space-sm);
     font-size: 0.85rem;
     inline-size: 100%;
 
     &:focus {
-        border-color: var(--color-b-cyan);
-        outline: var(--border-width-thin) solid var(--color-b-cyan);
+        border-color: var(--sem-focus-color);
+        outline: var(--border-width-thin) solid var(--sem-focus-color);
     }
 
     &__group {
@@ -58,7 +58,7 @@
     padding-inline var(--transition-time-default) var(--transition-easing-default);
 
   &:hover {
-    border-color: var(--color-b-cyan);
+    border-color: var(--sem-focus-color);
     padding-inline: var(--space-xs);
   }
 }

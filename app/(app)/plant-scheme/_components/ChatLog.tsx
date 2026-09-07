@@ -9,7 +9,7 @@
  * QuickReplies · ChatComposer.
  */
 
-import { forwardRef, type ReactNode } from "react";
+import { forwardRef, useId, type ReactNode } from "react";
 import { Icon } from "@/components/ui/Icon";
 
 export type ChatRole = "assistant" | "user";
@@ -85,6 +85,12 @@ export function QuickReplies({
 /**
  * Auto-growing composer. Enter sends; Shift+Enter inserts a newline. Focus is
  * the host's to manage after a send (keep it here).
+ *
+ * `label` is the gardener's side of the correspondence — shown, in the same
+ * mono-and-mark treatment as the assistant's attribution line, so the input
+ * reads as the next turn in the conversation rather than as page furniture. It
+ * also supplies the field's accessible name; `ariaLabel` overrides that name
+ * for hosts that need a longer one than the visible label.
  */
 export const ChatComposer = forwardRef<
   HTMLTextAreaElement,
@@ -93,39 +99,48 @@ export const ChatComposer = forwardRef<
     onChange: (value: string) => void;
     onSend: () => void;
     placeholder: string;
-    ariaLabel: string;
+    label: string;
+    ariaLabel?: string;
     disabled?: boolean;
   }
 >(function ChatComposer(
-  { value, onChange, onSend, placeholder, ariaLabel, disabled = false },
+  { value, onChange, onSend, placeholder, label, ariaLabel, disabled = false },
   ref
 ) {
+  const id = useId();
   return (
     <div className="c-chat__composer">
-      <textarea
-        ref={ref}
-        className="c-chat__input brevier"
-        rows={1}
-        value={value}
-        placeholder={placeholder}
-        aria-label={ariaLabel}
-        onChange={(e) => onChange(e.target.value)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey) {
-            e.preventDefault();
-            onSend();
-          }
-        }}
-      />
-      <button
-        type="button"
-        className="c-chat__send"
-        onClick={onSend}
-        disabled={disabled || value.trim().length === 0}
-        aria-label="Send message"
-      >
-        <Icon name="send" size={16} />
-      </button>
+      <label className="c-chat__composer-label o-type-label" htmlFor={id}>
+        <Icon name="pencil" size={16} className="c-chat__composer-mark" />
+        {label}
+      </label>
+      <div className="c-chat__composer-row">
+        <textarea
+          id={id}
+          ref={ref}
+          className="c-chat__input brevier"
+          rows={1}
+          value={value}
+          placeholder={placeholder}
+          aria-label={ariaLabel}
+          onChange={(e) => onChange(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              onSend();
+            }
+          }}
+        />
+        <button
+          type="button"
+          className="c-chat__send"
+          onClick={onSend}
+          disabled={disabled || value.trim().length === 0}
+          aria-label="Send message"
+        >
+          <Icon name="send" size={16} />
+        </button>
+      </div>
     </div>
   );
 });

@@ -183,7 +183,8 @@ export default function ChatPane() {
         onChange={setDraft}
         onSend={send}
         disabled={pending !== null}
-        ariaLabel="Message Plotted"
+        label="Your reply"
+        ariaLabel="Your reply to Plotted"
         placeholder="Ask for a swap, more options, a different direction…"
       />
     </div>
