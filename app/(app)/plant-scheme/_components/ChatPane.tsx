@@ -18,6 +18,7 @@ import { usePlantScheme, type ChatEntry, type DirectionOption } from "./PlantSch
 import { MOCK_QUESTIONS } from "./mockData";
 import { PlantCard } from "./PlantCard";
 import { ChatMessage, ChatComposer, TypingIndicator } from "./ChatLog";
+import { DirectionOptions } from "./DirectionOptions";
 import { Icon } from "@/components/ui/Icon";
 
 const THINK_MS = 700;
@@ -43,6 +44,13 @@ export default function ChatPane() {
 
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState<string | null>(null);
+  /* The picked direction, shown as chosen for the beat before the reply lands
+     and the context stamps it for real — same optimism as the sent message
+     above it, so the plate you clicked never sits unmarked while it waits. */
+  const [pendingChoice, setPendingChoice] = useState<{
+    entryId: string;
+    optionId: string;
+  } | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const atBottomRef = useRef(true);
@@ -130,9 +138,11 @@ export default function ChatPane() {
   function pickDirection(entryId: string, option: DirectionOption) {
     if (pending) return;
     setPending(`Let's try "${option.label}".`);
+    setPendingChoice({ entryId, optionId: option.id });
     atBottomRef.current = true;
     window.setTimeout(() => {
       chooseDirection(entryId, option);
+      setPendingChoice(null);
       setPending(null);
     }, THINK_MS);
   }
@@ -165,6 +175,9 @@ export default function ChatPane() {
             schemePlantIds={schemePlants.map((p) => p.id)}
             onAdd={addSuggestedPlant}
             onChooseDirection={pickDirection}
+            pendingChoiceId={
+              pendingChoice?.entryId === entry.id ? pendingChoice.optionId : undefined
+            }
             disabled={pending !== null}
           />
         ))}
@@ -197,6 +210,7 @@ function EntryView({
   schemePlantIds,
   onAdd,
   onChooseDirection,
+  pendingChoiceId,
   disabled,
 }: {
   entry: ChatEntry;
@@ -204,6 +218,7 @@ function EntryView({
   schemePlantIds: string[];
   onAdd: ReturnType<typeof usePlantScheme>["addSuggestedPlant"];
   onChooseDirection: (entryId: string, option: DirectionOption) => void;
+  pendingChoiceId?: string;
   disabled: boolean;
 }) {
   if (entry.kind === "text") {
@@ -259,22 +274,11 @@ function EntryView({
 
   // entry.kind === "directions"
   return (
-    <div className="c-chat__panel">
-      <p className="c-chat__panel-title brevier">{entry.title}</p>
-      <div className="o-stack--compact">
-        {entry.options.map((option) => (
-          <button
-            key={option.id}
-            type="button"
-            className="c-chat__option"
-            disabled={disabled}
-            onClick={() => onChooseDirection(entry.id, option)}
-          >
-            <span className="c-chat__option__label primer">{option.label}</span>
-            <span className="c-chat__option__blurb minion">{option.blurb}</span>
-          </button>
-        ))}
-      </div>
-    </div>
+    <DirectionOptions
+      entry={entry}
+      onChoose={onChooseDirection}
+      pendingChoiceId={pendingChoiceId}
+      disabled={disabled}
+    />
   );
 }

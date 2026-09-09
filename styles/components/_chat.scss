@@ -10,7 +10,9 @@
    with its own messages and slots. Motion is one authored beat (the typing
    dots); everything else is incidental or still.
 
-   Anatomy:  c-chat  >  c-chat__log ( c-chat__msg | c-chat__typing | c-chat__panel )
+   Anatomy:  c-chat  >  c-chat__log ( c-chat__msg | c-chat__typing
+                                       | c-chat__panel ( c-chat__options
+                                                         ( c-chat__option ) ) )
                      +  c-chat__chips ( c-chat__chip )
                      +  c-chat__composer ( c-chat__composer-label
                                           + c-chat__composer-row
@@ -194,11 +196,28 @@
     color: var(--color-ink-soft);
 }
 
-/* A choose-one option inside a panel (e.g. "which direction?"). */
-.c-chat__option {
+/* ---- Choose-one options inside a panel (e.g. "which direction?") -------
+
+   A set the eye reads as a set: full-width rows stacked in one column, each
+   carrying a choose-one mark drawn in *both* states, held to the trailing
+   edge — the label leads, the way a row's meaning outweighs its control.
+
+   Per the Chosen-Is-Filled rule, hover and chosen never share a treatment:
+   hover takes the highlight-yellow wash and *keeps* its edge, chosen is
+   carried by the filled mark and a focus-colour edge. That is the same
+   division the plant-identification radio cards use. */
+
+.c-chat__options {
     display: flex;
     flex-direction: column;
-    gap: 0.125rem;
+    gap: var(--space-sm);
+}
+
+.c-chat__option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
     padding: var(--space-sm) var(--space-md);
     text-align: start;
     background-color: var(--color-oat);
@@ -207,24 +226,133 @@
     cursor: pointer;
     transition:
         background-color var(--transition-time-default) var(--transition-easing-default),
-        border-color var(--transition-time-default) var(--transition-easing-default);
+        border-color var(--transition-time-default) var(--transition-easing-default),
+        box-shadow var(--transition-time-default) var(--transition-easing-default);
 
-    &:hover {
+    /* Fill only — the edge is held, so a hovered plate never has less
+       definition than its neighbours or than the chosen one beside it. */
+    &:hover:not(:disabled) {
         background-color: var(--color-y-yellow);
-        border-color: var(--color-y-yellow);
-    }
-    &:focus-visible {
-        outline: var(--border-width-thin) solid var(--sem-focus-color);
-        outline-offset: 1px;
     }
 
-    &__label {
-        font-family: var(--font-display);
-        font-weight: var(--font-weight-bold);
+    /* The button convention — a lavender ring floated off the ground — rather
+       than the field/menu cyan outline. On this object the cyan edge already
+       means "this is the one you picked", and a focused plate sitting beside a
+       chosen one has to be unmistakable at a glance. Three states, three
+       treatments: yellow fill for the pointer, this ring for the caret, a cyan
+       edge and a filled mark for the choice. */
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--border-width-thin) var(--color-clay),
+            0 0 0 calc(var(--border-width-thin) * 2) var(--color-p-lavender);
+    }
+
+    /* The one that was picked. The mark checks in and the edge steps up to
+       the focus colour with a 1px ring — 2px of edge without reflowing the
+       row. */
+    &.is-chosen {
+        border-color: var(--sem-focus-color);
+        box-shadow: 0 0 0 var(--border-width-hairline) var(--sem-focus-color);
+    }
+
+    /* Focus wins the shadow slot while it holds the caret — the cyan border
+       underneath still says which one is chosen. */
+    &.is-chosen:focus-visible {
+        box-shadow:
+            0 0 0 var(--border-width-thin) var(--color-clay),
+            0 0 0 calc(var(--border-width-thin) * 2) var(--color-p-lavender);
+    }
+
+    /* Not picked, once the group has closed: the plate lets the panel ground
+       through and its planting fades back, so the record reads at a glance.
+       Text stays at full strength — this is history, not noise. */
+    &:disabled {
+        cursor: default;
+        background-color: transparent;
+        border-color: color-mix(in srgb, var(--sem-border-color) 55%, transparent);
+    }
+
+    &.is-chosen:disabled {
+        background-color: var(--color-oat);
+        border-color: var(--sem-focus-color);
+    }
+
+    /* The label + blurb column. `min-inline-size: 0` lets its text wrap
+       instead of pushing the trailing mark out of the row. */
+    &__text {
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+        min-inline-size: 0;
+    }
+
+    /* Drawn empty at rest; hovering an undecided row checks it in — a preview
+       of the pick, not the pick itself, so it stays in plain ink rather than
+       the accent (see below). Held to the row's trailing edge: the label is
+       what you read, the mark is what confirms the pick, so it takes the
+       quieter, secondary position. Both icons occupy the same box so one
+       crossfades into the other instead of the row reflowing. */
+    &__mark {
+        position: relative;
+        flex: none;
+        inline-size: 1.125rem;
+        block-size: 1.125rem;
+    }
+
+    &__mark-icon {
+        position: absolute;
+        inset: 0;
+        color: var(--color-n-dark-grey);
+        transition:
+            opacity var(--transition-time-default) var(--transition-easing-default),
+            transform var(--transition-time-default) var(--transition-easing-default),
+            color var(--transition-time-default) var(--transition-easing-default);
+    }
+
+    &__mark-icon--checked {
+        opacity: 0;
+        transform: scale(0.7);
+    }
+
+    /* Hover previews the pick in ink, never in the focus colour — a hover
+       that already looked chosen would leave nothing left to say "this one
+       actually is" (the Chosen-Is-Filled rule). */
+    &:hover:not(:disabled) &__mark-icon--empty {
+        opacity: 0;
+        transform: scale(0.7);
+    }
+    &:hover:not(:disabled) &__mark-icon--checked {
+        opacity: 1;
+        transform: scale(1);
         color: var(--color-ink);
     }
+
+    /* The one that was picked: checked in the focus colour, whether or not
+       the pointer is still over it — a row that closed the group keeps
+       reading as decided, not merely hovered. */
+    &.is-chosen &__mark-icon--empty {
+        opacity: 0;
+        transform: scale(0.7);
+    }
+    &.is-chosen &__mark-icon--checked {
+        opacity: 1;
+        transform: scale(1);
+        color: var(--sem-focus-color);
+    }
+
+    /* Inter, not the display face: this is a control label, the same voice as
+       every other button in the app — bold here to carry the row's weight
+       now that it stands alone without a figure above it. */
+    &__label {
+        font-weight: var(--font-weight-bold);
+        color: var(--color-ink);
+        text-wrap: balance;
+    }
+
     &__blurb {
         color: var(--color-ink-soft);
+        text-wrap: pretty;
     }
 }
 
@@ -411,6 +539,11 @@
     .c-chat__send,
     .c-chat__send::before,
     .c-chat__input {
+        transition: none;
+    }
+
+    /* The mark still swaps icon on hover/choice — it just cuts, doesn't scale. */
+    .c-chat__option__mark-icon {
         transition: none;
     }
 }

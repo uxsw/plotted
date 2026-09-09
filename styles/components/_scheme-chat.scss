@@ -497,6 +497,74 @@
     }
 }
 
+/* ---- Direction mark — the option plate's engraved silhouette ---------- */
+
+/* The host's fill for `.c-chat__option__figure`: one direction drawn as a
+   border seen side-on, in the same engraved language as the scheme list's
+   elevation. Domain content, so it lives here rather than in the neutral
+   c-chat object — the same division that keeps `.c-suggestion` out of
+   `.c-chat__panel`.
+
+   The strokes sit back at rest and come up to full ink on hover, the way an
+   engraving catches the light when you lean over it. Incidental only (default
+   curve, colour and opacity): the workspace's authored moment stays with the
+   planting on the sheet. */
+.c-scheme-chat__direction-mark {
+    /* The bed the planting stands on: a rule across the whole plate, so the
+       silhouette reads as one section of a border that carries on past it —
+       rather than a small drawing floating in a box. It is drawn here, in
+       CSS, so the SVG holds nothing but the planting. */
+    border-block-end: var(--border-width-hairline) solid var(--color-n-dark-grey);
+    transition: border-color var(--transition-time-default) var(--transition-easing-default);
+
+    /* A vignette, not a banner: the height is fixed and `meet` holds the
+       drawing at its own scale from the left edge, so the strokes stay
+       engraving-fine however wide the plate gets. */
+    svg {
+        display: block;
+        inline-size: 100%;
+        block-size: 3rem;
+    }
+
+    /* "Something else — I'll describe it": an unplanted bed. The dashed rule is
+       the elevation's ghost idiom — a bed whose planting is still to be said. */
+    &.is-open {
+        border-block-end-style: dashed;
+    }
+
+    .c-scheme-chat__direction-plant {
+        opacity: 0.75;
+        transition: opacity var(--transition-time-default) var(--transition-easing-default);
+
+        path {
+            fill: none;
+            stroke: var(--color-ink);
+            stroke-width: 1.4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        circle {
+            fill: var(--color-ink);
+        }
+    }
+
+}
+
+.c-chat__option:hover:not(:disabled) .c-scheme-chat__direction-plant {
+    opacity: 1;
+}
+
+/* Once the group has closed, the roads not taken fade back into the panel;
+   the chosen plate keeps its planting at full strength. */
+.c-chat__option:disabled:not(.is-chosen) {
+    .c-scheme-chat__direction-mark {
+        border-block-end-color: color-mix(in srgb, var(--color-n-dark-grey) 45%, transparent);
+    }
+    .c-scheme-chat__direction-plant {
+        opacity: 0.32;
+    }
+}
+
 /* ---- Start-over / arrival actions ----------------------------------- */
 
 .c-scheme-chat__footer {
@@ -509,7 +577,8 @@
 
 /* ---- The planting: the workspace's one authored moment ---------------- */
 
-/* Cards in a fresh suggestion panel ease in one after another, so a scheme
+/* Cards in a fresh suggestion panel — and the plates in a fresh "which
+   direction?" panel — ease in one after another, so what the assistant offers
    arrives as a planting rather than a dump. Scheme-scoped — c-chat itself
    stays neutral. */
 .c-scheme-chat__arrive {

@@ -113,7 +113,16 @@ export interface DirectionOption {
 export type ChatEntry =
   | { kind: "text"; id: string; role: "assistant" | "user"; text: string }
   | { kind: "suggestions"; id: string; title: string; plants: SuggestionPlant[] }
-  | { kind: "directions"; id: string; title: string; options: DirectionOption[] };
+  /* `chosenOptionId` is set once the gardener picks one. The panel then stops
+     being a live prompt and becomes a record of the decision — see
+     chooseDirection below and EntryView in ChatPane.tsx. */
+  | {
+      kind: "directions";
+      id: string;
+      title: string;
+      options: DirectionOption[];
+      chosenOptionId?: string;
+    };
 
 export interface PlantSchemeState {
   /** Which entry path the user chose, or null before the A/B choice. */
@@ -432,9 +441,20 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
             },
           ];
 
+      /* Stamp the choice onto the panel it came from: the four options stop
+         being a live prompt and become a record of what was picked, the way
+         the rest of the scrollback is a record of what was said. */
       setState((s) => ({
         ...s,
-        transcript: [...s.transcript, userEntry, ...responseEntries],
+        transcript: [
+          ...s.transcript.map((e) =>
+            e.kind === "directions" && e.id === sourceEntryId
+              ? { ...e, chosenOptionId: option.id }
+              : e
+          ),
+          userEntry,
+          ...responseEntries,
+        ],
       }));
     },
     [mkId]
