@@ -244,6 +244,7 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
                 <button
                   key={opt.value}
                   type="button"
+                  aria-pressed={selected}
                   onClick={() => setSpace(opt.value)}
                   className={[
                     "c-scheme-prefs__choice",

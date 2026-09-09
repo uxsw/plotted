@@ -10,9 +10,13 @@
    with its own messages and slots. Motion is one authored beat (the typing
    dots); everything else is incidental or still.
 
-   Anatomy:  c-chat  >  c-chat__log ( c-chat__msg | c-chat__typing | c-chat__panel )
+   Anatomy:  c-chat  >  c-chat__log ( c-chat__msg | c-chat__typing
+                                       | c-chat__panel ( c-chat__options
+                                                         ( c-chat__option ) ) )
                      +  c-chat__chips ( c-chat__chip )
-                     +  c-chat__composer ( c-chat__input + c-chat__send )
+                     +  c-chat__composer ( c-chat__composer-label
+                                          + c-chat__composer-row
+                                              ( c-chat__input + c-chat__send ) )
    ───────────────────────────────────────────────────────────────────────── */
 
 .c-chat {
@@ -31,6 +35,8 @@
     flex-direction: column;
     gap: var(--space-md);
     min-block-size: 0;
+    /* Sits open on the page ground — no panel, no border. The conversation is
+       the surface here, not something framed inside one. */
     overflow-y: auto;
     overscroll-behavior: contain;
     /* The log manages its own scroll position (auto-scroll to newest); browser
@@ -38,10 +44,6 @@
        swapped for the landed reply in one commit, leaving the newest message
        out of view. */
     overflow-anchor: none;
-    padding: var(--space-md);
-    background-color: var(--color-paper);
-    border: var(--border-width-hairline) solid var(--sem-border-color);
-    border-radius: var(--radius-m);
 
     /* Theme the scrollbar — a browser surface that otherwise ships a default. */
     scrollbar-width: thin;
@@ -57,10 +59,26 @@
 
     /* Bound the height so the composer stays in view. `flex: none` so the
        explicit size wins over the grow used when a host gives .c-chat a
-       fixed height instead. */
+       fixed height instead. This is the always-scrolling variant (the
+       workspace conversation), so it also carries the foot dissolve: the
+       scrollback melts toward the composer rather than butting against it.
+       The end padding keeps the newest message clear of the fade. */
     &--bounded {
         flex: none;
         block-size: min(60vh, 40rem);
+        padding-block-end: var(--space-xl);
+        -webkit-mask-image: linear-gradient(
+            to bottom,
+            #000 0,
+            #000 calc(100% - var(--space-lg)),
+            transparent 100%
+        );
+        mask-image: linear-gradient(
+            to bottom,
+            #000 0,
+            #000 calc(100% - var(--space-lg)),
+            transparent 100%
+        );
     }
     &--short {
         flex: none;
@@ -98,25 +116,23 @@
     flex: none;
     inline-size: 1.25rem;
     block-size: 1.25rem;
-    color: var(--color-r-marigold); /* the one brand touch: this is Plotted */
+    color: var(--color-mulberry); /* the one brand touch: this is Plotted */
 }
 
 .c-chat__bubble {
     padding: var(--space-sm) var(--space-md);
+    color: var(--color-n-deep-grey);
     line-height: 1.55;
     border-radius: var(--radius-l);
     overflow-wrap: break-word;
 
     /* One squared corner toward the speaker — the familiar chat tell. */
     .c-chat__msg--assistant & {
-        color: var(--color-n-deep-grey);
-        background-color: var(--color-paper-deep);
+        background-color: var(--color-oat);
         border-end-start-radius: var(--radius-s);
     }
     .c-chat__msg--user & {
-        color: var(--color-n-deep-grey);
-        background-color: var(--color-white);
-        border: var(--border-width-hairline) solid var(--sem-border-color);
+        background-color: var(--color-y-hay);
         border-end-end-radius: var(--radius-s);
     }
 }
@@ -171,7 +187,7 @@
     flex-direction: column;
     gap: var(--space-sm);
     padding: var(--space-md);
-    background-color: var(--color-paper-deep);
+    background-color: var(--color-clay);
     border-radius: var(--radius-l);
     border-end-start-radius: var(--radius-s);
 }
@@ -180,37 +196,163 @@
     color: var(--color-ink-soft);
 }
 
-/* A choose-one option inside a panel (e.g. "which direction?"). */
-.c-chat__option {
+/* ---- Choose-one options inside a panel (e.g. "which direction?") -------
+
+   A set the eye reads as a set: full-width rows stacked in one column, each
+   carrying a choose-one mark drawn in *both* states, held to the trailing
+   edge — the label leads, the way a row's meaning outweighs its control.
+
+   Per the Chosen-Is-Filled rule, hover and chosen never share a treatment:
+   hover takes the highlight-yellow wash and *keeps* its edge, chosen is
+   carried by the filled mark and a focus-colour edge. That is the same
+   division the plant-identification radio cards use. */
+
+.c-chat__options {
     display: flex;
     flex-direction: column;
-    gap: 0.125rem;
+    gap: var(--space-sm);
+}
+
+.c-chat__option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
     padding: var(--space-sm) var(--space-md);
     text-align: start;
-    background-color: var(--color-white);
+    background-color: var(--color-oat);
     border: var(--border-width-hairline) solid var(--sem-border-color);
     border-radius: var(--radius-m);
     cursor: pointer;
     transition:
         background-color var(--transition-time-default) var(--transition-easing-default),
-        border-color var(--transition-time-default) var(--transition-easing-default);
+        border-color var(--transition-time-default) var(--transition-easing-default),
+        box-shadow var(--transition-time-default) var(--transition-easing-default);
 
-    &:hover {
+    /* Fill only — the edge is held, so a hovered plate never has less
+       definition than its neighbours or than the chosen one beside it. */
+    &:hover:not(:disabled) {
         background-color: var(--color-y-yellow);
-        border-color: var(--color-y-yellow);
-    }
-    &:focus-visible {
-        outline: var(--border-width-thin) solid var(--color-b-cyan);
-        outline-offset: 1px;
     }
 
-    &__label {
-        font-family: var(--font-display);
-        font-weight: var(--font-weight-bold);
+    /* The button convention — a lavender ring floated off the ground — rather
+       than the field/menu cyan outline. On this object the cyan edge already
+       means "this is the one you picked", and a focused plate sitting beside a
+       chosen one has to be unmistakable at a glance. Three states, three
+       treatments: yellow fill for the pointer, this ring for the caret, a cyan
+       edge and a filled mark for the choice. */
+    &:focus-visible {
+        outline: none;
+        box-shadow:
+            0 0 0 var(--border-width-thin) var(--color-clay),
+            0 0 0 calc(var(--border-width-thin) * 2) var(--color-p-lavender);
+    }
+
+    /* The one that was picked. The mark checks in and the edge steps up to
+       the focus colour with a 1px ring — 2px of edge without reflowing the
+       row. */
+    &.is-chosen {
+        border-color: var(--sem-focus-color);
+        box-shadow: 0 0 0 var(--border-width-hairline) var(--sem-focus-color);
+    }
+
+    /* Focus wins the shadow slot while it holds the caret — the cyan border
+       underneath still says which one is chosen. */
+    &.is-chosen:focus-visible {
+        box-shadow:
+            0 0 0 var(--border-width-thin) var(--color-clay),
+            0 0 0 calc(var(--border-width-thin) * 2) var(--color-p-lavender);
+    }
+
+    /* Not picked, once the group has closed: the plate lets the panel ground
+       through and its planting fades back, so the record reads at a glance.
+       Text stays at full strength — this is history, not noise. */
+    &:disabled {
+        cursor: default;
+        background-color: transparent;
+        border-color: color-mix(in srgb, var(--sem-border-color) 55%, transparent);
+    }
+
+    &.is-chosen:disabled {
+        background-color: var(--color-oat);
+        border-color: var(--sem-focus-color);
+    }
+
+    /* The label + blurb column. `min-inline-size: 0` lets its text wrap
+       instead of pushing the trailing mark out of the row. */
+    &__text {
+        display: flex;
+        flex-direction: column;
+        gap: 0.125rem;
+        min-inline-size: 0;
+    }
+
+    /* Drawn empty at rest; hovering an undecided row checks it in — a preview
+       of the pick, not the pick itself, so it stays in plain ink rather than
+       the accent (see below). Held to the row's trailing edge: the label is
+       what you read, the mark is what confirms the pick, so it takes the
+       quieter, secondary position. Both icons occupy the same box so one
+       crossfades into the other instead of the row reflowing. */
+    &__mark {
+        position: relative;
+        flex: none;
+        inline-size: 1.125rem;
+        block-size: 1.125rem;
+    }
+
+    &__mark-icon {
+        position: absolute;
+        inset: 0;
+        color: var(--color-n-dark-grey);
+        transition:
+            opacity var(--transition-time-default) var(--transition-easing-default),
+            transform var(--transition-time-default) var(--transition-easing-default),
+            color var(--transition-time-default) var(--transition-easing-default);
+    }
+
+    &__mark-icon--checked {
+        opacity: 0;
+        transform: scale(0.7);
+    }
+
+    /* Hover previews the pick in ink, never in the focus colour — a hover
+       that already looked chosen would leave nothing left to say "this one
+       actually is" (the Chosen-Is-Filled rule). */
+    &:hover:not(:disabled) &__mark-icon--empty {
+        opacity: 0;
+        transform: scale(0.7);
+    }
+    &:hover:not(:disabled) &__mark-icon--checked {
+        opacity: 1;
+        transform: scale(1);
         color: var(--color-ink);
     }
+
+    /* The one that was picked: checked in the focus colour, whether or not
+       the pointer is still over it — a row that closed the group keeps
+       reading as decided, not merely hovered. */
+    &.is-chosen &__mark-icon--empty {
+        opacity: 0;
+        transform: scale(0.7);
+    }
+    &.is-chosen &__mark-icon--checked {
+        opacity: 1;
+        transform: scale(1);
+        color: var(--sem-focus-color);
+    }
+
+    /* Inter, not the display face: this is a control label, the same voice as
+       every other button in the app — bold here to carry the row's weight
+       now that it stands alone without a figure above it. */
+    &__label {
+        font-weight: var(--font-weight-bold);
+        color: var(--color-ink);
+        text-wrap: balance;
+    }
+
     &__blurb {
         color: var(--color-ink-soft);
+        text-wrap: pretty;
     }
 }
 
@@ -238,14 +380,51 @@
         border-color: var(--color-y-yellow);
     }
     &:focus-visible {
-        outline: var(--border-width-thin) solid var(--color-b-cyan);
+        outline: var(--border-width-thin) solid var(--sem-focus-color);
         outline-offset: 1px;
     }
 }
 
 /* ---- Composer ------------------------------------------------------------ */
 
+/* The composer is the only *blank* thing on this surface. Everything above it
+   is a record of something already said — oat, hay, clay, all tinted paper —
+   so the one place the gardener writes is drawn as a fresh white sheet with a
+   real edge, headed by its own mono attribution the way Plotted's turns are.
+   A text input is unexpected in a gardening app; it has to read as an
+   invitation, not as chrome that happens to be there. */
 .c-chat__composer {
+    /* Rest / active edge. Mirrors .c-underline-field exactly — the grammar the
+       rest of Plotted already uses to say "you can write here": an
+       n-dark-grey rule that thickens to cyan when it has the caret. */
+    --_edge: var(--color-n-dark-grey);
+    --_edge-active: var(--sem-focus-color);
+
+    /* A deliberate step down from the tight title/log interval above — the
+       composer reads as its own persistent zone through rhythm, not a rule
+       or a box. Pairs with the log's foot-fade. */
+    margin-block-start: var(--space-md);
+}
+
+/* The gardener's side of the correspondence, set in the same mono + mark as
+   the assistant's `.c-chat__from` so the two voices bracket the exchange. */
+.c-chat__composer-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-xs);
+    inline-size: max-content;
+    margin-block-end: var(--space-xs);
+    color: var(--color-ink-soft);
+    cursor: pointer;
+}
+
+.c-chat__composer-mark {
+    flex: none;
+    inline-size: 1rem;
+    block-size: 1rem;
+}
+
+.c-chat__composer-row {
     display: flex;
     align-items: flex-end;
     gap: var(--space-sm);
@@ -259,28 +438,40 @@
     font: inherit;
     line-height: 1.5;
     color: var(--color-ink);
-    background-color: var(--color-paper);
-    border: var(--border-width-hairline) solid var(--color-sand-line);
+    /* The one pure white on the surface — a fresh page, not another tint. */
+    background-color: var(--color-white);
+    border: var(--border-width-hairline) solid var(--_edge);
     border-radius: var(--radius-l);
     caret-color: var(--color-r-marigold);
+    transition:
+        border-color var(--transition-time-default) var(--transition-easing-default),
+        box-shadow var(--transition-time-default) var(--transition-easing-default);
     /* Auto-grow where supported; the max + scroll is the fallback. */
     field-sizing: content;
     max-block-size: 8rem;
     overflow-y: auto;
 
     &::placeholder {
-        color: color-mix(in srgb, var(--color-ink-soft) 60%, transparent);
+        color: color-mix(in srgb, var(--color-ink-soft) 82%, var(--color-white));
     }
 
-    /* Repeated-entry field: ring + border only, no fill flip. */
+    /* Repeated-entry field: edge only, no fill flip. Border + a 1px ring makes
+       the 2px active rule without reflowing the field. */
     &:focus-visible {
         outline: none;
-        border-color: var(--color-r-marigold);
-        box-shadow: 0 0 0 var(--border-width-thin) var(--color-r-marigold);
+        border-color: var(--_edge-active);
+        box-shadow: 0 0 0 var(--border-width-hairline) var(--_edge-active);
     }
 }
 
+/* Empty, the send button is a quiet outline that shares the field's edge —
+   waiting, not broken. The marigold rises into it from the base the moment
+   there is something to say: the one honest signal that this surface is live.
+   (Incidental transition on the default curve — the log's typing dots keep
+   this surface's authored moment.) */
 .c-chat__send {
+    position: relative;
+    isolation: isolate;
     flex: none;
     display: inline-flex;
     align-items: center;
@@ -288,19 +479,46 @@
     inline-size: 2.75rem;
     block-size: 2.75rem;
     color: var(--color-r-white);
-    background-color: var(--color-r-marigold);
-    border: none;
+    background-color: transparent;
+    border: var(--border-width-hairline) solid var(--_edge);
     border-radius: var(--radius-roundel);
     cursor: pointer;
-    transition: background-color var(--transition-time-default) var(--transition-easing-default);
+    transition:
+        color var(--transition-time-default) var(--transition-easing-default),
+        border-color var(--transition-time-default) var(--transition-easing-default);
 
-    &:hover {
+    &::before {
+        content: "";
+        position: absolute;
+        inset: -1px;
+        z-index: -1;
+        border-radius: inherit;
+        background-color: var(--color-r-marigold);
+        transform: scaleY(1);
+        transform-origin: bottom;
+        transition:
+            transform var(--transition-time-default) var(--transition-easing-default),
+            background-color var(--transition-time-default) var(--transition-easing-default);
+    }
+
+    /* Marigold's documented hover partner: the fill lightens to vermillion and
+       the arrow flips to near-black so it stays legible against it. */
+    &:hover:not(:disabled) {
+        color: var(--color-n-deep-grey);
+    }
+    &:hover::before {
         background-color: var(--color-o-vermillion);
     }
+
     &:disabled {
-        opacity: 0.4;
+        color: var(--color-n-dark-grey);
         cursor: not-allowed;
+
+        &::before {
+            transform: scaleY(0);
+        }
     }
+
     &:focus-visible {
         outline: none;
         box-shadow:
@@ -315,5 +533,17 @@
     .c-chat__typing span {
         animation: none;
         opacity: 0.55;
+    }
+
+    /* The send button still changes state — it just arrives, it doesn't rise. */
+    .c-chat__send,
+    .c-chat__send::before,
+    .c-chat__input {
+        transition: none;
+    }
+
+    /* The mark still swaps icon on hover/choice — it just cuts, doesn't scale. */
+    .c-chat__option__mark-icon {
+        transition: none;
     }
 }

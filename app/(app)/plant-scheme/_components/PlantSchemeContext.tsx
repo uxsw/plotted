@@ -16,7 +16,16 @@
  * /schemes feature.
  */
 
-import { createContext, useCallback, useContext, useMemo, useRef, useState } from "react";
+import {
+  createContext,
+  Suspense,
+  useCallback,
+  useContext,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { useSearchParams } from "next/navigation";
 import {
   MOCK_DIRECTION_FOLLOWUP,
   MOCK_DIRECTION_OPTIONS,
@@ -24,6 +33,7 @@ import {
   MOCK_SUGGESTIONS,
   type MockSuggestion,
 } from "./mockData";
+import { PREVIEW_SEED_STATE } from "./previewSeed";
 
 export type SchemePath = "existing" | "scratch";
 export type SchemePhase = "questions" | "scheme";
@@ -103,7 +113,16 @@ export interface DirectionOption {
 export type ChatEntry =
   | { kind: "text"; id: string; role: "assistant" | "user"; text: string }
   | { kind: "suggestions"; id: string; title: string; plants: SuggestionPlant[] }
-  | { kind: "directions"; id: string; title: string; options: DirectionOption[] };
+  /* `chosenOptionId` is set once the gardener picks one. The panel then stops
+     being a live prompt and becomes a record of the decision — see
+     chooseDirection below and EntryView in ChatPane.tsx. */
+  | {
+      kind: "directions";
+      id: string;
+      title: string;
+      options: DirectionOption[];
+      chosenOptionId?: string;
+    };
 
 export interface PlantSchemeState {
   /** Which entry path the user chose, or null before the A/B choice. */
@@ -198,7 +217,27 @@ function toSuggestionPlants(mocks: MockSuggestion[]): SuggestionPlant[] {
 const PlantSchemeContext = createContext<PlantSchemeContextValue | null>(null);
 
 export function PlantSchemeProvider({ children }: { children: React.ReactNode }) {
-  const [state, setState] = useState<PlantSchemeState>(INITIAL_STATE);
+  // Wrapped only so useSearchParams (read in the inner provider to detect the
+  // dev `?preview=1` seed) has a Suspense boundary above it, matching the
+  // project convention (see app/auth/login/page.tsx). The (app) segment is
+  // always dynamically rendered, so this resolves synchronously — no fallback
+  // is ever shown and the real flow is unaffected.
+  return (
+    <Suspense fallback={null}>
+      <PlantSchemeProviderInner>{children}</PlantSchemeProviderInner>
+    </Suspense>
+  );
+}
+
+function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
+  // Dev convenience: `/plant-scheme/chat?preview=1` opened directly (typed or
+  // bookmarked, NOT via router.push) seeds the split-pane view with mock content
+  // so ChatPane / SchemeListPane / PlantCard can be iterated on without walking
+  // the entry → picker → questions flow on every refresh. No effect otherwise.
+  const previewActive = useSearchParams().get("preview") === "1";
+  const [state, setState] = useState<PlantSchemeState>(() =>
+    previewActive ? PREVIEW_SEED_STATE : INITIAL_STATE
+  );
   const idCounter = useRef(0);
   const mkId = useCallback((prefix: string) => `${prefix}-${++idCounter.current}`, []);
 
@@ -402,9 +441,20 @@ export function PlantSchemeProvider({ children }: { children: React.ReactNode })
             },
           ];
 
+      /* Stamp the choice onto the panel it came from: the four options stop
+         being a live prompt and become a record of what was picked, the way
+         the rest of the scrollback is a record of what was said. */
       setState((s) => ({
         ...s,
-        transcript: [...s.transcript, userEntry, ...responseEntries],
+        transcript: [
+          ...s.transcript.map((e) =>
+            e.kind === "directions" && e.id === sourceEntryId
+              ? { ...e, chosenOptionId: option.id }
+              : e
+          ),
+          userEntry,
+          ...responseEntries,
+        ],
       }));
     },
     [mkId]

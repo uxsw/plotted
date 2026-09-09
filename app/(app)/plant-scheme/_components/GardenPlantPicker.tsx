@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/Button";
 import buttonStyles from "@/components/ui/Button.module.css";
 import type { Plant } from "@/lib/types";
 import { usePlantScheme, type GardenPlantRef } from "./PlantSchemeContext";
+import { Icon } from "@/components/ui/Icon";
 
 const MAX_PLANTS = 5;
 
@@ -26,31 +27,6 @@ export type PickerPlant = Pick<
   Plant,
   "id" | "photo_url" | "genus" | "species" | "cultivar" | "common_names"
 >;
-
-function SproutIcon() {
-  return (
-    <svg width="28" height="28" viewBox="0 0 48 48" fill="none" stroke="currentColor"
-      strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M24 8c-4 0-8 4-8 8s4 8 8 8c0 4-2 8-8 12h16c-6-4-8-8-8-12 4 0 8-4 8-8s-4-8-8-8z" />
-    </svg>
-  );
-}
-
-function CheckIcon() {
-  return (
-    <svg width="12" height="12" viewBox="0 0 11 11" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <polyline points="1,5.5 4,8.5 10,2" />
-    </svg>
-  );
-}
-
-function XSmallIcon() {
-  return (
-    <svg width="9" height="9" viewBox="0 0 10 10" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
-      <line x1="1" y1="1" x2="9" y2="9" /><line x1="9" y1="1" x2="1" y2="9" />
-    </svg>
-  );
-}
 
 export default function GardenPlantPicker({ plants }: { plants: PickerPlant[] }) {
   const router = useRouter();
@@ -94,7 +70,7 @@ export default function GardenPlantPicker({ plants }: { plants: PickerPlant[] })
     return (
       <div className="o-surface--info island o-stack">
         <div className="text-marigold">
-          <SproutIcon />
+          <Icon name="sprout" size={28} />
         </div>
         <h2 className="font-display pica">No plants in your garden yet</h2>
         <p className="brevier">
@@ -149,13 +125,13 @@ export default function GardenPlantPicker({ plants }: { plants: PickerPlant[] })
                 <Image src={plant.photo_url} alt="" fill sizes="min(60vw, 280px)" className="is-image" />
               ) : (
                 <div className="missing-image">
-                  <SproutIcon />
+                  <Icon name="sprout" size={28} />
                 </div>
               )}
               {selected && (
                 <div className="c-scheme-scroller__check">
                   <span className="is-icon">
-                    <CheckIcon />
+                    <Icon name="check" size={12} />
                   </span>
                 </div>
               )}
@@ -180,7 +156,7 @@ export default function GardenPlantPicker({ plants }: { plants: PickerPlant[] })
                       <Image src={plant.photo_url} alt={plantDisplayTitle(plant)} fill sizes="100px" className="is-image" />
                     ) : (
                       <div className="missing-image">
-                        <SproutIcon />
+                        <Icon name="sprout" size={28} />
                       </div>
                     )}
                   </div>
@@ -190,7 +166,7 @@ export default function GardenPlantPicker({ plants }: { plants: PickerPlant[] })
                     aria-label={`Remove ${plantDisplayTitle(plant)}`}
                     className="is-remove"
                   >
-                    <XSmallIcon />
+                    <Icon name="close" size={9} />
                   </button>
                 </div>
               );

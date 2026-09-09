@@ -17,11 +17,11 @@
     &:hover,
     &:focus {
         background-color: var(--color-white);
-        border-color: var(--color-b-cyan);
+        border-color: var(--sem-focus-color);
     }
 
     &:focus-visible {
-        outline: var(--border-width-thin) solid var(--color-b-cyan);
+        outline: var(--border-width-thin) solid var(--sem-focus-color);
     }
 
     &__underline {

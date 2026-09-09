@@ -42,3 +42,8 @@ next-env.d.ts
 
 # session handoff notes (working notes, not project docs)
 .claude-notes/
+
+# impeccable live mode — runtime/session state (config.json is tracked)
+.impeccable/live/sessions/
+.impeccable/live/accept-receipts/
+.impeccable/live/roots.json

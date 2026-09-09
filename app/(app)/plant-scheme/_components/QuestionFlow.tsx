@@ -189,7 +189,7 @@ export default function QuestionFlow() {
               value={draft}
               onChange={setDraft}
               onSend={() => submitAnswer(draft)}
-              ariaLabel="Your answer"
+              label="Your answer"
               placeholder="Type your answer…"
             />
 

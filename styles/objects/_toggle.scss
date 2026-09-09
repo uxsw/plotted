@@ -7,9 +7,15 @@
         cursor: pointer;
     }
 
+    /* Off is an outlined track, on is a filled one — so the two states differ
+       by fill AND knob position, not by colour alone. The old pair (grey
+       track / light-cyan track, white knob on both) put the knob at 1.9:1
+       against the "on" fill, so the one part that reports the state was the
+       least visible thing in the control. */
     &__action {
         align-items: center;
-        background-color: var(--color-n-dark-grey);
+        background-color: transparent;
+        border: var(--border-width-hairline) solid var(--color-n-dark-grey);
         cursor: pointer;
         border-radius: var(--radius-pill);
         display: inline-flex;
@@ -17,13 +23,15 @@
         width: 44px;
         height: 24px;
         position: relative;
-        
-        transition: background-color var(--transition-time-default) var(--transition-easing-default);
+
+        transition:
+            background-color var(--transition-time-default) var(--transition-easing-default),
+            border-color var(--transition-time-default) var(--transition-easing-default);
 
         &:focus-visible {
             outline-width: var(--border-width-thin);
             outline-offset: var(--border-width-thin);
-            outline-color: var(--color-b-cyan);
+            outline-color: var(--sem-focus-color);
         }
 
         .is-switch {
@@ -31,16 +39,25 @@
             inline-size: var(--space-md);
             block-size: var(--space-md);
             border-radius: var(--radius-roundel);
-            background-color: var(--color-white);
-            transition: translate var(--transition-time-default) var(--transition-easing-default);
-            transform: translateX(6px);
+            background-color: var(--color-n-dark-grey);
+            transition:
+                transform var(--transition-time-default) var(--transition-easing-default),
+                background-color var(--transition-time-default) var(--transition-easing-default);
+            transform: translateX(4px);
         }
 
+        /* Cyan Deep, the same value the focus token resolves to: in this
+           palette the cyan hue reads "engaged", and it is the only register of
+           it that clears 3:1 on paper (3.71) while carrying a white knob
+           (4.11). Referenced through the palette token, not --sem-focus-color,
+           so the focus token stays single-purpose. */
         &.is-checked {
-            background-color: var(--color-b-cyan);
+            background-color: var(--color-b-cyan-deep);
+            border-color: var(--color-b-cyan-deep);
 
             .is-switch {
-                transform: translateX(24px);
+                background-color: var(--color-white);
+                transform: translateX(22px);
             }
         }
     }

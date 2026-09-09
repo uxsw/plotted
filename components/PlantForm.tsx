@@ -197,7 +197,12 @@ export default function PlantForm() {
       {error && <p className="brevier text-marigold bg-marigold p-3 rounded mb-4">{error}</p>}
 
       {/* Photo zone */}
-      <div
+      {/* A real <button>, not a div: the file input beside it is `hidden`
+          (display:none), so this is the only path to adding a photo and a
+          div gave keyboard and screen-reader users no way in at all. */}
+      <button
+        type="button"
+        aria-label={photoPreview ? "Change photo" : "Add a photo"}
         onClick={() => fileRef.current?.click()}
         onDrop={handleDrop}
         onDragOver={(e) => e.preventDefault()}
@@ -216,7 +221,7 @@ export default function PlantForm() {
             <span className="minion">Add a photo</span>
           </div>
         )}
-      </div>
+      </button>
       <input type="file" accept="image/*" ref={fileRef} onChange={handleFileChange} className="hidden" />
 
       {/* Identification — appears only once there's an image to identify.

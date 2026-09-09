@@ -6,6 +6,13 @@
         gap: var(--space-sm);
     }
 
+    /* A choose-one control, so hover and selected must never look alike — they
+       did, which meant hovering a sibling made it read as your choice. Hover
+       keeps the shared highlight-yellow (the Highlight-Yellow convention:
+       yellow marks whatever the pointer is on, nothing more); *chosen* is a
+       filled lavender plate — the Planting Schemes accent, and this is that
+       feature. Resting edge is the n-dark-grey interactive rule, not the pale
+       cyan hairline it was, which sat at 1.7:1 against paper. */
     &__choice {
         display: flex;
         flex-direction: column;
@@ -13,20 +20,34 @@
         justify-content: center;
         gap: var(--space-sm);
         padding: var(--space-sm);
-        border: var(--border-width-hairline) solid var(--color-b-cyan);
+        border: var(--border-width-hairline) solid var(--color-n-dark-grey);
         background-color: transparent;
+        color: var(--color-n-deep-grey);
         cursor: pointer;
         transition:
             background-color var(--transition-time-default) var(--transition-easing-default),
-            border var(--transition-time-default) var(--transition-easing-default),
-            padding var(--transition-time-default) var(--transition-easing-default);
+            border-color var(--transition-time-default) var(--transition-easing-default),
+            color var(--transition-time-default) var(--transition-easing-default);
 
-        &:hover,
-        &.is-selected {
+        /* Fill only — the edge stays. Elsewhere the yellow hover also takes the
+           border, but those controls carry a fill at rest; this one is
+           transparent, so dropping the edge would leave a hovered option with
+           no boundary at all against paper. */
+        &:hover:not(.is-selected) {
             background-color: var(--color-y-yellow);
-            border-color: var(--color-b-cyan);
-            border-width: var(--border-width-thin);
-            padding: calc(0.5rem - 2px);
+        }
+
+        /* Filled, not outlined — the one state that must survive a hovered
+           sibling sitting right beside it. */
+        &.is-selected {
+            background-color: var(--color-p-lavender);
+            border-color: var(--color-p-lavender);
+            color: var(--color-p-white);
+        }
+
+        &:focus-visible {
+            outline: var(--border-width-thin) solid var(--sem-focus-color);
+            outline-offset: var(--border-width-thin);
         }
     }
 
@@ -87,8 +108,11 @@
             width var(--transition-time-slow) var(--transition-easing-default);
 
         &.is-selected {
-            border-color: var(--color-b-cyan);
+            border-color: var(--color-b-cyan-deep);
 
+            /* Stays on the light cyan: this one is a surface behind `minion`
+               text, which needs 4.5:1 — light cyan + n-deep-grey gives 5.0,
+               the deep value would drop it to 2.8. */
             .overlay-text {
                 background-color: var(--color-b-cyan);
                 color: var(--color-n-deep-grey);
@@ -101,7 +125,7 @@
         }
 
         &:hover {
-            border: var(--border-width-thin) solid var(--color-b-cyan);
+            border: var(--border-width-thin) solid var(--color-b-cyan-deep);
             width: min(61vw, 300px);
         }
     }
@@ -121,8 +145,8 @@
         > .is-icon {
             inline-size: 2.5rem;
             block-size: 2.5rem;
-            background-color: var(--color-b-cyan);
-            color: var(--color-y-yellow);
+            background-color: var(--color-b-cyan-deep);
+            color: var(--color-white);
             display: flex;
             align-items: center;
             justify-content: center;

@@ -50,7 +50,7 @@ import Link from "next/link";
 import Image from "next/image";
 import clsx from "clsx";
 import { usePlantScheme } from "./PlantSchemeContext";
-import { EstablishedBedMark, BarePlotMark } from "./marks";
+import { Icon } from "@/components/ui/Icon";
 import buttonStyles from "@/components/ui/Button.module.css";
 
 export default function EntryChoice() {
@@ -99,7 +99,7 @@ export default function EntryChoice() {
           className="c-scheme-plate is-established"
         >
           <span className="c-scheme-plate__field">
-            <EstablishedBedMark className="c-scheme-plate__mark" />
+            <Icon name="leafygreen" className="c-scheme-plate__mark" />
           </span>
           <span className="c-scheme-plate__body">
             <span className="pica o-type-display kirk">From your garden</span>
@@ -121,7 +121,7 @@ export default function EntryChoice() {
           className="c-scheme-plate is-new"
         >
           <span className="c-scheme-plate__field">
-            <BarePlotMark className="c-scheme-plate__mark" />
+            <Icon name="sprout" className="c-scheme-plate__mark" />
           </span>
           <span className="c-scheme-plate__body">
             <span className="pica o-type-display kirk">From scratch</span>

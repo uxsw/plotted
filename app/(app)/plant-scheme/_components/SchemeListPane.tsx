@@ -13,24 +13,24 @@
  *
  * The panel reads as a living border sheet, not a list: the elevation sketch
  * grows a silhouette per tiered plant, the flowering-year strip fills in, and
- * each row carries a specimen-number stamp (the scratch schedule's device,
- * numbered continuously down the sheet). A new row eases in with the
- * accent-wash flash — the workspace's one authored moment, staggered into a
- * "planting" when the sheet first arrives populated.
+ * each group lays its cards out as a responsive grid. A new card eases in with
+ * the accent-wash flash — the workspace's one authored moment, staggered into
+ * a "planting" when the sheet first arrives populated.
  *
- * Every item has the same Remove control and a mocked shopping-list toggle.
+ * Every item has the same Remove control, on its own row below the content.
  */
 
 import { useState } from "react";
 import { usePlantScheme } from "./PlantSchemeContext";
 import { MOCK_TIER_LABELS, MOCK_TIER_ORDER } from "./mockData";
-import { PlantCard, CartIcon, CheckIcon } from "./PlantCard";
+import { PlantCard } from "./PlantCard";
 import BorderElevation from "./BorderElevation";
 import FloweringYear from "./FloweringYear";
+import { Icon } from "@/components/ui/Icon";
 import type { SchemePlant } from "./PlantSchemeContext";
 
 export default function SchemeListPane() {
-  const { schemePlants, removeSchemePlant, toggleShoppingList } = usePlantScheme();
+  const { schemePlants, removeSchemePlant } = usePlantScheme();
 
   /* Rows present on first render arrive as a staggered planting; a row added
      later eases in alone, immediately. Lazy state, captured once at mount. */
@@ -50,13 +50,13 @@ export default function SchemeListPane() {
     ...tierGroups.map((g) => ({ key: g.tier, label: g.label, items: g.items })),
   ];
 
-  /* Specimen numbers run continuously down the sheet, across groups. */
-  let specimenNo = 0;
+  /* A flat index across groups drives the staggered "planting" entrance. */
+  let flatIndex = 0;
 
   return (
     <section className="c-scheme-list" aria-label="Scheme list">
       <div className="c-scheme-list__head">
-        <span className="o-type-label">Scheme list</span>
+        <h2 className="o-type-label">Scheme list</h2>
         <span className="o-type-label c-scheme-list__count">
           {schemePlants.length} plant{schemePlants.length === 1 ? "" : "s"}
         </span>
@@ -75,50 +75,28 @@ export default function SchemeListPane() {
           {groups.map((group) => (
             <div key={group.key} className="c-scheme-list__group">
               <h3 className="c-scheme-list__group-label o-type-label">{group.label}</h3>
-              <div className="o-stack--compact">
+              <div className="c-scheme-list__grid">
                 {group.items.map((plant) => {
-                  specimenNo += 1;
-                  const delay = initialIds.has(plant.id) ? (specimenNo - 1) * 70 : 0;
+                  flatIndex += 1;
+                  const delay = initialIds.has(plant.id) ? (flatIndex - 1) * 70 : 0;
                   return (
                     <div
                       key={plant.id}
                       className="c-scheme-list__item"
                       style={{ "--_delay": `${delay}ms` } as React.CSSProperties}
                     >
-                      <span className="c-scheme-list__no minion" aria-hidden="true">
-                        {specimenNo}
-                      </span>
                       <PlantCard
                         plant={plant}
-                        actions={
-                          <>
-                            <button
-                              type="button"
-                              onClick={() => toggleShoppingList(plant.id)}
-                              aria-label={
-                                plant.addedToShoppingList
-                                  ? `${plant.commonName} is on your shopping list`
-                                  : `Add ${plant.commonName} to your shopping list`
-                              }
-                              aria-pressed={plant.addedToShoppingList}
-                              className="c-suggestion__cart"
-                            >
-                              {plant.addedToShoppingList ? <CheckIcon /> : <CartIcon />}
-                            </button>
-                            <button
-                              type="button"
-                              onClick={() => removeSchemePlant(plant.id)}
-                              aria-label={`Remove ${plant.commonName} from the scheme`}
-                              className="c-suggestion__remove minion"
-                            >
-                              Remove
-                            </button>
-                          </>
-                        }
                         footer={
-                          plant.addedToShoppingList
-                            ? "On your shopping list (preview — not saved)."
-                            : null
+                          <button
+                            type="button"
+                            onClick={() => removeSchemePlant(plant.id)}
+                            aria-label={`Remove ${plant.commonName} from the scheme`}
+                            className="c-suggestion__remove minion"
+                          >
+                            <Icon name="close" size={12} />
+                            Remove
+                          </button>
                         }
                       />
                     </div>

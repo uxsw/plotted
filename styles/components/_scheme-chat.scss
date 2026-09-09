@@ -36,26 +36,46 @@
 
 /* ---- The destination workspace ------------------------------------------- */
 
-/* Widen the page for the two-pane workspace — a second sanctioned exception
-   to the Narrow Column Rule, like the dashboard: peer panels, not one task.
-   The question flow keeps the 800px measure. */
+/* The two-pane workspace fills the full viewport width — no product measure.
+   Only the standard .o-page --space-md gutter is kept so content doesn't
+   touch the screen edges. The question flow keeps the 800px measure. */
 .o-page:has(.c-scheme-workspace) {
-    max-width: 1000px;
+    max-width: none;
 }
 
+/* Full-height shell (>=52rem): the workspace runs as a fixed-height app
+   surface — the composer pins to the base of the viewport and the log fills
+   everything between the app nav and the composer. It's a pure flex
+   pass-down from a 100dvh box: the header (and offline banner, if shown)
+   keep their natural height, and every level below just takes "whatever's
+   left", so there are no height calculations tied to the chrome above.
+   Below 52rem the panes stack and the log keeps its --bounded height. */
+@media (min-width: 52rem) {
+    .min-h-screen:has(.c-scheme-workspace) {
+        block-size: 100vh;
+        block-size: 100dvh;
+        display: flex;
+        flex-direction: column;
+        /* only the log scrolls; the shared app footer isn't surfaced here */
+        overflow: hidden;
+    }
+
+    .min-h-screen:has(.c-scheme-workspace) > .o-page {
+        flex: 1;
+        min-block-size: 0;
+        display: flex;
+        flex-direction: column;
+    }
+}
+
+/* Layout only — the grid + gap come from .c-scheme-chat (always paired). */
 .c-scheme-workspace {
-    display: grid;
-    gap: var(--space-lg);
-}
-
-.c-scheme-workspace__head {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-sm) var(--space-md);
-    padding-block-end: var(--space-sm);
-    border-block-end: var(--border-width-hairline) solid var(--sem-border-color);
+    @media (min-width: 52rem) {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+        min-block-size: 0;
+    }
 }
 
 .c-scheme-workspace__panes {
@@ -64,25 +84,61 @@
     align-items: start;
 
     @media (min-width: 52rem) {
-        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+        /* The conversation takes all the room it can; the sheet holds to a
+           catalogue-page width so it never scales up with the monitor. */
+        flex: 1;
+        grid-template-columns: minmax(0, 1fr) auto;
+        align-items: stretch;
+        min-block-size: 0;
     }
 }
 
-/* The scheme-list pane sticks alongside the conversation on wide screens. */
+/* Conversation column: the log grows to fill; --bounded is a mobile-only bound. */
+@media (min-width: 52rem) {
+    .c-scheme-workspace .c-chat__log--bounded {
+        flex: 1;
+        block-size: auto;
+    }
+}
+
+/* Scheme-list column scrolls on its own once the page height is fixed
+   (it was position: sticky against the whole-page scroll). Its width is a
+   bounded page measure — wide enough for a two-up card grid, capped so the
+   sheet reads as a page rather than a wall on a large display. */
 .c-scheme-workspace__list {
     @media (min-width: 52rem) {
-        position: sticky;
-        inset-block-start: var(--space-md);
+        inline-size: clamp(20rem, 34vw, 32rem);
+        min-block-size: 0;
+        overflow-y: auto;
+
+        /* Same themed thin scrollbar as the chat log — this pane scrolls now
+           too, and a default bar reads as unfinished. */
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-sand-line) transparent;
+
+        &::-webkit-scrollbar {
+            inline-size: 0.5rem;
+        }
+        &::-webkit-scrollbar-thumb {
+            background-color: var(--color-sand-line);
+            border-radius: var(--radius-pill);
+        }
     }
 }
 
 /* ---- Scheme list panel ------------------------------------------------- */
 
 .c-scheme-list {
+    /* The elevation figure and the month strip share this measure so they
+       align and stay diagram-scale on a wide sheet. */
+    --_figure-measure: 22rem;
+
     overflow: hidden;
-    background-color: var(--color-white);
-    border: var(--border-width-hairline) solid var(--sem-border-color);
-    border-radius: var(--radius-m);
+    /* No fill — the sheet reads as part of the page, not a boxed panel on
+       it. A single left rule is the only structure, plus a small inset so
+       the letterhead and cards don't sit flush against it or the gutter. */
+    padding: var(--space-sm);
+    border-inline-start: var(--border-width-hairline) solid var(--sem-border-color);
 
     &__head {
         display: flex;
@@ -91,6 +147,7 @@
         gap: var(--space-md);
         padding: var(--space-sm) var(--space-md);
         background-color: color-mix(in srgb, var(--_accent-wash) 60%, var(--color-white));
+        border-radius: var(--radius-m);
         border-block-end: var(--border-width-hairline) solid
             color-mix(in srgb, var(--_accent) 20%, var(--sem-border-color));
 
@@ -120,46 +177,35 @@
         color: var(--color-ink-soft);
     }
 
+    /* Cards within a group flow as a responsive grid — the column count
+       follows the pane width and the number of plants in the group. Same
+       recipe as .o-card-grid / .c-plant-grid (DESIGN.md Layout): auto-fill,
+       ~200px track, md gutter. The min() guard lets a single column form
+       when the pane is narrower than one track (mobile, stacked panes). */
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+        gap: var(--space-md);
+    }
+
     &__empty {
         padding: var(--space-md);
         color: var(--color-ink-soft);
     }
 
-    /* One row of the sheet: a specimen-number stamp beside the card. The
-       stamp is the scratch schedule's plate-number device carried into the
-       workspace — numbered continuously down the sheet, across groups. */
+    /* One card of the sheet. The card interior flashes from the accent wash
+       as it roots — the same beat the scratch schedule's rows land with. */
     &__item {
-        display: grid;
-        grid-template-columns: 1.75rem minmax(0, 1fr);
-        gap: var(--space-sm);
-        align-items: start;
         animation: scheme-item-in var(--transition-time-default) var(--transition-easing-emphasis)
             backwards;
         animation-delay: var(--_delay, 0ms);
 
-        /* The card interior flashes from the accent wash as it roots — the
-           same beat the scratch schedule's rows land with. */
         .c-suggestion {
+            block-size: 100%;
             animation: scheme-card-wash var(--transition-time-slow) var(--transition-easing-default)
                 backwards;
             animation-delay: var(--_delay, 0ms);
         }
-    }
-
-    &__no {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        inline-size: 1.75rem;
-        block-size: 1.75rem;
-        margin-block-start: calc(var(--space-md) - var(--space-xs));
-        border-radius: var(--radius-roundel);
-        background-color: var(--_accent);
-        color: var(--color-r-white);
-        font-variant-numeric: tabular-nums;
-        animation: scheme-stamp-in var(--transition-time-default) var(--transition-easing-emphasis)
-            backwards;
-        animation-delay: var(--_delay, 0ms);
     }
 }
 
@@ -172,9 +218,13 @@
 .c-scheme-elevation {
     padding: var(--space-sm) var(--space-md) 0;
 
+    /* The cross-section is a diagram, not content — hold it to a figure width
+       and centre it so it stays diagram-scale on a wide sheet. */
     svg {
         display: block;
         inline-size: 100%;
+        max-inline-size: var(--_figure-measure);
+        margin-inline: auto;
         block-size: auto;
     }
 
@@ -232,6 +282,10 @@
     &__strip {
         display: flex;
         gap: var(--space-xs);
+        /* Match the elevation figure above — same width, centred, so the
+           twelve cells stay legible rather than stretching across the sheet. */
+        max-inline-size: var(--_figure-measure);
+        margin-inline: auto;
     }
 
     &__month {
@@ -289,8 +343,11 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
-    background-color: var(--color-white);
-    border: var(--border-width-hairline) solid var(--sem-border-color);
+    /* Fills its grid row (the row's tallest card sets the height, via the
+       grid's default stretch) so a card with little content still lines its
+       footer up with its taller neighbours — see __footer below. */
+    block-size: 100%;
+    background-color: var(--color-oat);
     border-radius: var(--radius-m);
 
     &__media {
@@ -306,40 +363,53 @@
     &__body {
         display: flex;
         flex-direction: column;
-        gap: 0.25rem;
-        padding: var(--space-md);
+        flex: 1;
+        padding: var(--space-sm);
     }
 
     &__head {
         display: flex;
-        align-items: flex-start;
-        justify-content: space-between;
+        align-items: flex-end;
         gap: var(--space-sm);
     }
 
+    /* Always takes the full card width; a compact `actions` control (badge,
+       icon button) sits after it and is held to its own size by `flex: none`
+       below. Never fought over — see the PlantCard.tsx head comment. */
     &__name {
+        flex: 1 1 auto;
+        min-inline-size: 0;
         font-family: var(--font-display);
         font-weight: var(--font-weight-bold);
         line-height: 1.2;
-        color: var(--color-ink);
+        color: var(--color-damson);
     }
 
+    /* Rhythm below is deliberate contrast, not one gap repeated: identity
+       (name+latin) sits tight as one unit, the note gets a little more air,
+       the badges row (a distinct metadata zone) gets more again. */
     &__latin {
+        margin-block-start: 0.125rem;
         font-family: var(--font-display);
         font-style: italic;
-        color: var(--color-ink-soft);
+        color: var(--color-mulberry);
     }
 
     &__note {
-        margin-block-start: 0.125rem;
+        margin-block-start: var(--space-xs);
         color: var(--color-n-deep-grey);
     }
 
     &__badges {
         display: flex;
         flex-wrap: wrap;
+        align-items: center;
         gap: var(--space-xs);
-        margin-block-start: var(--space-xs);
+        margin-block-start: var(--space-sm);
+
+        .o-badge svg {
+            flex: none;
+        }
     }
 
     &__actions {
@@ -349,59 +419,149 @@
         gap: var(--space-xs);
     }
 
+    /* Pushed to the bottom of the now full-height card (margin-block-start:
+       auto against __body's flex: 1) rather than sitting directly under
+       whatever content happens to be above it — so Remove lines up at the
+       same height across every card in a row, short or long. */
     &__footer {
-        margin-block-start: var(--space-xs);
-        color: var(--color-ink-soft);
+        display: flex;
+        justify-content: flex-end;
+        margin-block-start: auto;
+        padding-block-start: var(--space-xs);
+        border-block-start: var(--border-width-hairline) solid
+            color-mix(in srgb, var(--color-sand-line) 60%, transparent);
     }
 }
 
-/* Cart toggle on a scheme-list item — icon button, roundel. */
-.c-suggestion__cart {
+/* ---- Add / Added — Add is the primary action; Added is a quiet notation */
+
+.c-suggestion__add {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
-    inline-size: 2.25rem;
-    block-size: 2.25rem;
-    color: var(--color-ink-soft);
-    background-color: transparent;
-    border: var(--border-width-hairline) solid var(--color-sand-line);
-    border-radius: var(--radius-roundel);
+    gap: 0.3rem;
+    padding: 0.5rem 0.875rem;
+    /* Fixed to the same wine family as the card's title/latin-name text and
+       the Plotted mark, rather than the path's own accent — Add reads as one
+       consistent colour everywhere, on either path. */
+    color: var(--color-blossom);
+    background-color: var(--color-plum);
+    border: none;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-inter), sans-serif;
     cursor: pointer;
-    transition:
-        background-color var(--transition-time-default) var(--transition-easing-default),
-        color var(--transition-time-default) var(--transition-easing-default),
-        border-color var(--transition-time-default) var(--transition-easing-default);
+    transition: background-color var(--transition-time-default) var(--transition-easing-default);
 
     &:hover {
-        background-color: var(--color-y-yellow);
-        color: var(--color-n-deep-grey);
-        border-color: var(--color-y-yellow);
-    }
-    &[aria-pressed="true"] {
-        color: var(--sem-edible-fg);
-        background-color: var(--sem-edible-bg);
-        border-color: transparent;
+        background-color: color-mix(in srgb, var(--color-blossom) 20%, var(--color-plum));
     }
     &:focus-visible {
-        outline: var(--border-width-thin) solid var(--color-b-cyan);
-        outline-offset: 1px;
+        outline: none;
+        box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-plum);
+    }
+}
+
+.c-suggestion__added {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    color: var(--color-ink-soft);
+
+    svg {
+        flex: none;
     }
 }
 
 .c-suggestion__remove {
-    padding: 0.25rem 0.375rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3125rem 0.5rem;
     color: var(--color-ink-soft);
     background: none;
     border: none;
+    border-radius: var(--radius-s);
     cursor: pointer;
     transition: color var(--transition-time-default) var(--transition-easing-default);
 
-    &:hover {
-        color: var(--color-ink);
+    &:hover,
+    &:focus-visible {
+        color: var(--color-r-marigold);
     }
     &:focus-visible {
-        outline: var(--border-width-thin) solid var(--color-b-cyan);
+        outline: var(--border-width-thin) solid var(--sem-focus-color);
         outline-offset: 1px;
+    }
+
+    svg {
+        flex: none;
+    }
+}
+
+/* ---- Direction mark — the option plate's engraved silhouette ---------- */
+
+/* The host's fill for `.c-chat__option__figure`: one direction drawn as a
+   border seen side-on, in the same engraved language as the scheme list's
+   elevation. Domain content, so it lives here rather than in the neutral
+   c-chat object — the same division that keeps `.c-suggestion` out of
+   `.c-chat__panel`.
+
+   The strokes sit back at rest and come up to full ink on hover, the way an
+   engraving catches the light when you lean over it. Incidental only (default
+   curve, colour and opacity): the workspace's authored moment stays with the
+   planting on the sheet. */
+.c-scheme-chat__direction-mark {
+    /* The bed the planting stands on: a rule across the whole plate, so the
+       silhouette reads as one section of a border that carries on past it —
+       rather than a small drawing floating in a box. It is drawn here, in
+       CSS, so the SVG holds nothing but the planting. */
+    border-block-end: var(--border-width-hairline) solid var(--color-n-dark-grey);
+    transition: border-color var(--transition-time-default) var(--transition-easing-default);
+
+    /* A vignette, not a banner: the height is fixed and `meet` holds the
+       drawing at its own scale from the left edge, so the strokes stay
+       engraving-fine however wide the plate gets. */
+    svg {
+        display: block;
+        inline-size: 100%;
+        block-size: 3rem;
+    }
+
+    /* "Something else — I'll describe it": an unplanted bed. The dashed rule is
+       the elevation's ghost idiom — a bed whose planting is still to be said. */
+    &.is-open {
+        border-block-end-style: dashed;
+    }
+
+    .c-scheme-chat__direction-plant {
+        opacity: 0.75;
+        transition: opacity var(--transition-time-default) var(--transition-easing-default);
+
+        path {
+            fill: none;
+            stroke: var(--color-ink);
+            stroke-width: 1.4;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+        circle {
+            fill: var(--color-ink);
+        }
+    }
+
+}
+
+.c-chat__option:hover:not(:disabled) .c-scheme-chat__direction-plant {
+    opacity: 1;
+}
+
+/* Once the group has closed, the roads not taken fade back into the panel;
+   the chosen plate keeps its planting at full strength. */
+.c-chat__option:disabled:not(.is-chosen) {
+    .c-scheme-chat__direction-mark {
+        border-block-end-color: color-mix(in srgb, var(--color-n-dark-grey) 45%, transparent);
+    }
+    .c-scheme-chat__direction-plant {
+        opacity: 0.32;
     }
 }
 
@@ -417,7 +577,8 @@
 
 /* ---- The planting: the workspace's one authored moment ---------------- */
 
-/* Cards in a fresh suggestion panel ease in one after another, so a scheme
+/* Cards in a fresh suggestion panel — and the plates in a fresh "which
+   direction?" panel — ease in one after another, so what the assistant offers
    arrives as a planting rather than a dump. Scheme-scoped — c-chat itself
    stays neutral. */
 .c-scheme-chat__arrive {
@@ -446,17 +607,6 @@
     }
 }
 
-@keyframes scheme-stamp-in {
-    from {
-        opacity: 0;
-        transform: scale(0.6);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
-}
-
 @keyframes scheme-elevation-draw {
     from {
         stroke-dashoffset: 1;
@@ -481,7 +631,6 @@
     .c-scheme-chat__arrive,
     .c-scheme-list__item,
     .c-scheme-list__item .c-suggestion,
-    .c-scheme-list__no,
     .c-scheme-elevation__plant path,
     .c-scheme-elevation__plant circle {
         animation: none;

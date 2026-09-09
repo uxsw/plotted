@@ -1,24 +1,37 @@
+/* The dashed marigold edge is the zone's identity and is held in BOTH states —
+   it is the only thing separating the well from the page (the warm fill is
+   1.15:1 against paper), so hover must not trade it away. It used to swap to
+   light cyan, which dropped the boundary to 1.63:1 against its own hover fill.
+   Cyan never belonged here: this is neither focus nor selection. */
 .c-add-photo {
     inline-size: 100%;
     height: 172px;
     background-color: var(--color-o-orange);
     border: var(--border-width-thin) dashed var(--color-r-marigold);
-    color: var(--color-n-dark-grey);
+    /* ink-soft, not n-dark-grey: the label is `.minion` (12.8px), so it owes
+       4.5:1 — it was sitting at 3.03 on this fill. */
+    color: var(--color-ink-soft);
     cursor: pointer;
     overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
     transition:
-        border-color var(--transition-time-default) var(--transition-easing-default),
+        color var(--transition-time-default) var(--transition-easing-default),
         background-color var(--transition-time-default) var(--transition-easing-default),
         border-radius var(--transition-time-default) var(--transition-easing-default);
 
+    /* Fill and text only. n-deep-grey on highlight-yellow is the documented
+       pairing for this hover; the marigold text it replaced was 2.91:1. */
     &:hover {
-        border-color: var(--color-b-cyan);
         background-color: var(--color-y-yellow);
         border-radius: var(--radius-m);
-        color: var(--color-r-marigold);
+        color: var(--color-n-deep-grey);
+    }
+
+    &:focus-visible {
+        outline: var(--border-width-thin) solid var(--sem-focus-color);
+        outline-offset: var(--border-width-thin);
     }
 
     &__placeholder {

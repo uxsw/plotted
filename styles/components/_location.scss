@@ -22,11 +22,11 @@
             background-color var(--transition-time-default) var(--transition-easing-default);
 
         &:focus-visible {
-            outline: 2px solid var(--color-b-cyan);
+            outline: 2px solid var(--sem-focus-color);
         }
 
         &:hover {
-            border-color: var(--color-b-cyan);
+            border-color: var(--sem-focus-color);
             background-color: var(--color-y-yellow);
         }
         
@@ -55,7 +55,7 @@
             background-color var(--transition-time-default) var(--transition-easing-default);
 
         &:focus-visible {
-            outline: 2px solid var(--color-b-cyan);
+            outline: 2px solid var(--sem-focus-color);
         }
 
         &:hover {

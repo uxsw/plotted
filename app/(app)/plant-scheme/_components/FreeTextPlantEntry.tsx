@@ -6,7 +6,7 @@ import Link from "next/link";
 import clsx from "clsx";
 import buttonStyles from "@/components/ui/Button.module.css";
 import { usePlantScheme } from "./PlantSchemeContext";
-import { BarePlotMark } from "./marks";
+import { Icon } from "@/components/ui/Icon";
 
 /**
  * Path B, step 2 of the "from scratch" journey — draft a plant schedule as
@@ -134,7 +134,7 @@ export default function FreeTextPlantEntry() {
                 aria-label={`Remove ${name}`}
                 className="c-scheme-schedule__remove"
               >
-                <RemoveIcon />
+                <Icon name="close" size={12} />
               </button>
             </li>
           ))}
@@ -155,7 +155,7 @@ export default function FreeTextPlantEntry() {
           ))}
         </ol>
 
-        <BarePlotMark className="c-scheme-schedule__watermark" />
+        <Icon name="sprout" className="c-scheme-schedule__watermark" />
       </div>
 
       <p className="long-primer o-type-display o-type--italic c-scheme-scratch__next">
@@ -184,25 +184,5 @@ export default function FreeTextPlantEntry() {
         </button>
       </div>
     </div>
-  );
-}
-
-/** Remove control — a single-weight cross, matching the drawn icons on the
- *  sibling "from your garden" picker. */
-function RemoveIcon() {
-  return (
-    <svg
-      width="12"
-      height="12"
-      viewBox="0 0 12 12"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      aria-hidden="true"
-    >
-      <line x1="2" y1="2" x2="10" y2="10" />
-      <line x1="10" y1="2" x2="2" y2="10" />
-    </svg>
   );
 }
