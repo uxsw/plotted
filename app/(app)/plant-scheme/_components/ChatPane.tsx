@@ -17,10 +17,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePlantScheme, type ChatEntry, type DirectionOption } from "./PlantSchemeContext";
 import { MOCK_QUESTIONS } from "./mockData";
-import { PlantCard } from "./PlantCard";
 import { ChatMessage, ChatComposer, SendFailedNotice, TypingIndicator } from "./ChatLog";
 import { DirectionOptions } from "./DirectionOptions";
-import { Icon } from "@/components/ui/Icon";
+import { SuggestionPanel } from "./SuggestionPanel";
 
 const THINK_MS = 700;
 
@@ -80,6 +79,7 @@ export default function ChatPane() {
     addSuggestedPlant,
     sendRefinementMessage,
     chooseDirection,
+    reopenDirection,
   } = usePlantScheme();
 
   const [draft, setDraft] = useState("");
@@ -237,6 +237,7 @@ export default function ChatPane() {
             schemePlantIds={schemePlants.map((p) => p.id)}
             onAdd={addSuggestedPlant}
             onChooseDirection={pickDirection}
+            onReopenDirection={reopenDirection}
             pendingChoiceId={
               turnState?.status === "sending" &&
               turnState.turn.kind === "direction" &&
@@ -280,6 +281,7 @@ function EntryView({
   schemePlantIds,
   onAdd,
   onChooseDirection,
+  onReopenDirection,
   pendingChoiceId,
   disabled,
 }: {
@@ -288,6 +290,7 @@ function EntryView({
   schemePlantIds: string[];
   onAdd: ReturnType<typeof usePlantScheme>["addSuggestedPlant"];
   onChooseDirection: (entryId: string, option: DirectionOption) => void;
+  onReopenDirection: (entryId: string) => void;
   pendingChoiceId?: string;
   disabled: boolean;
 }) {
@@ -300,46 +303,7 @@ function EntryView({
   }
 
   if (entry.kind === "suggestions") {
-    return (
-      <div className="c-chat__panel">
-        <p className="c-chat__panel-title brevier">{entry.title}</p>
-        <div className="o-stack--compact">
-          {entry.plants.map((plant, i) => {
-            const compositeId = `${entry.id}:${plant.plantId}`;
-            const added = schemePlantIds.includes(compositeId);
-            return (
-              /* Cards in a fresh panel ease in one after another — the scheme
-                 arrives as a planting, not a dump. Keyed by card, so flipping
-                 to "Added" never replays the entrance. */
-              <div
-                key={compositeId}
-                className="c-scheme-chat__arrive"
-                style={{ "--_delay": `${i * 80}ms` } as React.CSSProperties}
-              >
-                <PlantCard
-                  plant={plant}
-                  actions={
-                    added ? (
-                      <span className="c-suggestion__added minion">
-                        <Icon name="check" size={12} /> Added
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        className="c-suggestion__add brevier"
-                        onClick={() => onAdd(entry.id, plant)}
-                      >
-                        + Add
-                      </button>
-                    )
-                  }
-                />
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
+    return <SuggestionPanel entry={entry} schemePlantIds={schemePlantIds} onAdd={onAdd} />;
   }
 
   // entry.kind === "directions"
@@ -347,6 +311,7 @@ function EntryView({
     <DirectionOptions
       entry={entry}
       onChoose={onChooseDirection}
+      onReopen={onReopenDirection}
       pendingChoiceId={pendingChoiceId}
       disabled={disabled}
     />

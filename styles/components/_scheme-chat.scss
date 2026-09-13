@@ -412,6 +412,24 @@
         }
     }
 
+    /* "Why this fits" — the one line that ties a suggestion back to what the
+       gardener actually said (see matchNote.ts). Quiet by design: a plain
+       ink-soft note with a small check, the same icon+text register as
+       `.c-suggestion__added` below, not a badge or an accent colour — this is
+       reasoning, not a trait. Absent entirely when nothing genuinely matched. */
+    &__match {
+        display: flex;
+        align-items: flex-start;
+        gap: 0.25rem;
+        margin-block-start: var(--space-xs);
+        color: var(--color-ink-soft);
+
+        svg {
+            flex: none;
+            margin-block-start: 0.15em;
+        }
+    }
+
     &__actions {
         flex: none;
         display: inline-flex;

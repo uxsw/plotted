@@ -32,6 +32,9 @@ export interface PlantCardData {
   note: string;
   badges: string[];
   photoUrl?: string | null;
+  /** "Why this fits" — tied back to the gardener's own aspect/soil answers.
+   *  See matchNote.ts. Absent when nothing genuinely lined up. */
+  matchNote?: string;
 }
 
 /** Map a free-text trait label onto its field-guide mark. Colour used to carry
@@ -89,6 +92,12 @@ export function PlantCard({
               </span>
             ))}
           </div>
+        )}
+        {plant.matchNote && (
+          <p className="c-suggestion__match minion">
+            <Icon name="check" size={11} />
+            {plant.matchNote}
+          </p>
         )}
         {footer && <div className="c-suggestion__footer minion">{footer}</div>}
       </div>

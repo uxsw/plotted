@@ -33,6 +33,7 @@ import {
   MOCK_SUGGESTIONS,
   type MockSuggestion,
 } from "./mockData";
+import { buildMatchNote } from "./matchNote";
 import { PREVIEW_SEED_STATE } from "./previewSeed";
 
 export type SchemePath = "existing" | "scratch";
@@ -56,6 +57,9 @@ export interface SuggestionPlant {
   badges: string[];
   /** Months in flower, 1–12 — aggregated into the scheme list's year strip. */
   months: number[];
+  /** "Why this fits" — see matchNote.ts. Undefined when nothing genuinely
+   *  lines up with what the gardener said, rather than a fabricated match. */
+  matchNote?: string;
 }
 
 /**
@@ -170,6 +174,12 @@ export interface PlantSchemeContextValue extends PlantSchemeState {
   sendRefinementMessage: (text: string) => void;
   /** Pick one of the inline "directional options"; posts follow-up suggestions. */
   chooseDirection: (sourceEntryId: string, option: DirectionOption) => void;
+  /** Undo a direction pick: reopens the panel so the gardener can choose a
+   *  different one. Leaves everything that panel's choice already posted (the
+   *  assistant's reply, any suggestion cards) in the transcript — picking
+   *  again just adds another round, the same as choosing fresh; nothing the
+   *  gardener already saw or added disappears. */
+  reopenDirection: (sourceEntryId: string) => void;
   /** Wipe all state — used by "Start over". */
   reset: () => void;
 }
@@ -202,7 +212,10 @@ const DISLIKE_MARKERS = [
   "start again",
 ];
 
-function toSuggestionPlants(mocks: MockSuggestion[]): SuggestionPlant[] {
+function toSuggestionPlants(
+  mocks: MockSuggestion[],
+  outcomes: QuestionOutcome[]
+): SuggestionPlant[] {
   return mocks.map((m) => ({
     plantId: m.id,
     commonName: m.commonName,
@@ -211,6 +224,7 @@ function toSuggestionPlants(mocks: MockSuggestion[]): SuggestionPlant[] {
     note: m.note,
     badges: m.badges,
     months: m.months,
+    matchNote: buildMatchNote(m, outcomes),
   }));
 }
 
@@ -280,7 +294,7 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
         kind: "suggestions",
         id: INITIAL_SUGGESTIONS_ENTRY_ID,
         title: "A starting scheme — pick the ones you want on your list.",
-        plants: toSuggestionPlants(MOCK_SUGGESTIONS),
+        plants: toSuggestionPlants(MOCK_SUGGESTIONS, s.outcomes),
       };
       // Path A only: the garden plants the user picked in step 1 are resolved
       // records they deliberately selected, so they start already on the list —
@@ -398,13 +412,13 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
               kind: "suggestions",
               id: mkId("entry-suggestions"),
               title: "More suggestions",
-              plants: toSuggestionPlants(MOCK_FOLLOWUP_SUGGESTIONS),
+              plants: toSuggestionPlants(MOCK_FOLLOWUP_SUGGESTIONS, state.outcomes),
             },
           ];
 
       setState((s) => ({ ...s, transcript: [...s.transcript, userEntry, ...responseEntries] }));
     },
-    [mkId]
+    [mkId, state.outcomes]
   );
 
   const chooseDirection = useCallback(
@@ -429,7 +443,7 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
               kind: "suggestions",
               id: mkId("entry-suggestions"),
               title: `${option.label} suggestions`,
-              plants: toSuggestionPlants(followupMocks),
+              plants: toSuggestionPlants(followupMocks, state.outcomes),
             },
           ]
         : [
@@ -457,8 +471,19 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
         ],
       }));
     },
-    [mkId]
+    [mkId, state.outcomes]
   );
+
+  const reopenDirection = useCallback((sourceEntryId: string) => {
+    setState((s) => ({
+      ...s,
+      transcript: s.transcript.map((e) =>
+        e.kind === "directions" && e.id === sourceEntryId
+          ? { ...e, chosenOptionId: undefined }
+          : e
+      ),
+    }));
+  }, []);
 
   const reset = useCallback(() => {
     idCounter.current = 0;
@@ -480,6 +505,7 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
       toggleShoppingList,
       sendRefinementMessage,
       chooseDirection,
+      reopenDirection,
       reset,
     }),
     [
@@ -496,6 +522,7 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
       toggleShoppingList,
       sendRefinementMessage,
       chooseDirection,
+      reopenDirection,
       reset,
     ]
   );

@@ -20,6 +20,14 @@
  * mark held to the trailing edge. The layout, states and mark belong to the
  * neutral `.c-chat__option` object (styles/components/_chat.scss); nothing
  * here is scheme-specific.
+ *
+ * A closed group isn't a dead end: once `entry.chosenOptionId` is genuinely
+ * committed (not just the transient optimistic pick), a quiet "Choose a
+ * different direction" action stays attached below it. Reopening only clears
+ * that stamp so the group is interactive again — it does not retract
+ * anything the choice already posted (the assistant's reply, any suggestion
+ * cards already in the transcript); picking again just adds another round,
+ * same as choosing fresh.
  */
 
 import { Icon } from "@/components/ui/Icon";
@@ -30,15 +38,19 @@ type DirectionsEntry = Extract<ChatEntry, { kind: "directions" }>;
 export function DirectionOptions({
   entry,
   onChoose,
+  onReopen,
   pendingChoiceId,
   disabled,
 }: {
   entry: DirectionsEntry;
   onChoose: (entryId: string, option: DirectionOption) => void;
+  /** Clears a committed choice so the group re-opens — the undo path. */
+  onReopen: (entryId: string) => void;
   /** Optimistic: shown as chosen while the host waits for the reply to land. */
   pendingChoiceId?: string;
   disabled: boolean;
 }) {
+  const committed = entry.chosenOptionId !== undefined;
   const chosenId = entry.chosenOptionId ?? pendingChoiceId;
   const decided = chosenId !== undefined;
 
@@ -83,6 +95,17 @@ export function DirectionOptions({
           );
         })}
       </div>
+      {committed && (
+        <button
+          type="button"
+          className="c-chat__options-reopen minion"
+          disabled={disabled}
+          onClick={() => onReopen(entry.id)}
+        >
+          <Icon name="retry" size={12} />
+          Choose a different direction
+        </button>
+      )}
     </div>
   );
 }
