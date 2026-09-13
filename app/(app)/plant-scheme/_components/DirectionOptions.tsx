@@ -103,7 +103,7 @@ export function DirectionOptions({
           onClick={() => onReopen(entry.id)}
         >
           <Icon name="retry" size={12} />
-          Choose a different direction
+          Choose a different direction — what&rsquo;s already here stays
         </button>
       )}
     </div>

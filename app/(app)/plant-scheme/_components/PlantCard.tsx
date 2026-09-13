@@ -83,6 +83,17 @@ export function PlantCard({
         </div>
         <p className="c-suggestion__latin primer">{plant.latinName}</p>
         {plant.note && <p className="c-suggestion__note brevier">{plant.note}</p>}
+        {/* Grouped with the editorial note above, not the badge/tag row below —
+            both are prose reasoning about the plant; badges are labels, a
+            different kind of thing. Keeping the two "why" registers together
+            (rather than sandwiching this between badges and footer) is the
+            fix for a reviewer note that the two blurred together. */}
+        {plant.matchNote && (
+          <p className="c-suggestion__match minion">
+            <Icon name="check" size={11} />
+            {plant.matchNote}
+          </p>
+        )}
         {plant.badges.length > 0 && (
           <div className="c-suggestion__badges">
             {plant.badges.map((b) => (
@@ -92,12 +103,6 @@ export function PlantCard({
               </span>
             ))}
           </div>
-        )}
-        {plant.matchNote && (
-          <p className="c-suggestion__match minion">
-            <Icon name="check" size={11} />
-            {plant.matchNote}
-          </p>
         )}
         {footer && <div className="c-suggestion__footer minion">{footer}</div>}
       </div>

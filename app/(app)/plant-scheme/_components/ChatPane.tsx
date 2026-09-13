@@ -14,12 +14,13 @@
  * below for the retry/discard state machine and the `/fail` dev trigger.
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { usePlantScheme, type ChatEntry, type DirectionOption } from "./PlantSchemeContext";
 import { MOCK_QUESTIONS } from "./mockData";
 import { ChatMessage, ChatComposer, SendFailedNotice, TypingIndicator } from "./ChatLog";
 import { DirectionOptions } from "./DirectionOptions";
 import { SuggestionPanel } from "./SuggestionPanel";
+import { Icon } from "@/components/ui/Icon";
 
 const THINK_MS = 700;
 
@@ -88,6 +89,12 @@ export default function ChatPane() {
      there's never more than one thing to resolve (Retry or Discard) before
      doing anything else. */
   const [turnState, setTurnState] = useState<TurnState | null>(null);
+  /* Names this pane as a real landmark region (see the wrapping <section>
+     below) — a symmetric counterpart to the scheme-list pane's own
+     `aria-label="Scheme list"` section, so a keyboard/AT user can jump
+     directly between the two panes rather than tabbing through every
+     control in one to reach the other. */
+  const headingId = useId();
   const logRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const atBottomRef = useRef(true);
@@ -210,8 +217,10 @@ export default function ChatPane() {
   }
 
   return (
-    <div className="c-chat">
-      <h2 className="long-primer kirk o-type-display">Conversation</h2>
+    <section className="c-chat" aria-labelledby={headingId} id="c-scheme-workspace-chat" tabIndex={-1}>
+      <h2 id={headingId} className="long-primer kirk o-type-display">
+        Conversation
+      </h2>
 
       <div
         ref={logRef}
@@ -271,7 +280,20 @@ export default function ChatPane() {
         ariaLabel="Your reply to Plotted"
         placeholder="Ask for a swap, more options, a different direction…"
       />
-    </div>
+
+      {/* Keyboard-only, non-AT users have no equivalent to a screen reader's
+          landmark navigation — this is theirs: a real, labelled next stop
+          instead of a silent jump into the list pane's first control. Hidden
+          until focused (.u-skip-link); the target section is
+          tabIndex={-1}-focusable, see SchemeListPane.tsx. */}
+      <a
+        href="#c-scheme-workspace-list"
+        className="c-scheme-chat__skip-link u-skip-link minion"
+      >
+        Skip to scheme list
+        <Icon name="right" size={12} />
+      </a>
+    </section>
   );
 }
 

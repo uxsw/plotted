@@ -54,7 +54,23 @@ export default function SchemeListPane() {
   let flatIndex = 0;
 
   return (
-    <section className="c-scheme-list" aria-label="Scheme list">
+    <section
+      className="c-scheme-list"
+      aria-label="Scheme list"
+      id="c-scheme-workspace-list"
+      tabIndex={-1}
+    >
+      {/* Reciprocal of ChatPane.tsx's skip link — the first tab stop entering
+          this pane, so a keyboard-only user arrives at something labelled
+          rather than straight into the first "Remove" button. */}
+      <a
+        href="#c-scheme-workspace-chat"
+        className="c-scheme-chat__skip-link u-skip-link minion"
+      >
+        Skip to conversation
+        <Icon name="right" size={12} style={{ transform: "rotate(180deg)" }} />
+      </a>
+
       <div className="c-scheme-list__head">
         <h2 className="o-type-label">Scheme list</h2>
         <span className="o-type-label c-scheme-list__count">

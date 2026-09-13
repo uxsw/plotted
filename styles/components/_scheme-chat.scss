@@ -126,6 +126,29 @@
     }
 }
 
+/* A keyboard-only user with no assistive tech can't reach either pane's
+   ARIA landmark the way a screen-reader user can — this is their equivalent:
+   a real, labelled link that only appears once focused, placed as the very
+   next tab stop after the composer (leaving the chat pane) and as the very
+   first tab stop entering the list pane. Either way, the next Tab press
+   lands somewhere named, not a silent jump into an unrelated control. Uses
+   `.u-skip-link` (_utilities.scss) for the hide-until-focused mechanics;
+   this is just its visible, focused appearance. */
+.c-scheme-chat__skip-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--color-ink);
+    background-color: var(--color-paper-deep);
+    border: var(--border-width-hairline) solid var(--sem-border-color);
+    border-radius: var(--radius-m);
+
+    &:focus-visible {
+        outline: var(--border-width-thin) solid var(--sem-focus-color);
+        outline-offset: 2px;
+    }
+}
+
 /* ---- Scheme list panel ------------------------------------------------- */
 
 .c-scheme-list {
@@ -386,8 +409,10 @@
     }
 
     /* Rhythm below is deliberate contrast, not one gap repeated: identity
-       (name+latin) sits tight as one unit, the note gets a little more air,
-       the badges row (a distinct metadata zone) gets more again. */
+       (name+latin) sits tight as one unit, the note (and the match-note
+       right after it, when present — both prose reasoning about the plant)
+       gets a little more air, the badges row (tags, a distinct kind of
+       thing) gets more again. */
     &__latin {
         margin-block-start: 0.125rem;
         font-family: var(--font-display);
@@ -400,23 +425,16 @@
         color: var(--color-n-deep-grey);
     }
 
-    &__badges {
-        display: flex;
-        flex-wrap: wrap;
-        align-items: center;
-        gap: var(--space-xs);
-        margin-block-start: var(--space-sm);
-
-        .o-badge svg {
-            flex: none;
-        }
-    }
-
     /* "Why this fits" — the one line that ties a suggestion back to what the
-       gardener actually said (see matchNote.ts). Quiet by design: a plain
-       ink-soft note with a small check, the same icon+text register as
-       `.c-suggestion__added` below, not a badge or an accent colour — this is
-       reasoning, not a trait. Absent entirely when nothing genuinely matched. */
+       gardener actually said (see matchNote.ts). Sits directly under `__note`
+       (both are prose reasoning about the plant), deliberately ahead of the
+       badges row below — a design-critique finding was that the two "why"
+       registers (editorial note + personalised match, vs. the trait badges)
+       read as one undifferentiated pile; grouping the prose together and
+       letting the tags start their own zone after it is the fix. Quiet by
+       design: a plain ink-soft note with a small check, not a badge or an
+       accent colour — this is reasoning, not a trait. Absent entirely when
+       nothing genuinely matched. */
     &__match {
         display: flex;
         align-items: flex-start;
@@ -427,6 +445,18 @@
         svg {
             flex: none;
             margin-block-start: 0.15em;
+        }
+    }
+
+    &__badges {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-xs);
+        margin-block-start: var(--space-sm);
+
+        .o-badge svg {
+            flex: none;
         }
     }
 

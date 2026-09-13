@@ -30,10 +30,14 @@
     width: max-content;
 
     &.is-sm {
-        --_badge-text-size: 0.65rem;
+        /* Was a bespoke 0.65rem (10.4px) — below the 11px accessible-text
+           floor on every trait tag that uses it (plant cards, scheme
+           suggestions, the flowering-season badge). Matches `.minion`'s clamp
+           now: the nearest step on the scale per the One Scale Rule, not a
+           new size value. */
+        --_badge-text-size: clamp(0.728rem, 0.082vw + 0.713rem, 0.800rem);
         --_badge-line-height: 1.5;
         --_badge-pad-inline: var(--space-xs);
-
     }
 
     &.is-bug,
