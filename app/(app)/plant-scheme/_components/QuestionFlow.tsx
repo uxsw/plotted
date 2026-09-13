@@ -14,6 +14,8 @@
  *
  * Presentation reuses the shared c-chat primitives and the journey step marker,
  * so this reads as one continuous conversation with the workspace that follows.
+ * An answer can also fail to send — see `attemptAnswer` for the retry/discard
+ * state machine and the `/fail` dev trigger (same idiom as ChatPane.tsx).
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
@@ -22,15 +24,31 @@ import { Button } from "@/components/ui/Button";
 import buttonStyles from "@/components/ui/Button.module.css";
 import { usePlantScheme } from "./PlantSchemeContext";
 import { MOCK_QUESTIONS } from "./mockData";
-import { ChatMessage, ChatComposer, QuickReplies, TypingIndicator } from "./ChatLog";
+import { ChatMessage, ChatComposer, QuickReplies, SendFailedNotice, TypingIndicator } from "./ChatLog";
 
 const THINK_MS = 500;
+
+/** See ChatPane.tsx's FAIL_TRIGGER for why this exists and how it's meant to
+ *  be replaced. The delay is long enough for TypingIndicator's own stall
+ *  threshold to show before the simulated failure lands. */
+const FAIL_TRIGGER = "/fail";
+const SIMULATED_FAILURE_DELAY_MS = 7500;
 
 const INTRO_TEXT =
   "A few questions about your space so the scheme fits it — and so future schemes need fewer. Answer what you can; skip anything you're unsure of.";
 
 type Role = "assistant" | "user";
 type Line = { id: string; role: Role; text: string };
+type AnswerState = { status: "sending" | "failed"; text: string };
+
+function mockAttempt(simulateFailure: boolean): Promise<void> {
+  return new Promise((resolve, reject) => {
+    window.setTimeout(
+      () => (simulateFailure ? reject(new Error("simulated failure")) : resolve()),
+      simulateFailure ? SIMULATED_FAILURE_DELAY_MS : THINK_MS
+    );
+  });
+}
 
 export default function QuestionFlow() {
   const {
@@ -46,7 +64,10 @@ export default function QuestionFlow() {
   } = usePlantScheme();
 
   const [draft, setDraft] = useState("");
-  const [pendingAnswer, setPendingAnswer] = useState<string | null>(null);
+  /* At most one answer in flight or failed at a time — the composer, Skip,
+     and "build it now" all stay hidden until it resolves, the same
+     lock-until-resolved shape ChatPane.tsx uses for the workspace chat. */
+  const [answerState, setAnswerState] = useState<AnswerState | null>(null);
   const logRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -56,7 +77,7 @@ export default function QuestionFlow() {
   const currentQuestion = MOCK_QUESTIONS[questionIndex] ?? null;
   const isFirstQuestion = questionIndex === 0;
   const flowComplete = questionIndex >= totalQuestions;
-  const busy = pendingAnswer !== null;
+  const busy = answerState !== null;
 
   const lines = useMemo<Line[]>(() => {
     const out: Line[] = [{ id: "intro", role: "assistant", text: INTRO_TEXT }];
@@ -101,25 +122,43 @@ export default function QuestionFlow() {
       behavior: hasScrolledRef.current && !document.hidden ? "smooth" : "auto",
     });
     hasScrolledRef.current = true;
-  }, [lines.length, pendingAnswer]);
+  }, [lines.length, answerState]);
 
   // Fallback: every question handled but the flow hasn't completed — complete it.
   useEffect(() => {
     if (flowComplete && !busy) completeFlow();
   }, [flowComplete, busy, completeFlow]);
 
+  function attemptAnswer(text: string, simulateFailure: boolean, wasLast: boolean) {
+    setAnswerState({ status: "sending", text });
+    mockAttempt(simulateFailure)
+      .then(() => {
+        answerQuestion(currentQuestion!.id, text);
+        setAnswerState(null);
+        if (wasLast) completeFlow();
+      })
+      .catch(() => setAnswerState({ status: "failed", text }));
+  }
+
   function submitAnswer(value: string) {
     const text = value.trim();
     if (!text || !currentQuestion || busy) return;
     const wasLast = questionIndex === totalQuestions - 1;
-    setPendingAnswer(text);
     setDraft("");
     inputRef.current?.focus();
-    window.setTimeout(() => {
-      answerQuestion(currentQuestion.id, text);
-      setPendingAnswer(null);
-      if (wasLast) completeFlow();
-    }, THINK_MS);
+    attemptAnswer(text, text.toLowerCase() === FAIL_TRIGGER, wasLast);
+  }
+
+  /* Always attempts for real — same reasoning as ChatPane.tsx's retry(): a
+     failed answer's wording can't be edited, so retry is its only way
+     forward, and a mock retry should actually get there. */
+  function retryAnswer() {
+    if (!answerState || answerState.status !== "failed" || !currentQuestion) return;
+    attemptAnswer(answerState.text, false, questionIndex === totalQuestions - 1);
+  }
+
+  function discardAnswer() {
+    setAnswerState(null);
   }
 
   function handleSkip() {
@@ -170,10 +209,14 @@ export default function QuestionFlow() {
             </ChatMessage>
           ))}
 
-          {busy && (
+          {answerState && (
             <>
-              <ChatMessage role="user">{pendingAnswer}</ChatMessage>
-              <TypingIndicator />
+              <ChatMessage role="user">{answerState.text}</ChatMessage>
+              {answerState.status === "sending" ? (
+                <TypingIndicator />
+              ) : (
+                <SendFailedNotice onRetry={retryAnswer} onDiscard={discardAnswer} />
+              )}
             </>
           )}
         </div>
