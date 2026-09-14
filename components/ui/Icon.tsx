@@ -1,5 +1,5 @@
 import { SVGProps } from "react";
-import { Trash2, User, ArrowLeft, ArrowUp, Plus, Search, ListFilter, ChevronRight, Image, Camera, MessageSquare, Sprout, Leaf, Flower2, DropletOff, Check, LeafyGreen, Pencil, MapPin, MapPinCheckInside, X, ThermometerSnowflake, Square, SquareCheck, TriangleAlert, RotateCcw } from "lucide-react";
+import { Trash2, User, ArrowLeft, ArrowUp, ArrowRight, ArrowDown, Plus, Search, ListFilter, ChevronRight, Image, Camera, MessageSquare, Sprout, Leaf, Flower2, DropletOff, Check, LeafyGreen, Pencil, MapPin, MapPinCheckInside, X, ThermometerSnowflake, Square, SquareCheck, TriangleAlert, RotateCcw } from "lucide-react";
 import styles from "./Icon.module.css";
 
 
@@ -10,6 +10,8 @@ const icons = {
   user: User,
   back: ArrowLeft,
   send: ArrowUp,
+  arrowRight: ArrowRight,
+  arrowDown: ArrowDown,
   add: Plus,
   search: Search,
   filter: ListFilter,
