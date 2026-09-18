@@ -1,0 +1,218 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   c-scheme-example — the annotated example scheme (SchemeExample.tsx).
+
+   The journey's three steps, each beside the real part it produces. Shown on
+   the planting schemes hub (c-scheme-hub) to a gardener with no plans yet,
+   and folded behind "How a scheme comes together" once they have some. Its
+   season colour is routed through object-private --_* props (DESIGN.md
+   Semantic Layer Rule).
+   ───────────────────────────────────────────────────────────────────────── */
+
+.c-scheme-example {
+    /* A season of its own, so the example never reads as either door. */
+    --_accent: var(--sem-flowering-early-summer-fg);
+    --_accent-wash: var(--sem-flowering-early-summer-bg);
+    /* Shared with the workspace sheet: elevation + year strip align. */
+    --_figure-measure: 22rem;
+
+    display: grid;
+    gap: var(--space-lg);
+
+    /* Letterhead — the scheme sheet's season-washed head band. */
+    &__head {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--space-xs) var(--space-md);
+        padding: var(--space-sm) var(--space-md);
+        background-color: color-mix(in srgb, var(--_accent-wash) 60%, var(--color-white));
+        border-block-end: var(--border-width-hairline) solid
+            color-mix(in srgb, var(--_accent) 20%, var(--sem-border-color));
+        border-radius: var(--radius-m);
+
+        > .o-type-label {
+            color: var(--_accent);
+        }
+    }
+
+    &__meta {
+        color: color-mix(in srgb, var(--_accent) 80%, transparent);
+    }
+
+    &__steps {
+        display: grid;
+        gap: var(--space-xl);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    &__step {
+        position: relative;
+        display: grid;
+        grid-template-columns: minmax(0, 16rem) minmax(0, 1fr);
+        align-items: start;
+        gap: var(--space-lg);
+
+        /* The path between stamps — the sequence is the information. Only
+           where the note column stands alone beside its art. */
+        &:not(:last-child)::before {
+            content: "";
+            position: absolute;
+            inset-block: 2.25rem calc(var(--space-xl) * -1 + var(--space-sm));
+            inset-inline-start: calc(0.875rem - var(--border-width-hairline) / 2);
+            inline-size: var(--border-width-hairline);
+            background-color: color-mix(in srgb, var(--_accent) 35%, transparent);
+        }
+
+        @media (max-width: 44rem) {
+            grid-template-columns: minmax(0, 1fr);
+            gap: var(--space-md);
+
+            &:not(:last-child)::before {
+                content: none;
+            }
+        }
+    }
+
+    &__note {
+        display: grid;
+        grid-template-columns: 1.75rem minmax(0, 1fr);
+        gap: var(--space-xs) var(--space-sm);
+
+        > h3 {
+            grid-column: 2;
+            align-self: center;
+            text-wrap: balance;
+        }
+
+        > p {
+            grid-column: 2;
+            color: var(--color-n-deep-grey);
+            text-wrap: pretty;
+        }
+    }
+
+    /* The scratch schedule's numbered roundel stamp. */
+    &__stamp {
+        grid-row: 1;
+        grid-column: 1;
+        display: grid;
+        place-items: center;
+        inline-size: 1.75rem;
+        block-size: 1.75rem;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        font-weight: var(--font-weight-medium);
+        font-variant-numeric: tabular-nums;
+        color: var(--color-r-white);
+        background-color: var(--_accent);
+        border-radius: var(--radius-roundel);
+    }
+
+    &__art {
+        min-inline-size: 0;
+    }
+
+    /* Step 1 — the starting plants, as picked. */
+    &__picked,
+    &__answers {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-xs);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    &__pick {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-xs);
+        padding: var(--space-xs) var(--space-md) var(--space-xs) var(--space-sm);
+        color: var(--color-n-deep-grey);
+        background-color: var(--color-white);
+        border: var(--border-width-hairline) solid var(--color-sand-line);
+        border-radius: var(--radius-pill);
+
+        svg {
+            color: var(--_accent);
+        }
+    }
+
+    /* Step 2 — one question, its quick replies, the way out. */
+    &__ask {
+        display: grid;
+        gap: var(--space-sm);
+        max-inline-size: 30rem;
+    }
+
+    &__answer {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.25rem;
+        padding: var(--space-xs) var(--space-sm);
+        color: var(--color-n-deep-grey);
+        background-color: var(--color-paper);
+        border: var(--border-width-hairline) solid var(--color-sand-line);
+        border-radius: var(--radius-pill);
+
+        /* Chosen-Is-Filled: the cyan edge and check that mean "picked". */
+        &.is-chosen {
+            background-color: var(--color-white);
+            border-color: var(--sem-focus-color);
+            box-shadow: 0 0 0 var(--border-width-hairline) var(--sem-focus-color);
+
+            svg {
+                color: var(--sem-focus-color);
+            }
+        }
+    }
+
+    &__skip {
+        padding: var(--space-xs) var(--space-sm);
+        color: var(--color-ink-soft);
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+    }
+
+    /* Step 3 — the scheme sheet itself, open on the page like the workspace. */
+    &__sheet {
+        display: grid;
+        gap: var(--space-md);
+        padding: var(--space-sm) var(--space-md) var(--space-md);
+        border: var(--border-width-hairline) solid var(--sem-border-color);
+        border-radius: var(--radius-m);
+
+        .c-scheme-elevation {
+            padding-inline: 0;
+        }
+
+        .c-scheme-year {
+            padding-inline: 0;
+        }
+    }
+
+    &__cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, 200px), 1fr));
+        gap: var(--space-md);
+
+        /* One card is enough proof on a phone. */
+        @media (max-width: 32rem) {
+            > :nth-child(n + 2) {
+                display: none;
+            }
+        }
+    }
+}
+
+/* ---- Motion opt-out --------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .c-scheme-example .c-scheme-year__month {
+        transition: none;
+    }
+}

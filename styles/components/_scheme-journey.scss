@@ -1,0 +1,42 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   c-scheme-journey — the planting scheme step marker (question flow).
+
+   A hairline-ruled row: mono path label, a segmented progress track in the
+   path's --_accent, and the step count. The sequence carries information,
+   so it is wayfinding rather than a decorative eyebrow.
+   ───────────────────────────────────────────────────────────────────────── */
+
+.c-scheme-journey {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    padding-block-end: var(--space-sm);
+    border-block-end: var(--border-width-hairline) solid var(--sem-border-color);
+    color: var(--color-ink-soft);
+
+    &__track {
+        display: flex;
+        align-items: center;
+        gap: var(--space-xs);
+    }
+
+    &__track > span {
+        inline-size: 1.75rem;
+        block-size: 0.25rem;
+        border-radius: var(--radius-s);
+        background-color: var(--color-sand-line);
+    }
+
+    &__track > .is-done,
+    &__track > .is-current {
+        background-color: var(--_accent);
+    }
+
+    &__track > .is-current {
+        inline-size: 2.5rem;
+    }
+
+    &__count {
+        margin-inline-start: auto;
+    }
+}

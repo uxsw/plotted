@@ -1,0 +1,977 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   c-scheme-hub — /plant-scheme, the planting schemes workbench.
+
+   One wide page instead of a corridor: the gardener's drafts and finished
+   plans beside a sticky start panel (contract in SchemesHub.tsx). Season
+   colour stays inside the journey's licence (DESIGN.md Semantic Field
+   exception) and goes through object-private --_* props: spring on the start
+   panel (a border just beginning), summer on drafts (a border growing).
+   ───────────────────────────────────────────────────────────────────────── */
+
+/* Wider than the product measure, like the chat workspace this page leads
+   into — but bounded, so the plan grid never becomes a wall. */
+.o-page:has(.c-scheme-hub) {
+    max-width: 90rem;
+}
+
+/* First run (no drafts, no plans): there's nothing to browse yet, so the
+   workbench measure would just be empty air beside the panel. One focused
+   column at roughly the panel's own natural width instead. */
+.o-page:has(.c-scheme-hub.is-first-run) {
+    max-width: 40rem;
+}
+
+.c-scheme-hub {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+        "head"
+        "start"
+        "plans";
+    gap: var(--space-xl);
+    padding-block: var(--space-md) var(--space-xl);
+
+    /* A returning gardener reaches their drafts before the start panel. */
+    &.has-drafts {
+        grid-template-areas:
+            "head"
+            "drafts"
+            "start"
+            "plans";
+    }
+
+    /* First run: one column at every width — a class-selector rule, so it
+       outranks the >=60rem workbench split below regardless of source
+       order. There is nothing to put beside the panel yet. */
+    &.is-first-run {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-areas:
+            "head"
+            "start"
+            "plans";
+    }
+
+    /* Plans/drafts read left to right like the rest of the app; the start
+       panel takes the trailing column, on equal footing rather than a
+       narrow sidebar — the workbench earns the room. */
+    @media (min-width: 60rem) {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-rows: auto 1fr;
+        grid-template-areas:
+            "head head"
+            "plans start";
+        column-gap: calc(var(--space-xl) * 1.5);
+
+        &.has-drafts {
+            grid-template-rows: auto auto 1fr;
+            grid-template-areas:
+                "head head"
+                "drafts start"
+                "plans start";
+        }
+    }
+}
+
+.c-scheme-hub__head {
+    grid-area: head;
+    display: grid;
+    gap: var(--space-sm);
+    padding-block-end: var(--space-md);
+    border-block-end: var(--border-width-hairline) solid var(--sem-border-color);
+}
+
+.c-scheme-hub__lead {
+    max-inline-size: var(--measure);
+    color: var(--color-n-deep-grey);
+    text-wrap: pretty;
+}
+
+.c-scheme-hub__start {
+    grid-area: start;
+    min-inline-size: 0;
+
+    @media (min-width: 60rem) {
+        position: sticky;
+        inset-block-start: var(--space-md);
+        align-self: start;
+    }
+
+    /* Nothing tall beside it to stay level with — let the panel breathe to
+       its natural height instead of pinning and internally scrolling. */
+    .c-scheme-hub.is-first-run & {
+        @media (min-width: 60rem) {
+            position: static;
+            max-block-size: none;
+        }
+    }
+}
+
+/* The first-run "see how it works" teaser: a plain disclosure, not a second
+   panel — closed by default so it never competes with the task above it. */
+.c-scheme-hub__teaser {
+    grid-area: plans;
+    padding-block-start: var(--space-sm);
+}
+
+.c-scheme-hub__section {
+    display: grid;
+    align-content: start;
+    gap: var(--space-md);
+    min-inline-size: 0;
+
+    &.is-drafts {
+        grid-area: drafts;
+    }
+
+    &.is-plans {
+        grid-area: plans;
+    }
+}
+
+.c-scheme-hub__intro {
+    display: grid;
+    gap: var(--space-xs);
+
+    > p {
+        max-inline-size: var(--measure);
+        color: var(--color-n-deep-grey);
+    }
+}
+
+.c-scheme-hub__error {
+    color: var(--sem-color-error-bg);
+}
+
+/* The example, folded away once a gardener has plans of their own. */
+.c-scheme-hub__example {
+    padding-block-start: var(--space-md);
+    border-block-start: var(--border-width-hairline) solid var(--sem-border-color);
+
+    > summary {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-xs);
+        margin-inline-start: calc(var(--space-sm) * -1);
+        padding: var(--space-xs) var(--space-sm);
+        color: var(--color-n-deep-grey);
+        border-radius: var(--radius-s);
+        cursor: pointer;
+        list-style: none;
+        transition: background-color var(--transition-time-default)
+            var(--transition-easing-default);
+
+        &::-webkit-details-marker {
+            display: none;
+        }
+
+        &:hover {
+            background-color: var(--color-y-yellow);
+        }
+
+        &:focus-visible {
+            outline: var(--border-width-thin) solid var(--sem-focus-color);
+            outline-offset: 1px;
+        }
+    }
+
+    &[open] > summary {
+        margin-block-end: var(--space-lg);
+    }
+
+    &[open] .c-scheme-hub__example-arrow {
+        transform: rotate(180deg);
+    }
+}
+
+.c-scheme-hub__example-arrow {
+    transition: transform var(--transition-time-default) var(--transition-easing-default);
+}
+
+/* ---- Start panel: the page's blank sheet ------------------------------- */
+
+.c-scheme-start {
+    --_accent: var(--sem-flowering-spring-fg);
+    --_accent-wash: var(--sem-flowering-spring-bg);
+
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: var(--color-white);
+    border: var(--border-width-hairline) solid var(--sem-border-color);
+    border-radius: var(--radius-m);
+
+    /* Sticky beside the plans: the panel never outgrows the viewport, and
+       the garden grid scrolls inside it so Start stays in reach. */
+    @media (min-width: 60rem) {
+        max-block-size: calc(100dvh - var(--space-xl));
+    }
+
+    &__head {
+        display: grid;
+        gap: var(--space-xs);
+        padding: var(--space-md);
+        background-color: color-mix(in srgb, var(--_accent-wash) 55%, var(--color-white));
+        border-block-end: var(--border-width-hairline) solid
+            color-mix(in srgb, var(--_accent) 20%, var(--sem-border-color));
+    }
+
+    &__lead {
+        color: var(--color-n-deep-grey);
+        text-wrap: pretty;
+    }
+
+    &__row {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--space-md);
+        color: var(--color-ink-soft);
+    }
+
+    &__count {
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* The starting tray — five slots, dashed until a plant takes one. */
+    /* What you've chosen and the action that uses it, above the sources. */
+    &__tray {
+        display: grid;
+        gap: var(--space-sm);
+        padding: var(--space-md);
+        border-block-end: var(--border-width-hairline) solid var(--sem-border-color);
+
+        > .o-button--w100 {
+            justify-content: center;
+            margin-block-start: var(--space-xs);
+        }
+    }
+
+    &__picks {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-xs);
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
+
+    &__pick {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-xs);
+        max-inline-size: 100%;
+        block-size: 2.5rem;
+        padding-inline-start: 0.25rem;
+        background-color: var(--color-paper);
+        border: var(--border-width-hairline) solid var(--color-sand-line);
+        border-radius: var(--radius-pill);
+        animation: scheme-pick-in var(--transition-time-default)
+            var(--transition-easing-emphasis);
+
+        /* The empty tray: one dashed slot that says what goes in it. */
+        &.is-empty {
+            inline-size: 100%;
+            block-size: auto;
+            min-block-size: 2.5rem;
+            padding: var(--space-xs) var(--space-md);
+            color: var(--color-ink-soft);
+            background-color: transparent;
+            border-style: dashed;
+            border-color: color-mix(in srgb, var(--_accent) 45%, var(--sem-border-color));
+            border-radius: var(--radius-m);
+            animation: none;
+        }
+    }
+
+    &__pick-mark {
+        position: relative;
+        display: grid;
+        flex: none;
+        place-items: center;
+        inline-size: 2rem;
+        block-size: 2rem;
+        overflow: hidden;
+        color: var(--_accent);
+        background-color: var(--_accent-wash);
+        border-radius: var(--radius-roundel);
+
+        img {
+            object-fit: cover;
+        }
+    }
+
+    &__pick-name {
+        min-inline-size: 0;
+        overflow: hidden;
+        color: var(--color-n-deep-grey);
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    &__pick-remove {
+        display: inline-grid;
+        flex: none;
+        place-items: center;
+        inline-size: 2.375rem;
+        block-size: 2.375rem;
+        color: var(--color-ink-soft);
+        border-radius: var(--radius-roundel);
+        transition:
+            background-color var(--transition-time-default) var(--transition-easing-default),
+            color var(--transition-time-default) var(--transition-easing-default);
+
+        &:hover {
+            color: var(--color-n-deep-grey);
+            background-color: var(--color-y-yellow);
+        }
+
+        &:focus-visible {
+            outline: var(--border-width-thin) solid var(--sem-focus-color);
+            outline-offset: -2px;
+        }
+    }
+
+    /* One field: search the garden, or name a plant you're considering. */
+    &__find {
+        display: grid;
+        gap: var(--space-xs);
+        padding: var(--space-md);
+
+        > .o-type-label {
+            color: var(--color-ink-soft);
+        }
+    }
+
+    &__field-wrap {
+        position: relative;
+    }
+
+    &__field-icon {
+        position: absolute;
+        inset-block-start: 50%;
+        inset-inline-start: 0.75rem;
+        color: var(--color-ink-soft);
+        transform: translateY(-50%);
+        pointer-events: none;
+    }
+
+    &__field {
+        inline-size: 100%;
+        padding: var(--space-sm) var(--space-md) var(--space-sm) 2.25rem;
+        color: var(--color-ink);
+        background-color: var(--color-paper);
+        border: var(--border-width-hairline) solid var(--color-sand-line);
+        border-radius: var(--radius-m);
+        caret-color: var(--color-r-marigold);
+        transition:
+            border-color var(--transition-time-default) var(--transition-easing-default),
+            box-shadow var(--transition-time-default) var(--transition-easing-default);
+
+        &::placeholder {
+            color: color-mix(in srgb, var(--color-ink-soft) 70%, transparent);
+        }
+
+        /* Repeated-entry field: ring + border, no fill flip. */
+        &:focus-visible {
+            outline: none;
+            border-color: var(--color-r-marigold);
+            box-shadow: 0 0 0 var(--border-width-thin) var(--color-r-marigold);
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+    }
+
+    &__add {
+        display: inline-flex;
+        align-items: center;
+        justify-self: start;
+        gap: var(--space-xs);
+        margin-inline-start: calc(var(--space-sm) * -1);
+        padding: var(--space-xs) var(--space-sm);
+        color: var(--color-n-deep-grey);
+        text-align: start;
+        border-radius: var(--radius-s);
+        transition: background-color var(--transition-time-default)
+            var(--transition-easing-default);
+
+        &:hover {
+            background-color: var(--color-y-yellow);
+        }
+
+        &:focus-visible {
+            outline: var(--border-width-thin) solid var(--sem-focus-color);
+            outline-offset: 1px;
+        }
+    }
+
+    &__note {
+        color: var(--color-ink-soft);
+    }
+
+    /* The gardener's own plants as photo tiles — the grid scrolls in place. */
+    &__garden {
+        display: flex;
+        flex: 1;
+        flex-direction: column;
+        gap: var(--space-sm);
+        min-block-size: 0;
+        padding: 0 var(--space-md) var(--space-md);
+    }
+
+    &__empty {
+        color: var(--color-n-deep-grey);
+
+        a {
+            text-decoration: underline;
+            text-underline-offset: 0.2em;
+        }
+    }
+
+    &__grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
+        gap: var(--space-md) var(--space-sm);
+        min-block-size: 0;
+        max-block-size: 24rem;
+        margin: 0;
+        padding: 0.25rem;
+        overflow-y: auto;
+        list-style: none;
+        scrollbar-width: thin;
+        scrollbar-color: var(--color-sand-line) transparent;
+
+        @media (min-width: 60rem) {
+            max-block-size: none;
+        }
+    }
+
+    &__tile {
+        display: grid;
+        gap: 0.375rem;
+        inline-size: 100%;
+        padding: 0;
+        text-align: start;
+        background: none;
+        border-radius: var(--radius-m);
+        cursor: pointer;
+
+        &:focus-visible {
+            outline: var(--border-width-thin) solid var(--sem-focus-color);
+            outline-offset: 2px;
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+
+            .c-scheme-start__tile-media {
+                opacity: 0.45;
+            }
+        }
+    }
+
+    &__tile-media {
+        position: relative;
+        display: grid;
+        place-items: center;
+        aspect-ratio: 1;
+        overflow: hidden;
+        color: var(--color-ink-soft);
+        background-color: var(--color-paper-deep);
+        border-radius: var(--radius-m);
+        box-shadow: inset 0 0 0 var(--border-width-hairline) var(--sem-border-color);
+        transition: box-shadow var(--transition-time-default) var(--transition-easing-default);
+
+        img {
+            object-fit: cover;
+        }
+    }
+
+    /* Radio-card grammar, multi-select: the mark is drawn in both states. */
+    &__tile-mark {
+        position: absolute;
+        inset-block-start: 0.375rem;
+        inset-inline-end: 0.375rem;
+        display: grid;
+        place-items: center;
+        inline-size: 1.25rem;
+        block-size: 1.25rem;
+        color: transparent;
+        background-color: var(--color-white);
+        border: var(--border-width-thin) solid var(--color-n-dark-grey);
+        border-radius: var(--radius-s);
+        box-shadow: 0 0 0 var(--border-width-hairline) var(--color-white);
+    }
+
+    &__tile:hover:not(:disabled) &__tile-media {
+        box-shadow:
+            inset 0 0 0 var(--border-width-hairline) var(--sem-border-color),
+            0 4px 12px rgba(0, 0, 0, 0.12);
+    }
+
+    &__tile[aria-pressed="true"] &__tile-media {
+        box-shadow: inset 0 0 0 var(--border-width-thin) var(--color-b-cyan-deep);
+    }
+
+    &__tile[aria-pressed="true"] &__tile-mark {
+        color: var(--color-white);
+        background-color: var(--color-b-cyan-deep);
+        border-color: var(--color-white);
+    }
+
+    &__tile-name {
+        display: -webkit-box;
+        overflow: hidden;
+        color: var(--color-n-deep-grey);
+        overflow-wrap: anywhere;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+    }
+
+}
+
+/* From an already-visible state: the chip settles in and its wash fades. */
+@keyframes scheme-pick-in {
+    from {
+        transform: scale(0.9);
+        background-color: var(--_accent-wash);
+    }
+    to {
+        transform: scale(1);
+        background-color: var(--color-paper);
+    }
+}
+
+/* ---- First-run "how it works" — an editorial triptych ------------------ */
+
+/* HowItWorks.tsx. One aspirational line, three season-washed plates — see
+   the FIRST RUN note in SchemesHub.tsx for why this replaces SchemeExample
+   here. Deliberately spare: colour and the Image Plate signature (mat,
+   hairline frame, italic caption, mono number — see DESIGN.md Shapes) do
+   the explaining that three paragraphs used to. */
+.c-scheme-teaser {
+    display: grid;
+    gap: var(--space-lg);
+    padding-block-start: var(--space-sm);
+}
+
+.c-scheme-teaser__lead {
+    max-inline-size: var(--measure);
+    color: var(--color-ink);
+    text-wrap: pretty;
+}
+
+/* Break out of the 40rem first-run measure — deliberately, not a bug. The
+   task column stays narrow and focused; the photography earns real width
+   the moment curiosity is opted into. Margin-only (no explicit vw width),
+   the safe variant of the full-bleed trick: negative margins pull the box
+   to the viewport edge regardless of how narrow an ancestor already capped
+   it, then padding re-centres the content at a bounded 64rem measure. */
+.c-scheme-teaser__stage {
+    margin-inline: calc(50% - 50vw);
+    padding-inline: max(var(--space-md), calc(50vw - 32rem));
+}
+
+.c-scheme-teaser__plates {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-lg);
+
+    @media (max-width: 40rem) {
+        grid-template-columns: minmax(0, 1fr);
+        gap: var(--space-xl);
+    }
+}
+
+.c-scheme-teaser__plate {
+    display: grid;
+    gap: var(--space-sm);
+    margin: 0;
+
+    /* Season arc, spring to summer — the visual proof of "taking shape",
+       routed through object-private props per the Semantic Layer Rule. */
+    &.is-spring {
+        --_accent: var(--sem-flowering-spring-fg);
+        --_accent-wash: var(--sem-flowering-spring-bg);
+    }
+
+    &.is-early-summer {
+        --_accent: var(--sem-flowering-early-summer-fg);
+        --_accent-wash: var(--sem-flowering-early-summer-bg);
+    }
+
+    &.is-summer {
+        --_accent: var(--sem-flowering-summer-fg);
+        --_accent-wash: var(--sem-flowering-summer-bg);
+    }
+}
+
+/* The Image Plate signature (DESIGN.md Shapes): a solid paper mat inside a
+   hairline frame. */
+.c-scheme-teaser__mat {
+    padding: 0.5625rem;
+    background-color: var(--color-paper);
+    border: var(--border-width-hairline) solid
+        color-mix(in srgb, var(--color-ink) 30%, transparent);
+}
+
+.c-scheme-teaser__frame {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4 / 5;
+    background-color: var(--color-paper-deep);
+
+    @media (max-width: 40rem) {
+        aspect-ratio: 3 / 2;
+    }
+}
+
+.c-scheme-teaser__photo-img {
+    object-fit: cover;
+}
+
+/* The placeholder: a season-washed field, one line mark, a dashed edge —
+   the app's existing "not filled in yet" grammar, not invented chrome.
+   Replaced the moment a STEP supplies real photography. */
+.c-scheme-teaser__placeholder {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: color-mix(in srgb, var(--_accent) 55%, transparent);
+    background: linear-gradient(
+        155deg,
+        var(--_accent-wash),
+        color-mix(in srgb, var(--_accent-wash) 55%, var(--_accent) 16%)
+    );
+    border: var(--border-width-hairline) dashed
+        color-mix(in srgb, var(--_accent) 40%, transparent);
+}
+
+.c-scheme-teaser__caption {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-sm);
+
+    > span:first-child {
+        color: var(--color-ink);
+    }
+}
+
+.c-scheme-teaser__no {
+    flex: none;
+    color: var(--_accent);
+}
+
+/* ---- The one-time interstitial (SchemeWelcomeDialog.tsx) ---------------- */
+
+/* Widens the shared .o-dialog shell (DESIGN.md: dialog shadow, white, 4px
+   radius) past its 24rem confirm-dialog default, but only to a focused
+   "onboarding card" width — not the wide panel a static 3-up grid needed.
+   One slide at a time wants presence, not sprawl; on a phone this is
+   already close to the full available width via Modal's own p-4 gutter. */
+.c-scheme-welcome-dialog {
+    /* The one gutter value the panel, the slide track's bleed and each
+       slide's own inline padding all share — see .c-onboarding__track
+       below for why that sharing matters. Tighter on a phone, where the
+       full space-lg gutter on both sides of an already-narrow panel read
+       as cramped rather than generous. */
+    --_dialog-pad: var(--space-lg);
+
+    position: relative;
+    max-width: 30rem;
+    max-block-size: calc(100dvh - 2rem);
+    padding: var(--_dialog-pad);
+    overflow-y: auto;
+
+    @media (max-width: 30rem) {
+        --_dialog-pad: var(--space-md);
+    }
+}
+
+.c-scheme-welcome-dialog__close {
+    position: absolute;
+    inset-block-start: var(--space-sm);
+    inset-inline-end: var(--space-sm);
+    z-index: 1;
+}
+
+/* ---- OnboardingCarousel.tsx: one step at a time ------------------------- */
+
+.c-onboarding {
+    display: grid;
+    gap: var(--space-lg);
+    /* Clears the close button, absolutely positioned over the panel's own
+       top-right corner — headroom, not a narrower column, so the nav row
+       below stays full width. */
+    padding-block-start: 2rem;
+
+    @media (max-width: 30rem) {
+        gap: var(--space-md);
+        padding-block-start: 1.75rem;
+    }
+}
+
+.c-onboarding__track {
+    display: flex;
+    /* Cancels the panel's own padding exactly (same custom property), so
+       the track bleeds flush to the panel edge regardless of which gutter
+       is active — see .c-scheme-welcome-dialog. */
+    margin-inline: calc(var(--_dialog-pad) * -1);
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+.c-onboarding__slide {
+    display: grid;
+    flex: none;
+    gap: var(--space-md);
+    inline-size: 100%;
+    padding-inline: var(--_dialog-pad);
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+
+    /* Season arc, spring to summer — routed through object-private props
+       per the Semantic Layer Rule, same as HowItWorks' own plates. */
+    &.is-spring {
+        --_accent: var(--sem-flowering-spring-fg);
+        --_accent-wash: var(--sem-flowering-spring-bg);
+    }
+
+    &.is-early-summer {
+        --_accent: var(--sem-flowering-early-summer-fg);
+        --_accent-wash: var(--sem-flowering-early-summer-bg);
+    }
+
+    &.is-summer {
+        --_accent: var(--sem-flowering-summer-fg);
+        --_accent-wash: var(--sem-flowering-summer-bg);
+    }
+}
+
+/* The Image Plate signature (DESIGN.md Shapes), at one-per-slide scale. */
+.c-onboarding__mat {
+    padding: 0.5625rem;
+    background-color: var(--color-paper);
+    border: var(--border-width-hairline) solid
+        color-mix(in srgb, var(--color-ink) 30%, transparent);
+}
+
+.c-onboarding__frame {
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+    background-color: var(--color-paper-deep);
+}
+
+.c-onboarding__photo-img {
+    object-fit: cover;
+}
+
+/* Same placeholder grammar as HowItWorks' plates — a season-washed field,
+   one line mark, a dashed edge — just larger, this slide's sole subject. */
+.c-onboarding__placeholder {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    color: color-mix(in srgb, var(--_accent) 55%, transparent);
+    background: linear-gradient(
+        155deg,
+        var(--_accent-wash),
+        color-mix(in srgb, var(--_accent-wash) 55%, var(--_accent) 16%)
+    );
+    border: var(--border-width-hairline) dashed
+        color-mix(in srgb, var(--_accent) 40%, transparent);
+}
+
+.c-onboarding__copy {
+    display: grid;
+    gap: var(--space-xs);
+}
+
+.c-onboarding__title {
+    color: var(--color-ink);
+    text-wrap: balance;
+}
+
+.c-onboarding__body {
+    color: var(--color-n-deep-grey);
+    text-wrap: pretty;
+}
+
+/* Dots on their own row, Back/Next on the row below — not one crowded
+   line. "Create planting scheme" (the last step's label) is long enough
+   that sharing a row with Back and the dots read as cluttered, worst on a
+   narrow phone where all three had to compress at once. */
+.c-onboarding__nav {
+    display: grid;
+    gap: var(--space-sm);
+}
+
+.c-onboarding__dots {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-xs);
+}
+
+/* Back (start) — Next (end): a plain two-up row now that the dots have
+   their own line above. An absent Back (step one) leaves Next alone at
+   the end, not re-centred — space-between with nothing in the first slot
+   does that for free. */
+.c-onboarding__actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-sm);
+}
+
+/* An invisible, real touch target around the dot span it wraps (see
+   OnboardingCarousel.tsx) — the button itself draws nothing, so growing it
+   for a comfortable tap area never changes the dot's own established size. */
+.c-onboarding__dot {
+    display: inline-flex;
+    align-items: center;
+    appearance: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.625rem 0.375rem;
+    margin: -0.625rem -0.375rem;
+
+    &:focus-visible {
+        outline: var(--border-width-thin) solid var(--sem-focus-color);
+        outline-offset: 2px;
+        border-radius: var(--radius-s);
+    }
+}
+
+
+/* ---- Carry on: drafts as half-planted borders -------------------------- */
+
+.c-scheme-drafts {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 24rem), 1fr));
+    gap: var(--space-md);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.c-scheme-draft {
+    --_accent: var(--sem-flowering-summer-fg);
+    --_accent-wash: var(--sem-flowering-summer-bg);
+    --_figure-measure: 100%;
+
+    display: grid;
+    grid-template-columns: 10.5rem minmax(0, 1fr);
+    gap: var(--space-md);
+    block-size: 100%;
+    padding: var(--space-md);
+    color: inherit;
+    text-decoration: none;
+    background-color: var(--color-white);
+    border-radius: var(--radius-m);
+    transition: box-shadow var(--transition-time-default) var(--transition-easing-default);
+
+    @media (max-width: 26rem) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    &:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    &:focus-visible {
+        outline: var(--border-width-thin) solid var(--sem-focus-color);
+        outline-offset: 2px;
+    }
+
+    &__figure {
+        display: grid;
+        align-self: start;
+        padding: var(--space-sm) var(--space-sm) 0;
+        background-color: color-mix(in srgb, var(--_accent-wash) 45%, var(--color-white));
+        border-radius: var(--radius-s);
+
+        .c-scheme-elevation {
+            padding: 0;
+        }
+
+        /* Drawn at rest: the draw-in belongs to the workspace. */
+        .c-scheme-elevation__plant path,
+        .c-scheme-elevation__plant circle {
+            animation: none;
+        }
+    }
+
+    &__body {
+        display: grid;
+        align-content: start;
+        gap: var(--space-xs);
+    }
+
+    &__meta {
+        color: var(--color-ink-soft);
+    }
+
+    &__last {
+        display: -webkit-box;
+        overflow: hidden;
+        color: var(--color-n-deep-grey);
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+
+        > .o-type-label {
+            color: var(--color-ink-soft);
+        }
+    }
+
+    &__go {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-xs);
+        margin-block-start: var(--space-xs);
+        color: var(--color-ink);
+    }
+
+    &__arrow {
+        transition: transform var(--transition-time-default) var(--transition-easing-default);
+    }
+
+    &:hover &__arrow,
+    &:focus-visible &__arrow {
+        transform: translateX(0.25rem);
+    }
+}
+
+/* ---- Motion opt-out --------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+    .c-scheme-start__pick {
+        animation: none;
+    }
+
+    .c-scheme-start__tile-media,
+    .c-scheme-draft,
+    .c-scheme-draft__arrow,
+    .c-scheme-hub__example-arrow {
+        transition: none;
+    }
+
+    .c-scheme-draft:hover .c-scheme-draft__arrow,
+    .c-scheme-draft:focus-visible .c-scheme-draft__arrow {
+        transform: none;
+    }
+}

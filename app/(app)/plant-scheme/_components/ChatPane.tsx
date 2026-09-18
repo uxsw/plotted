@@ -71,7 +71,6 @@ function mockAttempt(simulateFailure: boolean): Promise<void> {
 
 export default function ChatPane() {
   const {
-    path,
     selectedGardenPlants,
     freeTextPlants,
     outcomes,
@@ -99,8 +98,10 @@ export default function ChatPane() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const atBottomRef = useRef(true);
 
-  const startingPlants =
-    path === "existing" ? selectedGardenPlants.map((p) => p.commonName) : freeTextPlants;
+  const startingPlants = useMemo(
+    () => [...selectedGardenPlants.map((p) => p.commonName), ...freeTextPlants],
+    [selectedGardenPlants, freeTextPlants]
+  );
 
   const recap = useMemo<RecapLine[]>(() => {
     const out: RecapLine[] = [{ id: "intro", role: "assistant", text: INTRO_TEXT }];

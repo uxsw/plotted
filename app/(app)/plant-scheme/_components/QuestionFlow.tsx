@@ -71,8 +71,10 @@ export default function QuestionFlow() {
   const logRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const startingPlants =
-    path === "existing" ? selectedGardenPlants.map((p) => p.commonName) : freeTextPlants;
+  const startingPlants = useMemo(
+    () => [...selectedGardenPlants.map((p) => p.commonName), ...freeTextPlants],
+    [selectedGardenPlants, freeTextPlants]
+  );
   const totalQuestions = MOCK_QUESTIONS.length;
   const currentQuestion = MOCK_QUESTIONS[questionIndex] ?? null;
   const isFirstQuestion = questionIndex === 0;
@@ -178,11 +180,10 @@ export default function QuestionFlow() {
     <div className={clsx("c-scheme-chat", path === "existing" ? "is-path-existing" : "is-path-scratch")}>
       <div
         className="c-scheme-journey"
-        aria-label={`Planting scheme, step 3: question ${Math.min(questionIndex + 1, totalQuestions)} of ${totalQuestions}`}
+        aria-label={`Planting scheme, step 2: question ${Math.min(questionIndex + 1, totalQuestions)} of ${totalQuestions}`}
       >
         <span className="o-type-label">Planting scheme</span>
         <span className="c-scheme-journey__track" aria-hidden="true">
-          <span className="is-done" />
           <span className="is-done" />
           <span className="is-current" />
         </span>

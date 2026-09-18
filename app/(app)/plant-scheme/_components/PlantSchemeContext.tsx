@@ -129,7 +129,8 @@ export type ChatEntry =
     };
 
 export interface PlantSchemeState {
-  /** Which entry path the user chose, or null before the A/B choice. */
+  /** The journey's accent family, or null before a scheme is started:
+   *  "existing" when any garden plants were chosen, otherwise "scratch". */
   path: SchemePath | null;
   /** "questions" = still in Q1–Q4 flow; "scheme" = persistent split-pane view. */
   phase: SchemePhase;
@@ -152,9 +153,12 @@ export interface PlantSchemeState {
 }
 
 export interface PlantSchemeContextValue extends PlantSchemeState {
-  choosePath: (path: SchemePath) => void;
-  setSelectedGardenPlants: (plants: GardenPlantRef[]) => void;
-  setFreeTextPlants: (names: string[]) => void;
+  /**
+   * Begin a fresh scheme from the hub's start panel. Either list may be empty,
+   * not both: garden plants are resolved records (pre-populated onto the list
+   * later), typed names are chat context only.
+   */
+  startScheme: (gardenPlants: GardenPlantRef[], freeTextPlants: string[]) => void;
   answerQuestion: (questionId: string, answer: string) => void;
   skipQuestion: (questionId: string) => void;
   /** Stop asking questions (does not itself change phase). */
@@ -255,17 +259,18 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
   const idCounter = useRef(0);
   const mkId = useCallback((prefix: string) => `${prefix}-${++idCounter.current}`, []);
 
-  const choosePath = useCallback((path: SchemePath) => {
-    setState((s) => ({ ...s, path }));
-  }, []);
-
-  const setSelectedGardenPlants = useCallback((plants: GardenPlantRef[]) => {
-    setState((s) => ({ ...s, selectedGardenPlants: plants }));
-  }, []);
-
-  const setFreeTextPlants = useCallback((names: string[]) => {
-    setState((s) => ({ ...s, freeTextPlants: names }));
-  }, []);
+  const startScheme = useCallback(
+    (gardenPlants: GardenPlantRef[], freeTextPlants: string[]) => {
+      idCounter.current = 0;
+      setState({
+        ...INITIAL_STATE,
+        path: gardenPlants.length > 0 ? "existing" : "scratch",
+        selectedGardenPlants: gardenPlants,
+        freeTextPlants,
+      });
+    },
+    []
+  );
 
   const answerQuestion = useCallback((questionId: string, answer: string) => {
     setState((s) => ({
@@ -296,12 +301,11 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
         title: "A starting scheme — pick the ones you want on your list.",
         plants: toSuggestionPlants(MOCK_SUGGESTIONS, s.outcomes),
       };
-      // Path A only: the garden plants the user picked in step 1 are resolved
-      // records they deliberately selected, so they start already on the list —
-      // no explicit add. Path B's typed names have no resolved identity and stay
-      // chat-context only (schemePlants stays []).
+      // Garden plants picked on the start panel are resolved records the user
+      // deliberately selected, so they start already on the list — no explicit
+      // add. Typed names have no resolved identity and stay chat-context only.
       const seededGardenPlants: SchemePlant[] =
-        s.path === "existing"
+        s.selectedGardenPlants.length > 0
           ? s.selectedGardenPlants.map((g) => ({
               id: `garden:${g.plantId}`,
               origin: "garden" as const,
@@ -493,9 +497,7 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
   const value = useMemo<PlantSchemeContextValue>(
     () => ({
       ...state,
-      choosePath,
-      setSelectedGardenPlants,
-      setFreeTextPlants,
+      startScheme,
       answerQuestion,
       skipQuestion,
       quickAnswer,
@@ -510,9 +512,7 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
     }),
     [
       state,
-      choosePath,
-      setSelectedGardenPlants,
-      setFreeTextPlants,
+      startScheme,
       answerQuestion,
       skipQuestion,
       quickAnswer,

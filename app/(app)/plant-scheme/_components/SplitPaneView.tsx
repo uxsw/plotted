@@ -48,7 +48,7 @@ export default function SplitPaneView() {
 
       <div className="c-scheme-chat__footer">
         <Link
-          href="/schemes"
+          href="/plant-scheme"
           className={clsx(
             buttonStyles["o-button"],
             buttonStyles["o-button--ghost"],

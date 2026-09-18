@@ -3,11 +3,16 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-const NAV_ITEMS = [
+const NAV_ITEMS: { href: string; label: string; also?: string[] }[] = [
   { href: "/dashboard", label: "Home" },
   { href: "/plants", label: "Plants" },
-  { href: "/schemes", label: "Schemes" },
-] as const;
+  /* /plant-scheme is the schemes hub being built alongside the live /schemes. */
+  { href: "/schemes", label: "Schemes", also: ["/plant-scheme"] },
+];
+
+function matches(pathname: string, href: string) {
+  return pathname === href || pathname.startsWith(`${href}/`);
+}
 
 export default function GlobalNav() {
   const pathname = usePathname();
@@ -15,7 +20,7 @@ export default function GlobalNav() {
   return (
     <nav className="nav-sections" aria-label="Primary">
       {NAV_ITEMS.map((item) => {
-        const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+        const isActive = [item.href, ...(item.also ?? [])].some((href) => matches(pathname, href));
         const activeClasses = "active border-marigold text-marigold";
         return (
           <Link

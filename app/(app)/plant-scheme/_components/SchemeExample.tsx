@@ -17,7 +17,7 @@
  * the month strip fills). Under prefers-reduced-motion the draw is already
  * off in _scheme-chat.scss, so it lands in its final state.
  *
- * Styles: `.c-scheme-example` in styles/components/_scheme-entry.scss.
+ * Styles: `.c-scheme-example` in styles/components/_scheme-example.scss.
  */
 
 import { useEffect, useRef, useState } from "react";
