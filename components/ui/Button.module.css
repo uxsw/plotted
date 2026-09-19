@@ -60,7 +60,13 @@
 
 .o-button--primary {
   background-color: var(--color-r-marigold);
-  color: var(--color-r-white);
+  /* ink-deep, not r-white: marigold at oklch 65.8% lightness only clears
+     ~3.2:1 against near-white text (an audit finding, confirmed by
+     computed-style measurement) — below the 4.5:1 AA floor for the app's
+     single primary-action button. n-deep-grey (4.10:1) and ink (4.27:1),
+     the two darkest existing neutrals, both still fell short — ink-deep
+     (5.13:1) is the token added to clear it. */
+  color: var(--color-ink-deep);
 }
 
 .o-button--outline {
@@ -71,7 +77,10 @@
 
 .o-button--primary:hover:not(:disabled) {
   background-color: var(--color-o-vermillion);
-  color: var(--color-n-deep-grey);
+  /* Same ink-deep as rest — vermillion is lighter than marigold, so the
+     text colour no longer needs to flip on hover to stay legible; one
+     text colour throughout this variant is simpler than two. */
+  color: var(--color-ink-deep);
 }
 
 .o-button--scheme {

@@ -1,16 +1,16 @@
 import type { IconName } from "@/components/ui/Icon";
 
 /**
- * The three-step "how a scheme comes together" story — the single source
- * both HowItWorks.tsx (the hub's compact, always-available reference
- * triptych) and OnboardingCarousel.tsx (the one-time welcome dialog) draw
- * from, so the two surfaces can never drift apart in what they claim the
- * journey is.
+ * The three-step "how a scheme comes together" story, drawn on by
+ * OnboardingCarousel.tsx (the one-time welcome dialog) — now the only place
+ * it's told. It used to also feed HowItWorks.tsx, the hub's own compact,
+ * always-available reference triptych; that was retired once the welcome
+ * dialog covered the same ground for the audience that actually needed it.
  *
  * `title`/`body` are placeholder copy — short on purpose, but expect real
  * content (and photoSrc/photoAlt) to replace both once written. `photoSrc`
  * falls back to a season-washed placeholder mark (`icon`) until then; see
- * either consuming component's own doc comment for what renders instead.
+ * OnboardingCarousel.tsx's own doc comment for what renders instead.
  */
 export interface SchemeOnboardingStep {
   n: string;

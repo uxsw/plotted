@@ -28,6 +28,20 @@
  * being seen; every dismissal path (finish, close, Escape, backdrop) closes
  * the same way and none of them un-sees it.
  *
+ * Initial focus goes to this heading (`initialFocusSelector`), not
+ * Modal's own default of "first focusable descendant" — that default
+ * would land on the carousel's first step-dot, a secondary navigation
+ * aid, ahead of any real content or the primary Next action. `tabIndex=
+ * {-1}` makes the heading a valid, if unusual, focus target without
+ * adding a tab stop; a screen reader announces the dialog's name first,
+ * same as opening any well-behaved modal.
+ *
+ * Finish is the one exit that isn't a plain close, though (see `finish`
+ * below) — a critique caught the carousel's last step promising "Choose
+ * your plants" and then just closing, identical to every other exit. A
+ * first-time gardener who just read the whole pitch and clicked the
+ * confident button deserves to land somewhere, not nowhere.
+ *
  * Styles: `.c-scheme-welcome-dialog` in styles/components/_scheme-hub.scss.
  */
 
@@ -51,6 +65,27 @@ export default function SchemeWelcomeDialog({ markSeen = true }: { markSeen?: bo
     setOpen(false);
   }
 
+  /* Finishing the carousel (not skipping it) hands off to the real task:
+     close, then — once the dialog's own unmount has handed focus back per
+     Modal's own restore-focus effect — steal it back onto the "Add a
+     plant" field and scroll it into view. A plain requestAnimationFrame is
+     enough; the field already exists in the DOM underneath (the hub is
+     rendered the whole time, per this file's own opening note), so there's
+     no data to wait on, just a paint to let happen first. Distinct from
+     `close` on purpose: Escape/backdrop/X are a gardener saying "let me
+     just look around," not "take me to the field" — only the button that
+     says so does. */
+  function finish() {
+    close();
+    requestAnimationFrame(() => {
+      const field = document.querySelector<HTMLInputElement>(
+        '[data-onboarding-target="add-plant-field"]'
+      );
+      field?.scrollIntoView({ behavior: "smooth", block: "center" });
+      field?.focus({ preventScroll: true });
+    });
+  }
+
   return (
     <Modal
       isOpen={open}
@@ -58,12 +93,13 @@ export default function SchemeWelcomeDialog({ markSeen = true }: { markSeen?: bo
       panelClassName="c-scheme-welcome-dialog"
       labelledBy={titleId}
       backdropOpacity={0.75}
+      initialFocusSelector="[data-modal-initial-focus]"
     >
-      <h2 id={titleId} className="u-visually-hidden">
+      <h2 id={titleId} tabIndex={-1} data-modal-initial-focus className="u-visually-hidden">
         Welcome to planting schemes
       </h2>
 
-      <OnboardingCarousel onFinish={close} />
+      <OnboardingCarousel onFinish={finish} />
 
       <button
         type="button"

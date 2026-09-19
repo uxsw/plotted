@@ -1,79 +1,39 @@
 /* ─────────────────────────────────────────────────────────────────────────
-   c-scheme-hub — /plant-scheme, the planting schemes workbench.
+   c-scheme-hub — /plant-scheme, the planting schemes entry point.
 
-   One wide page instead of a corridor: the gardener's drafts and finished
-   plans beside a sticky start panel (contract in SchemesHub.tsx). Season
-   colour stays inside the journey's licence (DESIGN.md Semantic Field
-   exception) and goes through object-private --_* props: spring on the start
-   panel (a border just beginning), summer on drafts (a border growing).
+   One column, always (contract in SchemesHub.tsx): a Recent plans glance,
+   then "Plan a new scheme" — itself two parts, a compact tray card
+   (.c-scheme-start) and an open, wide-breaking-out garden gallery
+   (.c-garden-gallery, StartPanel.tsx / GardenGallery.tsx) — see that pair's
+   own doc comments for why they split. Full browsing/management of every
+   plan lives at /plant-scheme/plans instead of sharing this page — see the
+   THESIS note in SchemesHub.tsx for why the original two-column workbench
+   was retired (a different split from the gallery's own breakout: that one
+   was two competing tasks sharing a page, this one is one task given room
+   to breathe). The "how it comes together" walkthrough (HowItWorks.tsx /
+   SchemeExample.tsx) that used to fold beneath the start panel is gone too
+   — that ground is now covered by the welcome dialog's OnboardingCarousel
+   at the start of the journey instead. Season colour stays inside the
+   journey's licence (DESIGN.md Semantic Field exception) and goes through
+   object-private --_* props: spring on the start panel (a border just
+   beginning).
    ───────────────────────────────────────────────────────────────────────── */
 
-/* Wider than the product measure, like the chat workspace this page leads
-   into — but bounded, so the plan grid never becomes a wall. */
-.o-page:has(.c-scheme-hub) {
-    max-width: 90rem;
-}
-
-/* First run (no drafts, no plans): there's nothing to browse yet, so the
-   workbench measure would just be empty air beside the panel. One focused
-   column at roughly the panel's own natural width instead. */
+/* First run (no drafts, no plans, no error): nothing to glance at yet, so
+   even the standard product measure is more width than the start panel
+   alone needs. One focused column at roughly the panel's own natural
+   width instead. */
 .o-page:has(.c-scheme-hub.is-first-run) {
     max-width: 40rem;
 }
 
 .c-scheme-hub {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-        "head"
-        "start"
-        "plans";
     gap: var(--space-xl);
     padding-block: var(--space-md) var(--space-xl);
-
-    /* A returning gardener reaches their drafts before the start panel. */
-    &.has-drafts {
-        grid-template-areas:
-            "head"
-            "drafts"
-            "start"
-            "plans";
-    }
-
-    /* First run: one column at every width — a class-selector rule, so it
-       outranks the >=60rem workbench split below regardless of source
-       order. There is nothing to put beside the panel yet. */
-    &.is-first-run {
-        grid-template-columns: minmax(0, 1fr);
-        grid-template-areas:
-            "head"
-            "start"
-            "plans";
-    }
-
-    /* Plans/drafts read left to right like the rest of the app; the start
-       panel takes the trailing column, on equal footing rather than a
-       narrow sidebar — the workbench earns the room. */
-    @media (min-width: 60rem) {
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-        grid-template-rows: auto 1fr;
-        grid-template-areas:
-            "head head"
-            "plans start";
-        column-gap: calc(var(--space-xl) * 1.5);
-
-        &.has-drafts {
-            grid-template-rows: auto auto 1fr;
-            grid-template-areas:
-                "head head"
-                "drafts start"
-                "plans start";
-        }
-    }
 }
 
 .c-scheme-hub__head {
-    grid-area: head;
     display: grid;
     gap: var(--space-sm);
     padding-block-end: var(--space-md);
@@ -86,105 +46,132 @@
     text-wrap: pretty;
 }
 
-.c-scheme-hub__start {
-    grid-area: start;
-    min-inline-size: 0;
-
-    @media (min-width: 60rem) {
-        position: sticky;
-        inset-block-start: var(--space-md);
-        align-self: start;
-    }
-
-    /* Nothing tall beside it to stay level with — let the panel breathe to
-       its natural height instead of pinning and internally scrolling. */
-    .c-scheme-hub.is-first-run & {
-        @media (min-width: 60rem) {
-            position: static;
-            max-block-size: none;
-        }
-    }
-}
-
-/* The first-run "see how it works" teaser: a plain disclosure, not a second
-   panel — closed by default so it never competes with the task above it. */
-.c-scheme-hub__teaser {
-    grid-area: plans;
-    padding-block-start: var(--space-sm);
-}
-
+/* Reserved for the Carry on shelf when drafts are reactivated — see the
+   commented-out block in SchemesHub.tsx. No live consumer today. */
 .c-scheme-hub__section {
     display: grid;
-    align-content: start;
     gap: var(--space-md);
-    min-inline-size: 0;
-
-    &.is-drafts {
-        grid-area: drafts;
-    }
-
-    &.is-plans {
-        grid-area: plans;
-    }
-}
-
-.c-scheme-hub__intro {
-    display: grid;
-    gap: var(--space-xs);
-
-    > p {
-        max-inline-size: var(--measure);
-        color: var(--color-n-deep-grey);
-    }
 }
 
 .c-scheme-hub__error {
     color: var(--sem-color-error-bg);
 }
 
-/* The example, folded away once a gardener has plans of their own. */
-.c-scheme-hub__example {
-    padding-block-start: var(--space-md);
-    border-block-start: var(--border-width-hairline) solid var(--sem-border-color);
+/* ---- Recent plans: a glance, not a browsing surface -------------------- */
+/* RecentPlans.tsx. Up to three cards; everything else lives at
+   /plant-scheme/plans. Mobile is a horizontal scroller (the app's
+   established scroller-on-narrow idiom — see .c-plant-scroller /
+   .c-carousel in _dashboard.scss); from --breakpoint-tablet it resolves
+   into a plain row, since three cards already fit without a scroll
+   affordance once there's room. */
 
-    > summary {
-        display: inline-flex;
-        align-items: center;
-        gap: var(--space-xs);
-        margin-inline-start: calc(var(--space-sm) * -1);
-        padding: var(--space-xs) var(--space-sm);
-        color: var(--color-n-deep-grey);
-        border-radius: var(--radius-s);
-        cursor: pointer;
-        list-style: none;
-        transition: background-color var(--transition-time-default)
-            var(--transition-easing-default);
+.c-recent-plans {
+    display: grid;
+    gap: var(--space-sm);
+}
 
-        &::-webkit-details-marker {
-            display: none;
-        }
+.c-recent-plans__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-md);
+}
 
-        &:hover {
-            background-color: var(--color-y-yellow);
-        }
+.c-recent-plans__row {
+    display: flex;
+    gap: var(--space-sm);
+    margin: 0;
+    margin-inline: calc(var(--space-md) * -1);
+    padding: 0.25rem var(--space-md) var(--space-xs);
+    overflow-x: auto;
+    list-style: none;
+    scroll-snap-type: x mandatory;
+    scroll-padding-inline-start: var(--space-md);
 
-        &:focus-visible {
-            outline: var(--border-width-thin) solid var(--sem-focus-color);
-            outline-offset: 1px;
-        }
+    @media (min-width: 860px) {
+        margin-inline: 0;
+        padding-inline: 0;
+        overflow: visible;
+        scroll-snap-type: none;
     }
 
-    &[open] > summary {
-        margin-block-end: var(--space-lg);
-    }
+    /* Sized on the <li> (not display:contents on it) so the list keeps its
+       item semantics for assistive tech while the row still lays out and
+       scroll-snaps like a plain flex row. */
+    > li {
+        flex: none;
+        inline-size: 60%;
+        max-inline-size: 15rem;
+        scroll-snap-align: start;
 
-    &[open] .c-scheme-hub__example-arrow {
-        transform: rotate(180deg);
+        @media (min-width: 860px) {
+            inline-size: 0;
+            max-inline-size: none;
+            flex: 1 1 0;
+        }
     }
 }
 
-.c-scheme-hub__example-arrow {
-    transition: transform var(--transition-time-default) var(--transition-easing-default);
+.c-recent-plans__card {
+    display: flex;
+    flex-direction: column;
+    block-size: 100%;
+    overflow: hidden;
+    color: inherit;
+    text-decoration: none;
+    background-color: var(--color-white);
+    border-radius: var(--radius-m);
+    transition: box-shadow var(--transition-time-default) var(--transition-easing-default);
+
+    &:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    &:focus-visible {
+        outline: var(--border-width-thin) solid var(--sem-focus-color);
+        outline-offset: 2px;
+    }
+}
+
+.c-recent-plans__media {
+    position: relative;
+    aspect-ratio: 4 / 3;
+    overflow: hidden;
+    background-color: var(--color-y-yellow);
+
+    &.is-failed {
+        display: grid;
+        place-items: center;
+        color: var(--sem-color-error-bg);
+        background-color: var(--color-paper-deep);
+    }
+}
+
+.c-recent-plans__photo {
+    object-fit: cover;
+}
+
+.c-recent-plans__placeholder {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: 22%;
+    color: var(--color-sand-line);
+}
+
+.c-recent-plans__body {
+    display: grid;
+    gap: 0.25rem;
+    padding: var(--space-sm) var(--space-md) var(--space-md);
+}
+
+.c-recent-plans__failed-label {
+    color: var(--color-ink-soft);
+}
+
+.c-recent-plans__date {
+    color: var(--color-ink-soft);
 }
 
 /* ---- Start panel: the page's blank sheet ------------------------------- */
@@ -199,12 +186,6 @@
     background-color: var(--color-white);
     border: var(--border-width-hairline) solid var(--sem-border-color);
     border-radius: var(--radius-m);
-
-    /* Sticky beside the plans: the panel never outgrows the viewport, and
-       the garden grid scrolls inside it so Start stays in reach. */
-    @media (min-width: 60rem) {
-        max-block-size: calc(100dvh - var(--space-xl));
-    }
 
     &__head {
         display: grid;
@@ -254,6 +235,16 @@
         margin: 0;
         padding: 0;
         list-style: none;
+        /* The real fix for a long typed name overflowing its pill and
+           hiding Remove: as a grid item of __tray, this list's automatic
+           minimum size defaults to its content's min-content width — a
+           single long, unbreakable name — so the grid track itself grew
+           to fit it (measured 471px inside a 341px tray) and everything
+           downstream (the pill's own max-inline-size: 100%, the name's
+           already-correct ellipsis) never got a real constraint to work
+           against. Without this, the pill/name rules alone can't fix it,
+           however they're set — the grid track was growing around them. */
+        min-inline-size: 0;
     }
 
     &__pick {
@@ -302,11 +293,31 @@
     }
 
     &__pick-name {
+        /* Containing block for the .u-visually-hidden suffix inside it
+           (below) — position:relative alone isn't the actual fix, only a
+           prerequisite for it: see that rule's own comment. */
+        position: relative;
         min-inline-size: 0;
         overflow: hidden;
         color: var(--color-n-deep-grey);
         text-overflow: ellipsis;
         white-space: nowrap;
+
+        /* The " (considering)"/"(in your garden)" a11y suffix sits inline
+           after the (possibly very long) nowrap name text it's part of.
+           An absolutely-positioned element with no explicit top/left
+           falls back to its CSS-spec "static position" — computed from
+           where it would have flowed in NORMAL layout — and that flow
+           position is after the *untruncated* text, landing it hundreds
+           of px off-screen regardless of which ancestor is positioned
+           (confirmed live: position:relative here alone didn't move it).
+           Since it's 1x1px and clipped either way, pinning it explicitly
+           removes the static-position calculation entirely rather than
+           fighting it. */
+        > .u-visually-hidden {
+            inset-block-start: 0;
+            inset-inline-start: 0;
+        }
     }
 
     &__pick-remove {
@@ -332,205 +343,15 @@
         }
     }
 
-    /* One field: search the garden, or name a plant you're considering. */
-    &__find {
-        display: grid;
-        gap: var(--space-xs);
-        padding: var(--space-md);
+}
 
-        > .o-type-label {
-            color: var(--color-ink-soft);
-        }
-    }
-
-    &__field-wrap {
-        position: relative;
-    }
-
-    &__field-icon {
-        position: absolute;
-        inset-block-start: 50%;
-        inset-inline-start: 0.75rem;
-        color: var(--color-ink-soft);
-        transform: translateY(-50%);
-        pointer-events: none;
-    }
-
-    &__field {
-        inline-size: 100%;
-        padding: var(--space-sm) var(--space-md) var(--space-sm) 2.25rem;
-        color: var(--color-ink);
-        background-color: var(--color-paper);
-        border: var(--border-width-hairline) solid var(--color-sand-line);
-        border-radius: var(--radius-m);
-        caret-color: var(--color-r-marigold);
-        transition:
-            border-color var(--transition-time-default) var(--transition-easing-default),
-            box-shadow var(--transition-time-default) var(--transition-easing-default);
-
-        &::placeholder {
-            color: color-mix(in srgb, var(--color-ink-soft) 70%, transparent);
-        }
-
-        /* Repeated-entry field: ring + border, no fill flip. */
-        &:focus-visible {
-            outline: none;
-            border-color: var(--color-r-marigold);
-            box-shadow: 0 0 0 var(--border-width-thin) var(--color-r-marigold);
-        }
-
-        &:disabled {
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-    }
-
-    &__add {
-        display: inline-flex;
-        align-items: center;
-        justify-self: start;
-        gap: var(--space-xs);
-        margin-inline-start: calc(var(--space-sm) * -1);
-        padding: var(--space-xs) var(--space-sm);
-        color: var(--color-n-deep-grey);
-        text-align: start;
-        border-radius: var(--radius-s);
-        transition: background-color var(--transition-time-default)
-            var(--transition-easing-default);
-
-        &:hover {
-            background-color: var(--color-y-yellow);
-        }
-
-        &:focus-visible {
-            outline: var(--border-width-thin) solid var(--sem-focus-color);
-            outline-offset: 1px;
-        }
-    }
-
-    &__note {
-        color: var(--color-ink-soft);
-    }
-
-    /* The gardener's own plants as photo tiles — the grid scrolls in place. */
-    &__garden {
-        display: flex;
-        flex: 1;
-        flex-direction: column;
-        gap: var(--space-sm);
-        min-block-size: 0;
-        padding: 0 var(--space-md) var(--space-md);
-    }
-
-    &__empty {
-        color: var(--color-n-deep-grey);
-
-        a {
-            text-decoration: underline;
-            text-underline-offset: 0.2em;
-        }
-    }
-
-    &__grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(5.5rem, 1fr));
-        gap: var(--space-md) var(--space-sm);
-        min-block-size: 0;
-        max-block-size: 24rem;
-        margin: 0;
-        padding: 0.25rem;
-        overflow-y: auto;
-        list-style: none;
-        scrollbar-width: thin;
-        scrollbar-color: var(--color-sand-line) transparent;
-
-        @media (min-width: 60rem) {
-            max-block-size: none;
-        }
-    }
-
-    &__tile {
-        display: grid;
-        gap: 0.375rem;
-        inline-size: 100%;
-        padding: 0;
-        text-align: start;
-        background: none;
-        border-radius: var(--radius-m);
-        cursor: pointer;
-
-        &:focus-visible {
-            outline: var(--border-width-thin) solid var(--sem-focus-color);
-            outline-offset: 2px;
-        }
-
-        &:disabled {
-            cursor: not-allowed;
-
-            .c-scheme-start__tile-media {
-                opacity: 0.45;
-            }
-        }
-    }
-
-    &__tile-media {
-        position: relative;
-        display: grid;
-        place-items: center;
-        aspect-ratio: 1;
-        overflow: hidden;
-        color: var(--color-ink-soft);
-        background-color: var(--color-paper-deep);
-        border-radius: var(--radius-m);
-        box-shadow: inset 0 0 0 var(--border-width-hairline) var(--sem-border-color);
-        transition: box-shadow var(--transition-time-default) var(--transition-easing-default);
-
-        img {
-            object-fit: cover;
-        }
-    }
-
-    /* Radio-card grammar, multi-select: the mark is drawn in both states. */
-    &__tile-mark {
-        position: absolute;
-        inset-block-start: 0.375rem;
-        inset-inline-end: 0.375rem;
-        display: grid;
-        place-items: center;
-        inline-size: 1.25rem;
-        block-size: 1.25rem;
-        color: transparent;
-        background-color: var(--color-white);
-        border: var(--border-width-thin) solid var(--color-n-dark-grey);
-        border-radius: var(--radius-s);
-        box-shadow: 0 0 0 var(--border-width-hairline) var(--color-white);
-    }
-
-    &__tile:hover:not(:disabled) &__tile-media {
-        box-shadow:
-            inset 0 0 0 var(--border-width-hairline) var(--sem-border-color),
-            0 4px 12px rgba(0, 0, 0, 0.12);
-    }
-
-    &__tile[aria-pressed="true"] &__tile-media {
-        box-shadow: inset 0 0 0 var(--border-width-thin) var(--color-b-cyan-deep);
-    }
-
-    &__tile[aria-pressed="true"] &__tile-mark {
-        color: var(--color-white);
-        background-color: var(--color-b-cyan-deep);
-        border-color: var(--color-white);
-    }
-
-    &__tile-name {
-        display: -webkit-box;
-        overflow: hidden;
-        color: var(--color-n-deep-grey);
-        overflow-wrap: anywhere;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: 2;
-    }
-
+/* The tray card and the open gallery below it are two halves of one task —
+   a tighter gap than the hub's own section rhythm (--space-xl) keeps them
+   read as connected, while the whole group still sits a full section's
+   distance from Recent Plans above it. */
+.c-scheme-start-group {
+    display: grid;
+    gap: var(--space-lg);
 }
 
 /* From an already-visible state: the chip settles in and its wash fades. */
@@ -545,126 +366,224 @@
     }
 }
 
-/* ---- First-run "how it works" — an editorial triptych ------------------ */
+/* ---- Garden gallery: the open browsing half (GardenGallery.tsx) -------- */
 
-/* HowItWorks.tsx. One aspirational line, three season-washed plates — see
-   the FIRST RUN note in SchemesHub.tsx for why this replaces SchemeExample
-   here. Deliberately spare: colour and the Image Plate signature (mat,
-   hairline frame, italic caption, mono number — see DESIGN.md Shapes) do
-   the explaining that three paragraphs used to. */
-.c-scheme-teaser {
+/* Sits on the bare page ground, no card — see the file's own doc comment
+   for why this half of "Plan a new scheme" was pulled out of the tray's
+   boxed sheet. The field and heading stay at the page's own product
+   measure; only __grid breaks out wider (see below), so the page visibly
+   opens up right at the moment it asks you to browse your whole garden. */
+.c-garden-gallery {
     display: grid;
-    gap: var(--space-lg);
-    padding-block-start: var(--space-sm);
+    gap: var(--space-md);
 }
 
-.c-scheme-teaser__lead {
-    max-inline-size: var(--measure);
-    color: var(--color-ink);
-    text-wrap: pretty;
-}
-
-/* Break out of the 40rem first-run measure — deliberately, not a bug. The
-   task column stays narrow and focused; the photography earns real width
-   the moment curiosity is opted into. Margin-only (no explicit vw width),
-   the safe variant of the full-bleed trick: negative margins pull the box
-   to the viewport edge regardless of how narrow an ancestor already capped
-   it, then padding re-centres the content at a bounded 64rem measure. */
-.c-scheme-teaser__stage {
-    margin-inline: calc(50% - 50vw);
-    padding-inline: max(var(--space-md), calc(50vw - 32rem));
-}
-
-.c-scheme-teaser__plates {
+/* One field: search the garden, or name a plant you're considering. */
+.c-garden-gallery__find {
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-lg);
+    gap: var(--space-xs);
 
-    @media (max-width: 40rem) {
-        grid-template-columns: minmax(0, 1fr);
-        gap: var(--space-xl);
+    > .o-type-label {
+        color: var(--color-ink-soft);
     }
 }
 
-.c-scheme-teaser__plate {
+.c-garden-gallery__field-wrap {
+    position: relative;
+}
+
+.c-garden-gallery__field-icon {
+    position: absolute;
+    inset-block-start: 50%;
+    inset-inline-start: 0.75rem;
+    color: var(--color-ink-soft);
+    transform: translateY(-50%);
+    pointer-events: none;
+}
+
+.c-garden-gallery__field {
+    inline-size: 100%;
+    padding: var(--space-sm) var(--space-md) var(--space-sm) 2.25rem;
+    color: var(--color-ink);
+    background-color: var(--color-white);
+    border: var(--border-width-hairline) solid var(--color-sand-line);
+    border-radius: var(--radius-m);
+    caret-color: var(--color-r-marigold);
+    transition:
+        border-color var(--transition-time-default) var(--transition-easing-default),
+        box-shadow var(--transition-time-default) var(--transition-easing-default);
+
+    &::placeholder {
+        color: color-mix(in srgb, var(--color-ink-soft) 70%, transparent);
+    }
+
+    /* Repeated-entry field: ring + border, no fill flip. */
+    &:focus-visible {
+        outline: none;
+        border-color: var(--color-r-marigold);
+        box-shadow: 0 0 0 var(--border-width-thin) var(--color-r-marigold);
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+    }
+}
+
+.c-garden-gallery__add {
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    gap: var(--space-xs);
+    margin-inline-start: calc(var(--space-sm) * -1);
+    padding: var(--space-xs) var(--space-sm);
+    color: var(--color-n-deep-grey);
+    text-align: start;
+    border-radius: var(--radius-s);
+    transition: background-color var(--transition-time-default) var(--transition-easing-default);
+
+    &:hover {
+        background-color: var(--color-y-yellow);
+    }
+
+    &:focus-visible {
+        outline: var(--border-width-thin) solid var(--sem-focus-color);
+        outline-offset: 1px;
+    }
+}
+
+.c-garden-gallery__note {
+    color: var(--color-ink-soft);
+}
+
+.c-garden-gallery__section {
     display: grid;
     gap: var(--space-sm);
+}
+
+.c-garden-gallery__empty {
+    color: var(--color-n-deep-grey);
+
+    a {
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+    }
+}
+
+/* The breakout: escapes the page's own measure and re-centres on the
+   viewport at a generous cap, the same margin-trick the hub used for its
+   retired first-run teaser — spent here on the real task instead. Below
+   ~60rem the formula already floors back to the page's own gutter, so
+   narrow viewports see no breakout at all, just a plain wide-as-the-page
+   grid. No max-block-size or internal scroll: a real garden's plant count
+   wraps the grid taller and the page scrolls past it, the same as any
+   other catalogue grid in the app — a fixed-height scroll well was a
+   workaround for sharing a box with the Start button, and that box is
+   gone. */
+.c-garden-gallery__grid {
+    display: grid;
+    /* 9.5rem clears two comfortable columns inside the page's own mobile
+       gutter (the formula floors back to it below ~60rem) — at 10.5rem a
+       phone was one giant card per row, which turned "handle a big garden
+       gracefully" into a worse scroll than the thing it replaced. */
+    grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+    gap: var(--space-md);
     margin: 0;
-
-    /* Season arc, spring to summer — the visual proof of "taking shape",
-       routed through object-private props per the Semantic Layer Rule. */
-    &.is-spring {
-        --_accent: var(--sem-flowering-spring-fg);
-        --_accent-wash: var(--sem-flowering-spring-bg);
-    }
-
-    &.is-early-summer {
-        --_accent: var(--sem-flowering-early-summer-fg);
-        --_accent-wash: var(--sem-flowering-early-summer-bg);
-    }
-
-    &.is-summer {
-        --_accent: var(--sem-flowering-summer-fg);
-        --_accent-wash: var(--sem-flowering-summer-bg);
-    }
+    margin-inline: calc(50% - 50vw);
+    padding: var(--space-xs) max(var(--space-md), calc(50vw - 38rem));
+    list-style: none;
 }
 
-/* The Image Plate signature (DESIGN.md Shapes): a solid paper mat inside a
-   hairline frame. */
-.c-scheme-teaser__mat {
-    padding: 0.5625rem;
-    background-color: var(--color-paper);
-    border: var(--border-width-hairline) solid
-        color-mix(in srgb, var(--color-ink) 30%, transparent);
-}
-
-.c-scheme-teaser__frame {
+/* Reuses .o-card / .o-card--interactive (DESIGN.md Components → Cards) at
+   real size instead of the old 5.5rem checkbox-on-a-thumbnail tile — the
+   same photo-card grammar as the /plants catalogue, so picking plants for
+   a scheme feels like the portfolio, not a form. Border stays none at rest
+   (the Cards convention: white against grained paper is the edge); a photo
+   card can't be filled to show "chosen" without burying the photograph
+   (DESIGN.md Chosen-Is-Filled Rule), so selection is carried the way
+   .c-identify-option's Radio card already does — a ring around the whole
+   card plus a mark drawn in both states, never a border swap alone. */
+.c-garden-gallery__tile {
     position: relative;
-    overflow: hidden;
-    aspect-ratio: 4 / 5;
-    background-color: var(--color-paper-deep);
 
-    @media (max-width: 40rem) {
-        aspect-ratio: 3 / 2;
+    &.is-selected {
+        box-shadow: 0 0 0 var(--border-width-thin) var(--color-b-cyan-deep);
+    }
+
+    &.is-selected:hover {
+        box-shadow:
+            0 0 0 var(--border-width-thin) var(--color-b-cyan-deep),
+            0 8px 24px rgba(0, 0, 0, 0.15);
+    }
+
+    &:focus-visible {
+        outline: var(--border-width-thin) solid var(--sem-focus-color);
+        outline-offset: 2px;
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+        opacity: 0.5;
+
+        &:hover {
+            box-shadow: none;
+        }
     }
 }
 
-.c-scheme-teaser__photo-img {
-    object-fit: cover;
-}
-
-/* The placeholder: a season-washed field, one line mark, a dashed edge —
-   the app's existing "not filled in yet" grammar, not invented chrome.
-   Replaced the moment a STEP supplies real photography. */
-.c-scheme-teaser__placeholder {
+/* The mark: 1.375rem disc, drawn in both states, opposite corner from
+   where a sun/season badge would sit on the full catalogue card (this
+   tile carries neither — picking is a faster glance than browsing the
+   full portfolio). A white glow keeps it legible over any photograph. */
+.c-garden-gallery__mark {
     position: absolute;
-    inset: 0;
+    inset-block-start: var(--space-xs);
+    inset-inline-end: var(--space-xs);
+    z-index: 1;
     display: grid;
     place-items: center;
-    color: color-mix(in srgb, var(--_accent) 55%, transparent);
-    background: linear-gradient(
-        155deg,
-        var(--_accent-wash),
-        color-mix(in srgb, var(--_accent-wash) 55%, var(--_accent) 16%)
-    );
-    border: var(--border-width-hairline) dashed
-        color-mix(in srgb, var(--_accent) 40%, transparent);
+    inline-size: 1.375rem;
+    block-size: 1.375rem;
+    color: transparent;
+    background-color: var(--color-white);
+    border: var(--border-width-thin) solid var(--color-n-dark-grey);
+    border-radius: var(--radius-roundel);
+    box-shadow: 0 0 0 var(--border-width-hairline) var(--color-white);
+    transition:
+        background-color var(--transition-time-default) var(--transition-easing-default),
+        border-color var(--transition-time-default) var(--transition-easing-default);
 }
 
-.c-scheme-teaser__caption {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-sm);
-
-    > span:first-child {
-        color: var(--color-ink);
-    }
+.c-garden-gallery__tile.is-selected .c-garden-gallery__mark {
+    color: var(--color-white);
+    background-color: var(--color-b-cyan-deep);
+    border-color: var(--color-white);
 }
 
-.c-scheme-teaser__no {
-    flex: none;
-    color: var(--_accent);
+/* min-inline-size: 0 on both — as flex children of .o-card__body
+   (display:flex; flex-direction:column, from the shared Card styles) they
+   default to min-width:auto, which lets a long name grow the box past its
+   card instead of actually clamping/truncating. Confirmed live: without
+   it, up to a third of real tiles overflowed their card by 16–101px on a
+   375px viewport — the ellipsis/line-clamp rules below were already
+   correct, just never getting the chance to engage. */
+.c-garden-gallery__name {
+    display: -webkit-box;
+    overflow: hidden;
+    min-inline-size: 0;
+    color: var(--color-n-deep-grey);
+    overflow-wrap: anywhere;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+}
+
+.c-garden-gallery__latin {
+    display: block;
+    overflow: hidden;
+    min-inline-size: 0;
+    color: var(--color-ink-soft);
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 /* ---- The one-time interstitial (SchemeWelcomeDialog.tsx) ---------------- */
@@ -742,7 +661,7 @@
     scroll-snap-stop: always;
 
     /* Season arc, spring to summer — routed through object-private props
-       per the Semantic Layer Rule, same as HowItWorks' own plates. */
+       per the Semantic Layer Rule. */
     &.is-spring {
         --_accent: var(--sem-flowering-spring-fg);
         --_accent-wash: var(--sem-flowering-spring-bg);
@@ -778,8 +697,8 @@
     object-fit: cover;
 }
 
-/* Same placeholder grammar as HowItWorks' plates — a season-washed field,
-   one line mark, a dashed edge — just larger, this slide's sole subject. */
+/* The app's existing "not filled in yet" grammar — a season-washed field,
+   one line mark, a dashed edge — at this slide's larger, sole-subject scale. */
 .c-onboarding__placeholder {
     position: absolute;
     inset: 0;
@@ -811,7 +730,7 @@
 }
 
 /* Dots on their own row, Back/Next on the row below — not one crowded
-   line. "Create planting scheme" (the last step's label) is long enough
+   line. The last step's label ("Choose your plants") is still long enough
    that sharing a row with Back and the dots read as cluttered, worst on a
    narrow phone where all three had to compress at once. */
 .c-onboarding__nav {
@@ -956,6 +875,38 @@
     }
 }
 
+/* ---- /plant-scheme/plans — the "View all" destination ------------------ */
+
+.c-plans-page__head {
+    display: grid;
+    gap: var(--space-sm);
+}
+
+.c-plans-page__back {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    justify-self: start;
+    color: var(--color-ink-soft);
+    text-decoration: none;
+    transition: color var(--transition-time-default) var(--transition-easing-default);
+
+    &:hover {
+        color: var(--color-n-deep-grey);
+    }
+
+    &:focus-visible {
+        outline: var(--border-width-thin) solid var(--sem-focus-color);
+        outline-offset: 2px;
+    }
+}
+
+.c-plans-page__link {
+    color: var(--color-n-deep-grey);
+    text-decoration: underline;
+    text-underline-offset: 0.2em;
+}
+
 /* ---- Motion opt-out --------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
@@ -963,10 +914,11 @@
         animation: none;
     }
 
-    .c-scheme-start__tile-media,
+    .c-garden-gallery__mark,
     .c-scheme-draft,
     .c-scheme-draft__arrow,
-    .c-scheme-hub__example-arrow {
+    .c-recent-plans__card,
+    .c-plans-page__back {
         transition: none;
     }
 

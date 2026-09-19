@@ -1,7 +1,31 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
+
+/* Nothing to subscribe to — this only needs the client/server snapshot
+   split. The recommended shape for an SSR-safe "has this mounted on the
+   client yet" check (see react.dev), and it sidesteps the
+   react-hooks/set-state-in-effect lint rule a plain
+   useEffect(() => setMounted(true), []) trips. */
+function noopSubscribe() {
+  return () => {};
+}
+
+function useIsMounted() {
+  return useSyncExternalStore(
+    noopSubscribe,
+    () => true,
+    () => false
+  );
+}
+
+const FOCUSABLE_SELECTOR =
+  'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])';
+
+function getFocusable(container: HTMLElement): HTMLElement[] {
+  return Array.from(container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR));
+}
 
 interface ModalProps {
   isOpen: boolean;
@@ -19,6 +43,14 @@ interface ModalProps {
    *  attention (an onboarding moment, first content a gardener meets) wants
    *  the page behind it read as clearly dismissed, not merely dimmed. */
   backdropOpacity?: number;
+  /** CSS selector for the element that should receive focus on open,
+   *  instead of the default "first focusable descendant in DOM order".
+   *  The default is right for most dialogs (usually a single primary
+   *  action or a short form), but wrong for one whose first focusable
+   *  descendant is secondary navigation — e.g. a carousel's step dots
+   *  sitting before its Next button. Point this at a `tabIndex={-1}`
+   *  heading or similar; falls back to the default if nothing matches. */
+  initialFocusSelector?: string;
 }
 
 export function Modal({
@@ -28,22 +60,68 @@ export function Modal({
   panelClassName,
   labelledBy,
   backdropOpacity = 0.4,
+  initialFocusSelector,
 }: ModalProps) {
   const panelRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  /* document.body doesn't exist during SSR — a client component still
+     renders server-side for its initial HTML. Most callers only flip
+     isOpen to true from a client event (safe by then), but one
+     (SchemeWelcomeDialog) opens on mount, so this guard is load-bearing,
+     not defensive-for-nothing. Portal only once mounted on the client. */
+  const mounted = useIsMounted();
 
   useEffect(() => {
-    if (!isOpen) return;
+    /* Also gated on `mounted`, not just `isOpen`: the portal (and
+       panelRef) doesn't exist yet on the render where `mounted` is still
+       false, so an effect that only depends on [isOpen, onClose] would
+       capture panelRef.current as null forever — silently killing both
+       the initial focus and the Tab trap below, since neither a ref
+       attaching nor `mounted` flipping true re-runs an effect that isn't
+       listed as depending on either. */
+    if (!isOpen || !mounted) return;
 
     previousFocusRef.current = document.activeElement as HTMLElement;
 
-    const firstFocusable = panelRef.current?.querySelector<HTMLElement>(
-      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-    );
-    (firstFocusable ?? panelRef.current)?.focus();
+    const panel = panelRef.current;
+    const preferred = initialFocusSelector
+      ? panel?.querySelector<HTMLElement>(initialFocusSelector)
+      : null;
+    const firstFocusable = panel ? getFocusable(panel)[0] : undefined;
+    (preferred ?? firstFocusable ?? panel)?.focus();
 
+    /* Keyboard trap: Escape closes, Tab/Shift+Tab cycle within the panel
+       instead of escaping into whatever the backdrop is still covering.
+       Re-queries focusable descendants on every Tab press rather than
+       caching them once, since a modal's content can change while open
+       (e.g. the welcome dialog's step-by-step carousel). */
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape") {
+        onClose();
+        return;
+      }
+      if (e.key !== "Tab" || !panel) return;
+
+      const focusable = getFocusable(panel);
+      if (focusable.length === 0) {
+        e.preventDefault();
+        panel.focus();
+        return;
+      }
+
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      const active = document.activeElement;
+
+      if (e.shiftKey) {
+        if (active === first || !panel.contains(active)) {
+          e.preventDefault();
+          last.focus();
+        }
+      } else if (active === last || !panel.contains(active)) {
+        e.preventDefault();
+        first.focus();
+      }
     }
 
     document.addEventListener("keydown", onKeyDown);
@@ -51,9 +129,9 @@ export function Modal({
       document.removeEventListener("keydown", onKeyDown);
       previousFocusRef.current?.focus();
     };
-  }, [isOpen, onClose]);
+  }, [isOpen, mounted, onClose, initialFocusSelector]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   return createPortal(
     <div

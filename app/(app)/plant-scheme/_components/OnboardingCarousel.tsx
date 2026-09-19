@@ -5,8 +5,9 @@
  * A dialog is a moment of focused attention a gardener can't be assumed to
  * give for long, so each of the three steps gets the whole panel to itself:
  * a big Image Plate, a real headline, one supporting sentence. Content is
- * SCHEME_ONBOARDING_STEPS — shared with HowItWorks.tsx, the hub's own
- * compact reference to the same three steps.
+ * SCHEME_ONBOARDING_STEPS (schemeOnboardingSteps.ts) — this is now the only
+ * place those three steps are told; the hub's own compact reference
+ * (HowItWorks.tsx) was retired once this dialog covered the same ground.
  *
  * Built on the app's existing carousel primitives rather than a bespoke
  * drag implementation: a native CSS scroll-snap track (the same mechanic
@@ -25,11 +26,17 @@
  * way, not the only way. Arrow-key navigation works from anywhere in the
  * dialog once it has focus.
  *
- * `onFinish` fires once, from the last step's primary button — the
- * "Create planting scheme" action the brief asks for. Escape, the
- * backdrop, and the dialog's own close button are the gardener's other,
- * equally-valid ways out (SchemeWelcomeDialog.tsx); this carousel doesn't
- * gate finishing on stepping through every slide.
+ * `onFinish` fires once, from the last step's primary button. Labelled
+ * "Choose your plants" rather than the earlier "Create planting scheme" —
+ * a critique caught that wording promising a scheme this click doesn't
+ * create, while the click itself did nothing beyond closing (same as
+ * every other exit). SchemeWelcomeDialog's `finish` now actually carries
+ * the moment forward (focuses the "Add a plant" field below), so the
+ * label had to stop overclaiming what one tap here actually starts.
+ * Escape, the backdrop, and the dialog's own close button are the
+ * gardener's other, equally-valid ways out (SchemeWelcomeDialog.tsx) —
+ * genuinely different from finishing, not just a relabelled twin — this
+ * carousel doesn't gate finishing on stepping through every slide.
  *
  * Styles: `.c-onboarding` in styles/components/_scheme-hub.scss.
  */
@@ -186,7 +193,7 @@ export default function OnboardingCarousel({ onFinish }: { onFinish: () => void 
               "c-onboarding__next"
             )}
           >
-            {isLast ? "Create planting scheme" : "Next"}
+            {isLast ? "Choose your plants" : "Next"}
             <Icon name="arrowRight" size={16} />
           </button>
         </div>

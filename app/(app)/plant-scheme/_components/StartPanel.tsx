@@ -6,27 +6,38 @@
  * what you're considering — into a single starting tray, because the only
  * difference between them was where a plant came from.
  *
- * One field does both jobs: typing filters the garden grid below, and a name
- * that isn't in the garden can be added as a plant you're considering. The
- * two kinds keep their spec behaviour downstream (PlantSchemeContext
- * `startScheme`): garden plants are resolved records and start on the scheme
- * list; typed names have no identity yet, so they only inform the chat.
+ * Two parts, rendered as siblings rather than one box (see
+ * `.c-scheme-start-group` in the SCSS): a compact tray card (this file,
+ * `.c-scheme-start`) holding the decisive bits — what's chosen, and the
+ * Start button — and GardenGallery.tsx, an open, wide browsing surface for
+ * the rest of the garden. They used to share one bordered white sheet; a
+ * gallery of dozens of plant photos wants room the tray's compact card
+ * shouldn't have to stretch to, so the gallery now breaks out past the
+ * page's own measure while the tray stays put.
+ *
+ * One field (in GardenGallery) does both jobs: typing filters the garden
+ * grid, and a name that isn't in the garden can be added as a plant you're
+ * considering. The two kinds keep their spec behaviour downstream
+ * (PlantSchemeContext `startScheme`): garden plants are resolved records and
+ * start on the scheme list; typed names have no identity yet, so they only
+ * inform the chat.
  *
  * The tray filling is the hub's one authored moment (`scheme-pick-in`).
  *
- * Styles: `.c-scheme-start` in styles/components/_scheme-hub.scss.
+ * Styles: `.c-scheme-start` / `.c-garden-gallery` in
+ * styles/components/_scheme-hub.scss.
  */
 
 import { useId, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import Link from "next/link";
 import clsx from "clsx";
 import { plantDisplayTitle } from "@/lib/plantName";
 import buttonStyles from "@/components/ui/Button.module.css";
 import { Icon } from "@/components/ui/Icon";
 import type { Plant } from "@/lib/types";
 import { usePlantScheme, type GardenPlantRef } from "./PlantSchemeContext";
+import GardenGallery from "./GardenGallery";
 
 const MAX_PLANTS = 5;
 
@@ -133,185 +144,96 @@ export default function StartPanel({ plants }: { plants: PickerPlant[] | null })
       : `Add “${trimmed}” as a plant you’re considering`;
 
   return (
-    <section className="c-scheme-start" aria-labelledby={ids.title}>
-      <div className="c-scheme-start__head">
-        <h2 id={ids.title} className="pica o-type-display kirk">
-          Plan a new scheme
-        </h2>
-        <p className="brevier c-scheme-start__lead">
-          Choose up to five plants to build around. Plotted asks about the spot, then
-          suggests plants to go with them, each with a reason.
-        </p>
-      </div>
-
-      <div className="c-scheme-start__tray">
-        <div className="c-scheme-start__row">
-          <span id={ids.tray} className="o-type-label">
-            Starting plants
-          </span>
-          <span className="o-type-label c-scheme-start__count">
-            {picks.length} / {MAX_PLANTS}
-          </span>
-        </div>
-        <ul className="c-scheme-start__picks" aria-labelledby={ids.tray}>
-          {picks.map((pick) => (
-            <li key={pick.key} className="c-scheme-start__pick">
-              <span className="c-scheme-start__pick-mark">
-                {pick.kind === "garden" && pick.plant.photo_url ? (
-                  <Image src={pick.plant.photo_url} alt="" fill sizes="32px" />
-                ) : (
-                  <Icon name={pick.kind === "garden" ? "sprout" : "leaf"} size={14} />
-                )}
-              </span>
-              <span className="c-scheme-start__pick-name brevier">
-                {pick.name}
-                <span className="u-visually-hidden">
-                  {pick.kind === "garden" ? " (in your garden)" : " (considering)"}
-                </span>
-              </span>
-              <button
-                type="button"
-                onClick={() => remove(pick.key)}
-                aria-label={`Remove ${pick.name}`}
-                className="c-scheme-start__pick-remove"
-              >
-                <Icon name="close" size={12} />
-              </button>
-            </li>
-          ))}
-          {picks.length === 0 && (
-            <li className="c-scheme-start__pick is-empty brevier">
-              {garden.length === 0
-                ? "Nothing chosen yet. Type a plant name below to get started."
-                : "Nothing chosen yet. Pick from your garden or type a name."}
-            </li>
-          )}
-        </ul>
-        {/* The action sits with the tray it acts on, so it stays in the first
-            viewport however long the garden grid below runs. */}
-        <button
-          type="button"
-          onClick={start}
-          disabled={picks.length === 0}
-          className={clsx(
-            buttonStyles["o-button"],
-            buttonStyles["o-button--primary"],
-            buttonStyles["o-button--w100"]
-          )}
-        >
-          {picks.length === 0
-            ? "Start the conversation"
-            : `Start with ${picks.length} plant${picks.length === 1 ? "" : "s"}`}
-          <Icon name="arrowRight" size={16} />
-        </button>
-      </div>
-
-      <form
-        className="c-scheme-start__find"
-        onSubmit={(e) => {
-          e.preventDefault();
-          addFromField();
-        }}
-      >
-        <label htmlFor={ids.field} className="o-type-label">
-          Add a plant
-        </label>
-        <div className="c-scheme-start__field-wrap">
-          <Icon name="search" size={16} className="c-scheme-start__field-icon" />
-          <input
-            ref={inputRef}
-            id={ids.field}
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Escape") setQuery("");
-            }}
-            disabled={full}
-            placeholder={
-              garden.length > 0 ? "Search your garden or type any plant" : "Type any plant, e.g. Salvia"
-            }
-            autoComplete="off"
-            aria-describedby={full ? ids.fieldNote : undefined}
-            className="c-scheme-start__field primer"
-          />
-        </div>
-        {full ? (
-          <p id={ids.fieldNote} className="minion c-scheme-start__note">
-            That&apos;s five, plenty to start from. Remove one to swap it for another.
+    <div className="c-scheme-start-group">
+      <section className="c-scheme-start" aria-labelledby={ids.title}>
+        <div className="c-scheme-start__head">
+          <h2 id={ids.title} className="pica o-type-display kirk">
+            Plan a new scheme
+          </h2>
+          <p className="brevier c-scheme-start__lead">
+            Choose up to five plants to build around. Plotted asks about the spot, then
+            suggests plants to go with them, each with a reason.
           </p>
-        ) : trimmed && addLabel ? (
-          <button type="submit" className="c-scheme-start__add brevier">
-            <Icon name="add" size={14} />
-            {addLabel}
-          </button>
-        ) : (
-          /* Nothing to browse below: fold that fact into the field's own
-             helper line instead of giving an empty garden its own labelled
-             section — one quiet sentence, not a whole dead group. */
-          garden.length === 0 && (
-            <p className="minion c-scheme-start__note">
-              {plants === null ? (
-                "Couldn't load your garden plants just now — you can still type a name above."
-              ) : (
-                <>
-                  No plants in your garden yet —{" "}
-                  <Link href="/plants/new">add one</Link>, or just type a name above.
-                </>
-              )}
-            </p>
-          )
-        )}
-      </form>
+        </div>
 
-      {garden.length > 0 && (
-        <div className="c-scheme-start__garden">
+        <div className="c-scheme-start__tray">
           <div className="c-scheme-start__row">
-            <span id={ids.garden} className="o-type-label">
-              In your garden
+            <span id={ids.tray} className="o-type-label">
+              Starting plants
             </span>
             <span className="o-type-label c-scheme-start__count">
-              {needle ? `${matches.length} of ${garden.length}` : garden.length}
+              {picks.length} / {MAX_PLANTS}
             </span>
           </div>
-
-          {matches.length === 0 ? (
-            <p className="brevier c-scheme-start__empty">
-              None of your plants match &ldquo;{trimmed}&rdquo;.
-            </p>
-          ) : (
-            <ul className="c-scheme-start__grid" aria-labelledby={ids.garden}>
-              {matches.map((plant) => {
-                const picked = isPicked(plant);
-                const title = plantDisplayTitle(plant);
-                return (
-                  <li key={plant.id}>
-                    <button
-                      type="button"
-                      onClick={() => toggleGarden(plant)}
-                      aria-pressed={picked}
-                      disabled={!picked && full}
-                      className="c-scheme-start__tile"
-                    >
-                      <span className="c-scheme-start__tile-media">
-                        {plant.photo_url ? (
-                          <Image src={plant.photo_url} alt="" fill sizes="112px" />
-                        ) : (
-                          <Icon name="sprout" size={22} />
-                        )}
-                        <span className="c-scheme-start__tile-mark" aria-hidden="true">
-                          <Icon name="check" size={12} />
-                        </span>
-                      </span>
-                      <span className="c-scheme-start__tile-name minion">{title}</span>
-                    </button>
-                  </li>
-                );
-              })}
-            </ul>
-          )}
+          <ul className="c-scheme-start__picks" aria-labelledby={ids.tray}>
+            {picks.map((pick) => (
+              <li key={pick.key} className="c-scheme-start__pick">
+                <span className="c-scheme-start__pick-mark">
+                  {pick.kind === "garden" && pick.plant.photo_url ? (
+                    <Image src={pick.plant.photo_url} alt="" fill sizes="32px" />
+                  ) : (
+                    <Icon name={pick.kind === "garden" ? "sprout" : "leaf"} size={14} />
+                  )}
+                </span>
+                <span className="c-scheme-start__pick-name brevier">
+                  {pick.name}
+                  <span className="u-visually-hidden">
+                    {pick.kind === "garden" ? " (in your garden)" : " (considering)"}
+                  </span>
+                </span>
+                <button
+                  type="button"
+                  onClick={() => remove(pick.key)}
+                  aria-label={`Remove ${pick.name}`}
+                  className="c-scheme-start__pick-remove"
+                >
+                  <Icon name="close" size={12} />
+                </button>
+              </li>
+            ))}
+            {picks.length === 0 && (
+              <li className="c-scheme-start__pick is-empty brevier">
+                {garden.length === 0
+                  ? "Nothing chosen yet. Type a plant name below to get started."
+                  : "Nothing chosen yet. Pick from your garden or type a name."}
+              </li>
+            )}
+          </ul>
+          {/* The action sits with the tray it acts on — always in the first
+              viewport, whatever else the gallery below is doing. */}
+          <button
+            type="button"
+            onClick={start}
+            disabled={picks.length === 0}
+            className={clsx(
+              buttonStyles["o-button"],
+              buttonStyles["o-button--primary"],
+              buttonStyles["o-button--w100"]
+            )}
+          >
+            {picks.length === 0
+              ? "Start the conversation"
+              : `Start with ${picks.length} plant${picks.length === 1 ? "" : "s"}`}
+            <Icon name="arrowRight" size={16} />
+          </button>
         </div>
-      )}
-    </section>
+      </section>
+
+      <GardenGallery
+        plants={plants}
+        garden={garden}
+        matches={matches}
+        query={query}
+        setQuery={setQuery}
+        inputRef={inputRef}
+        full={full}
+        trimmed={trimmed}
+        addLabel={addLabel}
+        onSubmitField={addFromField}
+        isPicked={isPicked}
+        onToggle={toggleGarden}
+        ids={ids}
+      />
+    </div>
   );
 }

@@ -1,55 +1,59 @@
 /* ──────────────────────────────────────────────────────────────────────────
-   PLANTING SCHEMES HUB — "The Workbench"             seed: de9b55af
+   PLANTING SCHEMES HUB — "One Task, One Page"        seed: de9b55af → 2
 
-   THESIS  Planting schemes are one bench, not a corridor. Starting a scheme,
-   carrying on with a draft and reopening a finished plan share one wide page,
-   refusing the old gallery → A/B door → picker → chat hand-offs.
+   THESIS  A gardener opening /plant-scheme wants one of two things: start a
+   new scheme, or go back to one they already have. Showing both a full
+   browsing grid and the full starting UI at once — the original "workbench"
+   two-column build — made every visit do double duty, competing for
+   attention whichever the gardener actually came for. This revision keeps
+   the single page (still no A/B door, no picker step) but makes starting the
+   one job: a light "Recent plans" glance up top, everything else in
+   /plant-scheme/plans, one column throughout.
 
    OWN-WORLD  Plotted's paper ground, hairlines and white raised sheets. The
    start panel is the page's blank sheet with a spring-washed head (a border
-   just beginning); drafts wear a summer wash and their own half-drawn border
-   elevation; finished plans stay the photo-led catalogue cards.
+   just beginning); recent plans stay the photo-led catalogue idiom, scaled
+   down to a glance.
 
    STORY  A new gardener sees what a scheme is and starts one without leaving
-   the page. A returning gardener finds their drafts first, then their plans.
+   the page. A returning gardener sees their last few plans first, then the
+   same starting panel — "View all" is one tap away, never in the way.
 
-   FIRST VIEWPORT  ≥60rem: title and one-line lead across the top; Finished
-   plans in the left column; an equal-width sticky start panel on the right
-   (starting tray with the primary Start directly under it, then
-   type-any-name, then garden plants). Narrow: title → start → plans.
+   LAYOUT  Single column, always — no breakpoint reflows the page into two.
+   Title and lead; Recent plans (up to three, "View all →" to the full
+   list); Plan a new scheme. On mobile the recent row is a horizontal
+   scroller (the app's established idiom, e.g. the dashboard's card
+   scrollers); it resolves into a plain row from --breakpoint-tablet, since
+   three cards are never worth a scroll affordance once there's room to
+   just show them.
 
-   Carry on drafts (SHOW_DRAFTS below) are switched off while focus is on
-   the first-run journey — commented out, not deleted, so the shelf and its
-   mock data are ready to switch back on.
+   Carry on drafts (SHOW_DRAFTS below) are switched off while nothing
+   persists yet — commented out, not deleted. When reactivated they belong
+   inside the Recent row (interleaved by recency with finished plans, not a
+   shelf of their own) — the "in progress" half of "recently created or in
+   progress" this row is named for.
 
-   FIRST RUN (no drafts, no plans, no error — `is-first-run`): the two-column
-   workbench is a browsing surface, and a brand-new gardener has nothing to
-   browse yet, so it collapses to one centred column at a focused measure —
-   the start panel, full stop. "How it works" moves below it, closed by
-   default behind a plain disclosure link, so the first thing a new user
-   meets is the task, not a second dense panel competing for equal
-   attention. It reopens the moment there's something to show (a plan or,
-   later, a draft) and the page returns to the workbench.
+   FIRST RUN (no drafts, no plans, no error — `is-first-run`): nothing to
+   glance at yet, so Recent plans doesn't render at all. The page narrows
+   further, to a focused single-task measure — the start panel, full stop.
 
-   Opened, it is HowItWorks — an editorial triptych, not SchemeExample's
-   working UI fragments: one aspirational line, three short season-washed
-   plates (spring → early-summer → summer), imagery over paragraphs. It
-   breaks the 40rem first-run measure on purpose — photography earns the
-   room the task column doesn't need — via a centred, capped (64rem)
-   breakout, the page visibly "opening up" the moment curiosity is opted
-   into.
+   There used to be a folded "how a scheme comes together" walkthrough
+   beneath the start panel here (HowItWorks.tsx for first run,
+   SchemeExample.tsx once a gardener had plans) — removed once the welcome
+   dialog below covered the same ground for the audience that actually
+   needed it (a first-time gardener), at the point they most needed it
+   (before they've started), rather than as a standing disclosure nobody
+   who already understood the product had reason to open.
 
    WELCOME DIALOG  A genuinely first-time gardener (needsSchemeOnboarding,
-   page.tsx) meets the same HowItWorks content once more, up front and
+   page.tsx) meets OnboardingCarousel's three-step walkthrough, up front and
    forced rather than opt-in — as a dialog over this page, not a separate
    one. The hub is already rendered underneath; dismissing it (the CTA,
    Escape, the backdrop) reveals the page they were already on rather than
-   navigating anywhere. The collapsed disclosure above stays put for anyone
-   who wants the reminder again later — the dialog is one-time, the
-   reference isn't.
+   navigating anywhere. One-time only — see SchemeWelcomeDialog.tsx.
 
-   FORM  Workbench, 2nd of 7 grounded structures (surface round, seed
-   de9b55af); picked by Claude at the gardener's request.
+   FORM  Single-column task page, revised from the original two-column
+   workbench (surface round, seed de9b55af) at the gardener's request.
 
    FINISH  unreviewed and undocumented is unfinished; this build ends with the
    finish review, the verdict, DESIGN.md, and every shipping raster carrying
@@ -57,12 +61,10 @@
    ────────────────────────────────────────────────────────────────────────── */
 
 import clsx from "clsx";
-import SchemeList, { type SchemeSummary } from "@/components/SchemeList";
-import { Icon } from "@/components/ui/Icon";
+import type { SchemeSummary } from "@/components/SchemeList";
 import StartPanel, { type PickerPlant } from "./StartPanel";
 // import DraftShelf from "./DraftShelf";
-import SchemeExample from "./SchemeExample";
-import HowItWorks from "./HowItWorks";
+import RecentPlans from "./RecentPlans";
 import SchemeWelcomeDialog from "./SchemeWelcomeDialog";
 import type { SchemeDraft } from "./mockDrafts";
 
@@ -92,8 +94,7 @@ export default function SchemesHub({
   const hasDrafts = SHOW_DRAFTS && drafts.length > 0;
   const hasPlans = plans.length > 0;
   /* Nothing to browse yet: no in-progress draft, no finished plan, and the
-     read didn't merely fail. The workbench has nothing to be a workbench
-     for, so it isn't one — see the FIRST RUN note above. */
+     read didn't merely fail — see the FIRST RUN note above. */
   const firstRun = !hasDrafts && !hasPlans && !plansError;
 
   return (
@@ -109,11 +110,8 @@ export default function SchemesHub({
         </p>
       </header>
 
-      <div className="c-scheme-hub__start">
-        <StartPanel plants={plants} />
-      </div>
-
-      {/* Carry on — see SHOW_DRAFTS above.
+      {/* Carry on — see SHOW_DRAFTS above. Once real, these interleave into
+          RecentPlans by recency rather than getting a shelf of their own.
       {hasDrafts && (
         <section className="c-scheme-hub__section is-drafts" aria-labelledby="scheme-hub-drafts">
           <h2 id="scheme-hub-drafts" className="pica o-type-display kirk">
@@ -124,64 +122,9 @@ export default function SchemesHub({
       )}
       */}
 
-      {firstRun ? (
-        /* Opt-in, not opt-out: closed by default so the first thing a new
-           gardener meets is the task above, not a second illustrated panel
-           claiming equal attention. */
-        <div className="c-scheme-hub__teaser">
-          <details className="c-scheme-hub__example">
-            <summary className="brevier">
-              See how a scheme comes together
-              <Icon name="arrowDown" size={14} className="c-scheme-hub__example-arrow" />
-            </summary>
-            <HowItWorks />
-          </details>
-        </div>
-      ) : (
-        <section className="c-scheme-hub__section is-plans" aria-labelledby="scheme-hub-plans">
-          {plansError ? (
-            <>
-              <h2 id="scheme-hub-plans" className="pica o-type-display kirk">
-                Finished plans
-              </h2>
-              <p className="brevier c-scheme-hub__error" role="alert">
-                Couldn&apos;t load your plans ({plansError}). Try refreshing the page.
-              </p>
-            </>
-          ) : hasPlans ? (
-            <>
-              <h2 id="scheme-hub-plans" className="pica o-type-display kirk">
-                Finished plans
-              </h2>
-              <SchemeList
-                key={plans.map((s) => `${s.id}:${s.status}`).join(",")}
-                schemes={plans}
-              />
-              <details className="c-scheme-hub__example">
-                <summary className="brevier">
-                  How a scheme comes together
-                  <Icon name="arrowDown" size={14} className="c-scheme-hub__example-arrow" />
-                </summary>
-                <SchemeExample />
-              </details>
-            </>
-          ) : (
-            // hasDrafts true, no plans yet — dead while SHOW_DRAFTS is off.
-            <>
-              <div className="c-scheme-hub__intro">
-                <h2 id="scheme-hub-plans" className="pica o-type-display kirk">
-                  How a scheme comes together
-                </h2>
-                <p className="brevier">
-                  Finished plans will appear here. Until then, this is the shape a scheme
-                  takes.
-                </p>
-              </div>
-              <SchemeExample />
-            </>
-          )}
-        </section>
-      )}
+      {!firstRun && <RecentPlans plans={plans} plansError={plansError} />}
+
+      <StartPanel plants={plants} />
     </div>
   );
 }

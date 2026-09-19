@@ -2,6 +2,16 @@
   max-width: 800px;
   margin-inline: auto;
   padding: var(--space-md);
+  /* Extra clearance at the very bottom so a page's last visible row never
+     renders directly under the site-wide fixed Feedback button
+     (FeedbackButton.tsx: bottom-6/right-6, 44px tall — 24px + 44px from
+     the viewport edge). Confirmed live on /plant-scheme's long scrolling
+     plant gallery: a bottom-right tile's photo and selection mark sat
+     right under the button mid-scroll, a real mis-tap risk on mobile.
+     Fixed here rather than per-page, since any page's last row could
+     collide with this persistent corner element the same way — every
+     .o-page consumer already renders it via AppLayout. */
+  padding-block-end: calc(var(--space-md) + 44px + var(--space-lg));
 }
 
 .o-page-size {
