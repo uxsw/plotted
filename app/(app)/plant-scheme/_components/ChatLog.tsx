@@ -6,7 +6,7 @@
  * host supplies the messages, the composer wiring, and any inline attachments.
  *
  * Pieces: ChatMessage (carries the assistant identity mark) · TypingIndicator ·
- * SendFailedNotice · QuickReplies · ChatComposer.
+ * SendFailedNotice · QuickReplies · AnswerOptions · ChatComposer.
  */
 
 import { forwardRef, useEffect, useId, useState, type ReactNode } from "react";
@@ -133,6 +133,57 @@ export function QuickReplies({
           onClick={() => onPick(option)}
         >
           {option}
+        </button>
+      ))}
+    </div>
+  );
+}
+
+/**
+ * The primary way to answer the current turn — a full-width, single-column
+ * stack of choose-one rows (the same `.c-chat__option` plate DirectionOptions
+ * uses for "which direction?"), so the options read as something to pick
+ * rather than a handful of dismissible suggestions sitting beside the real
+ * input. Picking one submits immediately: there's no persisted "chosen" mark
+ * here, unlike DirectionOptions' committed/reopen pair, because the host
+ * unmounts this the moment the turn advances — nothing is left to show as
+ * decided.
+ */
+export function AnswerOptions({
+  options,
+  onPick,
+  disabled = false,
+}: {
+  options: string[];
+  onPick: (value: string) => void;
+  disabled?: boolean;
+}) {
+  if (options.length === 0) return null;
+  return (
+    <div className="c-chat__options" role="group" aria-label="Suggested answers">
+      {options.map((option) => (
+        <button
+          key={option}
+          type="button"
+          className="c-chat__option"
+          disabled={disabled}
+          onClick={() => onPick(option)}
+        >
+          <span className="c-chat__option__text">
+            <span className="c-chat__option__label primer">{option}</span>
+          </span>
+          <span className="c-chat__option__mark" aria-hidden="true">
+            <Icon
+              name="square"
+              size={18}
+              className="c-chat__option__mark-icon c-chat__option__mark-icon--empty"
+            />
+            <Icon
+              name="squareCheck"
+              size={18}
+              className="c-chat__option__mark-icon c-chat__option__mark-icon--checked"
+            />
+          </span>
         </button>
       ))}
     </div>

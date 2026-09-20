@@ -34,6 +34,24 @@
     color: var(--color-ink-soft);
 }
 
+/* The opening turn's starting-plants summary: StartPanel.tsx's tray pill
+   (`.c-scheme-start__pick`), reused read-only inside a chat bubble instead of
+   a plain comma-joined sentence. */
+.c-scheme-chat__pills {
+    margin-block-start: var(--space-xs);
+}
+
+/* No remove button here, so the pill needs its own trailing space instead of
+   relying on that control's box to provide it (see `.c-scheme-start__pick`
+   in _scheme-hub.scss). No entrance animation either: `scheme-pick-in` is the
+   hub's one authored moment for a plant settling into the tray as you pick
+   it; this is a static summary of a pick already made, and the chat surface
+   around it already spends its own authored moment on the typing dots. */
+.c-scheme-start__pick--static {
+    padding-inline-end: var(--space-sm);
+    animation: none;
+}
+
 /* ---- The destination workspace ------------------------------------------- */
 
 /* The two-pane workspace fills the full viewport width — no product measure.

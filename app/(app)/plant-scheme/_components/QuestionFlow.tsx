@@ -19,12 +19,14 @@
  */
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import Image from "next/image";
 import clsx from "clsx";
 import { Button } from "@/components/ui/Button";
 import buttonStyles from "@/components/ui/Button.module.css";
+import { Icon } from "@/components/ui/Icon";
 import { usePlantScheme } from "./PlantSchemeContext";
 import { MOCK_QUESTIONS } from "./mockData";
-import { ChatMessage, ChatComposer, QuickReplies, SendFailedNotice, TypingIndicator } from "./ChatLog";
+import { ChatMessage, AnswerOptions, ChatComposer, SendFailedNotice, TypingIndicator } from "./ChatLog";
 
 const THINK_MS = 500;
 
@@ -38,8 +40,18 @@ const INTRO_TEXT =
   "A few questions about your space so the scheme fits it — and so future schemes need fewer. Answer what you can; skip anything you're unsure of.";
 
 type Role = "assistant" | "user";
-type Line = { id: string; role: Role; text: string };
+type Line =
+  | { id: string; role: Role; kind: "text"; text: string }
+  | { id: "starting-plants"; role: "assistant"; kind: "plants" };
 type AnswerState = { status: "sending" | "failed"; text: string };
+
+/** One chip in the opening turn's starting-plants summary — the same shape
+ *  StartPanel.tsx's tray pill reads from, minus the remove action (this is a
+ *  record of what the scheme started from, not something still editable
+ *  here). */
+type StartingPlantChip =
+  | { key: string; kind: "garden"; name: string; photoUrl: string | null }
+  | { key: string; kind: "considering"; name: string };
 
 function mockAttempt(simulateFailure: boolean): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -71,8 +83,20 @@ export default function QuestionFlow() {
   const logRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  const startingPlants = useMemo(
-    () => [...selectedGardenPlants.map((p) => p.commonName), ...freeTextPlants],
+  const startingPlantChips = useMemo<StartingPlantChip[]>(
+    () => [
+      ...selectedGardenPlants.map((p) => ({
+        key: `garden:${p.plantId}`,
+        kind: "garden" as const,
+        name: p.commonName,
+        photoUrl: p.photoUrl,
+      })),
+      ...freeTextPlants.map((name) => ({
+        key: `typed:${name}`,
+        kind: "considering" as const,
+        name,
+      })),
+    ],
     [selectedGardenPlants, freeTextPlants]
   );
   const totalQuestions = MOCK_QUESTIONS.length;
@@ -82,28 +106,30 @@ export default function QuestionFlow() {
   const busy = answerState !== null;
 
   const lines = useMemo<Line[]>(() => {
-    const out: Line[] = [{ id: "intro", role: "assistant", text: INTRO_TEXT }];
-    if (startingPlants.length > 0) {
-      out.push({
-        id: "starting-plants",
-        role: "assistant",
-        text: `We're working from ${startingPlants.join(", ")}.`,
-      });
+    const out: Line[] = [{ id: "intro", role: "assistant", kind: "text", text: INTRO_TEXT }];
+    if (startingPlantChips.length > 0) {
+      out.push({ id: "starting-plants", role: "assistant", kind: "plants" });
     }
     outcomes.forEach((outcome, i) => {
       const q = MOCK_QUESTIONS[i];
-      if (q) out.push({ id: `q-${q.id}`, role: "assistant", text: q.prompt });
+      if (q) out.push({ id: `q-${q.id}`, role: "assistant", kind: "text", text: q.prompt });
       out.push({
         id: `a-${i}`,
         role: "user",
+        kind: "text",
         text: outcome.type === "skipped" ? "Skipped" : (outcome.answer ?? ""),
       });
     });
     if (currentQuestion && !busy) {
-      out.push({ id: `q-${currentQuestion.id}`, role: "assistant", text: currentQuestion.prompt });
+      out.push({
+        id: `q-${currentQuestion.id}`,
+        role: "assistant",
+        kind: "text",
+        text: currentQuestion.prompt,
+      });
     }
     return out;
-  }, [startingPlants, outcomes, currentQuestion, busy]);
+  }, [startingPlantChips, outcomes, currentQuestion, busy]);
 
   const roleSeq: Role[] = lines.map((l) => l.role);
   const headsRun = (i: number) => roleSeq[i] === "assistant" && roleSeq[i - 1] !== "assistant";
@@ -206,7 +232,11 @@ export default function QuestionFlow() {
         >
           {lines.map((m, i) => (
             <ChatMessage key={m.id} role={m.role} showFrom={headsRun(i)}>
-              {m.text}
+              {m.kind === "plants" ? (
+                <StartingPlantsSummary chips={startingPlantChips} />
+              ) : (
+                m.text
+              )}
             </ChatMessage>
           ))}
 
@@ -225,7 +255,10 @@ export default function QuestionFlow() {
         {currentQuestion && !busy && (
           <>
             {currentQuestion.suggestions && currentQuestion.suggestions.length > 0 && (
-              <QuickReplies options={currentQuestion.suggestions} onPick={submitAnswer} />
+              <>
+                <AnswerOptions options={currentQuestion.suggestions} onPick={submitAnswer} />
+                <p className="c-scheme-chat__aside brevier">Or answer in your own words below.</p>
+              </>
             )}
 
             <ChatComposer
@@ -267,5 +300,44 @@ export default function QuestionFlow() {
         )}
       </div>
     </div>
+  );
+}
+
+/**
+ * The opening turn's "here's what we're building around" line, rendered as
+ * the same read-only tray pill StartPanel.tsx's starting tray uses (DESIGN.md:
+ * "reuse the tray pill... rather than reinventing it per screen") instead of
+ * a plain comma-joined sentence — a garden plant's photo carries more than
+ * its name alone did, and a scheme with several starting plants reads as a
+ * scannable row instead of a run-on clause. No remove control: this is a
+ * record of what the scheme started from, not the tray itself.
+ */
+function StartingPlantsSummary({ chips }: { chips: StartingPlantChip[] }) {
+  return (
+    <>
+      <span className="brevier">We&rsquo;re working from:</span>
+      <ul
+        className="c-scheme-start__picks c-scheme-chat__pills"
+        aria-label="Starting plants"
+      >
+        {chips.map((chip) => (
+          <li key={chip.key} className="c-scheme-start__pick c-scheme-start__pick--static">
+            <span className="c-scheme-start__pick-mark">
+              {chip.kind === "garden" && chip.photoUrl ? (
+                <Image src={chip.photoUrl} alt="" fill sizes="32px" />
+              ) : (
+                <Icon name={chip.kind === "garden" ? "sprout" : "leaf"} size={14} />
+              )}
+            </span>
+            <span className="c-scheme-start__pick-name brevier">
+              {chip.name}
+              <span className="u-visually-hidden">
+                {chip.kind === "garden" ? " (in your garden)" : " (considering)"}
+              </span>
+            </span>
+          </li>
+        ))}
+      </ul>
+    </>
   );
 }
