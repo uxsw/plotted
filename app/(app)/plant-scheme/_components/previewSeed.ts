@@ -203,4 +203,5 @@ export const PREVIEW_SEED_STATE: PlantSchemeState = {
   finished: true,
   transcript: TRANSCRIPT,
   schemePlants: [...GARDEN_SCHEME_PLANTS, ...SUGGESTION_SCHEME_PLANTS],
+  generationStatus: "idle",
 };

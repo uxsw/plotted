@@ -39,6 +39,11 @@ import { PREVIEW_SEED_STATE } from "./previewSeed";
 export type SchemePath = "existing" | "scratch";
 export type SchemePhase = "questions" | "scheme";
 export type SchemeTier = "back" | "mid" | "ground";
+/** "idle" until the gardener asks to generate; "generating" while the mocked
+ *  save + write-up is in flight; "complete" once it "lands". Reset to "idle"
+ *  by any later change to `schemePlants` — a saved confirmation shouldn't
+ *  keep showing once the list it describes has moved on. */
+export type SchemeGenerationStatus = "idle" | "generating" | "complete";
 
 export type QuestionOutcome = {
   questionId: string;
@@ -150,6 +155,8 @@ export interface PlantSchemeState {
   transcript: ChatEntry[];
   /** Plants explicitly added to the scheme list pane. */
   schemePlants: SchemePlant[];
+  /** See SchemeGenerationStatus. */
+  generationStatus: SchemeGenerationStatus;
 }
 
 export interface PlantSchemeContextValue extends PlantSchemeState {
@@ -174,6 +181,14 @@ export interface PlantSchemeContextValue extends PlantSchemeState {
   removeSchemePlant: (id: string) => void;
   /** Mocked shopping-list toggle on a scheme-list plant (by composite id). */
   toggleShoppingList: (id: string) => void;
+  /** Enter the "generating" state. No-op if the list is empty or a generation
+   *  is already running — the mock timing itself lives in the component that
+   *  calls this (SchemeGenerateAction.tsx), matching where ChatPane owns its
+   *  own mock delay rather than the context. */
+  beginGenerateScheme: () => void;
+  /** Land the mocked generation — no-op unless one is actually in flight, so
+   *  a stale timeout from a since-abandoned attempt can't resurrect it. */
+  finishGenerateScheme: () => void;
   /** Send a free-text refinement message; posts a mocked assistant response. */
   sendRefinementMessage: (text: string) => void;
   /** Pick one of the inline "directional options"; posts follow-up suggestions. */
@@ -199,6 +214,7 @@ const INITIAL_STATE: PlantSchemeState = {
   finished: false,
   transcript: [],
   schemePlants: [],
+  generationStatus: "idle",
 };
 
 const INITIAL_SUGGESTIONS_ENTRY_ID = "entry-initial-suggestions";
@@ -359,12 +375,22 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
         photoUrl: null,
         addedToShoppingList: false,
       };
-      return { ...s, schemePlants: [...s.schemePlants, added] };
+      return {
+        ...s,
+        schemePlants: [...s.schemePlants, added],
+        // A saved confirmation shouldn't keep reading as current once the
+        // list it described has changed — see SchemeGenerationStatus.
+        generationStatus: s.generationStatus === "complete" ? "idle" : s.generationStatus,
+      };
     });
   }, []);
 
   const removeSchemePlant = useCallback((id: string) => {
-    setState((s) => ({ ...s, schemePlants: s.schemePlants.filter((p) => p.id !== id) }));
+    setState((s) => ({
+      ...s,
+      schemePlants: s.schemePlants.filter((p) => p.id !== id),
+      generationStatus: s.generationStatus === "complete" ? "idle" : s.generationStatus,
+    }));
   }, []);
 
   const toggleShoppingList = useCallback((id: string) => {
@@ -374,6 +400,17 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
         p.id === id ? { ...p, addedToShoppingList: !p.addedToShoppingList } : p
       ),
     }));
+  }, []);
+
+  const beginGenerateScheme = useCallback(() => {
+    setState((s) => {
+      if (s.schemePlants.length === 0 || s.generationStatus === "generating") return s;
+      return { ...s, generationStatus: "generating" };
+    });
+  }, []);
+
+  const finishGenerateScheme = useCallback(() => {
+    setState((s) => (s.generationStatus === "generating" ? { ...s, generationStatus: "complete" } : s));
   }, []);
 
   const sendRefinementMessage = useCallback(
@@ -505,6 +542,8 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
       addSuggestedPlant,
       removeSchemePlant,
       toggleShoppingList,
+      beginGenerateScheme,
+      finishGenerateScheme,
       sendRefinementMessage,
       chooseDirection,
       reopenDirection,
@@ -520,6 +559,8 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
       addSuggestedPlant,
       removeSchemePlant,
       toggleShoppingList,
+      beginGenerateScheme,
+      finishGenerateScheme,
       sendRefinementMessage,
       chooseDirection,
       reopenDirection,
