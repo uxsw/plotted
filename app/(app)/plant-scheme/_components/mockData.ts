@@ -35,15 +35,26 @@ export const MOCK_QUESTIONS: MockQuestion[] = [
     id: "intent",
     prompt:
       "What are you hoping this planting adds — colour, structure, wildlife, scent?",
-    suggestions: ["Year-round colour", "Pollinators", "Evergreen structure", "Cut flowers"],
+    suggestions: [
+      "Year-round colour",
+      "Pollinators",
+      "Evergreen structure",
+      "Cut flowers",
+    ],
   },
   {
     id: "style",
-    prompt:
-      "Any style you're drawn to, or plants you'd rather avoid?",
+    prompt: "Any style you're drawn to, or plants you'd rather avoid?",
     suggestions: ["Cottage / informal", "Architectural", "Low maintenance"],
   },
 ];
+
+/** Loose match keys against the aspect/soil answers — see `matchNote.ts`.
+ *  Real horticultural fit for each mock plant, not arbitrary: used only to
+ *  generate the "why this fits" line under a suggestion card, never to filter
+ *  or rank the (fixed, hand-picked) mock lists themselves. */
+export type MockSun = "full-sun" | "partial-shade" | "full-shade";
+export type MockSoil = "free-draining" | "clay" | "damp";
 
 export interface MockSuggestion {
   id: string;
@@ -54,6 +65,8 @@ export interface MockSuggestion {
   badges: string[];
   /** Months in flower, 1–12 — feeds the scheme list's flowering-year strip. */
   months: number[];
+  sun: MockSun;
+  soil: MockSoil;
 }
 
 export const MOCK_TIER_LABELS: Record<MockSuggestion["tier"], string> = {
@@ -62,7 +75,11 @@ export const MOCK_TIER_LABELS: Record<MockSuggestion["tier"], string> = {
   ground: "Ground cover",
 };
 
-export const MOCK_TIER_ORDER: MockSuggestion["tier"][] = ["back", "mid", "ground"];
+export const MOCK_TIER_ORDER: MockSuggestion["tier"][] = [
+  "back",
+  "mid",
+  "ground",
+];
 
 /** Placeholder generated scheme — six plants across the three structural tiers. */
 export const MOCK_SUGGESTIONS: MockSuggestion[] = [
@@ -74,6 +91,8 @@ export const MOCK_SUGGESTIONS: MockSuggestion[] = [
     note: "Gives height at the back and repeat flowers into autumn.",
     badges: ["Wildlife friendly", "Scented"],
     months: [6, 7, 8, 9, 10],
+    sun: "full-sun",
+    soil: "free-draining",
   },
   {
     id: "s2",
@@ -83,6 +102,8 @@ export const MOCK_SUGGESTIONS: MockSuggestion[] = [
     note: "Vertical movement and winter structure behind the perennials.",
     badges: ["Drought tolerant"],
     months: [6, 7, 8, 9],
+    sun: "full-sun",
+    soil: "free-draining",
   },
   {
     id: "s3",
@@ -92,6 +113,8 @@ export const MOCK_SUGGESTIONS: MockSuggestion[] = [
     note: "Long-flowering mid-height filler that pollinators work heavily.",
     badges: ["Pollinators", "Drought tolerant"],
     months: [6, 7, 8, 9, 10],
+    sun: "full-sun",
+    soil: "free-draining",
   },
   {
     id: "s4",
@@ -101,6 +124,8 @@ export const MOCK_SUGGESTIONS: MockSuggestion[] = [
     note: "Flat flower heads contrast the salvia spikes; good for cutting.",
     badges: ["Pollinators", "Cut flowers"],
     months: [6, 7, 8, 9],
+    sun: "full-sun",
+    soil: "free-draining",
   },
   {
     id: "s5",
@@ -110,6 +135,8 @@ export const MOCK_SUGGESTIONS: MockSuggestion[] = [
     note: "Weaves through the front edge and suppresses weeds.",
     badges: ["Wildlife friendly", "Low maintenance"],
     months: [5, 6, 7, 8, 9],
+    sun: "partial-shade",
+    soil: "damp",
   },
   {
     id: "s6",
@@ -119,6 +146,8 @@ export const MOCK_SUGGESTIONS: MockSuggestion[] = [
     note: "Aromatic mat for the sunny front corner; bees love it.",
     badges: ["Pollinators", "Edible"],
     months: [5, 6, 7],
+    sun: "full-sun",
+    soil: "free-draining",
   },
 ];
 
@@ -136,6 +165,8 @@ export const MOCK_FOLLOWUP_SUGGESTIONS: MockSuggestion[] = [
     note: "Airy lace-cap flowers to soften the block planting.",
     badges: ["Pollinators", "Cut flowers"],
     months: [6, 7, 8],
+    sun: "full-sun",
+    soil: "free-draining",
   },
   {
     id: "s3",
@@ -145,6 +176,8 @@ export const MOCK_FOLLOWUP_SUGGESTIONS: MockSuggestion[] = [
     note: "Re-proposed from the starting scheme — add-state is per card.",
     badges: ["Pollinators", "Drought tolerant"],
     months: [6, 7, 8, 9, 10],
+    sun: "full-sun",
+    soil: "free-draining",
   },
 ];
 
@@ -193,6 +226,8 @@ export const MOCK_DIRECTION_FOLLOWUP: Record<string, MockSuggestion[]> = {
       note: "Scrambling pincushion flowers over a long season.",
       badges: ["Pollinators", "Wildlife friendly"],
       months: [6, 7, 8, 9],
+      sun: "full-sun",
+      soil: "free-draining",
     },
     {
       id: "m2",
@@ -202,6 +237,8 @@ export const MOCK_DIRECTION_FOLLOWUP: Record<string, MockSuggestion[]> = {
       note: "See-through grass for a hazy meadow layer.",
       badges: ["Drought tolerant"],
       months: [8, 9, 10],
+      sun: "full-sun",
+      soil: "damp",
     },
   ],
   "d-architectural": [
@@ -213,6 +250,8 @@ export const MOCK_DIRECTION_FOLLOWUP: Record<string, MockSuggestion[]> = {
       note: "Hard vertical accent, evergreen.",
       badges: ["Evergreen"],
       months: [7, 8],
+      sun: "full-sun",
+      soil: "free-draining",
     },
     {
       id: "a2",
@@ -222,6 +261,8 @@ export const MOCK_DIRECTION_FOLLOWUP: Record<string, MockSuggestion[]> = {
       note: "Acid-green domes that hold their shape.",
       badges: ["Drought tolerant", "Evergreen"],
       months: [3, 4, 5],
+      sun: "full-sun",
+      soil: "free-draining",
     },
   ],
   "d-edible": [
@@ -233,6 +274,8 @@ export const MOCK_DIRECTION_FOLLOWUP: Record<string, MockSuggestion[]> = {
       note: "Dramatic silver foliage and an edible crop.",
       badges: ["Edible", "Pollinators"],
       months: [7, 8, 9],
+      sun: "full-sun",
+      soil: "free-draining",
     },
     {
       id: "e2",
@@ -242,6 +285,8 @@ export const MOCK_DIRECTION_FOLLOWUP: Record<string, MockSuggestion[]> = {
       note: "Edible flowers and leaves, scrambles over bare soil.",
       badges: ["Edible", "Pollinators"],
       months: [6, 7, 8, 9, 10],
+      sun: "full-sun",
+      soil: "free-draining",
     },
   ],
 };

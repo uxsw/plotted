@@ -14,7 +14,7 @@ Lives at `styles/objects/_badge.scss`. Living document — update in place as co
 
 | Modifier | Represents | Colour status |
 |---|---|---|
-| `is-sm` | smaller text size (0.65rem), tighter line-height and inline padding | — |
+| `is-sm` | smaller text size (matches `.minion`'s clamp, ~11.6–12.8px), tighter line-height and inline padding | — |
 | `is-bug` / `is-error` | error/bug state | ✅ confirmed — `--sem-color-error-bg`/`-fg` |
 | `is-feedback` / `is-info` / `is-suggestion-count` | intentionally identical (confirmed) — also covers the legacy "UX issue" feedback type | ✅ confirmed — `--sem-color-info-bg`/`-fg` |
 | `is-wildlife-friendly` | suggestion category | ✅ confirmed — `--sem-color-wildlife-friendly-bg`/`-fg` |
@@ -27,6 +27,8 @@ Lives at `styles/objects/_badge.scss`. Living document — update in place as co
 | `is-flowering-winter` / `-spring` / `-early-summer` / `-summer` / `-autumn` | flowering-season colour band, by month-range midpoint | ✅ confirmed — **now tokenised** via `--sem-flowering-*`, superseding the earlier hardcode decision |
 
 **Status:** all modifiers confirmed following visual review, 2026-08-23. All colours now route through the `--sem-*` semantic layer (see `theme.md`) rather than referencing raw palette tokens directly — the preferred pattern for any new state-based modifier going forward.
+
+**2026-09-13:** `is-sm`'s text size was a bespoke 0.65rem (10.4px at the 16px root) — below the 11px accessible-text floor on every trait tag across the app (plant-scheme suggestion cards, `SchemeList.tsx`, `SchemeResults.tsx`, `PlantGrid.tsx`'s flowering-season badge, the dashboard scroller's suggestion-count pill). Found by both a live detector pass and an LLM design critique of `/plant-scheme/chat`. Fixed by matching `.minion`'s clamp instead of inventing a new value, per the One Scale Rule.
 
 **⚠️ Open bugs, not yet fixed (found during doc review of the colour-token pass):**
 - `_variables.scss`, `--sem-full-shade-fg` declaration — missing trailing semicolon, will break Sass compilation.

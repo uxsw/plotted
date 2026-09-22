@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "layout-transition",
+        "value": "*",
+        "files": [
+          "components/ui/Button.module.css"
+        ],
+        "createdAt": "2026-09-19T19:55:51.305Z",
+        "reason": "Pre-existing, documented interaction: .o-button--flush-start's padding-inline-start transition is DESIGN.md's own named 'catalogue-margin gesture' (Buttons > Shape modifiers), a single small-delta property on one element, not drift I introduced this session"
+      }
+    ]
+  }
+}

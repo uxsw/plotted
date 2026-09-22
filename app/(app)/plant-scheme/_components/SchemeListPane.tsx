@@ -26,6 +26,7 @@ import { MOCK_TIER_LABELS, MOCK_TIER_ORDER } from "./mockData";
 import { PlantCard } from "./PlantCard";
 import BorderElevation from "./BorderElevation";
 import FloweringYear from "./FloweringYear";
+import SchemeGenerateAction from "./SchemeGenerateAction";
 import { Icon } from "@/components/ui/Icon";
 import type { SchemePlant } from "./PlantSchemeContext";
 
@@ -54,59 +55,85 @@ export default function SchemeListPane() {
   let flatIndex = 0;
 
   return (
-    <section className="c-scheme-list" aria-label="Scheme list">
-      <div className="c-scheme-list__head">
-        <h2 className="o-type-label">Scheme list</h2>
-        <span className="o-type-label c-scheme-list__count">
-          {schemePlants.length} plant{schemePlants.length === 1 ? "" : "s"}
-        </span>
+    <section
+      className="c-scheme-list"
+      aria-label="Scheme list"
+      id="c-scheme-workspace-list"
+      tabIndex={-1}
+    >
+      {/* Reciprocal of ChatPane.tsx's skip link — the first tab stop entering
+          this pane, so a keyboard-only user arrives at something labelled
+          rather than straight into the first "Remove" button. */}
+      <a
+        href="#c-scheme-workspace-chat"
+        className="c-scheme-chat__skip-link u-skip-link minion"
+      >
+        Skip to conversation
+        <Icon name="right" size={12} style={{ transform: "rotate(180deg)" }} />
+      </a>
+
+      {/* Everything that can grow long (the groups of cards) scrolls in its
+          own region on wide screens, so the Generate action below stays
+          pinned in view without hunting for it — the same split .c-chat uses
+          for its log vs. composer. Below 52rem this is just a plain block:
+          the page scrolls and Generate sits at the end of the list, in
+          flow. */}
+      <div className="c-scheme-list__scroll">
+        <div className="c-scheme-list__head">
+          <h2 className="o-type-label">Scheme list</h2>
+          <span className="o-type-label c-scheme-list__count">
+            {schemePlants.length} plant{schemePlants.length === 1 ? "" : "s"}
+          </span>
+        </div>
+
+        <BorderElevation plants={schemePlants} />
+        <FloweringYear plants={schemePlants} />
+
+        {schemePlants.length === 0 ? (
+          <p className="c-scheme-list__empty brevier">
+            Add plants from the conversation and they&apos;ll gather here — the sketch above
+            fills in as the border takes shape.
+          </p>
+        ) : (
+          <div className="c-scheme-list__body">
+            {groups.map((group) => (
+              <div key={group.key} className="c-scheme-list__group">
+                <h3 className="c-scheme-list__group-label o-type-label">{group.label}</h3>
+                <div className="c-scheme-list__grid">
+                  {group.items.map((plant) => {
+                    flatIndex += 1;
+                    const delay = initialIds.has(plant.id) ? (flatIndex - 1) * 70 : 0;
+                    return (
+                      <div
+                        key={plant.id}
+                        className="c-scheme-list__item"
+                        style={{ "--_delay": `${delay}ms` } as React.CSSProperties}
+                      >
+                        <PlantCard
+                          plant={plant}
+                          footer={
+                            <button
+                              type="button"
+                              onClick={() => removeSchemePlant(plant.id)}
+                              aria-label={`Remove ${plant.commonName} from the scheme`}
+                              className="c-suggestion__remove minion"
+                            >
+                              <Icon name="close" size={12} />
+                              Remove
+                            </button>
+                          }
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      <BorderElevation plants={schemePlants} />
-      <FloweringYear plants={schemePlants} />
-
-      {schemePlants.length === 0 ? (
-        <p className="c-scheme-list__empty brevier">
-          Add plants from the conversation and they&apos;ll gather here — the sketch above
-          fills in as the border takes shape.
-        </p>
-      ) : (
-        <div className="c-scheme-list__body">
-          {groups.map((group) => (
-            <div key={group.key} className="c-scheme-list__group">
-              <h3 className="c-scheme-list__group-label o-type-label">{group.label}</h3>
-              <div className="c-scheme-list__grid">
-                {group.items.map((plant) => {
-                  flatIndex += 1;
-                  const delay = initialIds.has(plant.id) ? (flatIndex - 1) * 70 : 0;
-                  return (
-                    <div
-                      key={plant.id}
-                      className="c-scheme-list__item"
-                      style={{ "--_delay": `${delay}ms` } as React.CSSProperties}
-                    >
-                      <PlantCard
-                        plant={plant}
-                        footer={
-                          <button
-                            type="button"
-                            onClick={() => removeSchemePlant(plant.id)}
-                            aria-label={`Remove ${plant.commonName} from the scheme`}
-                            className="c-suggestion__remove minion"
-                          >
-                            <Icon name="close" size={12} />
-                            Remove
-                          </button>
-                        }
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <SchemeGenerateAction />
     </section>
   );
 }

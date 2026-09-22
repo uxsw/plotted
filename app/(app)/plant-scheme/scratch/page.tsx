@@ -1,10 +1,6 @@
-import type { Metadata } from "next";
-import FreeTextPlantEntry from "../_components/FreeTextPlantEntry";
+import { redirect } from "next/navigation";
 
-export const metadata: Metadata = {
-  title: "Enter plants | Plotted",
-};
-
+/* Typing plants you're considering now happens in the hub's start panel. */
 export default function PlantSchemeScratchPage() {
-  return <FreeTextPlantEntry />;
+  redirect("/plant-scheme");
 }

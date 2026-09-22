@@ -32,6 +32,9 @@ export interface PlantCardData {
   note: string;
   badges: string[];
   photoUrl?: string | null;
+  /** "Why this fits" — tied back to the gardener's own aspect/soil answers.
+   *  See matchNote.ts. Absent when nothing genuinely lined up. */
+  matchNote?: string;
 }
 
 /** Map a free-text trait label onto its field-guide mark. Colour used to carry
@@ -80,6 +83,17 @@ export function PlantCard({
         </div>
         <p className="c-suggestion__latin primer">{plant.latinName}</p>
         {plant.note && <p className="c-suggestion__note brevier">{plant.note}</p>}
+        {/* Grouped with the editorial note above, not the badge/tag row below —
+            both are prose reasoning about the plant; badges are labels, a
+            different kind of thing. Keeping the two "why" registers together
+            (rather than sandwiching this between badges and footer) is the
+            fix for a reviewer note that the two blurred together. */}
+        {plant.matchNote && (
+          <p className="c-suggestion__match minion">
+            <Icon name="check" size={11} />
+            {plant.matchNote}
+          </p>
+        )}
         {plant.badges.length > 0 && (
           <div className="c-suggestion__badges">
             {plant.badges.map((b) => (

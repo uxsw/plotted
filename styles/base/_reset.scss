@@ -1,5 +1,14 @@
 
 body {
+  /* Guards against exactly one class of bug: a `calc(50% - 50vw)` breakout
+     (the garden gallery grid's, and any future one) measuring `50vw`
+     against the full viewport while its own `50%` excludes the vertical
+     scrollbar's width — a ~7-15px mismatch that otherwise manifests as a
+     genuine page-level horizontal scrollbar. Doesn't affect `position:
+     fixed` content (its containing block is the viewport, not body, so
+     e.g. the feedback button is unaffected) or Radix's portalled,
+     viewport-positioned popovers. */
+  overflow-x: hidden;
   background-color: var(--color-paper);
   color: var(--color-n-deep-grey);
   font-family: var(--font-inter), sans-serif;

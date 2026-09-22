@@ -347,7 +347,7 @@ export default function SchemeList({ schemes: initialSchemes }: { schemes: Schem
       <div className="o-card-grid">
         <button
           type="button"
-          onClick={() => router.push("/schemes/new")}
+          onClick={() => router.push("/plant-scheme")}
           className="c-first-plant-card"
         >
           <div className="c-first-plant-card__media">

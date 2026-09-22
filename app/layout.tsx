@@ -1,5 +1,4 @@
 import type { Metadata, Viewport } from "next";
-import Script from "next/script";
 import { Fraunces, Inter, Spline_Sans_Mono } from "next/font/google";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { PwaInstallPromptProvider } from "@/components/PwaInstallPromptProvider";
@@ -125,10 +124,7 @@ export default function RootLayout({
           {children}
         </PwaInstallPromptProvider>
         <ServiceWorkerRegister />
-      {/* impeccable-live-start */}
-<Script src="http://localhost:8400/live.js?token=bfe81632-7284-4a2e-9fad-99efe1ca75d3" strategy="afterInteractive" />
-{/* impeccable-live-end */}
-</body>
+      </body>
     </html>
   );
 }

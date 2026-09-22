@@ -7,6 +7,12 @@
     --color-paper-deep: #F2ECDB;
     --color-ink: #2B2A24;
     --color-ink-soft: #5B574A;
+    /* One step darker than ink, same warm hue scaled down rather than a
+       cold pure black — added for the primary button's text: neither ink
+       nor n-deep-grey clears 4.5:1 against marigold (0.65:1 / 4.27:1 and
+       4.10:1 respectively, measured), so the darkest existing neutral
+       still failed AA on the app's single most-used CTA. */
+    --color-ink-deep: #1C1B17;
     --color-sand: #eae5d7;
     --color-sand-line: #dfd8c3;
     --color-white: #FFF;

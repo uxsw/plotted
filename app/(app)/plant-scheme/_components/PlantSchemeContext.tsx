@@ -33,11 +33,17 @@ import {
   MOCK_SUGGESTIONS,
   type MockSuggestion,
 } from "./mockData";
+import { buildMatchNote } from "./matchNote";
 import { PREVIEW_SEED_STATE } from "./previewSeed";
 
 export type SchemePath = "existing" | "scratch";
 export type SchemePhase = "questions" | "scheme";
 export type SchemeTier = "back" | "mid" | "ground";
+/** "idle" until the gardener asks to generate; "generating" while the mocked
+ *  save + write-up is in flight; "complete" once it "lands". Reset to "idle"
+ *  by any later change to `schemePlants` — a saved confirmation shouldn't
+ *  keep showing once the list it describes has moved on. */
+export type SchemeGenerationStatus = "idle" | "generating" | "complete";
 
 export type QuestionOutcome = {
   questionId: string;
@@ -56,6 +62,9 @@ export interface SuggestionPlant {
   badges: string[];
   /** Months in flower, 1–12 — aggregated into the scheme list's year strip. */
   months: number[];
+  /** "Why this fits" — see matchNote.ts. Undefined when nothing genuinely
+   *  lines up with what the gardener said, rather than a fabricated match. */
+  matchNote?: string;
 }
 
 /**
@@ -125,7 +134,8 @@ export type ChatEntry =
     };
 
 export interface PlantSchemeState {
-  /** Which entry path the user chose, or null before the A/B choice. */
+  /** The journey's accent family, or null before a scheme is started:
+   *  "existing" when any garden plants were chosen, otherwise "scratch". */
   path: SchemePath | null;
   /** "questions" = still in Q1–Q4 flow; "scheme" = persistent split-pane view. */
   phase: SchemePhase;
@@ -145,12 +155,17 @@ export interface PlantSchemeState {
   transcript: ChatEntry[];
   /** Plants explicitly added to the scheme list pane. */
   schemePlants: SchemePlant[];
+  /** See SchemeGenerationStatus. */
+  generationStatus: SchemeGenerationStatus;
 }
 
 export interface PlantSchemeContextValue extends PlantSchemeState {
-  choosePath: (path: SchemePath) => void;
-  setSelectedGardenPlants: (plants: GardenPlantRef[]) => void;
-  setFreeTextPlants: (names: string[]) => void;
+  /**
+   * Begin a fresh scheme from the hub's start panel. Either list may be empty,
+   * not both: garden plants are resolved records (pre-populated onto the list
+   * later), typed names are chat context only.
+   */
+  startScheme: (gardenPlants: GardenPlantRef[], freeTextPlants: string[]) => void;
   answerQuestion: (questionId: string, answer: string) => void;
   skipQuestion: (questionId: string) => void;
   /** Stop asking questions (does not itself change phase). */
@@ -166,10 +181,24 @@ export interface PlantSchemeContextValue extends PlantSchemeState {
   removeSchemePlant: (id: string) => void;
   /** Mocked shopping-list toggle on a scheme-list plant (by composite id). */
   toggleShoppingList: (id: string) => void;
+  /** Enter the "generating" state. No-op if the list is empty or a generation
+   *  is already running — the mock timing itself lives in the component that
+   *  calls this (SchemeGenerateAction.tsx), matching where ChatPane owns its
+   *  own mock delay rather than the context. */
+  beginGenerateScheme: () => void;
+  /** Land the mocked generation — no-op unless one is actually in flight, so
+   *  a stale timeout from a since-abandoned attempt can't resurrect it. */
+  finishGenerateScheme: () => void;
   /** Send a free-text refinement message; posts a mocked assistant response. */
   sendRefinementMessage: (text: string) => void;
   /** Pick one of the inline "directional options"; posts follow-up suggestions. */
   chooseDirection: (sourceEntryId: string, option: DirectionOption) => void;
+  /** Undo a direction pick: reopens the panel so the gardener can choose a
+   *  different one. Leaves everything that panel's choice already posted (the
+   *  assistant's reply, any suggestion cards) in the transcript — picking
+   *  again just adds another round, the same as choosing fresh; nothing the
+   *  gardener already saw or added disappears. */
+  reopenDirection: (sourceEntryId: string) => void;
   /** Wipe all state — used by "Start over". */
   reset: () => void;
 }
@@ -185,6 +214,7 @@ const INITIAL_STATE: PlantSchemeState = {
   finished: false,
   transcript: [],
   schemePlants: [],
+  generationStatus: "idle",
 };
 
 const INITIAL_SUGGESTIONS_ENTRY_ID = "entry-initial-suggestions";
@@ -202,7 +232,10 @@ const DISLIKE_MARKERS = [
   "start again",
 ];
 
-function toSuggestionPlants(mocks: MockSuggestion[]): SuggestionPlant[] {
+function toSuggestionPlants(
+  mocks: MockSuggestion[],
+  outcomes: QuestionOutcome[]
+): SuggestionPlant[] {
   return mocks.map((m) => ({
     plantId: m.id,
     commonName: m.commonName,
@@ -211,6 +244,7 @@ function toSuggestionPlants(mocks: MockSuggestion[]): SuggestionPlant[] {
     note: m.note,
     badges: m.badges,
     months: m.months,
+    matchNote: buildMatchNote(m, outcomes),
   }));
 }
 
@@ -241,17 +275,18 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
   const idCounter = useRef(0);
   const mkId = useCallback((prefix: string) => `${prefix}-${++idCounter.current}`, []);
 
-  const choosePath = useCallback((path: SchemePath) => {
-    setState((s) => ({ ...s, path }));
-  }, []);
-
-  const setSelectedGardenPlants = useCallback((plants: GardenPlantRef[]) => {
-    setState((s) => ({ ...s, selectedGardenPlants: plants }));
-  }, []);
-
-  const setFreeTextPlants = useCallback((names: string[]) => {
-    setState((s) => ({ ...s, freeTextPlants: names }));
-  }, []);
+  const startScheme = useCallback(
+    (gardenPlants: GardenPlantRef[], freeTextPlants: string[]) => {
+      idCounter.current = 0;
+      setState({
+        ...INITIAL_STATE,
+        path: gardenPlants.length > 0 ? "existing" : "scratch",
+        selectedGardenPlants: gardenPlants,
+        freeTextPlants,
+      });
+    },
+    []
+  );
 
   const answerQuestion = useCallback((questionId: string, answer: string) => {
     setState((s) => ({
@@ -280,14 +315,13 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
         kind: "suggestions",
         id: INITIAL_SUGGESTIONS_ENTRY_ID,
         title: "A starting scheme — pick the ones you want on your list.",
-        plants: toSuggestionPlants(MOCK_SUGGESTIONS),
+        plants: toSuggestionPlants(MOCK_SUGGESTIONS, s.outcomes),
       };
-      // Path A only: the garden plants the user picked in step 1 are resolved
-      // records they deliberately selected, so they start already on the list —
-      // no explicit add. Path B's typed names have no resolved identity and stay
-      // chat-context only (schemePlants stays []).
+      // Garden plants picked on the start panel are resolved records the user
+      // deliberately selected, so they start already on the list — no explicit
+      // add. Typed names have no resolved identity and stay chat-context only.
       const seededGardenPlants: SchemePlant[] =
-        s.path === "existing"
+        s.selectedGardenPlants.length > 0
           ? s.selectedGardenPlants.map((g) => ({
               id: `garden:${g.plantId}`,
               origin: "garden" as const,
@@ -341,12 +375,22 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
         photoUrl: null,
         addedToShoppingList: false,
       };
-      return { ...s, schemePlants: [...s.schemePlants, added] };
+      return {
+        ...s,
+        schemePlants: [...s.schemePlants, added],
+        // A saved confirmation shouldn't keep reading as current once the
+        // list it described has changed — see SchemeGenerationStatus.
+        generationStatus: s.generationStatus === "complete" ? "idle" : s.generationStatus,
+      };
     });
   }, []);
 
   const removeSchemePlant = useCallback((id: string) => {
-    setState((s) => ({ ...s, schemePlants: s.schemePlants.filter((p) => p.id !== id) }));
+    setState((s) => ({
+      ...s,
+      schemePlants: s.schemePlants.filter((p) => p.id !== id),
+      generationStatus: s.generationStatus === "complete" ? "idle" : s.generationStatus,
+    }));
   }, []);
 
   const toggleShoppingList = useCallback((id: string) => {
@@ -356,6 +400,17 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
         p.id === id ? { ...p, addedToShoppingList: !p.addedToShoppingList } : p
       ),
     }));
+  }, []);
+
+  const beginGenerateScheme = useCallback(() => {
+    setState((s) => {
+      if (s.schemePlants.length === 0 || s.generationStatus === "generating") return s;
+      return { ...s, generationStatus: "generating" };
+    });
+  }, []);
+
+  const finishGenerateScheme = useCallback(() => {
+    setState((s) => (s.generationStatus === "generating" ? { ...s, generationStatus: "complete" } : s));
   }, []);
 
   const sendRefinementMessage = useCallback(
@@ -398,13 +453,13 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
               kind: "suggestions",
               id: mkId("entry-suggestions"),
               title: "More suggestions",
-              plants: toSuggestionPlants(MOCK_FOLLOWUP_SUGGESTIONS),
+              plants: toSuggestionPlants(MOCK_FOLLOWUP_SUGGESTIONS, state.outcomes),
             },
           ];
 
       setState((s) => ({ ...s, transcript: [...s.transcript, userEntry, ...responseEntries] }));
     },
-    [mkId]
+    [mkId, state.outcomes]
   );
 
   const chooseDirection = useCallback(
@@ -429,7 +484,7 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
               kind: "suggestions",
               id: mkId("entry-suggestions"),
               title: `${option.label} suggestions`,
-              plants: toSuggestionPlants(followupMocks),
+              plants: toSuggestionPlants(followupMocks, state.outcomes),
             },
           ]
         : [
@@ -457,8 +512,19 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
         ],
       }));
     },
-    [mkId]
+    [mkId, state.outcomes]
   );
+
+  const reopenDirection = useCallback((sourceEntryId: string) => {
+    setState((s) => ({
+      ...s,
+      transcript: s.transcript.map((e) =>
+        e.kind === "directions" && e.id === sourceEntryId
+          ? { ...e, chosenOptionId: undefined }
+          : e
+      ),
+    }));
+  }, []);
 
   const reset = useCallback(() => {
     idCounter.current = 0;
@@ -468,9 +534,7 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
   const value = useMemo<PlantSchemeContextValue>(
     () => ({
       ...state,
-      choosePath,
-      setSelectedGardenPlants,
-      setFreeTextPlants,
+      startScheme,
       answerQuestion,
       skipQuestion,
       quickAnswer,
@@ -478,15 +542,16 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
       addSuggestedPlant,
       removeSchemePlant,
       toggleShoppingList,
+      beginGenerateScheme,
+      finishGenerateScheme,
       sendRefinementMessage,
       chooseDirection,
+      reopenDirection,
       reset,
     }),
     [
       state,
-      choosePath,
-      setSelectedGardenPlants,
-      setFreeTextPlants,
+      startScheme,
       answerQuestion,
       skipQuestion,
       quickAnswer,
@@ -494,8 +559,11 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
       addSuggestedPlant,
       removeSchemePlant,
       toggleShoppingList,
+      beginGenerateScheme,
+      finishGenerateScheme,
       sendRefinementMessage,
       chooseDirection,
+      reopenDirection,
       reset,
     ]
   );

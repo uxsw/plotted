@@ -10,18 +10,34 @@
  * All assistant responses are mocked (see PlantSchemeContext). To make the mock
  * read like a real assistant, a sent message shows optimistically with a typing
  * indicator, and the canned reply lands after a short beat — the same rhythm a
- * streamed LLM response will have.
+ * streamed LLM response will have. That beat can also fail: see `attemptTurn`
+ * below for the retry/discard state machine and the `/fail` dev trigger.
  */
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { usePlantScheme, type ChatEntry, type DirectionOption } from "./PlantSchemeContext";
 import { MOCK_QUESTIONS } from "./mockData";
-import { PlantCard } from "./PlantCard";
-import { ChatMessage, ChatComposer, TypingIndicator } from "./ChatLog";
+import { ChatMessage, ChatComposer, SendFailedNotice, TypingIndicator } from "./ChatLog";
 import { DirectionOptions } from "./DirectionOptions";
+import { SuggestionPanel } from "./SuggestionPanel";
 import { Icon } from "@/components/ui/Icon";
 
 const THINK_MS = 700;
+
+/**
+ * Typing "/fail" into the composer and then sending it, or choosing a
+ * direction while it's still sitting there, simulates that turn failing —
+ * the one deliberate hook for exercising the retry/discard state below
+ * without a real backend yet. Same crude-trigger idiom as `DISLIKE_MARKERS`
+ * in PlantSchemeContext.tsx: intentionally not real, replaced the moment a
+ * genuine API call can actually fail on its own.
+ *
+ * The simulated delay is long enough for TypingIndicator's own stall
+ * threshold (STALL_MS, ChatLog.tsx) to show "Still thinking…" before the
+ * failure lands — one test run walks through both new states.
+ */
+const FAIL_TRIGGER = "/fail";
+const SIMULATED_FAILURE_DELAY_MS = 7500;
 
 const INTRO_TEXT =
   "I'll help you turn this into a full planting scheme. Ask for a swap, more options in a direction, or tell me what isn't working — your list only changes when you add something.";
@@ -29,9 +45,32 @@ const INTRO_TEXT =
 type Role = "assistant" | "user";
 type RecapLine = { id: string; role: Role; text: string };
 
+/** One turn in flight or failed — a free-text send or a direction pick. */
+type PendingTurn =
+  | { kind: "text"; text: string }
+  | { kind: "direction"; entryId: string; option: DirectionOption };
+
+type TurnState = { status: "sending" | "failed"; turn: PendingTurn };
+
+function turnBubbleText(turn: PendingTurn): string {
+  return turn.kind === "text" ? turn.text : `Let's try "${turn.option.label}".`;
+}
+
+/** Stands in for the real network call this becomes. Resolves after THINK_MS;
+ *  rejects after SIMULATED_FAILURE_DELAY_MS when asked to. Swapping this for
+ *  a genuine API call is the only change the real integration needs — the
+ *  surrounding retry/stall state machine is already shaped for it. */
+function mockAttempt(simulateFailure: boolean): Promise<void> {
+  return new Promise((resolve, reject) => {
+    window.setTimeout(
+      () => (simulateFailure ? reject(new Error("simulated failure")) : resolve()),
+      simulateFailure ? SIMULATED_FAILURE_DELAY_MS : THINK_MS
+    );
+  });
+}
+
 export default function ChatPane() {
   const {
-    path,
     selectedGardenPlants,
     freeTextPlants,
     outcomes,
@@ -40,23 +79,29 @@ export default function ChatPane() {
     addSuggestedPlant,
     sendRefinementMessage,
     chooseDirection,
+    reopenDirection,
   } = usePlantScheme();
 
   const [draft, setDraft] = useState("");
-  const [pending, setPending] = useState<string | null>(null);
-  /* The picked direction, shown as chosen for the beat before the reply lands
-     and the context stamps it for real — same optimism as the sent message
-     above it, so the plate you clicked never sits unmarked while it waits. */
-  const [pendingChoice, setPendingChoice] = useState<{
-    entryId: string;
-    optionId: string;
-  } | null>(null);
+  /* The turn currently in flight or stuck failed — at most one at a time.
+     Both the composer and the direction rows lock while this is set, so
+     there's never more than one thing to resolve (Retry or Discard) before
+     doing anything else. */
+  const [turnState, setTurnState] = useState<TurnState | null>(null);
+  /* Names this pane as a real landmark region (see the wrapping <section>
+     below) — a symmetric counterpart to the scheme-list pane's own
+     `aria-label="Scheme list"` section, so a keyboard/AT user can jump
+     directly between the two panes rather than tabbing through every
+     control in one to reach the other. */
+  const headingId = useId();
   const logRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const atBottomRef = useRef(true);
 
-  const startingPlants =
-    path === "existing" ? selectedGardenPlants.map((p) => p.commonName) : freeTextPlants;
+  const startingPlants = useMemo(
+    () => [...selectedGardenPlants.map((p) => p.commonName), ...freeTextPlants],
+    [selectedGardenPlants, freeTextPlants]
+  );
 
   const recap = useMemo<RecapLine[]>(() => {
     const out: RecapLine[] = [{ id: "intro", role: "assistant", text: INTRO_TEXT }];
@@ -105,7 +150,7 @@ export default function ChatPane() {
     hasScrolledRef.current = true;
     autoScrollingRef.current = behavior === "smooth";
     el.scrollTo({ top: el.scrollHeight, behavior });
-  }, [recap.length, transcript.length, pending]);
+  }, [recap.length, transcript.length, turnState]);
 
   function onScroll() {
     const el = logRef.current;
@@ -122,34 +167,61 @@ export default function ChatPane() {
     autoScrollingRef.current = false;
   }
 
+  /* The one place a turn actually resolves or fails. `send` and
+     `pickDirection` each build a `PendingTurn` and hand it here; `retry`
+     replays the same turn (always for real — see below); the mock's own
+     mutation only runs once `mockAttempt` resolves, matching the shape a real
+     `fetch(...).then(applyMutation).catch(setFailed)` will take. */
+  function attemptTurn(turn: PendingTurn, simulateFailure: boolean) {
+    setTurnState({ status: "sending", turn });
+    atBottomRef.current = true;
+    mockAttempt(simulateFailure)
+      .then(() => {
+        if (turn.kind === "text") sendRefinementMessage(turn.text);
+        else chooseDirection(turn.entryId, turn.option);
+        setTurnState(null);
+      })
+      .catch(() => {
+        setTurnState({ status: "failed", turn });
+      });
+  }
+
   function send() {
     const text = draft.trim();
-    if (!text || pending) return;
-    setPending(text);
+    if (!text || turnState) return;
     setDraft("");
-    atBottomRef.current = true;
     inputRef.current?.focus();
-    window.setTimeout(() => {
-      sendRefinementMessage(text);
-      setPending(null);
-    }, THINK_MS);
+    attemptTurn({ kind: "text", text }, text.toLowerCase() === FAIL_TRIGGER);
   }
 
   function pickDirection(entryId: string, option: DirectionOption) {
-    if (pending) return;
-    setPending(`Let's try "${option.label}".`);
-    setPendingChoice({ entryId, optionId: option.id });
-    atBottomRef.current = true;
-    window.setTimeout(() => {
-      chooseDirection(entryId, option);
-      setPendingChoice(null);
-      setPending(null);
-    }, THINK_MS);
+    if (turnState) return;
+    const simulateFailure = draft.trim().toLowerCase() === FAIL_TRIGGER;
+    attemptTurn({ kind: "direction", entryId, option }, simulateFailure);
+  }
+
+  /* Retry always attempts for real: in the mock, a transient failure is
+     assumed resolved by the time someone deliberately retries, so this is
+     the one way out of a failed text turn (its wording can't be edited) and
+     the fast path for a failed direction turn. */
+  function retry() {
+    if (!turnState || turnState.status !== "failed") return;
+    attemptTurn(turnState.turn, false);
+  }
+
+  /* The other way out — drop the failed turn without resending, back to
+     idle so the reader can type something else or pick a different
+     direction instead. Never silent: the reader chose this, Discard didn't
+     happen to them. */
+  function discard() {
+    setTurnState(null);
   }
 
   return (
-    <div className="c-chat">
-      <h2 className="long-primer kirk o-type-display">Conversation</h2>
+    <section className="c-chat" aria-labelledby={headingId} id="c-scheme-workspace-chat" tabIndex={-1}>
+      <h2 id={headingId} className="long-primer kirk o-type-display">
+        Conversation
+      </h2>
 
       <div
         ref={logRef}
@@ -175,17 +247,26 @@ export default function ChatPane() {
             schemePlantIds={schemePlants.map((p) => p.id)}
             onAdd={addSuggestedPlant}
             onChooseDirection={pickDirection}
+            onReopenDirection={reopenDirection}
             pendingChoiceId={
-              pendingChoice?.entryId === entry.id ? pendingChoice.optionId : undefined
+              turnState?.status === "sending" &&
+              turnState.turn.kind === "direction" &&
+              turnState.turn.entryId === entry.id
+                ? turnState.turn.option.id
+                : undefined
             }
-            disabled={pending !== null}
+            disabled={turnState !== null}
           />
         ))}
 
-        {pending !== null && (
+        {turnState && (
           <>
-            <ChatMessage role="user">{pending}</ChatMessage>
-            <TypingIndicator />
+            <ChatMessage role="user">{turnBubbleText(turnState.turn)}</ChatMessage>
+            {turnState.status === "sending" ? (
+              <TypingIndicator />
+            ) : (
+              <SendFailedNotice onRetry={retry} onDiscard={discard} />
+            )}
           </>
         )}
       </div>
@@ -195,12 +276,25 @@ export default function ChatPane() {
         value={draft}
         onChange={setDraft}
         onSend={send}
-        disabled={pending !== null}
+        disabled={turnState !== null}
         label="Your reply"
         ariaLabel="Your reply to Plotted"
         placeholder="Ask for a swap, more options, a different direction…"
       />
-    </div>
+
+      {/* Keyboard-only, non-AT users have no equivalent to a screen reader's
+          landmark navigation — this is theirs: a real, labelled next stop
+          instead of a silent jump into the list pane's first control. Hidden
+          until focused (.u-skip-link); the target section is
+          tabIndex={-1}-focusable, see SchemeListPane.tsx. */}
+      <a
+        href="#c-scheme-workspace-list"
+        className="c-scheme-chat__skip-link u-skip-link minion"
+      >
+        Skip to scheme list
+        <Icon name="right" size={12} />
+      </a>
+    </section>
   );
 }
 
@@ -210,6 +304,7 @@ function EntryView({
   schemePlantIds,
   onAdd,
   onChooseDirection,
+  onReopenDirection,
   pendingChoiceId,
   disabled,
 }: {
@@ -218,6 +313,7 @@ function EntryView({
   schemePlantIds: string[];
   onAdd: ReturnType<typeof usePlantScheme>["addSuggestedPlant"];
   onChooseDirection: (entryId: string, option: DirectionOption) => void;
+  onReopenDirection: (entryId: string) => void;
   pendingChoiceId?: string;
   disabled: boolean;
 }) {
@@ -230,46 +326,7 @@ function EntryView({
   }
 
   if (entry.kind === "suggestions") {
-    return (
-      <div className="c-chat__panel">
-        <p className="c-chat__panel-title brevier">{entry.title}</p>
-        <div className="o-stack--compact">
-          {entry.plants.map((plant, i) => {
-            const compositeId = `${entry.id}:${plant.plantId}`;
-            const added = schemePlantIds.includes(compositeId);
-            return (
-              /* Cards in a fresh panel ease in one after another — the scheme
-                 arrives as a planting, not a dump. Keyed by card, so flipping
-                 to "Added" never replays the entrance. */
-              <div
-                key={compositeId}
-                className="c-scheme-chat__arrive"
-                style={{ "--_delay": `${i * 80}ms` } as React.CSSProperties}
-              >
-                <PlantCard
-                  plant={plant}
-                  actions={
-                    added ? (
-                      <span className="c-suggestion__added minion">
-                        <Icon name="check" size={12} /> Added
-                      </span>
-                    ) : (
-                      <button
-                        type="button"
-                        className="c-suggestion__add brevier"
-                        onClick={() => onAdd(entry.id, plant)}
-                      >
-                        + Add
-                      </button>
-                    )
-                  }
-                />
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
+    return <SuggestionPanel entry={entry} schemePlantIds={schemePlantIds} onAdd={onAdd} />;
   }
 
   // entry.kind === "directions"
@@ -277,6 +334,7 @@ function EntryView({
     <DirectionOptions
       entry={entry}
       onChoose={onChooseDirection}
+      onReopen={onReopenDirection}
       pendingChoiceId={pendingChoiceId}
       disabled={disabled}
     />

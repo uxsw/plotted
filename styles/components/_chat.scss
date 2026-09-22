@@ -10,9 +10,11 @@
    with its own messages and slots. Motion is one authored beat (the typing
    dots); everything else is incidental or still.
 
-   Anatomy:  c-chat  >  c-chat__log ( c-chat__msg | c-chat__typing
+   Anatomy:  c-chat  >  c-chat__log ( c-chat__msg | c-chat__typing | c-chat__failed
                                        | c-chat__panel ( c-chat__options
-                                                         ( c-chat__option ) ) )
+                                                           ( c-chat__option )
+                                                         + c-chat__options-reopen
+                                                         | c-chat__panel-group ) )
                      +  c-chat__chips ( c-chat__chip )
                      +  c-chat__composer ( c-chat__composer-label
                                           + c-chat__composer-row
@@ -149,7 +151,7 @@
     border-radius: var(--radius-l);
     border-end-start-radius: var(--radius-s);
 
-    span {
+    &-dot {
         inline-size: 0.375rem;
         block-size: 0.375rem;
         border-radius: var(--radius-roundel);
@@ -163,6 +165,17 @@
             animation-delay: 0.3s;
         }
     }
+
+    /* Visibility of System Status for the genuinely slow reply: after
+       STALL_MS the dots admit they're still going rather than spinning
+       silently forever. An incidental fade-in, not a second authored
+       moment — the dots themselves already hold that role on this surface. */
+    &-stall {
+        margin-inline-start: 0.125rem;
+        color: var(--color-ink-soft);
+        animation: chat-typing-stall-in var(--transition-time-default)
+            var(--transition-easing-default) both;
+    }
 }
 
 @keyframes chat-typing {
@@ -175,6 +188,67 @@
     30% {
         opacity: 1;
         transform: translateY(-0.125rem);
+    }
+}
+
+@keyframes chat-typing-stall-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* ---- Failed turn — the calm retry affordance -------------------------- */
+
+/* Attaches under the optimistic bubble it belongs to. The bubble itself is
+   untouched (still what the gardener said or chose) — only this line reads
+   as a problem. Text colour is `--sem-color-error-bg` (the fresh red, not
+   `--color-r-marigold`): marigold clears only ~3:1 against paper, below the
+   4.5:1 AA floor for body-sized text — a real gap in the marigold-error-text
+   convention `Input.tsx`/`Select.tsx` use elsewhere, not one worth repeating
+   here. The error red is otherwise reserved for the `.o-badge.is-error` fill
+   (DESIGN.md), but as plain text on paper it both passes AA and still reads
+   distinctly as "something needs attention" without the alarm of a filled
+   surface. */
+.c-chat__failed {
+    align-self: flex-end;
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-xs);
+    color: var(--sem-color-error-bg);
+}
+
+.c-chat__failed-icon {
+    flex: none;
+}
+
+.c-chat__failed-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.125rem 0.25rem;
+    color: inherit;
+    background: none;
+    border: none;
+    border-radius: var(--radius-s);
+    font: inherit;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    cursor: pointer;
+
+    /* Darken rather than swap hue on hover — vermillion tested at ~1.7:1
+       against paper, nowhere near AA; mixing toward black only ever
+       increases contrast against a light ground. */
+    &:hover {
+        color: color-mix(in srgb, var(--sem-color-error-bg) 75%, black);
+    }
+    &:focus-visible {
+        outline: var(--border-width-thin) solid var(--sem-focus-color);
+        outline-offset: 1px;
+        text-decoration: none;
     }
 }
 
@@ -193,6 +267,21 @@
 }
 
 .c-chat__panel-title {
+    color: var(--color-ink-soft);
+}
+
+/* Sub-grouping inside a panel — used only above SuggestionPanel.tsx's
+   TIER_GROUP_THRESHOLD, so a 6-card scheme reads as three small chunks
+   (back / mid / ground, the same grouping the scheme-list pane uses) rather
+   than one flat list past the app's own ≤4-visible-choice ceiling. Smaller
+   panels never carry this — .c-chat__panel's own gap is enough there. */
+.c-chat__panel-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.c-chat__panel-group-label {
     color: var(--color-ink-soft);
 }
 
@@ -353,6 +442,39 @@
     &__blurb {
         color: var(--color-ink-soft);
         text-wrap: pretty;
+    }
+}
+
+/* A closed group isn't a dead end. Same quiet-ghost-action convention as
+   `.c-suggestion__remove` (ink-soft, marigold on hover/focus) — this app's
+   established idiom for a reversible, secondary action, not a fresh accent.
+   Sits as a sibling under `.c-chat__options`; the panel's own gap spaces it,
+   no margin of its own needed. */
+.c-chat__options-reopen {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.3125rem 0.5rem;
+    margin-inline-start: -0.5rem;
+    color: var(--color-ink-soft);
+    background: none;
+    border: none;
+    border-radius: var(--radius-s);
+    cursor: pointer;
+    transition: color var(--transition-time-default) var(--transition-easing-default);
+
+    &:hover:not(:disabled),
+    &:focus-visible {
+        color: var(--color-r-marigold);
+    }
+    &:focus-visible {
+        outline: var(--border-width-thin) solid var(--sem-focus-color);
+        outline-offset: 1px;
+    }
+    &:disabled {
+        color: var(--color-n-dark-grey);
+        cursor: not-allowed;
     }
 }
 
@@ -530,9 +652,15 @@
 /* ---- Motion opt-out --------------------------------------------------- */
 
 @media (prefers-reduced-motion: reduce) {
-    .c-chat__typing span {
+    .c-chat__typing-dot {
         animation: none;
         opacity: 0.55;
+    }
+
+    /* The stall caption still appears after STALL_MS — it just arrives, it
+       doesn't fade in. */
+    .c-chat__typing-stall {
+        animation: none;
     }
 
     /* The send button still changes state — it just arrives, it doesn't rise. */
