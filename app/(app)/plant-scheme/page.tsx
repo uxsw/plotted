@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import type { SchemeSummary } from "@/components/SchemeList";
 import { needsSchemeOnboarding } from "@/lib/scheme-onboarding";
@@ -40,7 +41,7 @@ export default async function PlantSchemeHubPage({
 
   const supabase = await createClient();
 
-  const [plantsResult, schemesResult] = await Promise.all([
+  const [plantsResult, schemesResult, savedDraftsResult] = await Promise.all([
     supabase
       .from("plants")
       .select("id, photo_url, genus, species, cultivar, common_names")
@@ -57,6 +58,10 @@ export default async function PlantSchemeHubPage({
       )
       .in("status", ["complete", "failed"])
       .order("created_at", { ascending: false }),
+    supabase
+      .from("plant_scheme_drafts")
+      .select("id, path, updated_at")
+      .order("updated_at", { ascending: false }),
   ]);
 
   /* A failed garden read is not an empty garden: null lets the start panel
@@ -82,13 +87,32 @@ export default async function PlantSchemeHubPage({
         }));
 
   return (
-    <SchemesHub
-      plants={plants}
-      drafts={params.drafts === "0" ? [] : MOCK_DRAFTS}
-      plans={plans}
-      plansError={params.plans === "0" ? null : (schemesResult.error?.message ?? null)}
-      showWelcome={showWelcome}
-      welcomeIsPreview={params.welcome === "1"}
-    />
+    <>
+      <SchemesHub
+        plants={plants}
+        drafts={params.drafts === "0" ? [] : MOCK_DRAFTS}
+        plans={plans}
+        plansError={params.plans === "0" ? null : (schemesResult.error?.message ?? null)}
+        showWelcome={showWelcome}
+        welcomeIsPreview={params.welcome === "1"}
+      />
+      {/* Temporary, unstyled: a way to reopen a persisted draft while the real
+        hub draft cards are still mocked (see SHOW_DRAFTS in SchemesHub). */}
+      {savedDraftsResult.data && savedDraftsResult.data.length > 0 && (
+        <nav aria-label="Saved drafts">
+          <p>Saved drafts</p>
+          <ul>
+            {savedDraftsResult.data.map((d) => (
+              <li key={d.id}>
+                <Link href={`/plant-scheme/chat/${d.id}`}>
+                  {d.path} draft · last saved{" "}
+                  {new Date(d.updated_at).toLocaleString("en-GB")}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+    </>
   );
 }

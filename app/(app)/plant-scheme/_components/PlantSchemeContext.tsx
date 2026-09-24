@@ -3,14 +3,18 @@
 /**
  * Cross-route client state for the conversational planting scheme shell.
  *
- * Stage 1 (UI / state-shape only). Nothing here is persisted — not to a
- * database and not to browser storage — and there is no AI wiring. The question
- * flow and every "assistant" response are driven off hardcoded mock content
- * (see ./mockData.ts).
+ * There is no AI wiring yet: the question flow and every "assistant" response
+ * are driven off hardcoded mock content (see ./mockData.ts).
+ *
+ * Persistence: the question flow (Q1–Q4) is in-memory only. When it completes,
+ * a `plant_scheme_drafts` row is created and the URL moves to
+ * /plant-scheme/chat/[draftId]; from then on every state change is written
+ * through to that row (optimistic local update, async save), and the
+ * [draftId] route rehydrates from it on a hard refresh or new tab. A hard
+ * refresh mid-question-flow still loses the state, as before.
  *
  * The provider is mounted in the segment layout, so state survives client-side
- * navigation between /plant-scheme sub-routes. A hard refresh mid-flow loses the
- * state and the step guards send the user back to the entry point.
+ * navigation between /plant-scheme sub-routes.
  *
  * Deliberately isolated: this file shares no code path with the existing
  * /schemes feature.
@@ -21,11 +25,16 @@ import {
   Suspense,
   useCallback,
   useContext,
+  useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import {
+  createPlantSchemeDraft,
+  updatePlantSchemeDraft,
+} from "@/app/actions/plant-scheme-drafts";
 import {
   MOCK_DIRECTION_FOLLOWUP,
   MOCK_DIRECTION_OPTIONS,
@@ -159,7 +168,27 @@ export interface PlantSchemeState {
   generationStatus: SchemeGenerationStatus;
 }
 
+/**
+ * What goes in `plant_scheme_drafts.state`. `path`/`phase` are real columns;
+ * `generationStatus` is left out because generation is still a client-side
+ * mock — a persisted "generating" would come back stuck after a refresh.
+ */
+export type PersistedDraftState = Omit<PlantSchemeState, "path" | "phase" | "generationStatus">;
+
+/** A `plant_scheme_drafts` row as read back for rehydration. */
+export interface PlantSchemeDraftRecord {
+  id: string;
+  path: SchemePath;
+  phase: SchemePhase;
+  state: Partial<PersistedDraftState>;
+}
+
 export interface PlantSchemeContextValue extends PlantSchemeState {
+  /** The persisted draft this conversation writes through to; null until the
+   *  question flow completes and the row has been created. */
+  draftId: string | null;
+  /** Replace all state with a draft read back from the database. */
+  hydrateDraft: (draft: PlantSchemeDraftRecord) => void;
   /**
    * Begin a fresh scheme from the hub's start panel. Either list may be empty,
    * not both: garden plants are resolved records (pre-populated onto the list
@@ -248,6 +277,12 @@ function toSuggestionPlants(
   }));
 }
 
+function toPersisted(s: PlantSchemeState): PersistedDraftState {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { path, phase, generationStatus, ...rest } = s;
+  return rest;
+}
+
 const PlantSchemeContext = createContext<PlantSchemeContextValue | null>(null);
 
 export function PlantSchemeProvider({ children }: { children: React.ReactNode }) {
@@ -272,12 +307,97 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<PlantSchemeState>(() =>
     previewActive ? PREVIEW_SEED_STATE : INITIAL_STATE
   );
-  const idCounter = useRef(0);
-  const mkId = useCallback((prefix: string) => `${prefix}-${++idCounter.current}`, []);
+  const router = useRouter();
+  const [draftId, setDraftId] = useState<string | null>(null);
+  // Random rather than a counter: a rehydrated transcript's ids must not
+  // collide with entries created after the reload.
+  const mkId = useCallback((prefix: string) => `${prefix}-${crypto.randomUUID()}`, []);
+
+  /* Bumped whenever the conversation is replaced (start, reset, hydrate) so an
+     in-flight draft insert from the previous one can't claim the new one. */
+  const sessionRef = useRef(0);
+  /* Set by completeFlow; the insert itself runs in the effect below once the
+     phase flip has actually landed — callers often queue answerQuestion and
+     completeFlow in the same tick, so completeFlow can't see final state. */
+  const pendingCreateRef = useRef(false);
+  /* `${draftId}:${json}` of the last payload saved or loaded, so unchanged
+     renders (and the hydrate itself) don't trigger a write. */
+  const lastSavedRef = useRef<string | null>(null);
+  /* Writes run strictly in order, so a slow earlier save can never land after
+     (and overwrite) a later one. */
+  const writeChainRef = useRef<Promise<unknown>>(Promise.resolve());
+
+  const beginNewSession = useCallback(() => {
+    sessionRef.current += 1;
+    pendingCreateRef.current = false;
+    lastSavedRef.current = null;
+    setDraftId(null);
+  }, []);
+
+  useEffect(() => {
+    if (!pendingCreateRef.current || state.phase !== "scheme" || !state.path || draftId) return;
+    pendingCreateRef.current = false;
+    const session = sessionRef.current;
+    const persisted = toPersisted(state);
+    const json = JSON.stringify({ phase: state.phase, state: persisted });
+    createPlantSchemeDraft({ path: state.path, phase: state.phase, state: persisted }).then(
+      (result) => {
+        if (sessionRef.current !== session) return;
+        if ("error" in result) {
+          // The conversation carries on unsaved, as it did before persistence.
+          console.error("[PlantSchemeContext] draft create failed:", result.error);
+          return;
+        }
+        lastSavedRef.current = `${result.id}:${json}`;
+        setDraftId(result.id);
+        // Only move the URL if the gardener is still on the id-less chat route.
+        if (window.location.pathname === "/plant-scheme/chat") {
+          router.replace(`/plant-scheme/chat/${result.id}`, { scroll: false });
+        }
+      }
+    );
+  }, [state, draftId, router]);
+
+  useEffect(() => {
+    if (!draftId) return;
+    const persisted = toPersisted(state);
+    const json = JSON.stringify({ phase: state.phase, state: persisted });
+    const key = `${draftId}:${json}`;
+    if (lastSavedRef.current === key) return;
+    lastSavedRef.current = key;
+    const phase = state.phase;
+    writeChainRef.current = writeChainRef.current.then(() =>
+      updatePlantSchemeDraft(draftId, { phase, state: persisted }).then((result) => {
+        if (result && "error" in result) {
+          console.error("[PlantSchemeContext] draft save failed:", result.error);
+        }
+      })
+    );
+  }, [state, draftId]);
+
+  const hydrateDraft = useCallback(
+    (draft: PlantSchemeDraftRecord) => {
+      beginNewSession();
+      const next: PlantSchemeState = {
+        ...INITIAL_STATE,
+        ...draft.state,
+        path: draft.path,
+        phase: draft.phase,
+        generationStatus: "idle",
+      };
+      lastSavedRef.current = `${draft.id}:${JSON.stringify({
+        phase: next.phase,
+        state: toPersisted(next),
+      })}`;
+      setDraftId(draft.id);
+      setState(next);
+    },
+    [beginNewSession]
+  );
 
   const startScheme = useCallback(
     (gardenPlants: GardenPlantRef[], freeTextPlants: string[]) => {
-      idCounter.current = 0;
+      beginNewSession();
       setState({
         ...INITIAL_STATE,
         path: gardenPlants.length > 0 ? "existing" : "scratch",
@@ -285,7 +405,7 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
         freeTextPlants,
       });
     },
-    []
+    [beginNewSession]
   );
 
   const answerQuestion = useCallback((questionId: string, answer: string) => {
@@ -311,6 +431,7 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
   const completeFlow = useCallback(() => {
     setState((s) => {
       if (s.phase === "scheme") return s;
+      pendingCreateRef.current = true;
       const initialEntry: ChatEntry = {
         kind: "suggestions",
         id: INITIAL_SUGGESTIONS_ENTRY_ID,
@@ -527,13 +648,15 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
   }, []);
 
   const reset = useCallback(() => {
-    idCounter.current = 0;
+    beginNewSession();
     setState(INITIAL_STATE);
-  }, []);
+  }, [beginNewSession]);
 
   const value = useMemo<PlantSchemeContextValue>(
     () => ({
       ...state,
+      draftId,
+      hydrateDraft,
       startScheme,
       answerQuestion,
       skipQuestion,
@@ -551,6 +674,8 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
     }),
     [
       state,
+      draftId,
+      hydrateDraft,
       startScheme,
       answerQuestion,
       skipQuestion,
