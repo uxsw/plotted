@@ -7,48 +7,133 @@
  * pane is doing its own scrolling on wide screens, and simply the next thing
  * in flow on a stacked mobile layout.
  *
- * Mocked, like the rest of Stage 1: `beginGenerateScheme` flips the context
- * to "generating", this component holds the fake delay (the same split of
- * responsibility ChatPane uses for its own mock turns — timing lives beside
- * the UI that shows it, not in the context), then `finishGenerateScheme`
- * lands it. The real integration swaps GENERATE_MS for an actual save +
- * write-up call; the surrounding state machine doesn't change.
+ * Real save: it flushes any pending draft writes, POSTs
+ * /api/plant-scheme/[draftId]/save (which returns at once and generates in the
+ * background), then polls /api/schemes/[id]/status — the same endpoint the
+ * /schemes generating page polls — and opens the finished scheme at
+ * /schemes/[id] when it lands. The list and chat are locked while it runs
+ * (see PlantSchemeContext), so what's generated is what's on screen.
  *
- * What "generating" actually produces — the planting-arrangement / care /
- * maintenance write-up itself — is a separate destination page, out of scope
- * here (see SchemeChat.tsx doc comment: this workspace has no results route
- * yet). This component's job ends at a clear, honest confirmation that the
- * plants are saved and the guide exists — not at building that page.
+ * On failure the draft is untouched and the button becomes "Try again". After
+ * a refresh mid-save the context hands back the in-flight scheme id
+ * (`resumeSchemeId`) and polling simply resumes.
  */
 
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { usePlantScheme } from "./PlantSchemeContext";
 import { Icon } from "@/components/ui/Icon";
 import buttonStyles from "@/components/ui/Button.module.css";
+import { STALE_GENERATING_MS } from "@/lib/scheme-generation-timing";
 import clsx from "clsx";
 
-const GENERATE_MS = 1500;
+const POLL_INTERVAL_MS = 3000;
+
+const SAVE_FAILED_MESSAGE =
+  "We couldn't save your scheme this time. Your plants and conversation are safe — please try again.";
+const DRAFT_STALE_MESSAGE =
+  "We couldn't save your latest changes. Check your connection and try again.";
 
 export default function SchemeGenerateAction() {
-  const { schemePlants, generationStatus, beginGenerateScheme, finishGenerateScheme } =
-    usePlantScheme();
-  const timeoutRef = useRef<number | undefined>(undefined);
+  const {
+    schemePlants,
+    generationStatus,
+    draftId,
+    resumeSchemeId,
+    flushDraft,
+    beginGenerateScheme,
+    finishGenerateScheme,
+    failGenerateScheme,
+  } = usePlantScheme();
+  const router = useRouter();
+  const [schemeId, setSchemeId] = useState<string | null>(resumeSchemeId);
+  const [error, setError] = useState<string | null>(null);
 
-  // Stage 1 has no real request to cancel, but the workspace itself is
-  // route-scoped (see PlantSchemeContext's provider comment) — clearing a
-  // pending mock on unmount avoids a setState-after-unmount warning if the
-  // gardener navigates away mid-"generation".
+  // Poll the scheme's status while a save is running, from the moment the
+  // POST hands back an id (or the page reloaded mid-save) until it settles.
   useEffect(() => {
-    return () => window.clearTimeout(timeoutRef.current);
-  }, []);
+    if (generationStatus !== "generating" || !schemeId) return;
+    let active = true;
+    const startedAt = Date.now();
+
+    function settle() {
+      active = false;
+      window.clearInterval(interval);
+    }
+
+    async function poll() {
+      if (!active) return;
+      // A save nobody is finishing (the server died) shouldn't spin forever.
+      if (Date.now() - startedAt > STALE_GENERATING_MS) {
+        settle();
+        failGenerateScheme();
+        return;
+      }
+      try {
+        const res = await fetch(`/api/schemes/${schemeId}/status`);
+        if (!active) return;
+        if (res.status === 404) {
+          settle();
+          failGenerateScheme();
+          return;
+        }
+        if (!res.ok) return;
+        const { status } = (await res.json()) as { status: string };
+        if (!active) return;
+        if (status === "complete") {
+          settle();
+          finishGenerateScheme();
+          router.push(`/schemes/${schemeId}`);
+        } else if (status === "failed") {
+          settle();
+          failGenerateScheme();
+        }
+      } catch {
+        // network error — keep polling
+      }
+    }
+
+    const interval = window.setInterval(poll, POLL_INTERVAL_MS);
+    poll();
+    return () => {
+      active = false;
+      window.clearInterval(interval);
+    };
+  }, [generationStatus, schemeId, router, finishGenerateScheme, failGenerateScheme]);
 
   const count = schemePlants.length;
   if (count === 0) return null;
 
-  function handleGenerate() {
+  async function handleGenerate() {
+    setError(null);
+    // Locks the list and chat straight away, before the (possibly slow) flush.
     beginGenerateScheme();
-    timeoutRef.current = window.setTimeout(finishGenerateScheme, GENERATE_MS);
+
+    // The server builds the scheme from the draft row, so it must be current.
+    if (!draftId || !(await flushDraft())) {
+      failGenerateScheme();
+      setError(DRAFT_STALE_MESSAGE);
+      return;
+    }
+
+    try {
+      const res = await fetch(`/api/plant-scheme/${draftId}/save`, { method: "POST" });
+      const json = (await res.json().catch(() => ({}))) as { scheme_id?: string; status?: string };
+      if (!res.ok || !json.scheme_id) throw new Error("save failed");
+
+      if (json.status === "complete") {
+        finishGenerateScheme();
+        router.push(`/schemes/${json.scheme_id}`);
+        return;
+      }
+      setSchemeId(json.scheme_id);
+    } catch {
+      failGenerateScheme();
+      setError(SAVE_FAILED_MESSAGE);
+    }
   }
+
+  const failed = generationStatus === "failed";
 
   return (
     <div className="c-scheme-list__generate" aria-live="polite">
@@ -70,6 +155,11 @@ export default function SchemeGenerateAction() {
             and put together your planting guide — how to arrange them, and how to care for them
             through the year.
           </p>
+          {failed && (
+            <p className="minion c-scheme-list__generate-lead" role="alert">
+              {error ?? SAVE_FAILED_MESSAGE}
+            </p>
+          )}
           <button
             type="button"
             onClick={handleGenerate}
@@ -93,7 +183,7 @@ export default function SchemeGenerateAction() {
             ) : (
               <>
                 <Icon name="sprout" size={16} />
-                Generate the scheme
+                {failed ? "Try again" : "Generate the scheme"}
               </>
             )}
           </button>

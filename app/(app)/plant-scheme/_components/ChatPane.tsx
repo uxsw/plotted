@@ -76,12 +76,16 @@ export default function ChatPane() {
     outcomes,
     transcript,
     schemePlants,
+    generationStatus,
     addSuggestedPlant,
     sendRefinementMessage,
     chooseDirection,
     reopenDirection,
   } = usePlantScheme();
 
+  /* The scheme is being saved: the conversation is frozen (the context also
+     ignores changes) so the list that's generated matches what's on screen. */
+  const saving = generationStatus === "generating";
   const [draft, setDraft] = useState("");
   /* The turn currently in flight or stuck failed — at most one at a time.
      Both the composer and the direction rows lock while this is set, so
@@ -255,7 +259,7 @@ export default function ChatPane() {
                 ? turnState.turn.option.id
                 : undefined
             }
-            disabled={turnState !== null}
+            disabled={turnState !== null || saving}
           />
         ))}
 
@@ -276,7 +280,7 @@ export default function ChatPane() {
         value={draft}
         onChange={setDraft}
         onSend={send}
-        disabled={turnState !== null}
+        disabled={turnState !== null || saving}
         label="Your reply"
         ariaLabel="Your reply to Plotted"
         placeholder="Ask for a swap, more options, a different direction…"

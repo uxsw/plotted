@@ -31,7 +31,7 @@ import { Icon } from "@/components/ui/Icon";
 import type { SchemePlant } from "./PlantSchemeContext";
 
 export default function SchemeListPane() {
-  const { schemePlants, removeSchemePlant } = usePlantScheme();
+  const { schemePlants, removeSchemePlant, generationStatus } = usePlantScheme();
 
   /* Rows present on first render arrive as a staggered planting; a row added
      later eases in alone, immediately. Lazy state, captured once at mount. */
@@ -115,6 +115,7 @@ export default function SchemeListPane() {
                             <button
                               type="button"
                               onClick={() => removeSchemePlant(plant.id)}
+                              disabled={generationStatus === "generating"}
                               aria-label={`Remove ${plant.commonName} from the scheme`}
                               className="c-suggestion__remove minion"
                             >

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import type { PlantSchemeDraftRecord } from "../../_components/PlantSchemeContext";
+import { isStaleGenerating } from "@/lib/scheme-generation-timing";
 import DraftChat from "../../_components/DraftChat";
 
 export const metadata: Metadata = {
@@ -26,7 +27,7 @@ export default async function PlantSchemeDraftPage({
 
   const { data, error } = await supabase
     .from("plant_scheme_drafts")
-    .select("id, path, phase, state")
+    .select("id, path, phase, state, status, scheme_id")
     .eq("id", draftId)
     .eq("user_id", user.id)
     .maybeSingle();
@@ -39,5 +40,38 @@ export default async function PlantSchemeDraftPage({
   }
   if (!data) redirect("/plant-scheme");
 
-  return <DraftChat draft={data as PlantSchemeDraftRecord} />;
+  // A saved draft is finished business: its scheme is the durable artifact.
+  if (data.status === "saved" && data.scheme_id) redirect(`/schemes/${data.scheme_id}`);
+
+  // A save may be in flight, or have failed, from before this load (a refresh
+  // mid-save). The scheme row — found via schemes.draft_id — is the source of
+  // truth; the draft row itself is untouched until a save succeeds.
+  const { data: scheme } = await supabase
+    .from("schemes")
+    .select("id, status, updated_at")
+    .eq("draft_id", draftId)
+    .maybeSingle();
+
+  if (scheme?.status === "complete") redirect(`/schemes/${scheme.id}`);
+
+  const generation: PlantSchemeDraftRecord["generation"] = scheme
+    ? {
+        schemeId: scheme.id,
+        // A "generating" row nobody has touched in minutes was abandoned.
+        status:
+          scheme.status === "generating" && !isStaleGenerating(scheme.updated_at)
+            ? "generating"
+            : "failed",
+      }
+    : undefined;
+
+  const draft: PlantSchemeDraftRecord = {
+    id: data.id,
+    path: data.path,
+    phase: data.phase,
+    state: data.state,
+    generation,
+  };
+
+  return <DraftChat draft={draft} />;
 }

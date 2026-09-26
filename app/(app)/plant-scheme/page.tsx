@@ -56,11 +56,14 @@ export default async function PlantSchemeHubPage({
         scheme_suggestions ( saved )
       `
       )
-      .in("status", ["complete", "failed"])
+      // Failed conversation schemes are retried from their draft, not from here —
+      // the retry route has no way to rebuild their plant list.
+      .or("status.eq.complete,and(status.eq.failed,origin.eq.form)")
       .order("created_at", { ascending: false }),
     supabase
       .from("plant_scheme_drafts")
       .select("id, path, updated_at")
+      .eq("status", "draft")
       .order("updated_at", { ascending: false }),
   ]);
 

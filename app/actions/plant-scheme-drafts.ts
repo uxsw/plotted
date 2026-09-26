@@ -41,7 +41,10 @@ export async function updatePlantSchemeDraft(
     .from("plant_scheme_drafts")
     .update({ phase: input.phase, state: input.state })
     .eq("id", id)
-    .eq("user_id", user.id);
+    .eq("user_id", user.id)
+    // A saved draft's state is final (its transcript was cleared on save); a
+    // stale client write must not resurrect it.
+    .eq("status", "draft");
 
   if (error) {
     console.error("[updatePlantSchemeDraft] update failed:", error);
