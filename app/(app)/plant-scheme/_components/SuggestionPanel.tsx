@@ -104,3 +104,32 @@ export function SuggestionPanel({
     </div>
   );
 }
+
+/**
+ * Stand-in for the starting scheme while it's being generated — the first
+ * thing a gardener sees in the workspace, for the 10–15s the request takes.
+ * The same panel and tier groups the real card will use, with placeholder
+ * cards, so the scheme visibly takes its place rather than the chat sitting
+ * empty. Purely visual: the TypingIndicator above it carries the status for
+ * assistive tech.
+ */
+export function SuggestionPanelSkeleton() {
+  return (
+    <div className="c-chat__panel c-suggestion-skeleton" aria-hidden="true">
+      {MOCK_TIER_ORDER.map((tier) => (
+        <div key={tier} className="c-chat__panel-group">
+          <p className="c-chat__panel-group-label o-type-label">{MOCK_TIER_LABELS[tier]}</p>
+          <div className="o-stack--compact">
+            {[0, 1].map((i) => (
+              <div key={i} className="c-suggestion-skeleton__card">
+                <span className="c-suggestion-skeleton__line c-suggestion-skeleton__line--name" />
+                <span className="c-suggestion-skeleton__line c-suggestion-skeleton__line--latin" />
+                <span className="c-suggestion-skeleton__line" />
+              </div>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}

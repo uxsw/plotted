@@ -38,6 +38,7 @@ export default function SchemeGenerateAction() {
   const {
     schemePlants,
     generationStatus,
+    initialTurnStatus,
     draftId,
     resumeSchemeId,
     flushDraft,
@@ -163,7 +164,9 @@ export default function SchemeGenerateAction() {
           <button
             type="button"
             onClick={handleGenerate}
-            disabled={generationStatus === "generating"}
+            // Also while the starting scheme is loading: a Path A list isn't
+            // empty then, but saving mid-load would start from a half-built screen.
+            disabled={generationStatus === "generating" || initialTurnStatus === "sending"}
             aria-busy={generationStatus === "generating"}
             className={clsx(
               buttonStyles["o-button"],

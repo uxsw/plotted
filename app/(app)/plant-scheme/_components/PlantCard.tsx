@@ -32,8 +32,9 @@ export interface PlantCardData {
   note: string;
   badges: string[];
   photoUrl?: string | null;
-  /** "Why this fits" — tied back to the gardener's own aspect/soil answers.
-   *  See matchNote.ts. Absent when nothing genuinely lined up. */
+  /** "Why this fits" — tied back to what the gardener actually said. Written
+   *  by the model (see lib/scheme-conversation.ts). Absent when nothing
+   *  genuinely lined up. */
   matchNote?: string;
 }
 
