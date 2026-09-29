@@ -41,7 +41,7 @@ import {
   updatePlantSchemeDraft,
 } from "@/app/actions/plant-scheme-drafts";
 import { INITIAL_SUGGESTIONS_ENTRY_ID } from "@/lib/scheme-conversation";
-import { requestTurn } from "./requestTurn";
+import { isRateLimited, requestTurn } from "./requestTurn";
 import { PREVIEW_SEED_STATE } from "./previewSeed";
 
 export type SchemePath = "existing" | "scratch";
@@ -56,11 +56,13 @@ export type SchemeTier = "back" | "mid" | "ground";
  *  A later change to `schemePlants` resets "complete" to "idle". */
 export type SchemeGenerationStatus = "idle" | "generating" | "complete" | "failed";
 /** The starting scheme's own request (the engine's "initial" turn): "sending"
- *  while it's in flight, "failed" until retried, "idle" otherwise. Never
+ *  while it's in flight, "failed" until retried ("rate_limited" when it failed
+ *  on the hourly turn limit, which a retry won't fix until the hour is up),
+ *  "idle" otherwise. Never
  *  persisted — whether one is still needed is derived from the transcript
  *  (no INITIAL_SUGGESTIONS_ENTRY_ID entry yet), the same way generationStatus
  *  is derived from the scheme row. */
-export type InitialTurnStatus = "idle" | "sending" | "failed";
+export type InitialTurnStatus = "idle" | "sending" | "failed" | "rate_limited";
 
 export type QuestionOutcome = {
   questionId: string;
@@ -206,7 +208,7 @@ export interface PlantSchemeContextValue extends PlantSchemeState {
    *  request usually spans the id-less → /chat/[draftId] route change, which
    *  remounts ChatPane (the provider, in the layout, survives it). */
   initialTurnStatus: InitialTurnStatus;
-  /** Re-request the starting scheme after a failure. No-op unless failed. */
+  /** Re-request the starting scheme after a failure. No-op unless it failed. */
   retryInitialTurn: () => void;
   /** Resolves once every queued write to the draft row has landed (retrying a
    *  failed one) — call before asking the server to save. False if the draft
@@ -548,7 +550,7 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
         if (sessionRef.current !== session) return;
         initialInFlightRef.current = null;
         console.error("[PlantSchemeContext] starting scheme failed:", err);
-        setInitialTurnStatus("failed");
+        setInitialTurnStatus(isRateLimited(err) ? "rate_limited" : "failed");
       }
     );
   }, []);
@@ -566,7 +568,7 @@ function PlantSchemeProviderInner({ children }: { children: React.ReactNode }) {
   }, [state, draftId, initialTurnStatus, previewActive, runInitialTurn]);
 
   const retryInitialTurn = useCallback(() => {
-    if (initialTurnStatus !== "failed") return;
+    if (initialTurnStatus !== "failed" && initialTurnStatus !== "rate_limited") return;
     runInitialTurn(stateRef.current, draftId);
   }, [initialTurnStatus, runInitialTurn, draftId]);
 

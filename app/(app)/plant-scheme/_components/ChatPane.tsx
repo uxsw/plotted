@@ -22,7 +22,7 @@
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { usePlantScheme, type ChatEntry, type DirectionOption } from "./PlantSchemeContext";
 import { SOMETHING_ELSE_OPTION } from "@/lib/scheme-conversation";
-import { requestTurn } from "./requestTurn";
+import { isRateLimited, requestTurn } from "./requestTurn";
 import { MOCK_QUESTIONS } from "./mockData";
 import { ChatMessage, ChatComposer, SendFailedNotice, TypingIndicator } from "./ChatLog";
 import { DirectionOptions } from "./DirectionOptions";
@@ -32,6 +32,12 @@ import { Icon } from "@/components/ui/Icon";
 /** The local reply to the fixed "Something else" direction — it invites the
  *  gardener to describe the direction themselves, so there's nothing to ask
  *  the model yet. Same wording the mock used. */
+/** Shown when a turn hits the hourly turn limit (the route's 429), in place of
+ *  "Couldn't send" — which would imply Retry helps, when it can't until the
+ *  hour is up. PLACEHOLDER COPY — pending Natalie's review. */
+const RATE_LIMITED_LABEL =
+  "You've reached this hour's limit for new suggestions — try again a little later";
+
 const DESCRIBE_DIRECTION_TEXT =
   "Tell me more about the direction you have in mind and I'll suggest some plants.";
 
@@ -46,7 +52,9 @@ type PendingTurn =
   | { kind: "text"; text: string }
   | { kind: "direction"; entryId: string; option: DirectionOption };
 
-type TurnState = { status: "sending" | "failed"; turn: PendingTurn };
+type TurnState =
+  | { status: "sending"; turn: PendingTurn }
+  | { status: "failed"; turn: PendingTurn; rateLimited: boolean };
 
 function turnBubbleText(turn: PendingTurn): string {
   return turn.kind === "text" ? turn.text : `Let's try "${turn.option.label}".`;
@@ -194,7 +202,7 @@ export default function ChatPane() {
       })
       .catch((err) => {
         console.error("[ChatPane] turn failed:", err);
-        setTurnState({ status: "failed", turn });
+        setTurnState({ status: "failed", turn, rateLimited: isRateLimited(err) });
       });
   }
 
@@ -283,6 +291,11 @@ export default function ChatPane() {
             onRetry={retryInitialTurn}
           />
         )}
+        {/* Retry stays here: it's the only way to a starting scheme once the
+            hour is up. The label says when. */}
+        {initialTurnStatus === "rate_limited" && (
+          <SendFailedNotice side="assistant" label={RATE_LIMITED_LABEL} onRetry={retryInitialTurn} />
+        )}
 
         {turnState && (
           <>
@@ -290,7 +303,13 @@ export default function ChatPane() {
             {turnState.status === "sending" ? (
               <TypingIndicator />
             ) : (
-              <SendFailedNotice onRetry={retry} onDiscard={discard} />
+              <SendFailedNotice
+                // A retry can't clear the hourly limit, so it isn't offered —
+                // Discard is the way out, and the label says when to try again.
+                {...(turnState.rateLimited
+                  ? { label: RATE_LIMITED_LABEL, onDiscard: discard }
+                  : { onRetry: retry, onDiscard: discard })}
+              />
             )}
           </>
         )}

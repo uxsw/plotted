@@ -74,6 +74,9 @@ function rawPlant(over: Record<string, unknown> = {}) {
   return {
     common_name: "Knautia",
     latin_name: "Knautia macedonica",
+    conditions_check: "Thrives in sun and copes with clay.",
+    sun_fit: "good",
+    soil_fit: "good",
     tier: "mid",
     note: "Pincushion flowers all summer.",
     badges: ["Pollinators"],
@@ -302,9 +305,9 @@ describe("CONVERSATION_RESPONSE_SCHEMA", () => {
 describe("mergeConversationResponse", () => {
   const ctx = () => buildConversationContext(state(), []);
 
-  it("initial: a single suggestions entry with the fixed id, reply dropped", () => {
+  it("initial: just the suggestions entry, with the fixed id, when the reply is empty", () => {
     const entries = mergeConversationResponse(
-      rawResponse({ plants: [rawPlant(), rawPlant({ latin_name: "Digitalis purpurea", common_name: "Foxglove", tier: "back" })] }),
+      rawResponse({ reply: "", plants: [rawPlant(), rawPlant({ latin_name: "Digitalis purpurea", common_name: "Foxglove", tier: "back" })] }),
       ctx(),
       { kind: "initial" },
       mkId
@@ -313,6 +316,69 @@ describe("mergeConversationResponse", () => {
     expect(entries[0]).toMatchObject({ kind: "suggestions", id: INITIAL_SUGGESTIONS_ENTRY_ID, title: "Shade lovers" });
     const plants = (entries[0] as Extract<ChatEntry, { kind: "suggestions" }>).plants;
     expect(plants.map((p) => p.plantId)).toEqual(["p1", "p2"]);
+  });
+
+  it("initial: a reply (flagging an unsuited plant they mentioned) goes above the cards", () => {
+    const entries = mergeConversationResponse(
+      rawResponse({ reply: "Lavender won't enjoy wet clay, so I've left it out." }),
+      ctx(),
+      { kind: "initial" },
+      mkId
+    );
+    expect(entries.map((e) => e.kind)).toEqual(["text", "suggestions"]);
+    expect(entries[0]).toMatchObject({ role: "assistant", text: "Lavender won't enjoy wet clay, so I've left it out." });
+    expect(entries[1].id).toBe(INITIAL_SUGGESTIONS_ENTRY_ID);
+  });
+
+  it("drops any plant the model didn't rate a good fit on both sun and soil", () => {
+    const entries = mergeConversationResponse(
+      rawResponse({
+        plants: [
+          rawPlant({ common_name: "Pinks", latin_name: "Dianthus 'Doris'", soil_fit: "poor" }),
+          rawPlant({ common_name: "Sneezeweed", latin_name: "Helenium 'Moerheim Beauty'", sun_fit: "marginal" }),
+          rawPlant({ common_name: "Masterwort", latin_name: "Astrantia major" }),
+          rawPlant({ common_name: "Unrated", latin_name: "Aster amellus", sun_fit: undefined, soil_fit: undefined }),
+        ],
+      }),
+      ctx(),
+      { kind: "message", text: "more please" },
+      mkId
+    );
+    const suggestions = entries.find((e) => e.kind === "suggestions") as Extract<ChatEntry, { kind: "suggestions" }>;
+    expect(suggestions.plants.map((p) => p.latinName)).toEqual(["Astrantia major"]);
+    // The private fields never reach the card.
+    expect(Object.keys(suggestions.plants[0])).not.toContain("sun_fit");
+    expect(Object.keys(suggestions.plants[0])).not.toContain("soil_fit");
+    expect(Object.keys(suggestions.plants[0])).not.toContain("conditions_check");
+  });
+
+  it("keeps at most one plant per genus in a reply — the first listed wins", () => {
+    const entries = mergeConversationResponse(
+      rawResponse({
+        plants: [
+          rawPlant({ common_name: "Cranesbill", latin_name: "Geranium 'Rozanne'" }),
+          rawPlant({ common_name: "Meadow cranesbill", latin_name: "Geranium pratense" }),
+          rawPlant({ common_name: "Masterwort", latin_name: "Astrantia major" }),
+        ],
+      }),
+      ctx(),
+      { kind: "message", text: "more please" },
+      mkId
+    );
+    const suggestions = entries.find((e) => e.kind === "suggestions") as Extract<ChatEntry, { kind: "suggestions" }>;
+    expect(suggestions.plants.map((p) => p.latinName)).toEqual(["Geranium 'Rozanne'", "Astrantia major"]);
+  });
+
+  it("the genus rule is per reply — a genus already on the list can still be suggested", () => {
+    const c = buildConversationContext(state({ schemePlants: [schemePlant({ latinName: "Geranium pratense" })] }), []);
+    const entries = mergeConversationResponse(
+      rawResponse({ plants: [rawPlant({ latin_name: "Geranium phaeum" })] }),
+      c,
+      { kind: "message", text: "more" },
+      mkId
+    );
+    const suggestions = entries.find((e) => e.kind === "suggestions") as Extract<ChatEntry, { kind: "suggestions" }>;
+    expect(suggestions.plants.map((p) => p.latinName)).toEqual(["Geranium phaeum"]);
   });
 
   it("initial: throws when no plants survive, so the client can retry", () => {

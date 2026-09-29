@@ -87,7 +87,8 @@ export function TypingIndicator({ label = "Plotted is thinking" }: { label?: str
  * and returns the surface to idle without resending. Neither is hidden behind
  * the other, so the host is never left with only a dead end. A host with
  * nothing sensible to discard to (e.g. a turn the rest of the surface depends
- * on) omits `onDiscard`, leaving Retry as the one way forward.
+ * on) omits `onDiscard`, leaving Retry as the one way forward; a failure a
+ * retry can't fix yet (e.g. a usage limit) omits `onRetry` instead.
  *
  * `side` says whose turn failed: "user" (default) hangs it under the gardener's
  * bubble; "assistant" is for a reply the assistant owed with no user message
@@ -99,7 +100,7 @@ export function SendFailedNotice({
   label = "Couldn't send",
   side = "user",
 }: {
-  onRetry: () => void;
+  onRetry?: () => void;
   onDiscard?: () => void;
   label?: string;
   side?: ChatRole;
@@ -108,10 +109,12 @@ export function SendFailedNotice({
     <div className={`c-chat__failed c-chat__failed--${side} minion`} role="alert">
       <Icon name="alertTriangle" size={14} className="c-chat__failed-icon" />
       <span>{label}.</span>
-      <button type="button" className="c-chat__failed-action" onClick={onRetry}>
-        <Icon name="retry" size={12} />
-        Retry
-      </button>
+      {onRetry && (
+        <button type="button" className="c-chat__failed-action" onClick={onRetry}>
+          <Icon name="retry" size={12} />
+          Retry
+        </button>
+      )}
       {onDiscard && (
         <button type="button" className="c-chat__failed-action" onClick={onDiscard}>
           Discard

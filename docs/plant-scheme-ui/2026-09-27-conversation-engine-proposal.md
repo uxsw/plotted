@@ -122,3 +122,36 @@ Built:
 - *Horticultural fit:* initial scheme included *Salvia nemorosa 'Caradonna'* (badged drought tolerant) for a partial-shade, heavy-clay bed, justified only by "complements the lavender you mentioned" — and didn't flag that lavender itself suits neither. Likely wants an instruction to weigh conditions over typed-plant affinity and to gently flag a typed plant that won't suit the bed.
 - *Badges:* some are generous (Rodgersia badged Pollinators).
 - *Referent ambiguity:* "Will these cope with a very wet winter?" was answered about the latest suggestions, not the list; the answer also said "all three" while naming four plants.
+
+## 3d status (2026-09-29)
+
+**Harness:** `scripts/eval-scheme-conversation.ts` runs 4 fixed conversations (shade/clay + an unsuitable typed Lavender; sun/free-draining; full shade/damp + an unsuitable typed Salvia; sun/heavy clay) against the real engine, then scores them. Code checks: replies over 3 sentences, same-genus pairs, false "on your list" claims, latency. A `claude-opus-5` judge (dev-only; not a product model change) grades each plant's sun and soil fit, invasive/restricted status, badges, "why this fits" and note consistency. Roughly 16 engine turns + 4 judge calls per run. Condition fit is the headline number.
+
+```
+set -a && . ./.env.local && set +a && npx tsx scripts/eval-scheme-conversation.ts [out.json]
+```
+
+**Changes, in priority order:**
+1. **Growing conditions come first** (the product risk). A system-prompt section says plants must *thrive* in the stated aspect and soil, that nothing (typed plant, style, message request) overrides this, and names the classic mismatches. The conditions are restated at the top of every turn's context. Each plant now carries private `conditions_check`, `sun_fit` and `soil_fit` fields, placed before its descriptive fields, and **the merge drops anything not rated "good" on both** — enforced in code. A single combined rating was tried first and let one axis hide the other.
+2. **Unsuitable typed plants** are flagged kindly instead of built around. On the starting scheme the model's reply is now kept (above the cards) only when it has such a flag; otherwise it's empty and dropped as before.
+3. **Invasive/restricted plants:** the harness caught American skunk cabbage (GB-restricted) suggested for a bog-garden direction. The prompt now rules out GB-invasive/restricted plants and rampant spreaders, and such a plant can never be rated "good", so the fit filter drops it.
+4. **One plant per genus per reply**, enforced in the merge (first listed wins); previously prompt-only.
+5. Secondary polish: "why this fits" must cite something the gardener actually said; notes must match flowering months and the request; stricter badge rules; direction blurbs don't name plants; replies under 60 words; "these/them" means the list, and earlier suggestions are not "on your list".
+6. **Rate-limit copy** (PLACEHOLDER — pending Natalie): a 429 shows "You've reached this hour's limit for new suggestions — try again a little later". Message/direction turns offer Discard only; the starting scheme keeps Retry (its only way forward). `requestTurn` now throws a `TurnRequestError` carrying the HTTP status.
+
+**Results** (single runs are noisy; judge counts over ~45 plants):
+
+| | Baseline | Prompt only | + combined fit | + split sun/soil (×4 runs) |
+|---|---|---|---|---|
+| Poor condition fit | 4 | 6 | 1 | 2 / 1 / 1 / 4 (avg 2) |
+| Unsuitable typed plant flagged | 0/2 | 2/2 | 2/2 | 2/2 in every run |
+| Initial / follow-up latency | 13.9s / 8.6s | 11.8s / 10.4s | 16.7s / 10.5s | ~15s / ~10–11s |
+
+The final runs also showed no legally restricted plants, no same-genus pairs, no false "on your list" claims, and 1 of 20 replies over three sentences.
+
+**Still open:**
+- **Fit is better on average but not reliable** (poor fits 1–4 per run). The model's self-rating is the ceiling: when it misjudges a plant, nothing downstream catches it. Recurring misses: Helenium offered for partial shade in answer to "late summer colour" (most runs), and occasionally drainage-lovers on heavy clay (Scabiosa, Liatris, Tricyrtis). The next lever is an independent check: a short second verification call (roughly +3–5s per turn, recommended to try first) or adaptive thinking (likely slower). On hold pending a speed-versus-accuracy decision.
+- The judge's "marginal" count rose to 15–20. Most are clay-tolerant sun perennials and part-shade plants in full shade that the judge marks down strictly. Tuning toward it would narrow the palette sharply, so this is a product call rather than an obvious fix.
+- The invasive rule relies on the model. A hard, code-side denylist would need an authoritative, maintained GB list, not one written from memory.
+- Latency is ~1–2s higher from the fit fields. "Still thinking…" shows on most turns, so 3e (streaming the reply) remains open.
+- The model once used the banned word "tapestry" in a direction label.

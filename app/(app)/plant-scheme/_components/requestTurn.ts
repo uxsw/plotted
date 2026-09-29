@@ -17,12 +17,28 @@ import type { ConversationTurn } from "@/lib/scheme-conversation";
  */
 export const TURN_TIMEOUT_MS = 45_000;
 
+/** A turn that didn't go through. `status` is the HTTP status when the server
+ *  answered (429 = the hourly turn limit), null for a timeout, network drop
+ *  or malformed body. */
+export class TurnRequestError extends Error {
+  constructor(
+    message: string,
+    readonly status: number | null
+  ) {
+    super(message);
+  }
+}
+
+export function isRateLimited(err: unknown): boolean {
+  return err instanceof TurnRequestError && err.status === 429;
+}
+
 /**
  * One conversation turn against the real engine. `state` is the draft as it
  * stands right now (the route is stateless — it builds the model's context
  * from what's sent); `draftId` lets it refuse a turn on an already-saved
- * draft. Rejects on any non-2xx, a malformed body, or TURN_TIMEOUT_MS
- * elapsing — all of which land in the same failed state.
+ * draft. Rejects with a TurnRequestError on any non-2xx, a malformed body,
+ * or TURN_TIMEOUT_MS elapsing.
  */
 export async function requestTurn(
   state: PersistedDraftState,
@@ -32,16 +48,21 @@ export async function requestTurn(
   const controller = new AbortController();
   const timer = window.setTimeout(() => controller.abort(), TURN_TIMEOUT_MS);
   try {
-    const res = await fetch("/api/plant-scheme/turn", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ state, draftId, turn }),
-      signal: controller.signal,
-    });
-    if (!res.ok) throw new Error(`turn failed: ${res.status}`);
-    const json: unknown = await res.json();
+    let res: Response;
+    try {
+      res = await fetch("/api/plant-scheme/turn", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ state, draftId, turn }),
+        signal: controller.signal,
+      });
+    } catch (err) {
+      throw new TurnRequestError(`turn failed: ${String(err)}`, null);
+    }
+    if (!res.ok) throw new TurnRequestError(`turn failed: ${res.status}`, res.status);
+    const json: unknown = await res.json().catch(() => null);
     const entries = (json as { entries?: unknown } | null)?.entries;
-    if (!Array.isArray(entries)) throw new Error("turn failed: malformed response");
+    if (!Array.isArray(entries)) throw new TurnRequestError("turn failed: malformed response", null);
     return entries as ChatEntry[];
   } finally {
     window.clearTimeout(timer);
