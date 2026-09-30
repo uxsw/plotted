@@ -295,7 +295,7 @@ export default function SchemeResults({
         />
 
         <Link
-          href="/schemes"
+          href={scheme.origin === "conversation" ? "/plant-scheme" : "/schemes"}
           className={[buttonStyles["o-button"], buttonStyles["o-button--overlay"]].join(" ")}
         >
           ← Planting schemes

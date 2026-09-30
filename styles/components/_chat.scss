@@ -219,6 +219,11 @@
     align-items: center;
     gap: var(--space-xs);
     color: var(--sem-color-error-bg);
+
+    /* A reply the assistant owed, with no user bubble above it to hang from. */
+    &--assistant {
+        align-self: flex-start;
+    }
 }
 
 .c-chat__failed-icon {

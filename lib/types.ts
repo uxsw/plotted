@@ -101,6 +101,9 @@ export interface Scheme {
   narrative_body: string | null;
   featured_plant_latin: string | null;
   ai_notice_seen_at: string | null;
+  /** "form" = the /schemes journey; "conversation" = saved from a /plant-scheme draft. */
+  origin: "form" | "conversation";
+  draft_id: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -109,6 +112,9 @@ export interface SchemeSourcePlant {
   id: string;
   scheme_id: string;
   plant_id: string | null;
+  /** Set for conversation-origin rows, which may have no plants row. */
+  common_name: string | null;
+  latin_name: string | null;
   sort_order: number;
 }
 

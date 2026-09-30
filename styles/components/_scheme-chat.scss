@@ -650,6 +650,50 @@
     }
 }
 
+/* ---- Starting-scheme skeleton (SuggestionPanelSkeleton) -------------- */
+
+/* Holds the starting scheme's place while it's generated: the real panel and
+   tier groups, with placeholder cards shaped like .c-suggestion (oat card,
+   name / latin / note lines). A slow, low-contrast breath rather than a
+   shimmer sweep — it should read as "coming", not demand attention for the
+   10–15s it's on screen. */
+.c-suggestion-skeleton__card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xs);
+    padding: var(--space-sm);
+    background-color: var(--color-oat);
+    border-radius: var(--radius-m);
+}
+
+.c-suggestion-skeleton__line {
+    display: block;
+    block-size: 0.625rem;
+    inline-size: 85%;
+    background-color: var(--color-sand-line);
+    border-radius: var(--radius-s);
+    animation: scheme-skeleton-breathe 1.8s ease-in-out infinite;
+
+    &--name {
+        block-size: 0.875rem;
+        inline-size: 45%;
+    }
+
+    &--latin {
+        inline-size: 30%;
+    }
+}
+
+@keyframes scheme-skeleton-breathe {
+    0%,
+    100% {
+        opacity: 0.45;
+    }
+    50% {
+        opacity: 1;
+    }
+}
+
 /* ---- Direction mark — the option plate's engraved silhouette ---------- */
 
 /* The host's fill for `.c-chat__option__figure`: one direction drawn as a
@@ -785,7 +829,8 @@
     .c-scheme-list__item,
     .c-scheme-list__item .c-suggestion,
     .c-scheme-elevation__plant path,
-    .c-scheme-elevation__plant circle {
+    .c-scheme-elevation__plant circle,
+    .c-suggestion-skeleton__line {
         animation: none;
     }
 

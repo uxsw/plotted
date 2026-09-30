@@ -49,10 +49,9 @@ export const MOCK_QUESTIONS: MockQuestion[] = [
   },
 ];
 
-/** Loose match keys against the aspect/soil answers — see `matchNote.ts`.
- *  Real horticultural fit for each mock plant, not arbitrary: used only to
- *  generate the "why this fits" line under a suggestion card, never to filter
- *  or rank the (fixed, hand-picked) mock lists themselves. */
+/** Real horticultural fit for each mock plant. These once drove a keyword-
+ *  matched "why this fits" line; the real engine now writes that line, so
+ *  nothing reads them — they're kept only as descriptive data on the mocks. */
 export type MockSun = "full-sun" | "partial-shade" | "full-shade";
 export type MockSoil = "free-draining" | "clay" | "damp";
 

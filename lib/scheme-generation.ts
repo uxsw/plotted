@@ -121,6 +121,7 @@ Context inferred from their selection:
 Preferences:
 - weight suggestions toward plants with strong wildlife and pollinator value
 - weight suggestions toward drought-tolerant plants where possible${edibleInstruction}
+- favour a mix of well-known and less common plants suited to the conditions, rather than defaulting to the most obvious choice every time
 
 Return a JSON object with exactly this structure:
 {
@@ -132,7 +133,7 @@ Return a JSON object with exactly this structure:
   "suggestions": [
     {
       "common_name": "string — use the most widely recognised, user-friendly common name",
-      "latin_name": "string — accurate species-level binomial where possible, avoiding cultivar names, to support reliable image lookup",
+      "latin_name": "string — the accurate latin name. Use the species-level binomial by default, but where a named cultivar is genuinely the better garden plant, give it in full (e.g. Geum 'Mrs Bradshaw')",
       "tier": "back | mid | ground",
       "height_cm": number,
       "flowering_months": [array of month numbers 1-12],

@@ -19,7 +19,9 @@ export default async function SchemesPage() {
       scheme_suggestions ( saved )
     `
     )
-    .in("status", ["complete", "failed"])
+    // Failed conversation schemes are retried from their draft, not from here —
+    // the retry route has no way to rebuild their plant list.
+    .or("status.eq.complete,and(status.eq.failed,origin.eq.form)")
     .order("created_at", { ascending: false });
 
   if (error) {
