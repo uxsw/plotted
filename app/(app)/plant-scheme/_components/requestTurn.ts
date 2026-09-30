@@ -9,13 +9,18 @@ import type { ChatEntry, PersistedDraftState } from "./PlantSchemeContext";
 import type { ConversationTurn } from "@/lib/scheme-conversation";
 
 /**
- * A real turn is one blocking model call — typically 5–15s. Past this the
- * request is abandoned and the turn lands in its failed state, since a hung
- * fetch would otherwise leave the chat locked with no way out. Comfortably
- * above the route's worst case short of the host's own timeout
- * (maxDuration = 60 in app/api/plant-scheme/turn/route.ts).
+ * A real turn is two blocking model calls (the turn, then its fit check) —
+ * typically 12–20s, with occasional API slowdowns well past that (76–88s seen
+ * in testing). Past this the request is abandoned and the turn lands in its
+ * failed state, since a hung fetch would otherwise leave the chat locked with
+ * no way out.
+ *
+ * Set just above the route's own ceiling (maxDuration = 90 in
+ * app/api/plant-scheme/turn/route.ts), so a slow turn gets the server's full
+ * allowance, and a turn the host kills at 90s comes back as a real error
+ * response rather than racing this timer. Keep the two in step.
  */
-export const TURN_TIMEOUT_MS = 45_000;
+export const TURN_TIMEOUT_MS = 95_000;
 
 /** A turn that didn't go through. `status` is the HTTP status when the server
  *  answered (429 = the hourly turn limit), null for a timeout, network drop

@@ -12,9 +12,12 @@ import { enforceHourlySchemeTurnLimit, SchemeTurnLimitError } from "@/lib/scheme
 import type { GardenPlantRow } from "@/lib/scheme-selection";
 import type { PersistedDraftState } from "@/app/(app)/plant-scheme/_components/PlantSchemeContext";
 
-// A turn is one blocking model call — typically 5–15s, with headroom for the
-// SDK's own retries on 429/5xx.
-export const maxDuration = 60;
+// A turn is two blocking model calls (the turn, then its fit check) —
+// typically 10–20s, occasionally double that when the check sends it round
+// once more — with headroom for the SDK's own retries on 429/5xx. The
+// client's TURN_TIMEOUT_MS (requestTurn.ts) sits just above this: keep the
+// two in step.
+export const maxDuration = 90;
 
 // Generous for any real conversation (the draft state is small JSON); only
 // here to bound what a single request can make the server parse and prompt.
@@ -123,7 +126,7 @@ export async function POST(request: NextRequest) {
   const ctx = buildConversationContext(state, gardenRows);
 
   try {
-    const entries = await generateConversationTurn(
+    const { entries } = await generateConversationTurn(
       ctx,
       turn,
       direction,

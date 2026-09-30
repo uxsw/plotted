@@ -5,6 +5,12 @@ import {
   CONVERSATION_RESPONSE_SCHEMA,
   CONVERSATION_SYSTEM_PROMPT,
   ConversationResponseError,
+  applyFitCheck,
+  buildFitCheckPrompt,
+  FIT_CHECK_SCHEMA,
+  FIT_CHECK_SYSTEM_PROMPT,
+  parseFitCheck,
+  proposedPlants,
   INITIAL_SUGGESTIONS_ENTRY_ID,
   mergeConversationResponse,
   parseConversationTurn,
@@ -529,5 +535,107 @@ describe("mergeConversationResponse", () => {
     expect(() =>
       mergeConversationResponse(rawResponse({ reply: "" }), ctx(), { kind: "message", text: "x" }, mkId)
     ).toThrow(ConversationResponseError);
+  });
+});
+
+describe("fit check", () => {
+  const plant = (plantId: string, latinName: string, commonName = latinName) => ({
+    plantId,
+    commonName,
+    latinName,
+    tier: "mid" as const,
+    note: "",
+    badges: [],
+    months: [],
+  });
+  const reply: ChatEntry = { kind: "text", id: "r", role: "assistant", text: "Here are some." };
+  const card = (plants: ReturnType<typeof plant>[]): ChatEntry => ({ kind: "suggestions", id: "s", title: "t", plants });
+  const verdict = (n: number, over: Record<string, unknown> = {}) => ({
+    n,
+    sun_fit: "good",
+    soil_fit: "good",
+    invasive_or_restricted: false,
+    reason: "",
+    ...over,
+  });
+
+  it("states the bed's conditions and numbers the plants", () => {
+    const prompt = buildFitCheckPrompt(buildConversationContext(state(), []), [
+      { commonName: "Sneezeweed", latinName: "Helenium 'Moerheim Beauty'" },
+      { commonName: "Masterwort", latinName: "Astrantia major" },
+    ]);
+    expect(prompt).toContain("Aspect and sun: Partial shade");
+    expect(prompt).toContain("Soil: unknown"); // skipped in the fixture
+    expect(prompt).toContain("1. Helenium 'Moerheim Beauty' (Sneezeweed)");
+    expect(prompt).toContain("2. Astrantia major (Masterwort)");
+  });
+
+  it("drops only a poor fit on either axis, or an invasive plant — marginal stays", () => {
+    const verdicts = parseFitCheck(
+      {
+        plants: [
+          verdict(1),
+          verdict(2, { sun_fit: "marginal", soil_fit: "marginal" }),
+          verdict(3, { sun_fit: "poor", reason: "Flops in part shade" }),
+          verdict(4, { soil_fit: "poor", reason: "" }),
+          verdict(5, { invasive_or_restricted: true, reason: "GB restricted" }),
+          verdict(6, { sun_fit: "excellent" }),
+        ],
+      },
+      6
+    );
+    expect(verdicts.map((v) => v.keep)).toEqual([true, true, false, false, false, false]);
+    expect(verdicts[2].reason).toBe("Flops in part shade");
+    expect(verdicts[3].reason).toBe("sun good, soil poor"); // no reason given → one is made up
+  });
+
+  it("fails closed: a plant the check didn't return, or returned twice or out of range, isn't kept", () => {
+    const verdicts = parseFitCheck({ plants: [verdict(2), verdict(2, { sun_fit: "poor" }), verdict(9)] }, 3);
+    expect(verdicts.map((v) => v.keep)).toEqual([false, true, false]);
+    expect(parseFitCheck(null, 2).map((v) => v.keep)).toEqual([false, false]);
+  });
+
+  it("drops rejected plants from the card and reports them", () => {
+    const entries = [reply, card([plant("p1", "Astrantia major"), plant("p2", "Helenium 'Moerheim Beauty'", "Sneezeweed")])];
+    expect(proposedPlants(entries).map((p) => p.plantId)).toEqual(["p1", "p2"]);
+    const result = applyFitCheck(entries, [
+      { keep: true, reason: "" },
+      { keep: false, reason: "Flops in part shade" },
+    ]);
+    expect(result.kept).toBe(1);
+    expect(result.emptied).toBe(false);
+    expect(result.dropped).toEqual([
+      { commonName: "Sneezeweed", latinName: "Helenium 'Moerheim Beauty'", reason: "Flops in part shade" },
+    ]);
+    const kept = result.entries.find((e) => e.kind === "suggestions") as Extract<ChatEntry, { kind: "suggestions" }>;
+    // Survivors keep their ids, so composite list ids stay stable.
+    expect(kept.plants.map((p) => p.plantId)).toEqual(["p1"]);
+  });
+
+  it("removes a card left with no plants, and says it was emptied", () => {
+    const result = applyFitCheck([reply, card([plant("p1", "Dianthus 'Doris'")])], [{ keep: false, reason: "Rots in clay" }]);
+    expect(result.entries.map((e) => e.kind)).toEqual(["text"]);
+    expect(result.emptied).toBe(true);
+    expect(result.kept).toBe(0);
+  });
+
+  it("tells the checker to exclude Gunnera manicata (commonly mis-sold as restricted G. tinctoria)", () => {
+    expect(FIT_CHECK_SYSTEM_PROMPT).toContain("Always mark Gunnera manicata true");
+  });
+
+  it("the fit-check schema requires every property (structured outputs requirement)", () => {
+    const item = FIT_CHECK_SCHEMA.properties.plants.items;
+    expect([...item.required].sort()).toEqual(Object.keys(item.properties).sort());
+    expect(item.additionalProperties).toBe(false);
+  });
+
+  it("plants ruled out by the check are named in a regenerated turn's prompt", () => {
+    const ctx = {
+      ...buildConversationContext(state(), []),
+      unsuited: [{ commonName: "Sneezeweed", latinName: "Helenium 'Moerheim Beauty'" }],
+    };
+    expect(buildConversationPrompt(ctx, { kind: "message", text: "late summer colour?" })).toContain(
+      "Already ruled out as a poor fit for their conditions"
+    );
   });
 });

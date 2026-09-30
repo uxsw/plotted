@@ -11,7 +11,8 @@
  * Two kinds of check:
  * - Code checks (free, exact): replies over 3 sentences, two plants of one
  *   genus in a reply, a reply calling something "on your list" that isn't,
- *   and latency per turn.
+ *   a reply naming a plant the fit check removed from its card, and latency
+ *   per turn.
  * - A model judge (claude-opus-5, deliberately stronger than the engine's
  *   model) grades each suggested plant: does it genuinely suit the stated
  *   aspect and soil, are its badges justified, and is its "why this fits"
@@ -119,6 +120,11 @@ type TurnRecord = {
   replySentences: number | null;
   genusRepeats: string[];
   falseListMentions: string[];
+  /** Plants the fit check dropped this turn, and whether it regenerated. */
+  dropped: { commonName: string; latinName: string; reason: string }[];
+  regenerated: boolean;
+  /** Dropped plants the reply still names — a reply promising a card that isn't there. */
+  replyNamesDropped: string[];
 };
 
 function mkId(prefix: string) {
@@ -202,7 +208,7 @@ async function runScenario(sc: Scenario) {
     } else {
       const panel = [...state.transcript!].reverse().find((e) => e.kind === "directions");
       if (!panel || panel.kind !== "directions") {
-        turns.push({ label: "direction (no panel offered)", ms: 0, entries: [], replySentences: null, genusRepeats: [], falseListMentions: [] });
+        turns.push({ label: "direction (no panel offered)", ms: 0, entries: [], replySentences: null, genusRepeats: [], falseListMentions: [], dropped: [], regenerated: false, replyNamesDropped: [] });
         continue;
       }
       const option = panel.options[step.pick];
@@ -214,7 +220,15 @@ async function runScenario(sc: Scenario) {
     const ctx = buildConversationContext(state, []);
     const direction = turn.kind === "direction" ? resolveDirectionChoice(state, turn) : null;
     const start = Date.now();
-    const entries = await generateConversationTurn(ctx, turn, direction, mkId);
+    let result: Awaited<ReturnType<typeof generateConversationTurn>>;
+    try {
+      result = await generateConversationTurn(ctx, turn, direction, mkId);
+    } catch (err) {
+      // A failed turn is a result, not a crash: the app would show Retry.
+      turns.push({ label: `${label} — FAILED (${err instanceof Error ? err.message : String(err)})`, ms: Date.now() - start, entries: [], replySentences: null, genusRepeats: [], falseListMentions: [], dropped: [], regenerated: false, replyNamesDropped: [] });
+      continue;
+    }
+    const { entries, fitCheck } = result;
     const ms = Date.now() - start;
 
     const reply = entries.find((e) => e.kind === "text" && e.role === "assistant");
@@ -227,6 +241,17 @@ async function runScenario(sc: Scenario) {
       replySentences: reply && reply.kind === "text" ? sentenceCount(reply.text) : null,
       genusRepeats: Array.from(new Set(genera.filter((g, i) => genera.indexOf(g) !== i))),
       falseListMentions: reply && reply.kind === "text" ? falseListMentions(reply.text, state) : [],
+      dropped: fitCheck.dropped,
+      regenerated: fitCheck.regenerated,
+      replyNamesDropped:
+        reply && reply.kind === "text"
+          ? fitCheck.dropped
+              .filter((d) => {
+                const text = reply.text.toLowerCase();
+                return text.includes(d.commonName.toLowerCase()) || text.includes(d.latinName.split(" ")[0].toLowerCase());
+              })
+              .map((d) => d.commonName)
+          : [],
     });
 
     if (turn.kind === "message") state.transcript!.push({ kind: "text", id: mkId("u"), role: "user", text: turn.text });
@@ -341,7 +366,7 @@ typed_plant_handled: ${sc.unsuitedTyped ? `the gardener mentioned ${sc.unsuitedT
 async function main() {
   const outPath = process.argv[2];
   const report: unknown[] = [];
-  const totals = { plants: 0, invasive: 0, poorFit: 0, marginalFit: 0, badBadges: 0, badMatchNotes: 0, badNotes: 0, longReplies: 0, replies: 0, genusRepeats: 0, falseList: 0 };
+  const totals = { dropped: 0, regenerated: 0, replyNamesDropped: 0, plants: 0, invasive: 0, poorFit: 0, marginalFit: 0, badBadges: 0, badMatchNotes: 0, badNotes: 0, longReplies: 0, replies: 0, genusRepeats: 0, falseList: 0 };
   const latencies: { kind: string; ms: number }[] = [];
 
   for (const sc of SCENARIOS) {
@@ -357,6 +382,12 @@ async function main() {
       );
       if (t.genusRepeats.length) console.log(`    ! same genus in one reply: ${t.genusRepeats.join(", ")}`);
       if (t.falseListMentions.length) console.log(`    ! said on their list but isn't: ${t.falseListMentions.join(", ")}`);
+      if (t.dropped.length)
+        console.log(`    fit check dropped: ${t.dropped.map((d) => `${d.latinName} (${d.reason})`).join("; ")}${t.regenerated ? " — regenerated" : ""}`);
+      if (t.replyNamesDropped.length) console.log(`    ! reply names a dropped plant: ${t.replyNamesDropped.join(", ")}`);
+      totals.dropped += t.dropped.length;
+      if (t.regenerated) totals.regenerated += 1;
+      totals.replyNamesDropped += t.replyNamesDropped.length;
       if (t.replySentences != null) {
         totals.replies += 1;
         if (t.replySentences > 3) totals.longReplies += 1;
@@ -399,6 +430,7 @@ async function main() {
   console.log(`Replies:         ${totals.longReplies} of ${totals.replies} over 3 sentences`);
   console.log(`Genus repeats:   ${totals.genusRepeats}`);
   console.log(`False "on your list": ${totals.falseList}`);
+  console.log(`Fit check:       dropped ${totals.dropped}, regenerated ${totals.regenerated} turns, ${totals.replyNamesDropped} replies naming a dropped plant`);
   console.log(`Latency:         initial avg ${avg("initial")}s, follow-up avg ${avg("follow-up")}s`);
 
   if (outPath) {

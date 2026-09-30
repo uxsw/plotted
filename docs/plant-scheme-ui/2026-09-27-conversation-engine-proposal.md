@@ -62,7 +62,7 @@ Wording needs a copy pass with Natalie.
 ## 4. Cost/latency and the "thinking" UX
 
 **ChatPane fit:** mostly clean. `attemptTurn` is already `fetch().then(apply).catch(setFailed)`-shaped, and a failed turn leaves the transcript clean (the user bubble lives in `turnState` and only commits on success). Needed:
-- a **client timeout** (~45s) rejecting into `failed` — the mock can't hang, a real fetch can;
+- a **client timeout** rejecting into `failed` — the mock can't hang, a real fetch can (built at 45s in 3b; raised to 95s with the fit check, see below);
 - remove `/fail`, `SIMULATED_FAILURE_DELAY_MS`, `THINK_MS`;
 - a new `PendingTurn` kind `initial` (no user bubble; Retry only);
 - a **rehydration rule**: phase `scheme` with no `INITIAL_SUGGESTIONS_ENTRY_ID` in the transcript → fire the initial turn on mount (derived from content, like `generationStatus`);
@@ -150,8 +150,31 @@ set -a && . ./.env.local && set +a && npx tsx scripts/eval-scheme-conversation.t
 The final runs also showed no legally restricted plants, no same-genus pairs, no false "on your list" claims, and 1 of 20 replies over three sentences.
 
 **Still open:**
-- **Fit is better on average but not reliable** (poor fits 1–4 per run). The model's self-rating is the ceiling: when it misjudges a plant, nothing downstream catches it. Recurring misses: Helenium offered for partial shade in answer to "late summer colour" (most runs), and occasionally drainage-lovers on heavy clay (Scabiosa, Liatris, Tricyrtis). The next lever is an independent check: a short second verification call (roughly +3–5s per turn, recommended to try first) or adaptive thinking (likely slower). On hold pending a speed-versus-accuracy decision.
+- ~~Fit is better on average but not reliable~~ — addressed by the fit check below.
 - The judge's "marginal" count rose to 15–20. Most are clay-tolerant sun perennials and part-shade plants in full shade that the judge marks down strictly. Tuning toward it would narrow the palette sharply, so this is a product call rather than an obvious fix.
 - The invasive rule relies on the model. A hard, code-side denylist would need an authoritative, maintained GB list, not one written from memory.
 - Latency is ~1–2s higher from the fit fields. "Still thinking…" shows on most turns, so 3e (streaming the reply) remains open.
 - The model once used the banned word "tapestry" in a direction label.
+
+## Fit check (2026-09-30)
+
+The model's self-rating was its own ceiling: when it misjudged a plant (Helenium for partial shade in most runs; Scabiosa/Liatris on heavy clay), nothing downstream caught it. Decision: check its output against the stated conditions afterwards, rather than keep asking it to get this right unprompted. Same pattern as the avoid-list and one-per-genus rule. A 3–5s latency cost was accepted.
+
+**How it works:** after a turn is generated and merged, a second, short `claude-sonnet-4-6` call rates each proposed plant's sun fit and soil fit against the bed, and flags invasive/restricted plants. The merge then drops, in code, any plant that is **"poor" on either axis or invasive**. It fails closed: a plant the check didn't rate is dropped, and if the check call itself fails, the turn fails (Retry). If the check empties a card, or leaves a starting scheme under 4 plants, the turn is regenerated once with the rejected plants ruled out; if it's still empty, the turn fails. It all counts as one turn against the rate limit. Code: "Fit check" in `lib/scheme-conversation.ts`, and `generateConversationTurn` in `lib/scheme-conversation-generation.ts`.
+
+**Calibration, learned the hard way.** The first version dropped anything short of "good" on both axes. It rejected UK staples (foxglove, astrantia and catmint on clay), sometimes with wrong reasons, shrank starting schemes to 2–3 plants, regenerated half of all turns, pushed starting-scheme latency past 30s, and failed a turn outright. The shipped version drops only clear failures ("poor") and keeps "marginal-but-valid" plants; the checker's instructions say its job is to catch plants that will fail, not to find the ideal one. Keep this line.
+
+**Gunnera manicata** is always excluded. It's legal itself, but it's commonly mis-sold as the restricted *G. tinctoria*, and the feature shouldn't be party to that. The checker has an explicit instruction for it (verified with a live check call).
+
+**Results** (same harness, directly comparable):
+
+| | Before the check (v6a / v6b) | Strict check (v7) | **Shipped check (v8a / v8b)** |
+|---|---|---|---|
+| Poor condition fit | 1 / 4 (avg 2) | 0 | **1 / 1** |
+| Plants shown, 4 scenarios | 45 / 46 | 26 | **42 / 44** |
+| Turns regenerated / failed | – | 5 / 1 | **0 / 0** |
+| Median turn latency | ~13s | – | **~15.5s** |
+
+It caught the recurring Helenium-in-shade miss; a second legally restricted plant (*Lysichiton camtschatcensis*, Asian skunk cabbage) that the generator suggested despite the prompt rule; Lamium 'Hermann's Pride' (rampant spreader); and meadowsweet in full sun. No reply named a plant the check removed. What still gets through: about one borderline case per run (Echinacea or Tricyrtis on clay), which the checker rates "marginal" where the stricter judge says "poor". That's accepted, per the calibration above.
+
+**Timeouts:** the route's `maxDuration` is 90s (two calls, plus an occasional regeneration). The client's `TURN_TIMEOUT_MS` is 95s, just above it, so a slow turn gets the server's full allowance, and a turn the host kills comes back as a real error. Keep the two in step. The harness saw two API-slowdown outliers (88s and 77s; one was a turn with no plants, so not the check itself); at the old 45s client timeout both would have failed. Worth watching in real use.

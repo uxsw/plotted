@@ -145,6 +145,10 @@ export type ConversationContext = {
   exchange: { role: "user" | "assistant"; text: string }[];
   /** Every species-level key the model must not return (list + shown). */
   avoidKeys: Set<string>;
+  /** Plants the fit check rejected earlier in this same turn — set only when a
+   *  turn is regenerated because the check emptied it (see
+   *  scheme-conversation-generation.ts). Also in avoidKeys. */
+  unsuited?: { commonName: string; latinName: string }[];
 };
 
 /** Expands a from/to month range, handling year wraparound (e.g. Nov–Feb). */
@@ -446,6 +450,14 @@ export function buildConversationPrompt(
     );
   }
 
+  if (ctx.unsuited && ctx.unsuited.length > 0) {
+    sections.push(
+      `Already ruled out as a poor fit for their conditions (don't suggest these, or anything with the same needs):\n${ctx.unsuited
+        .map((p) => `- ${p.commonName} (${p.latinName})`)
+        .join("\n")}`
+    );
+  }
+
   if (ctx.exchange.length > 0) {
     sections.push(
       `The conversation so far (most recent last):\n${ctx.exchange
@@ -711,4 +723,146 @@ export function mergeConversationResponse(
 /** Latin names in a turn's suggestion entries — for the convergence log line. */
 export function suggestedLatinNames(entries: ChatEntry[]): string[] {
   return entries.flatMap((e) => (e.kind === "suggestions" ? e.plants.map((p) => p.latinName) : []));
+}
+
+// ---------------------------------------------------------------------------
+// Fit check — an independent pass over the plants a turn proposes
+// ---------------------------------------------------------------------------
+
+/*
+ * The generating call rates each plant's fit itself (sun_fit / soil_fit), but
+ * that self-rating is its ceiling: when it misjudges a plant (Helenium for
+ * part shade, Scabiosa for heavy clay), nothing downstream notices. So a
+ * second, narrow call checks the named plants against the stated conditions
+ * after the fact, and anything that fails is dropped here in code — the same
+ * "check the output, don't trust the model to self-police" pattern as the
+ * avoid-list and the one-per-genus rule. Verifying a named plant is a much
+ * easier task than choosing one, which is why this catches what the
+ * self-rating misses.
+ */
+
+export const FIT_CHECK_SYSTEM_PROMPT = `You are an experienced UK horticulturist checking a gardening app's plant suggestions before a gardener sees them. Your job is to catch clear mismatches — plants that will fail or struggle badly in the stated conditions of a UK garden bed — not to find the ideal plant. Plants that UK gardeners widely and successfully grow in these conditions are fine, even if they'd be happier elsewhere.
+
+- sun_fit: "poor" if the plant is a known bad fit for that aspect — e.g. a sun-loving prairie or Mediterranean plant in partial or full shade, where it flops, sulks or barely flowers; or a shade-lover that scorches in full sun. "marginal" if it copes but isn't at its best. "good" if it does well there.
+- soil_fit: the same for the soil — "poor" for a plant that needs sharp drainage on heavy or wet clay (where it rots), or a bog or moisture-lover on dry free-draining ground. Most border perennials grown on ordinary clay are "good" or "marginal", not "poor".
+- If the aspect or soil is unknown (skipped or "not sure"), judge that axis "good" unless the plant is notably fussy about it.
+- invasive_or_restricted: true only if it's on a GB invasive non-native species list, restricted from sale or planting in Great Britain, or a notoriously rampant spreader that would overrun a mixed border. Ordinary self-seeding is not enough. Always mark Gunnera manicata true: it's legal itself, but commonly mis-sold as the restricted Gunnera tinctoria.
+- reason: under 12 words, only when an axis is "poor" or it's invasive; otherwise an empty string.
+
+Judge each plant on its own merits. Don't be swayed by why it was suggested.`;
+
+/** The stated conditions, as the fit check sees them. */
+export function fitCheckConditions(ctx: ConversationContext): string {
+  const find = (label: string) => ctx.answers.find((a) => a.label === label)?.answer;
+  const aspect = find(QUESTION_LABELS.aspect) ?? "unknown";
+  const soil = find(QUESTION_LABELS.soil) ?? "unknown";
+  return `Aspect and sun: ${aspect}\nSoil: ${soil}`;
+}
+
+export function buildFitCheckPrompt(
+  ctx: ConversationContext,
+  plants: { commonName: string; latinName: string }[]
+): string {
+  const numbered = plants.map((p, i) => `${i + 1}. ${p.latinName} (${p.commonName})`).join("\n");
+  return `The bed's conditions:\n${fitCheckConditions(ctx)}\n\nThe plants to check:\n${numbered}\n\nReturn one entry per plant, by number.`;
+}
+
+export const FIT_CHECK_SCHEMA = {
+  type: "object",
+  additionalProperties: false,
+  required: ["plants"],
+  properties: {
+    plants: {
+      type: "array",
+      items: {
+        type: "object",
+        additionalProperties: false,
+        required: ["n", "sun_fit", "soil_fit", "invasive_or_restricted", "reason"],
+        properties: {
+          n: { type: "integer" },
+          sun_fit: { type: "string", enum: ["good", "marginal", "poor"] },
+          soil_fit: { type: "string", enum: ["good", "marginal", "poor"] },
+          invasive_or_restricted: { type: "boolean" },
+          reason: { type: "string" },
+        },
+      },
+    },
+  },
+} as const;
+
+export type FitVerdict = { keep: boolean; reason: string };
+
+/**
+ * The check's JSON → one verdict per plant, in input order. Fails closed: a
+ * plant the check didn't return (or returned malformed) is not kept — an
+ * unverified plant is exactly what this exists to stop.
+ *
+ * Only a "poor" fit (or an invasive/restricted plant) is dropped. "marginal"
+ * stays: an earlier version dropped anything short of "good", and it threw out
+ * UK staples (foxglove, astrantia and catmint on clay), shrank starting
+ * schemes to 2–3 plants and regenerated half of all turns. The product risk
+ * is the clear mismatch, not the merely second-best plant.
+ */
+export function parseFitCheck(raw: unknown, count: number): FitVerdict[] {
+  const byNumber = new Map<number, Record<string, unknown>>();
+  const list = typeof raw === "object" && raw !== null ? (raw as Record<string, unknown>).plants : null;
+  if (Array.isArray(list)) {
+    for (const item of list) {
+      if (typeof item !== "object" || item === null) continue;
+      const r = item as Record<string, unknown>;
+      const n = typeof r.n === "number" ? r.n : Number(r.n);
+      if (!Number.isInteger(n) || n < 1 || n > count || byNumber.has(n)) continue;
+      byNumber.set(n, r);
+    }
+  }
+  return Array.from({ length: count }, (_, i) => {
+    const r = byNumber.get(i + 1);
+    if (!r) return { keep: false, reason: "not checked" };
+    const okay = (fit: unknown) => fit === "good" || fit === "marginal";
+    const keep = okay(r.sun_fit) && okay(r.soil_fit) && r.invasive_or_restricted === false;
+    const reason = typeof r.reason === "string" && r.reason.trim() ? r.reason.trim() : "";
+    return { keep, reason: keep ? "" : reason || `sun ${String(r.sun_fit)}, soil ${String(r.soil_fit)}` };
+  });
+}
+
+/** Every plant a turn's entries propose, in order — what the fit check checks. */
+export function proposedPlants(entries: ChatEntry[]): SuggestionPlant[] {
+  return entries.flatMap((e) => (e.kind === "suggestions" ? e.plants : []));
+}
+
+/**
+ * Drops the plants the check rejected. `verdicts` line up with
+ * proposedPlants(entries). A suggestions entry left with no plants is removed
+ * entirely, and `emptied` says so — the caller decides whether that's worth
+ * a regeneration or a failure (see scheme-conversation-generation.ts).
+ */
+export function applyFitCheck(
+  entries: ChatEntry[],
+  verdicts: FitVerdict[]
+): {
+  entries: ChatEntry[];
+  dropped: { commonName: string; latinName: string; reason: string }[];
+  kept: number;
+  emptied: boolean;
+} {
+  let i = 0;
+  let kept = 0;
+  let emptied = false;
+  const dropped: { commonName: string; latinName: string; reason: string }[] = [];
+  const out: ChatEntry[] = [];
+  for (const entry of entries) {
+    if (entry.kind !== "suggestions") {
+      out.push(entry);
+      continue;
+    }
+    const plants = entry.plants.filter((p) => {
+      const verdict = verdicts[i++] ?? { keep: false, reason: "not checked" };
+      if (!verdict.keep) dropped.push({ commonName: p.commonName, latinName: p.latinName, reason: verdict.reason });
+      return verdict.keep;
+    });
+    kept += plants.length;
+    if (plants.length === 0) emptied = true;
+    else out.push({ ...entry, plants });
+  }
+  return { entries: out, dropped, kept, emptied };
 }
