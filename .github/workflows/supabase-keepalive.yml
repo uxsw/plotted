@@ -1,0 +1,29 @@
+name: Supabase keepalive
+
+# Free-tier Supabase projects auto-pause after 7 days of inactivity.
+# One lightweight read every 3 days keeps the project active.
+
+on:
+  schedule:
+    - cron: "0 9 */3 * *"
+  workflow_dispatch:
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Ping Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+        run: |
+          # A REST read hits Postgres (the auth health endpoint may not).
+          # With RLS the anon key gets an empty 200 — that's fine, the query still runs.
+          # --fail makes curl exit non-zero on any 4xx/5xx.
+          curl --fail --silent --show-error --max-time 30 \
+            --retry 2 --retry-delay 10 \
+            -o /dev/null -w "HTTP %{http_code}\n" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY" \
+            "$SUPABASE_URL/rest/v1/plants?select=id&limit=1"
