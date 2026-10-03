@@ -52,7 +52,7 @@ export default async function SchemesPage() {
         <h1 className="pica o-type-display kirk">Planting schemes</h1>
         {schemes.length > 0 && (
           <Link
-            href="/schemes/new"
+            href="/plant-scheme"
             className={clsx(
               buttonStyles["o-button"],
               buttonStyles["o-button--primary"]
