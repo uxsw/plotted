@@ -48,7 +48,7 @@ export default async function SchemesSection() {
       <SchemeCardScroller schemes={schemes} />
       <div className="flex items-center justify-between mt-3">
         <Link
-          href="/schemes"
+          href="/plant-scheme/plans"
           className={clsx(
             buttonStyles["o-button"],
             buttonStyles["o-button--ghost"],
@@ -59,7 +59,7 @@ export default async function SchemesSection() {
           <Icon name="right" size={16} />
         </Link>
         <Link
-          href="/schemes/new"
+          href="/plant-scheme"
           className={clsx(
             buttonStyles["o-button"],
             buttonStyles["o-button--primary"]

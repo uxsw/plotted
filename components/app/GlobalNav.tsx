@@ -6,8 +6,9 @@ import { usePathname } from "next/navigation";
 const NAV_ITEMS: { href: string; label: string; also?: string[] }[] = [
   { href: "/dashboard", label: "Home" },
   { href: "/plants", label: "Plants" },
-  /* /plant-scheme is the schemes hub being built alongside the live /schemes. */
-  { href: "/schemes", label: "Schemes", also: ["/plant-scheme"] },
+  /* /plant-scheme is the way in; /schemes stays active-highlighted because
+     finished schemes (old and new) still open at /schemes/[id]. */
+  { href: "/plant-scheme", label: "Schemes", also: ["/schemes"] },
 ];
 
 function matches(pathname: string, href: string) {
