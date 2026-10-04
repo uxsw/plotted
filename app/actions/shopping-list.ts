@@ -1,7 +1,10 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
-import { sanitizeSpecies } from "@/lib/sanitize";
+import { revalidatePath } from "next/cache";
+import { sanitizePlantName } from "@/lib/sanitize";
+import { parseScientificName } from "@/lib/identification/name";
+import { createPlantWithLookup } from "@/lib/plant-create";
 
 export async function markShoppingListNoticeSeen(): Promise<void> {
   const supabase = await createClient();
@@ -57,7 +60,8 @@ type PurchaseResult =
 /**
  * "Yes, add to garden" path.
  *
- * Order: copy image → insert plant → delete item.
+ * Order: copy image → insert plant (+ AI lookup, background frost
+ * enrichment — same sequence as adding to the garden) → delete item.
  * The shopping list item is only deleted once both image copy and plant insert
  * succeed, so a partial failure always leaves the item available to retry.
  * If the item delete itself fails (step 3), we log it but don't surface an
@@ -76,6 +80,16 @@ export async function purchaseShoppingListItem(itemId: string): Promise<Purchase
     .single();
 
   if (!item) return { error: "Item not found" };
+
+  // Scheme items store the full binomial in `species` ("Verbena bonariensis");
+  // plants keep genus and epithet in separate columns.
+  // TODO(manual-items): when manual shopping list items land (see
+  // docs/specs/shopping-list-manual-add.md §4), branch on item.source here —
+  // use the item's resolved genus/species/cultivar if present, otherwise
+  // insert with entered_name as the name and let the lookup correct it.
+  const { genus, species } = parseScientificName(item.species ?? "");
+  const cultivar = item.cultivar ? sanitizePlantName(item.cultivar) || null : null;
+  if (!genus && !species) return { error: "This item has no plant name to add." };
 
   // --- Step 1: copy the snapshotted thumbnail into the plant-photos location ---
   let photoUrl: string | null = null;
@@ -99,12 +113,6 @@ export async function purchaseShoppingListItem(itemId: string): Promise<Purchase
   }
 
   // --- Step 2: insert the plant record ---
-  // Convention matches PlantForm: genus is always "", species holds the full
-  // latin name (e.g. "verbena bonariensis"), cultivar is a separate field.
-  const genus = "";
-  const species = sanitizeSpecies(item.species);
-  const cultivar = item.cultivar ?? null;
-
   // Pull image metadata into explicit variables so the intent is clear and
   // the values are easy to inspect in a debugger or log.
   const imageSource: "wikimedia" | null = photoUrl ? "wikimedia" : null;
@@ -112,9 +120,11 @@ export async function purchaseShoppingListItem(itemId: string): Promise<Purchase
     ? (item.wikimedia_attribution ?? null)
     : null;
 
-  const { data: plant, error: insertError } = await supabase
-    .from("plants")
-    .insert({
+  // requireGenus: purchase must not add blank-genus keys to
+  // species_reference — see hasGenusForEnrichment.
+  const plant = await createPlantWithLookup(
+    supabase,
+    {
       genus,
       species,
       cultivar,
@@ -130,18 +140,24 @@ export async function purchaseShoppingListItem(itemId: string): Promise<Purchase
       eventual_height_cm: null,
       eventual_spread_cm: null,
       notes: null,
-    })
-    .select("id")
-    .single();
+      // Same values upsertPlant computes for a typed-in plant: a scheme name
+      // is not a photo identification, so the lookup may correct it.
+      identification_status: "identified",
+      species_source: "manual",
+    },
+    { requireGenus: true }
+  );
 
-  if (insertError || !plant) {
+  if ("error" in plant) {
     // Roll back the copied image so storage doesn't accumulate orphans.
     if (copiedPath) {
       await supabase.storage.from("plant-photos").remove([copiedPath]);
     }
-    console.error("[purchase] plant insert failed:", insertError);
+    console.error("[purchase] plant insert failed:", plant.error);
     return { error: "Couldn't create the plant record — please try again." };
   }
+
+  revalidatePath("/plants");
 
   // --- Step 3: delete the shopping list item (best-effort) ---
   if (item.thumbnail_storage_path) {
