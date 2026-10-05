@@ -258,6 +258,28 @@ describe("upsertPlant – identification_status", () => {
     expect(enrichSpeciesReference).toHaveBeenCalledWith("Thymus", null, null);
   });
 
+  it("still enriches a normal garden add with genus and species present (shared-helper regression)", async () => {
+    setupInsertCapture();
+    await upsertPlant(null, BASE_PLANT); // genus "Rosa", species "canina"
+    expect(enrichSpeciesReference).toHaveBeenCalledTimes(1);
+    expect(enrichSpeciesReference).toHaveBeenCalledWith("Rosa", "canina", null);
+  });
+
+  it("enriches with the lookup-corrected species, not the one typed", async () => {
+    setupInsertCapture();
+    vi.mocked(performLookup).mockResolvedValue({ ...BASE_LOOKUP, corrected_species: "rugosa" });
+    await upsertPlant(null, BASE_PLANT);
+    expect(enrichSpeciesReference).toHaveBeenCalledWith("Rosa", "rugosa", null);
+  });
+
+  // The genus guard is opt-in and garden add leaves it off for now (PlantForm
+  // still sends genus: "") — see the TODO(genus-guard) notes in plants.ts.
+  it("manual garden add with a blank genus still enriches — guard is off on this path", async () => {
+    setupInsertCapture();
+    await upsertPlant(null, { ...BASE_PLANT, genus: "", species: "verbena bonariensis" });
+    expect(enrichSpeciesReference).toHaveBeenCalledWith("", "verbena bonariensis", null);
+  });
+
   it("does not trigger enrichment for a fully unidentified save — nothing to describe", async () => {
     setupInsertCapture();
     await upsertPlant(null, {

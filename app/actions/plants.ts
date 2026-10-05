@@ -7,15 +7,14 @@ import { createClient } from "@/lib/supabase/server";
 import { sanitizePlantName, sanitizeGenus, sanitizeSpecies } from "@/lib/sanitize";
 import { validatePlantInput, hasFieldErrors, type FieldErrors } from "@/lib/validation";
 import type { PlantInsert } from "@/lib/types";
-import { performLookup } from "@/lib/plant-lookup";
-import { applyLookupResult } from "@/lib/lookup-apply";
 import { enrichSpeciesReference } from "@/lib/species-reference-enrichment";
 import { manualSpeciesTransition } from "@/lib/species-transition";
-import Anthropic from "@anthropic-ai/sdk";
+import { createPlantWithLookup } from "@/lib/plant-create";
 
 // ─── revalidatePath from inside after(): cache hygiene only, not live push ───
 //
-// The three enrichSpeciesReference call sites below each call revalidatePath
+// The three enrichSpeciesReference call sites (two below, plus the insert
+// path's in lib/plant-create.ts) each call revalidatePath
 // *inside* their after() callback, once enrichment has actually resolved,
 // rather than alongside the surrounding write. This does NOT push a live
 // update to a client already sitting on the plant's detail page — an earlier
@@ -71,6 +70,11 @@ export async function updatePlantField(
     // revalidatePath is called after enrichment resolves, not alongside the
     // write above — cache hygiene for a later navigation, not a live push to
     // an open tab. See the file-level note above before touching this.
+    //
+    // TODO(genus-guard): unguarded — a blank-genus plant still enriches here.
+    // Gate on hasGenusForEnrichment (lib/plant-create.ts) once genus
+    // resolution lands (performLookup returning a genus, PlantForm no longer
+    // sending genus: "").
     after(async () => {
       await enrichSpeciesReference(updated.genus, updated.species, updated.cultivar);
       revalidatePath(`/plants/${plantId}`);
@@ -140,6 +144,11 @@ export async function upsertPlant(
     // Nothing to enrich for a fully unidentified plant — genus-only is still
     // enriched (a genus-level lookup is a real, if hedged, answer; see spec's
     // "Enrichment of genus-level records").
+    //
+    // TODO(genus-guard): unguarded — a blank-genus plant still enriches here.
+    // Gate on hasGenusForEnrichment (lib/plant-create.ts) once genus
+    // resolution lands (performLookup returning a genus, PlantForm no longer
+    // sending genus: "").
     if (clean.genus || clean.species) {
       // revalidatePath fires post-enrichment, inside the after() callback —
       // cache hygiene for a later navigation, not a live push to an open
@@ -152,63 +161,14 @@ export async function upsertPlant(
     revalidatePath("/plants");
     redirect(`/plants/${plantId}`);
   } else {
-    const { data: row, error } = await supabase
-      .from("plants")
-      .insert(clean)
-      .select("id")
-      .single();
-    if (error) return { error: error.message };
-
-    let lookup_status: "skipped" | "success" | "not_found" | "error" = "skipped";
-    let finalSpecies = clean.species;
-    let finalCultivar = clean.cultivar;
-    if (clean.species) {
-      try {
-        const result = await performLookup(clean.genus, clean.species, clean.cultivar ?? null);
-        const { updates, lookup_status: ls } = applyLookupResult(
-          result,
-          { species: clean.species, cultivar: clean.cultivar ?? null },
-          {
-            skipCorrection: options.fromIdentification,
-            existingCommonNames: options.fromIdentification ? clean.common_names : undefined,
-          }
-        );
-        lookup_status = ls;
-        if (updates.species !== undefined) finalSpecies = updates.species as string;
-        if (updates.cultivar !== undefined) finalCultivar = updates.cultivar as string;
-        await supabase.from("plants").update({ ...updates, lookup_status }).eq("id", row.id);
-      } catch (err) {
-        const isBillingError =
-          err instanceof Anthropic.APIError &&
-          ((err.status === 429) ||
-            (err.status === 400 &&
-              typeof err.message === "string" &&
-              err.message.toLowerCase().includes("credit")));
-        if (isBillingError) {
-          console.error("AI lookup failed — possible billing/quota issue:", err);
-        } else {
-          console.error("AI lookup failed on plant creation:", err);
-        }
-        lookup_status = "error";
-        await supabase.from("plants").update({ lookup_status }).eq("id", row.id);
-      }
-    } else {
-      await supabase.from("plants").update({ lookup_status }).eq("id", row.id);
-    }
-
-    if (clean.genus || finalSpecies) {
-      // This is the call site the frost-tolerance-bug race actually showed
-      // up on: a freshly-inserted plant, redirected to immediately, with
-      // enrichment for a genuinely new species still running in the
-      // background. revalidatePath here is cache hygiene for a later
-      // navigation only — the live update on this first view comes from
-      // PlantDetail.tsx's polling, not from this call. See the file-level
-      // note above before touching this.
-      after(async () => {
-        await enrichSpeciesReference(clean.genus, finalSpecies, finalCultivar);
-        revalidatePath(`/plants/${row.id}`);
-      });
-    }
+    // TODO(genus-guard): requireGenus is left off here so manual garden add
+    // (PlantForm still sends genus: "") keeps getting frost data. Switch it
+    // on once genus resolution lands — performLookup returning a genus and
+    // PlantForm no longer sending a blank one.
+    const row = await createPlantWithLookup(supabase, clean, {
+      fromIdentification: options.fromIdentification,
+    });
+    if ("error" in row) return { error: row.error };
 
     revalidatePath("/plants");
     redirect(`/plants/${row.id}`);
