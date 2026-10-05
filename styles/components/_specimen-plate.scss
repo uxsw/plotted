@@ -63,6 +63,36 @@
     }
 }
 
+/* --plain: the plate for a free-text name (a typed or dictated shopping list
+   item). Same frame and number; the monogram stands upright, because italic
+   is the Latin-in-Italic Rule's and this name isn't known to be Latin. */
+.c-specimen-plate--plain .c-specimen-plate__monogram {
+    font-style: normal;
+}
+
+/* --compact: a list-row media well (~4rem) rather than a card. Thinner mat,
+   and the monogram lifted a little so the plate number has its own line
+   underneath instead of colliding with it. */
+.c-specimen-plate--compact {
+    padding: var(--space-xs);
+
+    .c-specimen-plate__monogram {
+        font-size: clamp(1.5rem, 44cqi, 2.5rem);
+        translate: 0 -12%;
+    }
+
+    .c-specimen-plate__mark {
+        translate: 0 -10%;
+    }
+
+    .c-specimen-plate__number {
+        inset-block-end: 2px;
+        inset-inline-end: var(--space-xs);
+        font-size: 0.5625rem;
+        letter-spacing: 0;
+    }
+}
+
 /* The one authored moment: on card hover the plate comes into focus — the
    monogram settles a touch larger and darker. */
 .o-card--interactive:hover .c-specimen-plate__monogram {

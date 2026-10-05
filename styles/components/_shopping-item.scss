@@ -77,6 +77,35 @@
         color: var(--color-ink-soft);
     }
 
+    /* Manual items: what the user typed about where to get it, and their
+       own notes. Free text, so it wraps anywhere — a pasted URL has no
+       spaces to break on. */
+    &__where,
+    &__notes {
+        margin-block-start: var(--space-xs);
+        color: var(--color-ink-soft);
+        overflow-wrap: anywhere;
+    }
+
+    &__where {
+        > .o-type-label {
+            margin-inline-end: var(--space-xs);
+        }
+
+        > a {
+            color: var(--color-ink);
+            text-decoration: underline;
+
+            &:focus-visible {
+                outline: var(--border-width-thin) solid var(--sem-focus-color);
+            }
+        }
+    }
+
+    &__notes {
+        white-space: pre-line;
+    }
+
     &__source {
         margin-block-start: var(--space-xs);
     }
@@ -97,6 +126,20 @@
         margin-block-start: var(--space-sm);
     }
 
+    /* An action, not a status: o-button--text alone is unadorned grey text,
+       which made "Purchased" read as a label on every card. Ink and an
+       underline mark it as something to press. */
+    &__purchase {
+        color: var(--color-ink);
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+    }
+
     &__remove {
         flex-shrink: 0;
         align-self: flex-start;
@@ -113,9 +156,15 @@
                 color 150ms cubic-bezier(0.4, 0, 0.2, 1),
                 background-color 150ms cubic-bezier(0.4, 0, 0.2, 1);
 
-            &:hover {
+            &:hover:not(:disabled) {
                 background-color: var(--color-r-marigold);
-                color: var(--color-r-marigold);
+                /* was marigold-on-marigold, which hid the icon on hover */
+                color: var(--color-ink-deep);
+            }
+
+            &:disabled {
+                opacity: 0.5;
+                cursor: default;
             }
 
             &:focus-visible {
@@ -162,5 +211,53 @@
         display: flex;
         justify-content: flex-end;
         gap: var(--space-sm);
+    }
+}
+
+/* c-shopping-add — quick capture at the top of /shopping-list: a name field
+   that is always there, and optional details behind a toggle. */
+.c-shopping-add {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-sm);
+    padding: 0.75rem;
+    background-color: var(--color-white);
+
+    &__row {
+        display: flex;
+        align-items: stretch;
+        gap: var(--space-sm);
+        inline-size: 100%;
+
+        > .o-text-input {
+            flex: 1;
+            min-inline-size: 0;
+        }
+    }
+
+    &__error {
+        color: var(--sem-color-error-bg);
+    }
+
+    &__details {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-sm);
+        inline-size: 100%;
+
+        &[hidden] {
+            display: none;
+        }
+    }
+
+    &__field {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-xs);
+
+        > textarea {
+            resize: vertical;
+        }
     }
 }

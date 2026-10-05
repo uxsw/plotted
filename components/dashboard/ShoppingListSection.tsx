@@ -7,6 +7,8 @@ import buttonStyles from "@/components/ui/Button.module.css";
 import { Icon } from "@/components/ui/Icon";
 
 function ShoppingItemCard({ item }: { item: ShoppingListItemData }) {
+  const isManual = item.source === "manual";
+  const displayName = shoppingItemDisplayName(item);
   const nameLabel = item.common_names?.[0] ?? (item.cultivar ? `'${item.cultivar}'` : null);
 
   const inner = (
@@ -15,7 +17,7 @@ function ShoppingItemCard({ item }: { item: ShoppingListItemData }) {
         {item.thumbnail_url ? (
           <Image
             src={item.thumbnail_url}
-            alt={shoppingItemDisplayName(item)}
+            alt={displayName}
             fill
             sizes="40px"
             className="is-image"
@@ -26,10 +28,16 @@ function ShoppingItemCard({ item }: { item: ShoppingListItemData }) {
           </div>
         )}
       </div>
-      <div className="">
-        <p className="o-type-display brevier o-type--italic">{item.species}</p>
-        {nameLabel && (
-          <p className="minion">{nameLabel}</p>
+      <div>
+        {isManual ? (
+          <p className="o-type-display brevier">{displayName}</p>
+        ) : (
+          <>
+            <p className="o-type-display brevier o-type--italic">{item.species}</p>
+            {nameLabel && (
+              <p className="minion">{nameLabel}</p>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -73,7 +81,7 @@ export default async function ShoppingListSection() {
           <ShoppingItemCard key={item.id} item={item} />
         ))}
       </div>
-      <div className="flex mt-3">
+      <div className="c-shopping-list__footer">
         <Link
           href="/shopping-list"
           className={clsx(
