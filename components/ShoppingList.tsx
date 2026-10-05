@@ -33,11 +33,11 @@ function SproutIcon() {
 
 function EmptyState() {
   return (
-    <div className="flex flex-col items-center gap-3 py-16 text-center">
-      <div className="text-sand-line">
+    <div className="c-shopping-item-list__empty">
+      <div className="is-illustration">
         <SproutIcon />
       </div>
-      <p className="brevier text-ink-soft">
+      <p className="brevier">
         Your shopping list is empty — add plants from your planting schemes using the cart icon.
       </p>
     </div>
@@ -61,43 +61,43 @@ function ItemCard({
     .join(" ");
 
   return (
-    <div className="flex gap-3 bg-white p-3">
-      <div className="relative w-16 h-16 flex-shrink-0 overflow-hidden">
+    <div className="c-shopping-item">
+      <div className="c-shopping-item__media">
         {item.thumbnail_url ? (
           <Image
             src={item.thumbnail_url}
             alt={item.species}
             fill
             sizes="64px"
-            className="object-cover"
+            className="is-image"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-sand-line">
+          <div className="is-placeholder">
             <SproutIcon />
           </div>
         )}
       </div>
 
-      <div className="flex flex-col gap-0.5 flex-1 min-w-0">
-        <p className="o-type-display o-type--italic brevier text-ink o-type-leading--snug truncate">{item.species}</p>
+      <div className="c-shopping-item__body">
+        <p className="c-shopping-item__name o-type-display o-type--italic brevier o-type-leading--snug">{item.species}</p>
         {nameLabel && (
-          <p className="minion text-ink-soft o-type-leading--snug truncate">{nameLabel}</p>
+          <p className="c-shopping-item__subname minion o-type-leading--snug">{nameLabel}</p>
         )}
-        <div className="mt-1">
+        <div className="c-shopping-item__source">
           {item.scheme_id ? (
             <Link
               href={`/schemes/${item.scheme_id}`}
-              className="minion text-marigold hover:text-marigold underline"
+              className="c-shopping-item__scheme-link minion"
             >
               {item.scheme_name ?? "Planting scheme"}
             </Link>
           ) : (
-            <p className="minion text-ink-soft/60 o-type--italic">
+            <p className="c-shopping-item__scheme-deleted minion o-type--italic">
               This planting scheme has been deleted
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2 mt-2">
+        <div className="c-shopping-item__actions">
           <button
             type="button"
             onClick={onPurchase}
@@ -108,14 +108,13 @@ function ItemCard({
         </div>
       </div>
 
-      <div className="flex-shrink-0 self-start">
+      <div className="c-shopping-item__remove">
         <button
           type="button"
           onClick={onDelete}
           aria-label={`Remove ${item.species} from shopping list`}
-          className="flex items-center justify-center w-8 h-8 rounded text-ink-soft transition-colors hover:bg-marigold hover:text-marigold focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marigold focus-visible:ring-offset-2 focus-visible:ring-offset-paper"
         >
-          <Icon name="delete" aria-label="Delete" /> 
+          <Icon name="delete" aria-label="Delete" />
         </button>
       </div>
     </div>
@@ -145,15 +144,15 @@ function PurchaseDialog({
 }) {
   return (
     <Modal isOpen={isOpen} onClose={onDismiss}>
-      <div className="flex flex-col gap-5">
-        <div className="flex flex-col gap-1">
-          <h2 className="o-type-display pica kirk text-ink">Plant purchased!</h2>
-          <p className="brevier text-ink-soft">
-            Do you want to add <span className="italic">{item?.species}</span> to your garden?
+      <div className="c-purchase-dialog">
+        <div className="c-purchase-dialog__text">
+          <h2 className="c-purchase-dialog__title o-type-display pica kirk">Plant purchased!</h2>
+          <p className="c-purchase-dialog__message brevier">
+            Do you want to add <span className="is-latin">{item?.species}</span> to your garden?
           </p>
-          {error && <p className="minion text-marigold mt-1">{error}</p>}
+          {error && <p className="c-purchase-dialog__error minion">{error}</p>}
         </div>
-        <div className="flex gap-2 justify-end">
+        <div className="c-purchase-dialog__actions">
           <Button
             type="button"
             variant="ghost"
@@ -247,8 +246,8 @@ export default function ShoppingList({ initialItems }: { initialItems: ShoppingL
   if (items.length === 0) return <EmptyState />;
 
   return (
-    <div className="flex flex-col gap-3">
-      {deleteError && <p className="brevier text-marigold">{deleteError}</p>}
+    <div className="c-shopping-item-list">
+      {deleteError && <p className="c-shopping-item-list__error brevier">{deleteError}</p>}
       {items.map((item) => (
         <ItemCard
           key={item.id}
