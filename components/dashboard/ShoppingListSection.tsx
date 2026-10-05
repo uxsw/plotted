@@ -1,12 +1,14 @@
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import type { ShoppingListItemData } from "@/components/ShoppingList";
+import { shoppingItemDisplayName, toShoppingListItemData, type ShoppingListItemData } from "@/lib/shopping-list";
 import clsx from "clsx";
 import buttonStyles from "@/components/ui/Button.module.css";
 import { Icon } from "@/components/ui/Icon";
 
 function ShoppingItemCard({ item }: { item: ShoppingListItemData }) {
+  const isManual = item.source === "manual";
+  const displayName = shoppingItemDisplayName(item);
   const nameLabel = item.common_names?.[0] ?? (item.cultivar ? `'${item.cultivar}'` : null);
 
   const inner = (
@@ -15,7 +17,7 @@ function ShoppingItemCard({ item }: { item: ShoppingListItemData }) {
         {item.thumbnail_url ? (
           <Image
             src={item.thumbnail_url}
-            alt={item.species}
+            alt={displayName}
             fill
             sizes="40px"
             className="is-image"
@@ -26,10 +28,16 @@ function ShoppingItemCard({ item }: { item: ShoppingListItemData }) {
           </div>
         )}
       </div>
-      <div className="">
-        <p className="o-type-display brevier o-type--italic">{item.species}</p>
-        {nameLabel && (
-          <p className="minion">{nameLabel}</p>
+      <div>
+        {isManual ? (
+          <p className="o-type-display brevier">{displayName}</p>
+        ) : (
+          <>
+            <p className="o-type-display brevier o-type--italic">{item.species}</p>
+            {nameLabel && (
+              <p className="minion">{nameLabel}</p>
+            )}
+          </>
         )}
       </div>
     </div>
@@ -58,23 +66,11 @@ export default async function ShoppingListSection() {
   if (!plantCount || !items?.length) return null;
 
   const mapped: ShoppingListItemData[] = items.map((item) => {
-    const scheme = Array.isArray(item.schemes) ? item.schemes[0] : item.schemes;
     const thumbnailUrl = item.thumbnail_storage_path
       ? supabase.storage.from("plant-photos").getPublicUrl(item.thumbnail_storage_path).data.publicUrl
       : null;
 
-    return {
-      id: item.id,
-      scheme_id: item.scheme_id,
-      species: item.species,
-      cultivar: item.cultivar,
-      common_names: item.common_names,
-      thumbnail_url: thumbnailUrl,
-      thumbnail_storage_path: item.thumbnail_storage_path,
-      wikimedia_attribution: item.wikimedia_attribution,
-      created_at: item.created_at,
-      scheme_name: scheme?.name ?? null,
-    };
+    return toShoppingListItemData(item, thumbnailUrl);
   });
 
   return (
@@ -85,7 +81,7 @@ export default async function ShoppingListSection() {
           <ShoppingItemCard key={item.id} item={item} />
         ))}
       </div>
-      <div className="flex mt-3">
+      <div className="c-shopping-list__footer">
         <Link
           href="/shopping-list"
           className={clsx(

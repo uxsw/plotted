@@ -272,6 +272,11 @@
       color: var(--color-r-red);
     }
   }
+
+  &__footer {
+    display: flex;
+    margin-block-start: 0.75rem;
+  }
 }
 
 // Interaction character on the plant scroller: the photo leans in a touch on

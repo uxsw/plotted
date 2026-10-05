@@ -3,8 +3,14 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { sanitizePlantName } from "@/lib/sanitize";
-import { parseScientificName } from "@/lib/identification/name";
 import { createPlantWithLookup } from "@/lib/plant-create";
+import {
+  plantNameFromShoppingItem,
+  toShoppingListItemData,
+  validateManualItemInput,
+  type ManualItemInput,
+  type ShoppingListItemData,
+} from "@/lib/shopping-list";
 
 export async function markShoppingListNoticeSeen(): Promise<void> {
   const supabase = await createClient();
@@ -53,6 +59,45 @@ export async function deleteShoppingListItem(id: string): Promise<{ error?: stri
   return {};
 }
 
+/**
+ * Add a plant to the shopping list by name (docs/specs/shopping-list-manual-add.md §2).
+ *
+ * Capture only: nothing is looked up here, and lookup_status /
+ * lookup_requested_at stay null — the Phase 2 lookup sets 'pending' itself
+ * when it starts, and picks up manual items whose status is still null.
+ * Duplicates are allowed, so there is no existence check.
+ */
+export async function createManualShoppingListItem(
+  input: ManualItemInput
+): Promise<{ item: ShoppingListItemData } | { error: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const validated = validateManualItemInput(input ?? {});
+  if (!validated.ok) return { error: validated.error };
+
+  const { data: row, error } = await supabase
+    .from("shopping_list_items")
+    .insert({
+      user_id: user.id,
+      source: "manual",
+      ...validated.value,
+    })
+    .select("*")
+    .single();
+
+  if (error || !row) {
+    console.error("[shopping-list] manual insert failed:", error);
+    return { error: "Couldn't add that to your shopping list — please try again." };
+  }
+
+  revalidatePath("/shopping-list");
+  revalidatePath("/dashboard");
+
+  return { item: toShoppingListItemData(row, null) };
+}
+
 type PurchaseResult =
   | { plantId: string }
   | { error: string };
@@ -81,13 +126,10 @@ export async function purchaseShoppingListItem(itemId: string): Promise<Purchase
 
   if (!item) return { error: "Item not found" };
 
-  // Scheme items store the full binomial in `species` ("Verbena bonariensis");
-  // plants keep genus and epithet in separate columns.
-  // TODO(manual-items): when manual shopping list items land (see
-  // docs/specs/shopping-list-manual-add.md §4), branch on item.source here —
-  // use the item's resolved genus/species/cultivar if present, otherwise
-  // insert with entered_name as the name and let the lookup correct it.
-  const { genus, species } = parseScientificName(item.species ?? "");
+  // Scheme items are split from their stored binomial; manual items use a
+  // lookup-resolved genus/species if they have one, otherwise the typed name
+  // with a blank genus — see plantNameFromShoppingItem.
+  const { genus, species } = plantNameFromShoppingItem(item);
   const cultivar = item.cultivar ? sanitizePlantName(item.cultivar) || null : null;
   if (!genus && !species) return { error: "This item has no plant name to add." };
 
@@ -121,7 +163,8 @@ export async function purchaseShoppingListItem(itemId: string): Promise<Purchase
     : null;
 
   // requireGenus: purchase must not add blank-genus keys to
-  // species_reference — see hasGenusForEnrichment.
+  // species_reference — see hasGenusForEnrichment. An unresolved manual item
+  // has a blank genus, so it gets the plant lookup but no enrichment.
   const plant = await createPlantWithLookup(
     supabase,
     {
@@ -139,9 +182,12 @@ export async function purchaseShoppingListItem(itemId: string): Promise<Purchase
       flowering_season_to: null,
       eventual_height_cm: null,
       eventual_spread_cm: null,
-      notes: null,
-      // Same values upsertPlant computes for a typed-in plant: a scheme name
-      // is not a photo identification, so the lookup may correct it.
+      // Only manual items have notes. where_to_buy has no plants column and
+      // is not carried over.
+      notes: item.notes ?? null,
+      // Same values upsertPlant computes for a typed-in plant: neither a
+      // scheme name nor a typed one is a photo identification, so the lookup
+      // may correct it.
       identification_status: "identified",
       species_source: "manual",
     },

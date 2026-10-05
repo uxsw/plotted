@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import type { SeasonBand } from "@/components/ui/FloweringSeasonBadge";
 
 /**
@@ -9,6 +10,12 @@ import type { SeasonBand } from "@/components/ui/FloweringSeasonBadge";
  * of "broken", and it stays calm across a whole grid of them.
  *
  * Passed to <Card> through its `placeholder` slot.
+ *
+ * `variant="plain"` is the same plate for a name that isn't known to be
+ * Latin — a shopping list item someone typed or dictated ("bugle", "that
+ * red salvia"). The monogram is drawn from `name` and set upright: italic is
+ * reserved for Latin, and a free-text name must not borrow it. `compact`
+ * tightens the mat and type for a small (list-row) media well.
  */
 
 const LETTER = /\p{L}/u;
@@ -28,6 +35,9 @@ export function SpecimenPlate({
   species,
   cultivar,
   commonName,
+  name,
+  variant = "latin",
+  compact = false,
   plateNumber,
   seasonBand,
 }: {
@@ -35,17 +45,28 @@ export function SpecimenPlate({
   species?: string | null;
   cultivar?: string | null;
   commonName?: string | null;
+  /** Free-text name; the only monogram source when variant is "plain". */
+  name?: string | null;
+  variant?: "latin" | "plain";
+  compact?: boolean;
   /** 1-based position in the full portfolio, stable across search/filter. */
   plateNumber: number;
   /** Tints the mat a hair toward the plant's flowering season, when known. */
   seasonBand?: SeasonBand;
 }) {
-  const monogram = monogramFrom(genus, species, cultivar, commonName);
+  const monogram =
+    variant === "plain"
+      ? monogramFrom(name)
+      : monogramFrom(genus, species, cultivar, commonName);
   const label = `Pl. ${String(plateNumber).padStart(2, "0")}`;
 
   return (
     <div
-      className="c-specimen-plate"
+      className={clsx(
+        "c-specimen-plate",
+        variant === "plain" && "c-specimen-plate--plain",
+        compact && "c-specimen-plate--compact"
+      )}
       data-season={seasonBand ?? undefined}
       aria-hidden="true"
     >

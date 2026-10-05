@@ -12,7 +12,7 @@ import { createClient } from "@/lib/supabase/server";
 import { performLookup } from "@/lib/plant-lookup";
 import { enrichSpeciesReference } from "@/lib/species-reference-enrichment";
 import { after } from "next/server";
-import { purchaseShoppingListItem } from "@/app/actions/shopping-list";
+import { createManualShoppingListItem, purchaseShoppingListItem } from "@/app/actions/shopping-list";
 import { createPlantWithLookup } from "@/lib/plant-create";
 
 const BASE_LOOKUP: LookupResult = {
@@ -320,5 +320,256 @@ describe("purchase path – genus guard", () => {
     expect(performLookup).not.toHaveBeenCalled();
     expect(db.plantUpdates()).toEqual([{ lookup_status: "skipped" }]);
     expect(enrichSpeciesReference).toHaveBeenCalledWith("Geranium", null, null);
+  });
+});
+
+// ─── purchase from a manual item ──────────────────────────────────────────────
+
+// A manual item as Phase 1 creates it: only what the user typed, no image,
+// no lookup started.
+const MANUAL_ITEM = {
+  id: "item-2",
+  user_id: "user-123",
+  source: "manual",
+  scheme_id: null,
+  species: null,
+  genus: null,
+  cultivar: null,
+  common_names: null,
+  entered_name: "Bugle",
+  notes: "From the podcast",
+  where_to_buy: "https://example.test/nursery",
+  thumbnail_storage_path: null,
+  wikimedia_attribution: null,
+  lookup_status: null,
+  lookup_requested_at: null,
+};
+
+describe("purchaseShoppingListItem – manual item", () => {
+  it("unresolved: inserts the typed name with a blank genus, runs the lookup, skips enrichment", async () => {
+    vi.mocked(performLookup).mockResolvedValue({ ...BASE_LOOKUP, corrected_species: "ajuga reptans" });
+    const db = setupPurchaseSupabase(MANUAL_ITEM);
+
+    const result = await purchaseShoppingListItem("item-2");
+
+    expect(result).toEqual({ plantId: "new-plant-id" });
+    expect(db.plantInsert()).toMatchObject({
+      genus: "",
+      species: "bugle",
+      cultivar: null,
+      common_names: [],
+      identification_status: "identified",
+      species_source: "manual",
+    });
+    expect(performLookup).toHaveBeenCalledWith("", "bugle", null);
+    expect(db.plantUpdates()[0]).toMatchObject({ species: "ajuga reptans" });
+    // The genus guard: blank genus, so no species_reference work at all.
+    expect(enrichSpeciesReference).not.toHaveBeenCalled();
+    expect(after).not.toHaveBeenCalled();
+    expect(db.itemDelete).toHaveBeenCalled();
+  });
+
+  it("resolved: uses the item's genus, species and cultivar, and enriches", async () => {
+    const db = setupPurchaseSupabase({
+      ...MANUAL_ITEM,
+      genus: "Ajuga",
+      species: "reptans",
+      cultivar: "Black Scallop",
+      common_names: ["Bugle"],
+    });
+
+    const result = await purchaseShoppingListItem("item-2");
+
+    expect(result).toEqual({ plantId: "new-plant-id" });
+    expect(db.plantInsert()).toMatchObject({
+      genus: "Ajuga",
+      species: "reptans",
+      cultivar: "Black Scallop",
+      common_names: ["Bugle"],
+    });
+    expect(performLookup).toHaveBeenCalledWith("Ajuga", "reptans", "Black Scallop");
+    expect(enrichSpeciesReference).toHaveBeenCalledWith("Ajuga", "reptans", "Black Scallop");
+  });
+
+  it("carries notes to the plant; where_to_buy is not written anywhere", async () => {
+    const db = setupPurchaseSupabase(MANUAL_ITEM);
+    await purchaseShoppingListItem("item-2");
+
+    const insert = db.plantInsert()!;
+    expect(insert.notes).toBe("From the podcast");
+    expect(JSON.stringify(insert)).not.toContain("example.test/nursery");
+    expect(insert).not.toHaveProperty("where_to_buy");
+  });
+
+  it("copes with no thumbnail: no storage copy or cleanup, plant has no photo", async () => {
+    const db = setupPurchaseSupabase(MANUAL_ITEM);
+    const result = await purchaseShoppingListItem("item-2");
+
+    expect(result).toEqual({ plantId: "new-plant-id" });
+    expect(db.bucket.copy).not.toHaveBeenCalled();
+    expect(db.bucket.remove).not.toHaveBeenCalled();
+    expect(db.plantInsert()).toMatchObject({
+      photo_url: null,
+      image_source: null,
+      image_attribution: null,
+    });
+  });
+
+  it("refuses a manual item with no usable name before writing anything", async () => {
+    const db = setupPurchaseSupabase({ ...MANUAL_ITEM, entered_name: "   " });
+    const result = await purchaseShoppingListItem("item-2");
+
+    expect(result).toEqual({ error: expect.any(String) });
+    expect(db.plantInsert()).toBeNull();
+    expect(performLookup).not.toHaveBeenCalled();
+  });
+});
+
+// ─── createManualShoppingListItem ─────────────────────────────────────────────
+
+function setupCreateSupabase(opts: { user?: boolean; insertError?: boolean } = {}) {
+  let inserted: Record<string, unknown> | null = null;
+
+  const itemsTable = {
+    insert: vi.fn().mockImplementation((payload: Record<string, unknown>) => {
+      inserted = payload;
+      return {
+        select: vi.fn().mockReturnValue({
+          single: vi.fn().mockResolvedValue(
+            opts.insertError
+              ? { data: null, error: { message: "boom" } }
+              : {
+                  data: {
+                    id: "new-item-id",
+                    scheme_id: null,
+                    species: null,
+                    cultivar: null,
+                    common_names: null,
+                    thumbnail_storage_path: null,
+                    wikimedia_attribution: null,
+                    lookup_status: null,
+                    lookup_requested_at: null,
+                    created_at: "2026-10-05T12:00:00Z",
+                    ...payload,
+                  },
+                  error: null,
+                }
+          ),
+        }),
+      };
+    }),
+  };
+
+  const from = vi.fn().mockReturnValue(itemsTable);
+  vi.mocked(createClient).mockResolvedValue({
+    auth: {
+      getUser: vi.fn().mockResolvedValue({
+        data: { user: opts.user === false ? null : { id: "user-123" } },
+      }),
+    },
+    from,
+  } as unknown as Awaited<ReturnType<typeof createClient>>);
+
+  return { inserted: () => inserted, insert: itemsTable.insert, from };
+}
+
+describe("createManualShoppingListItem", () => {
+  it("rejects an empty or whitespace-only name without inserting", async () => {
+    const db = setupCreateSupabase();
+
+    expect(await createManualShoppingListItem({ name: "" })).toEqual({ error: expect.any(String) });
+    expect(await createManualShoppingListItem({ name: "   " })).toEqual({ error: expect.any(String) });
+    expect(db.insert).not.toHaveBeenCalled();
+  });
+
+  it("rejects over-length fields without inserting", async () => {
+    const db = setupCreateSupabase();
+
+    expect(await createManualShoppingListItem({ name: "a".repeat(121) })).toEqual({ error: expect.any(String) });
+    expect(
+      await createManualShoppingListItem({ name: "bugle", whereToBuy: "a".repeat(201) })
+    ).toEqual({ error: expect.any(String) });
+    expect(
+      await createManualShoppingListItem({ name: "bugle", notes: "a".repeat(1001) })
+    ).toEqual({ error: expect.any(String) });
+    expect(db.insert).not.toHaveBeenCalled();
+  });
+
+  it("accepts fields exactly at their limits", async () => {
+    const db = setupCreateSupabase();
+    const result = await createManualShoppingListItem({
+      name: "a".repeat(120),
+      whereToBuy: "b".repeat(200),
+      notes: "c".repeat(1000),
+    });
+
+    expect(result).toHaveProperty("item");
+    expect(db.insert).toHaveBeenCalledTimes(1);
+  });
+
+  it("trims before inserting, as a manual item for the signed-in user", async () => {
+    const db = setupCreateSupabase();
+    await createManualShoppingListItem({
+      name: "  Salvia  'Amistad'  ",
+      whereToBuy: "  RHS Wisley ",
+      notes: "  dry shade\n",
+    });
+
+    expect(db.inserted()).toEqual({
+      user_id: "user-123",
+      source: "manual",
+      entered_name: "Salvia 'Amistad'",
+      where_to_buy: "RHS Wisley",
+      notes: "dry shade",
+    });
+  });
+
+  it("starts no lookup: no lookup_status or lookup_requested_at, nothing else touched", async () => {
+    const db = setupCreateSupabase();
+    await createManualShoppingListItem({ name: "bugle" });
+
+    expect(db.inserted()).not.toHaveProperty("lookup_status");
+    expect(db.inserted()).not.toHaveProperty("lookup_requested_at");
+    expect(db.inserted()).toMatchObject({ where_to_buy: null, notes: null });
+    expect(db.from.mock.calls.every(([table]) => table === "shopping_list_items")).toBe(true);
+    expect(performLookup).not.toHaveBeenCalled();
+    expect(enrichSpeciesReference).not.toHaveBeenCalled();
+    expect(after).not.toHaveBeenCalled();
+  });
+
+  it("returns the created row in the shape the list renders", async () => {
+    setupCreateSupabase();
+    const result = await createManualShoppingListItem({ name: "bugle", whereToBuy: "https://example.test" });
+
+    expect(result).toEqual({
+      item: expect.objectContaining({
+        id: "new-item-id",
+        source: "manual",
+        entered_name: "bugle",
+        where_to_buy: "https://example.test",
+        notes: null,
+        species: null,
+        lookup_status: null,
+        thumbnail_url: null,
+        scheme_name: null,
+      }),
+    });
+  });
+
+  it("allows duplicates: the same name twice inserts twice, with no existence check", async () => {
+    const db = setupCreateSupabase();
+    await createManualShoppingListItem({ name: "bugle" });
+    await createManualShoppingListItem({ name: "bugle" });
+
+    expect(db.insert).toHaveBeenCalledTimes(2);
+  });
+
+  it("returns an error when not signed in or when the insert fails", async () => {
+    const anon = setupCreateSupabase({ user: false });
+    expect(await createManualShoppingListItem({ name: "bugle" })).toEqual({ error: expect.any(String) });
+    expect(anon.insert).not.toHaveBeenCalled();
+
+    setupCreateSupabase({ insertError: true });
+    expect(await createManualShoppingListItem({ name: "bugle" })).toEqual({ error: expect.any(String) });
   });
 });
