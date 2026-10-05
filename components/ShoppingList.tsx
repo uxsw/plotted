@@ -9,19 +9,8 @@ import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { deleteShoppingListItem, purchaseShoppingListItem } from "@/app/actions/shopping-list";
 import { Icon } from "@/components/ui/Icon";
+import { shoppingItemDisplayName, type ShoppingListItemData } from "@/lib/shopping-list";
 
-export type ShoppingListItemData = {
-  id: string;
-  scheme_id: string | null;
-  species: string;
-  cultivar: string | null;
-  common_names: string[] | null;
-  thumbnail_url: string | null;
-  thumbnail_storage_path: string | null;
-  wikimedia_attribution: string | null;
-  created_at: string;
-  scheme_name: string | null;
-};
 
 function SproutIcon() {
   return (
@@ -66,7 +55,7 @@ function ItemCard({
         {item.thumbnail_url ? (
           <Image
             src={item.thumbnail_url}
-            alt={item.species}
+            alt={shoppingItemDisplayName(item)}
             fill
             sizes="64px"
             className="is-image"

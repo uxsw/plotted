@@ -49,8 +49,8 @@ Add to `shopping_list_items`:
 | `summary_scope` | text, nullable | check in (`'cultivar'`, `'species'`, `'genus'`). Lets the UI frame a species-level summary honestly. |
 | `lookup_confidence` | text, nullable | check in (`'high'`, `'medium'`, `'low'`). |
 | `growth_type` | text, nullable | e.g. shrub, perennial, bulb, climber, annual, tree. Used for the fallback tile if cheap. |
-| `lookup_status` | text, nullable | check in (`'pending'`, `'complete'`, `'not_found'`, `'failed'`). Null for scheme items. |
-| `lookup_requested_at` | timestamptz, nullable | For the stale-pending timeout. |
+| `lookup_status` | text, nullable | check in (`'pending'`, `'complete'`, `'not_found'`, `'failed'`). Null for scheme items, and for a manual item no lookup has been started for yet. |
+| `lookup_requested_at` | timestamptz, nullable | Set when a lookup starts, alongside `pending`. For the stale-pending timeout. |
 
 Changes to existing columns:
 - `species` becomes nullable. Add a check that `species IS NOT NULL OR entered_name IS NOT NULL`.
@@ -64,8 +64,8 @@ Existing RLS policies are per-user and cover the new columns. If lookup writes h
 
 - **Server action** `createManualShoppingListItem`:
   - Validate: trim `entered_name` (required, max 120); `where_to_buy` max 200; `notes` max 1000.
-  - Insert with `source = 'manual'`, `lookup_status = 'pending'`, `lookup_requested_at = now()`.
-  - Return the created row immediately. Do not await the lookup.
+  - Insert with `source = 'manual'`. Leave `lookup_status` and `lookup_requested_at` null: capture does not start a lookup, and a null status renders as a normal item.
+  - Return the created row immediately.
   - Duplicates allowed (no check).
 - **Add form** on `/shopping-list`:
   - Name field is always visible and is the only required field. Use plain text input attributes that do not interfere with keyboard dictation (no aggressive autocorrect or autocomplete behaviour).
@@ -83,6 +83,8 @@ Existing RLS policies are per-user and cover the new columns. If lookup writes h
 ## 3. Phase 2: lookup
 
 Runs after the item is created, in `after()`. Capture never waits for it.
+
+Phase 1 creates manual items with a null `lookup_status`. The lookup itself sets `lookup_status = 'pending'` and `lookup_requested_at = now()` at the moment it starts, so `pending` always means "a lookup is actually running". Manual items that already exist with a null status (everything captured before this phase ships) must be picked up too: treat `source = 'manual'` with a null status as "not looked up yet" and start a lookup for it, not as a failure.
 
 **Steps**
 1. Fetch the Wikipedia summary for `entered_name` (reusing `fetchWikimediaImage`'s underlying request). Verify that the endpoint returns a text `extract`; the current code only reads the thumbnail and page URL.
