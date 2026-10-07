@@ -391,6 +391,54 @@ describe("purchaseShoppingListItem – manual item", () => {
     expect(enrichSpeciesReference).toHaveBeenCalledWith("Ajuga", "reptans", "Black Scallop");
   });
 
+  it("resolved hybrid: the epithet goes in species, the genus in genus, never a binomial in either", async () => {
+    const db = setupPurchaseSupabase({
+      ...MANUAL_ITEM,
+      entered_name: "euphorbia mar tinny",
+      genus: "Euphorbia",
+      species: "×martini",
+      cultivar: null,
+      common_names: ["Martin's spurge"],
+      lookup_status: "complete",
+    });
+
+    await purchaseShoppingListItem("item-2");
+
+    expect(db.plantInsert()).toMatchObject({ genus: "Euphorbia", species: "×martini", cultivar: null });
+    expect(performLookup).toHaveBeenCalledWith("Euphorbia", "×martini", null);
+    expect(enrichSpeciesReference).toHaveBeenCalledWith("Euphorbia", "×martini", null);
+  });
+
+  it("resolved genus-only: a genus and no species, and the typed text is not used as the name", async () => {
+    const db = setupPurchaseSupabase({
+      ...MANUAL_ITEM,
+      entered_name: "hew kera",
+      genus: "Heuchera",
+      species: null,
+      common_names: ["Coral bells"],
+      lookup_status: "complete",
+    });
+
+    await purchaseShoppingListItem("item-2");
+
+    expect(db.plantInsert()).toMatchObject({ genus: "Heuchera", species: null });
+    expect(JSON.stringify(db.plantInsert())).not.toContain("hew kera");
+  });
+
+  it("a suggestion not yet accepted is still unresolved: the typed name goes in, genus blank", async () => {
+    const db = setupPurchaseSupabase({
+      ...MANUAL_ITEM,
+      entered_name: "sal via car a dona",
+      lookup_status: "complete",
+      lookup_candidates: [{ genus: "Salvia", species: "nemorosa", cultivar: "Caradonna", common_names: [] }],
+    });
+
+    await purchaseShoppingListItem("item-2");
+
+    expect(db.plantInsert()).toMatchObject({ genus: "", species: "sal via car a dona" });
+    expect(enrichSpeciesReference).not.toHaveBeenCalled();
+  });
+
   it("carries notes to the plant; where_to_buy is not written anywhere", async () => {
     const db = setupPurchaseSupabase(MANUAL_ITEM);
     await purchaseShoppingListItem("item-2");
@@ -524,7 +572,10 @@ describe("createManualShoppingListItem", () => {
     });
   });
 
-  it("starts no lookup: no lookup_status or lookup_requested_at, nothing else touched", async () => {
+  // Starting the lookup is covered in shopping-list-lookup.test.ts. This
+  // client has no session to hand to a background client, so none starts —
+  // which is also the "capture must not depend on the lookup" case.
+  it("inserts with no lookup fields set, and touches nothing but shopping_list_items", async () => {
     const db = setupCreateSupabase();
     await createManualShoppingListItem({ name: "bugle" });
 
