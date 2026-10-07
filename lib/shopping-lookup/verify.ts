@@ -65,20 +65,28 @@ export function verificationFrom(
  * | medium | anything else          | medium |
  * | low    | any                    | low    |
  *
+ * Two caps come first, and nothing overrides them — a capped candidate is
+ * medium at best:
+ * - It names a cultivar. Wikipedia can only vouch for the species or genus,
+ *   so a cultivar is never confirmed by anything but the gardener.
+ * - It leaves part of the note unexplained (unmatched_text).
+ *
  * A page proves the plant exists, not that it's the one the gardener meant —
  * so a medium is only raised when it is the model's one and only candidate
  * (a second candidate, even a guess, means the note was ambiguous) and it
- * names more than a genus (a bare genus offered at medium is the model
- * falling back from an epithet it couldn't place, e.g. an invented species).
+ * names a species (a bare genus offered at medium is the model falling back
+ * from an epithet it couldn't place, e.g. an invented species).
  */
 export function finalConfidence(
-  candidate: Pick<ResolverCandidate, "confidence" | "species" | "cultivar">,
+  candidate: Pick<ResolverCandidate, "confidence" | "species" | "cultivar" | "unmatched_text">,
   verification: Verification,
   /** How many candidates the model returned in all, this one included. */
   totalCandidates: number
 ): LookupConfidence {
   if (candidate.confidence === "low") return "low";
+  if (candidate.cultivar || candidate.unmatched_text) return "medium";
   if (candidate.confidence === "high") return verification === "unverified" ? "medium" : "high";
-  const specific = !!(candidate.species || candidate.cultivar);
-  return verification === "verified" && totalCandidates === 1 && specific ? "high" : "medium";
+  return verification === "verified" && totalCandidates === 1 && candidate.species
+    ? "high"
+    : "medium";
 }

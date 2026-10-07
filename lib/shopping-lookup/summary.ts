@@ -1,16 +1,9 @@
-import Anthropic from "@anthropic-ai/sdk";
-import {
-  SHOPPING_LOOKUP_MODEL,
-  extractJsonObject,
-  type ModelUsage,
-  type ResolverCandidate,
-} from "./resolver";
+import { SHOPPING_LOOKUP_MODEL, lookupAnthropic, usageFrom, type ModelUsage } from "./client";
+import { extractJsonObject, type ResolverCandidate } from "./resolver";
 
 // The one-line reminder shown on a resolved shopping list card. Grounded in
 // the Wikipedia extract when there is one; a blank is always preferred to an
 // invented line.
-
-const anthropic = new Anthropic();
 
 export const SUMMARY_SCOPES = ["cultivar", "species", "genus"] as const;
 export type SummaryScope = (typeof SUMMARY_SCOPES)[number];
@@ -87,15 +80,20 @@ export function parsePlantSummary(
 
 export async function summarisePlant(
   candidate: Pick<ResolverCandidate, "genus" | "species" | "cultivar">,
-  extract: string | null
+  extract: string | null,
+  options: { signal?: AbortSignal } = {}
 ): Promise<{ result: PlantSummary | null; usage: ModelUsage }> {
   const started = Date.now();
-  const message = await anthropic.messages.create({
-    model: SHOPPING_LOOKUP_MODEL,
-    max_tokens: 120,
-    system: SUMMARY_SYSTEM_PROMPT,
-    messages: [{ role: "user", content: buildSummaryUserMessage(candidate, extract) }],
-  });
+  const message = await lookupAnthropic.messages.create(
+    {
+      model: SHOPPING_LOOKUP_MODEL,
+      max_tokens: 120,
+      temperature: 0,
+      system: SUMMARY_SYSTEM_PROMPT,
+      messages: [{ role: "user", content: buildSummaryUserMessage(candidate, extract) }],
+    },
+    { signal: options.signal }
+  );
 
   const text = message.content[0]?.type === "text" ? message.content[0].text : "";
   let result: PlantSummary | null = null;
@@ -104,12 +102,5 @@ export async function summarisePlant(
   } catch {
     result = null;
   }
-  return {
-    result,
-    usage: {
-      input_tokens: message.usage.input_tokens,
-      output_tokens: message.usage.output_tokens,
-      ms: Date.now() - started,
-    },
-  };
+  return { result, usage: usageFrom(message, started) };
 }

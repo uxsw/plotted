@@ -6,9 +6,9 @@
  *
  *   set -a && . ./.env.local && set +a && npx tsx scripts/eval-shopping-lookup.ts [out.json] [--only=category,…]
  *
- * Costs real money, though not much: one small resolver call per run (about
- * 75 runs), plus one summary call for each input that resolves confidently.
- * Also makes roughly 100 Wikipedia summary requests.
+ * Costs real money, though not much (about $0.35 a run): one small resolver
+ * call per run (about 75 runs), plus one summary call for each input that
+ * resolves confidently. Also makes roughly 100 Wikipedia summary requests.
  *
  * What it checks:
  * - Where the expected plant landed: top candidate, among the three, missing.
@@ -16,6 +16,8 @@
  *   candidate or the final confidence is flagged.
  * - Traps (fake species, fake cultivar, fake plant) and junk/injection
  *   inputs must never come out as a confident match.
+ * - Anything expected with a cultivar must come out as a suggestion with
+ *   the right plant on top, never as a confident match.
  * - "priors" inputs run with and without known_plants: priors may nudge,
  *   never override.
  * - Latency and token counts per run.
@@ -39,8 +41,6 @@ type FixtureEntry = {
   expect_none?: boolean;
   /** Pass only if nothing is confidently resolved. */
   must_not_be_high?: boolean;
-  /** For the fake-cultivar trap: the cultivar that must not be resolved. */
-  trap_cultivar?: string;
   known_plants?: string[];
 };
 
@@ -125,10 +125,7 @@ async function runOne(entry: FixtureEntry, label: string, knownPlants: string[])
     if (check === "FAIL") check_note = `expected nothing, got ${outcome.kind}`;
   } else if (entry.must_not_be_high) {
     if (outcome.kind !== "resolved") check = "pass";
-    else if (entry.trap_cultivar && fold(outcome.candidate.cultivar ?? "") !== fold(entry.trap_cultivar)) {
-      check = "warn";
-      check_note = `fake cultivar dropped, but resolved high as ${nameOf(outcome.candidate)}`;
-    } else {
+    else {
       check = "FAIL";
       check_note = `reached high as ${nameOf(outcome.candidate)}`;
     }
@@ -137,6 +134,12 @@ async function runOne(entry: FixtureEntry, label: string, knownPlants: string[])
     if (outcome.kind === "resolved" && expected_position !== "top") {
       check = "FAIL";
       check_note = `confidently wrong: ${nameOf(outcome.candidate)}`;
+    }
+    // Cultivars are never confirmed by anything but the gardener: the right
+    // plant on top, offered as a suggestion.
+    if (entry.expected.cultivar && outcome.kind !== "suggest") {
+      check = "FAIL";
+      check_note = `cultivar case came out as ${outcome.kind}, expected a suggestion`;
     }
   }
 
@@ -151,7 +154,10 @@ function row(run: Run): string {
   const t = run.trace;
   const candidates =
     (t?.candidates ?? [])
-      .map((c) => `${nameOf(c)} [${c.confidence}→${c.final_confidence}, wiki ${c.verification}]`)
+      .map(
+        (c) =>
+          `${nameOf(c)} [${c.confidence}→${c.final_confidence}, wiki ${c.verification}${c.unmatched_text ? `, unmatched "${c.unmatched_text}"` : ""}]`
+      )
       .join("; ") || "(none)";
   const summary =
     run.outcome.kind === "resolved"
@@ -203,7 +209,10 @@ async function main() {
   }
 
   const runs: Run[] = new Array(jobs.length);
-  let next = 0;
+  // The first run goes alone so the resolver's instructions are in the prompt
+  // cache before the rest start in parallel.
+  runs[0] = await jobs[0]();
+  let next = 1;
   await Promise.all(
     Array.from({ length: CONCURRENCY }, async () => {
       while (next < jobs.length) {
@@ -236,25 +245,43 @@ async function main() {
   }
 
   const count = (check: Run["check"]) => runs.filter((r) => r.check === check).length;
-  const tokens = runs.reduce(
-    (sum, r) => ({
-      input: sum.input + (r.trace?.resolver?.input_tokens ?? 0) + (r.trace?.summary?.input_tokens ?? 0),
-      output: sum.output + (r.trace?.resolver?.output_tokens ?? 0) + (r.trace?.summary?.output_tokens ?? 0),
+  const calls = runs.flatMap((r) => [r.trace?.resolver, r.trace?.summary]).filter((u) => !!u);
+  const tokens = calls.reduce(
+    (sum, u) => ({
+      input: sum.input + u.input_tokens,
+      cache_read: sum.cache_read + u.cache_read_tokens,
+      cache_write: sum.cache_write + u.cache_write_tokens,
+      output: sum.output + u.output_tokens,
     }),
-    { input: 0, output: 0 }
+    { input: 0, cache_read: 0, cache_write: 0, output: 0 }
   );
-  const totals = runs.map((r) => r.total_ms).sort((x, y) => x - y);
+  // claude-sonnet-4-6: $3 / MTok in, $15 / MTok out; cache reads 0.1x, writes 1.25x.
+  const uncached = tokens.input - tokens.cache_read - tokens.cache_write;
+  const cost =
+    (uncached * 3 + tokens.cache_read * 0.3 + tokens.cache_write * 3.75 + tokens.output * 15) / 1e6;
+
+  const percentile = (values: number[], p: number) => {
+    const sorted = [...values].sort((x, y) => x - y);
+    return sorted.length ? sorted[Math.min(sorted.length - 1, Math.ceil(p * sorted.length) - 1)] : 0;
+  };
+  const latency = (label: string, values: number[]) =>
+    `${label}: ${values.length} calls, median ${percentile(values, 0.5)}ms, p95 ${percentile(values, 0.95)}ms, max ${percentile(values, 1)}ms`;
+  const resolverMs = runs.map((r) => r.trace?.resolver?.ms).filter((ms): ms is number => !!ms);
+  const summaryMs = runs.map((r) => r.trace?.summary?.ms).filter((ms): ms is number => !!ms);
+  const totalMs = runs.map((r) => r.total_ms);
 
   console.log(`\n=== Summary ===`);
   console.log(`Runs: ${runs.length} — pass ${count("pass")}, warn ${count("warn")}, FAIL ${count("FAIL")}, unchecked ${count("-")}`);
-  console.log(`Latency (whole lookup): median ${totals[Math.floor(totals.length / 2)]}ms, max ${totals[totals.length - 1]}ms`);
-  console.log(`Tokens: ${tokens.input} in, ${tokens.output} out`);
+  console.log(latency("Resolver call", resolverMs));
+  console.log(latency("Summary call", summaryMs));
+  console.log(latency("Whole lookup", totalMs));
+  console.log(`Tokens: ${tokens.input} in (${tokens.cache_read} cache read, ${tokens.cache_write} cache write), ${tokens.output} out — about $${cost.toFixed(2)}`);
   console.log(`Disagreements between paired runs: ${disagreements.length}`);
   for (const line of disagreements) console.log(`  ! ${line}`);
 
   await writeFile(
     outPath,
-    JSON.stringify({ ranAt: new Date().toISOString(), tokens, disagreements, runs }, null, 2)
+    JSON.stringify({ ranAt: new Date().toISOString(), tokens, cost, disagreements, runs }, null, 2)
   );
   console.log(`\nWrote ${outPath}`);
 }

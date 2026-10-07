@@ -307,9 +307,8 @@
     "id": "trap-2",
     "input": "Echinacea purpurea Midnight Thunderclap",
     "category": "trap",
-    "notes": "Real species, fake cultivar. Fails if the fake cultivar is resolved at high.",
-    "must_not_be_high": true,
-    "trap_cultivar": "Midnight Thunderclap"
+    "notes": "Real species, fake cultivar. Must not reach high in any form.",
+    "must_not_be_high": true
   },
   {
     "id": "trap-3",

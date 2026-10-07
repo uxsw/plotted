@@ -3,12 +3,8 @@ import {
   type WikimediaImage,
   type WikipediaSummaryResult,
 } from "@/lib/wikimedia";
-import {
-  resolvePlantName,
-  type LookupConfidence,
-  type ModelUsage,
-  type ResolverCandidate,
-} from "./resolver";
+import type { ModelUsage } from "./client";
+import { resolvePlantName, type LookupConfidence, type ResolverCandidate } from "./resolver";
 import { summarisePlant, type PlantSummary } from "./summary";
 import {
   finalConfidence,
@@ -21,6 +17,18 @@ import {
 // the caller decides what to write. See docs/specs/shopping-list-manual-add.md §3.
 
 const WIKIPEDIA_STAGGER_MS = 120;
+
+/**
+ * Hard ceiling on one whole lookup, whatever the individual timeouts and
+ * retries add up to. When it runs out, whatever is in flight is aborted:
+ * an unfinished resolve fails the lookup, an unfinished verification counts
+ * as "couldn't ask", an unfinished summary is left blank. Sized to leave
+ * room inside the shopping list page's 60s maxDuration for the image
+ * snapshot and the database writes that follow.
+ */
+export const LOOKUP_BUDGET_MS = 40_000;
+/** Not worth starting a model call with less than this left. */
+const MIN_SUMMARY_MS = 3_000;
 
 export type VerifiedCandidate = ResolverCandidate & {
   /** "not_checked" for low-confidence candidates, which are never looked up. */
@@ -46,10 +54,19 @@ export type LookupOutcome =
 
 export type LookupTrace = {
   candidates: VerifiedCandidate[];
+  /** The resolver's scratch line. Diagnostic only: never stored or shown. */
+  sounds_like: string | null;
   resolver: ModelUsage | null;
   summary: ModelUsage | null;
   wikipedia_ms: number;
 };
+
+type Budget = { signal: AbortSignal; remaining: () => number };
+
+function startBudget(ms: number): Budget {
+  const deadline = Date.now() + ms;
+  return { signal: AbortSignal.timeout(ms), remaining: () => deadline - Date.now() };
+}
 
 const RANK: Record<LookupConfidence, number> = { high: 0, medium: 1, low: 2 };
 
@@ -62,11 +79,14 @@ function delay(ms: number): Promise<void> {
  * ("Rosa", "Iris" are disambiguation pages), so those get a second try at
  * "Genus (plant)". Never throws.
  */
-async function fetchCandidatePage(candidate: ResolverCandidate): Promise<WikipediaSummaryResult> {
+async function fetchCandidatePage(
+  candidate: ResolverCandidate,
+  signal: AbortSignal
+): Promise<WikipediaSummaryResult> {
   try {
-    const page = await fetchWikipediaSummary(wikipediaTitleFor(candidate));
+    const page = await fetchWikipediaSummary(wikipediaTitleFor(candidate), { signal });
     if (!candidate.species && page.status === "found" && page.summary.type === "disambiguation") {
-      return await fetchWikipediaSummary(`${candidate.genus} (plant)`);
+      return await fetchWikipediaSummary(`${candidate.genus} (plant)`, { signal });
     }
     return page;
   } catch {
@@ -74,16 +94,12 @@ async function fetchCandidatePage(candidate: ResolverCandidate): Promise<Wikiped
   }
 }
 
-/**
- * Summary and image for one candidate. Used for a confident match, and again
- * when the gardener accepts a suggestion. Never throws: a failed summary or a
- * missing image leaves that part null.
- */
-export async function describeCandidate(
+async function describe(
   candidate: ResolverCandidate,
-  page?: WikipediaSummaryResult
+  page: WikipediaSummaryResult | undefined,
+  budget: Budget
 ): Promise<CandidateDetails & { usage: ModelUsage | null }> {
-  const result = page ?? (await fetchCandidatePage(candidate));
+  const result = page ?? (await fetchCandidatePage(candidate, budget.signal));
   const verified =
     result.status === "found" && verificationFrom(candidate, result) === "verified"
       ? result.summary
@@ -91,47 +107,70 @@ export async function describeCandidate(
 
   let summary: PlantSummary | null = null;
   let usage: ModelUsage | null = null;
-  try {
-    const summarised = await summarisePlant(candidate, verified?.extract ?? null);
-    summary = summarised.result;
-    usage = summarised.usage;
-  } catch (err) {
-    console.error("[shopping-lookup] summary failed:", err);
+  if (budget.remaining() > MIN_SUMMARY_MS) {
+    try {
+      const summarised = await summarisePlant(candidate, verified?.extract ?? null, {
+        signal: budget.signal,
+      });
+      summary = summarised.result;
+      usage = summarised.usage;
+    } catch (err) {
+      console.error("[shopping-lookup] summary failed:", err instanceof Error ? err.message : err);
+    }
   }
 
   return { summary, image: verified?.image ?? null, usage };
 }
 
+/**
+ * Summary and image for one candidate the gardener has accepted from a
+ * "Did you mean…?" suggestion. Never throws: a failed summary or a missing
+ * image leaves that part null.
+ */
+export async function describeCandidate(
+  candidate: ResolverCandidate,
+  options: { budgetMs?: number } = {}
+): Promise<CandidateDetails> {
+  const { summary, image } = await describe(
+    candidate,
+    undefined,
+    startBudget(options.budgetMs ?? LOOKUP_BUDGET_MS)
+  );
+  return { summary, image };
+}
+
 export async function lookupPlantByName(
   enteredName: string,
-  knownPlants: string[] = []
+  knownPlants: string[] = [],
+  options: { budgetMs?: number } = {}
 ): Promise<{ outcome: LookupOutcome; trace: LookupTrace }> {
-  const { candidates: resolved, usage: resolverUsage } = await resolvePlantName(
-    enteredName,
-    knownPlants
-  );
+  const budget = startBudget(options.budgetMs ?? LOOKUP_BUDGET_MS);
 
-  const pages = new Map<ResolverCandidate, WikipediaSummaryResult>();
+  const resolved = await resolvePlantName(enteredName, knownPlants, { signal: budget.signal });
+
+  // Low-confidence candidates are never shown, so they are never looked up.
   const wikiStarted = Date.now();
   let fetched = 0;
+  const pages = await Promise.all(
+    resolved.candidates.map(async (candidate) => {
+      if (candidate.confidence === "low") return null;
+      const position = fetched++;
+      if (position > 0) await delay(position * WIKIPEDIA_STAGGER_MS);
+      return fetchCandidatePage(candidate, budget.signal);
+    })
+  );
+  const wikipediaMs = fetched ? Date.now() - wikiStarted : 0;
 
-  const candidates: VerifiedCandidate[] = [];
-  for (const candidate of resolved) {
-    if (candidate.confidence === "low") {
-      candidates.push({ ...candidate, verification: "not_checked", final_confidence: "low" });
-      continue;
-    }
-    if (fetched++ > 0) await delay(WIKIPEDIA_STAGGER_MS);
-    const page = await fetchCandidatePage(candidate);
-    pages.set(candidate, page);
+  const candidates: VerifiedCandidate[] = resolved.candidates.map((candidate, index) => {
+    const page = pages[index];
+    if (!page) return { ...candidate, verification: "not_checked", final_confidence: "low" };
     const verification = verificationFrom(candidate, page);
-    candidates.push({
+    return {
       ...candidate,
       verification,
-      final_confidence: finalConfidence(candidate, verification, resolved.length),
-    });
-  }
-  const wikipediaMs = fetched ? Date.now() - wikiStarted : 0;
+      final_confidence: finalConfidence(candidate, verification, resolved.candidates.length),
+    };
+  });
 
   // Stable sort: the model's own order breaks ties.
   const ranked = [...candidates].sort(
@@ -139,7 +178,8 @@ export async function lookupPlantByName(
   );
   const trace: LookupTrace = {
     candidates: ranked,
-    resolver: resolverUsage,
+    sounds_like: resolved.sounds_like,
+    resolver: resolved.usage,
     summary: null,
     wikipedia_ms: wikipediaMs,
   };
@@ -149,8 +189,11 @@ export async function lookupPlantByName(
   const highs = ranked.filter((c) => c.final_confidence === "high");
   if (highs.length === 1) {
     const top = highs[0];
-    const source = resolved[candidates.indexOf(top)];
-    const { usage, ...details } = await describeCandidate(top, pages.get(source));
+    const { usage, ...details } = await describe(
+      top,
+      pages[candidates.indexOf(top)] ?? undefined,
+      budget
+    );
     trace.summary = usage;
     return { outcome: { kind: "resolved", candidate: top, details }, trace };
   }
