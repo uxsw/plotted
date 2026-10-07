@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -9,19 +9,30 @@ import { Button } from "@/components/ui/Button";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import clsx from "clsx";
 import {
+  acceptShoppingItemCandidate,
   createManualShoppingListItem,
   deleteShoppingListItem,
+  keepShoppingItemAsTyped,
   purchaseShoppingListItem,
+  retryShoppingItemLookup,
+  updateManualItemName,
 } from "@/app/actions/shopping-list";
 import { Icon } from "@/components/ui/Icon";
 import { SpecimenPlate } from "@/components/plants/SpecimenPlate";
 import {
+  MANUAL_ITEM_LIMITS,
+  formatLatinName,
+  isResolvedManualItem,
+  manualItemNames,
   parseHttpUrl,
   shoppingItemDisplayName,
+  shoppingItemLatinName,
   validateManualItemInput,
   type ManualItemInput,
+  type ShoppingListCandidate,
   type ShoppingListItemData,
 } from "@/lib/shopping-list";
+import { LOOKUP_PENDING_STALE_MS, LOOKUP_POLL_INTERVAL_MS } from "@/lib/shopping-lookup/timing";
 
 
 function SproutIcon() {
@@ -39,15 +50,27 @@ function isUnsaved(item: ShoppingListItemData): boolean {
   return item.id.startsWith(OPTIMISTIC_PREFIX);
 }
 
-/** The name dialogs and labels refer to an item by. Scheme items keep going
- *  by their Latin name, as the card leads with it; manual items by what the
- *  user typed. */
+/** The name dialogs and labels refer to an item by — the one its card leads
+ *  with. Scheme items go by their Latin name; manual items by what the user
+ *  typed, or by the resolved name once a lookup has put one to it. */
 function itemLabel(item: ShoppingListItemData): string {
-  return (item.source === "scheme" && item.species) || shoppingItemDisplayName(item);
+  return (
+    (item.source === "scheme" && shoppingItemLatinName(item)) || shoppingItemDisplayName(item)
+  );
 }
 
 function hasLatinLabel(item: ShoppingListItemData): boolean {
-  return item.source === "scheme" && !!item.species;
+  if (item.source === "scheme") return !!shoppingItemLatinName(item);
+  return isResolvedManualItem(item) && manualItemNames(item).primaryIsLatin;
+}
+
+/** A lookup is running for this item, or is about to (waiting for a slot). */
+function isLookingUp(item: ShoppingListItemData): boolean {
+  return (
+    item.source === "manual" &&
+    !isUnsaved(item) &&
+    (item.lookup_status === "pending" || item.lookup_status === null)
+  );
 }
 
 function EmptyState() {
@@ -209,6 +232,230 @@ function WhereToBuy({ value }: { value: string }) {
   );
 }
 
+function ImageCredit({ attribution }: { attribution: string }) {
+  const href = parseHttpUrl(attribution);
+  return href ? (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="c-shopping-item__credit minion"
+    >
+      Image: Wikimedia Commons
+    </a>
+  ) : (
+    <p className="c-shopping-item__credit minion">Image: Wikimedia Commons</p>
+  );
+}
+
+/** One suggested plant, as a button. Latin in italic; anything the lookup
+ *  couldn't place from the user's own note is called out, not hidden. */
+function CandidateChoice({
+  candidate,
+  disabled,
+  onChoose,
+}: {
+  candidate: ShoppingListCandidate;
+  disabled: boolean;
+  onChoose: () => void;
+}) {
+  const commonName = candidate.common_names[0];
+  return (
+    <button type="button" className="c-shopping-item__choice minion" disabled={disabled} onClick={onChoose}>
+      <span>
+        <span className="is-latin">{formatLatinName(candidate.genus, candidate.species)}</span>
+        {candidate.cultivar && <> &lsquo;{candidate.cultivar}&rsquo;</>}
+        {commonName && <span className="is-common"> ({commonName})</span>}
+      </span>
+      {candidate.unmatched_text && (
+        <span className="is-unmatched">
+          &ldquo;{candidate.unmatched_text}&rdquo; not recognised
+        </span>
+      )}
+    </button>
+  );
+}
+
+function EditNameForm({
+  item,
+  onDone,
+}: {
+  item: ShoppingListItemData;
+  onDone: () => void;
+}) {
+  const [error, setError] = useState<string | null>(null);
+  const [isSaving, startSaving] = useTransition();
+  const inputId = `shopping-item-name-${item.id}`;
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const name = String(new FormData(event.currentTarget).get("name") ?? "");
+    const validated = validateManualItemInput({ name });
+    if (!validated.ok) {
+      setError(validated.error);
+      return;
+    }
+    setError(null);
+    startSaving(async () => {
+      const result = await updateManualItemName(item.id, validated.value.entered_name);
+      if (result.error) setError(result.error);
+      else onDone();
+    });
+  }
+
+  return (
+    <form className="c-shopping-item__edit" onSubmit={handleSubmit} noValidate>
+      <label htmlFor={inputId} className="o-type-label">
+        Plant name
+      </label>
+      <input
+        id={inputId}
+        name="name"
+        type="text"
+        className="o-text-input"
+        defaultValue={item.entered_name ?? ""}
+        maxLength={MANUAL_ITEM_LIMITS.name}
+        autoFocus
+        autoComplete="off"
+        autoCorrect="off"
+        spellCheck={false}
+        enterKeyHint="done"
+        aria-invalid={error ? true : undefined}
+        aria-describedby={error ? `${inputId}-error` : undefined}
+        onKeyDown={(event) => {
+          if (event.key === "Escape") onDone();
+        }}
+      />
+      {error && (
+        <p id={`${inputId}-error`} role="alert" className="c-shopping-item__problem minion">
+          {error}
+        </p>
+      )}
+      <div className="c-shopping-item__edit-actions">
+        <Button type="submit" disabled={isSaving}>
+          {isSaving ? "Saving…" : "Save"}
+        </Button>
+        <button type="button" className="o-button--text minion" disabled={isSaving} onClick={onDone}>
+          Cancel
+        </button>
+      </div>
+    </form>
+  );
+}
+
+/** A manual item's names, summary and lookup state. */
+function ManualItemDetails({ item }: { item: ShoppingListItemData }) {
+  const [problem, setProblem] = useState<string | null>(null);
+  const [isWorking, startWork] = useTransition();
+  const names = manualItemNames(item);
+  const unsaved = isUnsaved(item);
+
+  function run(action: () => Promise<{ error?: string }>) {
+    setProblem(null);
+    startWork(async () => {
+      try {
+        const result = await action();
+        if (result.error) setProblem(result.error);
+      } catch {
+        setProblem("Something went wrong — please try again.");
+      }
+    });
+  }
+
+  // A species- or genus-level line under a more specific name says so,
+  // rather than passing as a description of the cultivar.
+  const summaryScope =
+    item.summary_scope === "species" && item.cultivar
+      ? "About the species: "
+      : item.summary_scope === "genus" && (item.species || item.cultivar)
+        ? "About the genus: "
+        : null;
+
+  const cultivar = names.cultivar ? <> &lsquo;{names.cultivar}&rsquo;</> : null;
+
+  return (
+    <>
+      <p
+        className={clsx(
+          "c-shopping-item__name o-type-display brevier o-type-leading--snug",
+          names.primaryIsLatin && "is-resolved"
+        )}
+      >
+        <span className={names.primaryIsLatin ? "o-type--italic" : undefined}>{names.primary}</span>
+        {names.primaryIsLatin && cultivar}
+      </p>
+      {names.secondary && (
+        <p className="c-shopping-item__subname minion o-type-leading--snug">
+          <span className={names.secondaryIsLatin ? "o-type--italic" : undefined}>
+            {names.secondary}
+          </span>
+          {names.secondaryIsLatin && cultivar}
+        </p>
+      )}
+      {names.notedAs && (
+        <p className="c-shopping-item__noted minion">Noted as: {names.notedAs}</p>
+      )}
+
+      {item.summary && (
+        <p className="c-shopping-item__summary minion">
+          {summaryScope}
+          {item.summary}
+        </p>
+      )}
+
+      {!unsaved && item.lookup_status === "pending" && (
+        <p className="c-shopping-item__status minion" role="status">
+          Looking this up…
+        </p>
+      )}
+
+      {item.lookup_status === "failed" && (
+        <p className="c-shopping-item__status minion">
+          Couldn&rsquo;t look this one up.{" "}
+          <button
+            type="button"
+            className="c-shopping-item__retry o-button--text"
+            disabled={isWorking}
+            onClick={() => run(() => retryShoppingItemLookup(item.id))}
+          >
+            {isWorking ? "Retrying…" : "Retry"}
+          </button>
+        </p>
+      )}
+
+      {item.lookup_candidates.length > 0 && (
+        <div className="c-shopping-item__suggest" role="group" aria-label={`Possible matches for ${names.primary}`}>
+          <p className="minion">Not sure about this one. It might be:</p>
+          <div className="c-shopping-item__choices">
+            <button
+              type="button"
+              className="c-shopping-item__choice minion"
+              disabled={isWorking}
+              onClick={() => run(() => keepShoppingItemAsTyped(item.id))}
+            >
+              Keep as typed
+            </button>
+            {item.lookup_candidates.map((candidate, index) => (
+              <CandidateChoice
+                key={`${candidate.genus}-${candidate.species}-${candidate.cultivar}`}
+                candidate={candidate}
+                disabled={isWorking}
+                onChoose={() => run(() => acceptShoppingItemCandidate(item.id, index))}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {problem && (
+        <p role="alert" className="c-shopping-item__problem minion">
+          {problem}
+        </p>
+      )}
+    </>
+  );
+}
+
 function ItemCard({
   item,
   plateNumber,
@@ -221,6 +468,7 @@ function ItemCard({
   onPurchase: () => void;
   onDelete: () => void;
 }) {
+  const [isEditingName, setIsEditingName] = useState(false);
   const isManual = item.source === "manual";
   const displayName = shoppingItemDisplayName(item);
   const unsaved = isUnsaved(item);
@@ -244,7 +492,13 @@ function ItemCard({
             className="is-image"
           />
         ) : isManual ? (
-          <SpecimenPlate variant="plain" compact name={displayName} plateNumber={plateNumber} />
+          <SpecimenPlate
+            variant={isResolvedManualItem(item) ? "latin" : "plain"}
+            compact
+            genus={item.genus}
+            name={displayName}
+            plateNumber={plateNumber}
+          />
         ) : (
           <div className="is-placeholder">
             <SproutIcon />
@@ -254,10 +508,16 @@ function ItemCard({
 
       <div className="c-shopping-item__body">
         {isManual ? (
-          <p className="c-shopping-item__name o-type-display brevier o-type-leading--snug">{displayName}</p>
+          isEditingName ? (
+            <EditNameForm item={item} onDone={() => setIsEditingName(false)} />
+          ) : (
+            <ManualItemDetails item={item} />
+          )
         ) : (
           <>
-            <p className="c-shopping-item__name o-type-display o-type--italic brevier o-type-leading--snug">{item.species}</p>
+            <p className="c-shopping-item__name o-type-display o-type--italic brevier o-type-leading--snug">
+              {shoppingItemLatinName(item)}
+            </p>
             {nameLabel && (
               <p className="c-shopping-item__subname minion o-type-leading--snug">{nameLabel}</p>
             )}
@@ -286,6 +546,10 @@ function ItemCard({
           </div>
         )}
 
+        {item.thumbnail_url && item.wikimedia_attribution && (
+          <ImageCredit attribution={item.wikimedia_attribution} />
+        )}
+
         <div className="c-shopping-item__actions">
           <button
             type="button"
@@ -295,6 +559,16 @@ function ItemCard({
           >
             Mark as purchased
           </button>
+          {isManual && !isEditingName && (
+            <button
+              type="button"
+              onClick={() => setIsEditingName(true)}
+              disabled={unsaved}
+              className="c-shopping-item__purchase o-button--text minion"
+            >
+              Edit name
+            </button>
+          )}
         </div>
       </div>
 
@@ -387,6 +661,28 @@ export default function ShoppingList({ initialItems }: { initialItems: ShoppingL
     );
   }, [initialItems, added, removedIds]);
 
+  // Polling, not server push: a lookup finishes in after(), long after the
+  // response that started it has gone, so nothing the server does then can
+  // reach this page (CLAUDE.md, "revalidatePath inside after()"). While any
+  // item is being looked up — or is queued behind the per-user limit, which
+  // the page's own load picks up — re-fetch the server list every few
+  // seconds. The server reports a pending lookup that has gone stale as
+  // failed, which ends the poll for it; the tick limit is a backstop for a
+  // queued item that never gets started.
+  const lookupActive = items.some(isLookingUp);
+  useEffect(() => {
+    if (!lookupActive) return;
+    let ticksLeft = Math.ceil(LOOKUP_PENDING_STALE_MS / LOOKUP_POLL_INTERVAL_MS);
+    const interval = setInterval(() => {
+      if (ticksLeft-- <= 0) {
+        clearInterval(interval);
+        return;
+      }
+      router.refresh();
+    }, LOOKUP_POLL_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [lookupActive, router]);
+
   const [deleteTarget, setDeleteTarget] = useState<ShoppingListItemData | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
@@ -401,9 +697,13 @@ export default function ShoppingList({ initialItems }: { initialItems: ShoppingL
       id: tempId,
       source: "manual",
       scheme_id: null,
+      genus: null,
       species: null,
       cultivar: null,
       common_names: null,
+      summary: null,
+      summary_scope: null,
+      lookup_candidates: [],
       entered_name: input.name,
       notes: input.notes ?? null,
       where_to_buy: input.whereToBuy ?? null,
