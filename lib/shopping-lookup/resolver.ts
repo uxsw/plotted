@@ -36,9 +36,16 @@ export type ResolverCandidate = {
   cultivar: string | null;
   common_names: string[];
   /**
-   * Any part of the note this candidate doesn't account for — a cultivar the
-   * model didn't recognise, a descriptive word. Null when the whole note is
-   * explained. A candidate with leftovers is never treated as a confident match.
+   * True when the model said part of the note is not accounted for by this
+   * candidate — a cultivar it didn't recognise, a descriptive word. A partial
+   * match is never treated as a confident one.
+   */
+  partial_match: boolean;
+  /**
+   * The unexplained words, safe to show: only ever words that appear in the
+   * gardener's own note, in the note's order — never the model's phrasing.
+   * Null when nothing was left over, or when what the model reported
+   * contained none of the note's words.
    */
   unmatched_text: string | null;
   /** The model's own confidence, before Wikipedia verification. */
@@ -204,24 +211,39 @@ function cleanCommonNames(value: unknown): string[] {
 
 const FILLER = new Set(["the", "a", "an", "that", "this", "some", "my", "please", "and"]);
 
-function cleanUnmatched(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  const text = sanitizePlantName(value).replace(/[<>{}]/g, "").slice(0, MANUAL_ITEM_LIMITS.name);
-  const meaningful = text
-    .toLowerCase()
-    .split(/[^\p{L}\p{N}]+/u)
-    .filter((word) => word && !FILLER.has(word));
-  return meaningful.length ? text : null;
+function words(text: string): string[] {
+  return text.split(/[^\p{L}\p{N}'’-]+/u).filter(Boolean);
+}
+
+/**
+ * What the model reported as unexplained, reduced to the note's own words.
+ * The model's value is free text and sometimes carries commentary ("red
+ * climbing — descriptive, no cultivar identified"); only words the gardener
+ * actually wrote survive, so nothing the model composed can reach the screen.
+ */
+function cleanUnmatched(
+  value: unknown,
+  note: string
+): { partial_match: boolean; unmatched_text: string | null } {
+  if (typeof value !== "string") return { partial_match: false, unmatched_text: null };
+  const reported = new Set(
+    words(sanitizePlantName(value).toLowerCase()).filter((word) => !FILLER.has(word))
+  );
+  if (reported.size === 0) return { partial_match: false, unmatched_text: null };
+
+  const kept = words(note).filter((word) => reported.has(word.toLowerCase()));
+  return { partial_match: true, unmatched_text: kept.length ? kept.join(" ") : null };
 }
 
 const squash = (text: string) => text.toLowerCase().replace(/[^\p{L}\p{N}]/gu, "");
 
 /**
  * Model reply → candidates the rest of the app can trust the shape of.
+ * `note` is what the gardener wrote, used to keep unmatched_text to their words.
  * Anything malformed is dropped rather than repaired: a missing candidate
  * shows as "nothing found", a half-valid one could show as a wrong plant.
  */
-export function parseResolverCandidates(raw: unknown): ResolverCandidate[] {
+export function parseResolverCandidates(raw: unknown, note: string): ResolverCandidate[] {
   if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
     throw new Error("Invalid resolver response shape");
   }
@@ -251,7 +273,7 @@ export function parseResolverCandidates(raw: unknown): ResolverCandidate[] {
       genus,
       species,
       cultivar,
-      unmatched_text: cleanUnmatched(c.unmatched_text),
+      ...cleanUnmatched(c.unmatched_text, note),
       common_names: cleanCommonNames(c.common_names),
       confidence: c.confidence as LookupConfidence,
       growth_type: (GROWTH_TYPES as readonly unknown[]).includes(c.growth_type)
@@ -306,7 +328,7 @@ export async function resolvePlantName(
   if (!call || call.type !== "tool_use") throw new Error("Resolver returned no tool call");
   const soundsLike = (call.input as Record<string, unknown> | null)?.sounds_like;
   return {
-    candidates: parseResolverCandidates(call.input),
+    candidates: parseResolverCandidates(call.input, sanitizePlantName(enteredName)),
     sounds_like: typeof soundsLike === "string" ? soundsLike.slice(0, 200) : null,
     usage: usageFrom(message, started),
   };

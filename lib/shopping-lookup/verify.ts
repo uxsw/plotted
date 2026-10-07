@@ -43,8 +43,14 @@ export function isMatchingPlantPage(
 
   const hasWord = (word: string) => new RegExp(`(^|[^a-z])${fold(word)}([^a-z]|$)`).test(text);
   if (!hasWord(candidate.genus)) return false;
-  if (candidate.species && !hasWord(candidate.species)) return false;
-  return true;
+  if (!candidate.species || hasWord(candidate.species)) return true;
+
+  // The binomial landed on its genus page and the opening text doesn't name
+  // the species. That is normal for a genus with a single species
+  // ("Fascicularia bicolor" → "Fascicularia", "a monotypic genus…"): Wikipedia
+  // only has the redirect because the name is real, and there is no other
+  // species it could be confused with.
+  return fold(page.title) === fold(candidate.genus) && /\bmonotypic\b/.test(text);
 }
 
 export function verificationFrom(
@@ -69,7 +75,7 @@ export function verificationFrom(
  * medium at best:
  * - It names a cultivar. Wikipedia can only vouch for the species or genus,
  *   so a cultivar is never confirmed by anything but the gardener.
- * - It leaves part of the note unexplained (unmatched_text).
+ * - It leaves part of the note unexplained (partial_match).
  *
  * A page proves the plant exists, not that it's the one the gardener meant —
  * so a medium is only raised when it is the model's one and only candidate
@@ -78,13 +84,13 @@ export function verificationFrom(
  * from an epithet it couldn't place, e.g. an invented species).
  */
 export function finalConfidence(
-  candidate: Pick<ResolverCandidate, "confidence" | "species" | "cultivar" | "unmatched_text">,
+  candidate: Pick<ResolverCandidate, "confidence" | "species" | "cultivar" | "partial_match">,
   verification: Verification,
   /** How many candidates the model returned in all, this one included. */
   totalCandidates: number
 ): LookupConfidence {
   if (candidate.confidence === "low") return "low";
-  if (candidate.cultivar || candidate.unmatched_text) return "medium";
+  if (candidate.cultivar || candidate.partial_match) return "medium";
   if (candidate.confidence === "high") return verification === "unverified" ? "medium" : "high";
   return verification === "verified" && totalCandidates === 1 && candidate.species
     ? "high"
