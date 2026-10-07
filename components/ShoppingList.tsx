@@ -669,9 +669,11 @@ export default function ShoppingList({ initialItems }: { initialItems: ShoppingL
   // seconds. The server reports a pending lookup that has gone stale as
   // failed, which ends the poll for it; the tick limit is a backstop for a
   // queued item that never gets started.
-  const lookupActive = items.some(isLookingUp);
+  // Keyed on which items are in flight, so the tick limit restarts whenever
+  // that set changes (a new item added, one finishing).
+  const lookupsInFlight = items.filter(isLookingUp).map((item) => item.id).join(",");
   useEffect(() => {
-    if (!lookupActive) return;
+    if (!lookupsInFlight) return;
     let ticksLeft = Math.ceil(LOOKUP_PENDING_STALE_MS / LOOKUP_POLL_INTERVAL_MS);
     const interval = setInterval(() => {
       if (ticksLeft-- <= 0) {
@@ -681,7 +683,7 @@ export default function ShoppingList({ initialItems }: { initialItems: ShoppingL
       router.refresh();
     }, LOOKUP_POLL_INTERVAL_MS);
     return () => clearInterval(interval);
-  }, [lookupActive, router]);
+  }, [lookupsInFlight, router]);
 
   const [deleteTarget, setDeleteTarget] = useState<ShoppingListItemData | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
