@@ -3,9 +3,19 @@ import type { NextRequest } from "next/server";
 
 vi.mock("@/lib/supabase/server", () => ({ createClient: vi.fn() }));
 vi.mock("@/lib/plant-lookup", () => ({ performLookup: vi.fn() }));
+vi.mock("@/lib/species-reference-enrichment", () => ({ enrichSpeciesReference: vi.fn() }));
+vi.mock("next/cache", () => ({ revalidatePath: vi.fn() }));
+// after() needs a request scope; run its callback inline, as the action tests do.
+vi.mock("next/server", async (importOriginal) => ({
+  ...(await importOriginal<typeof import("next/server")>()),
+  after: vi.fn((cb: () => unknown) => cb()),
+}));
 
+import { after } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { performLookup } from "@/lib/plant-lookup";
+import { enrichSpeciesReference } from "@/lib/species-reference-enrichment";
 import { POST } from "./route";
 import type { LookupResult } from "@/lib/plant-lookup";
 
@@ -169,5 +179,111 @@ describe("POST /api/plants/[id]/lookup — species_source gate", () => {
     });
     await callRoute();
     expect(capturedUpdate()).toMatchObject({ species: "canina", common_names: ["Dog rose"] });
+  });
+});
+
+// ─── enrichment after a retry ────────────────────────────────────────────────
+//
+// The retry used to apply a correction and stop: the plant ended up corrected
+// with no frost data, or with frost data under the pre-correction key.
+describe("POST /api/plants/[id]/lookup — species_reference enrichment", () => {
+  beforeEach(() => {
+    vi.mocked(enrichSpeciesReference).mockReset();
+    vi.mocked(after).mockClear();
+    vi.mocked(revalidatePath).mockClear();
+  });
+
+  const plant = (overrides: Record<string, unknown>) => ({
+    genus: "Rosa",
+    species: "canna",
+    cultivar: null,
+    common_names: [],
+    species_source: "manual",
+    ...overrides,
+  });
+
+  it("enriches once, with the post-correction values, then revalidates the plant", async () => {
+    vi.mocked(performLookup).mockResolvedValue({ ...BASE_LOOKUP, corrected_species: "canina" });
+    setupSupabase(plant({}));
+    await callRoute();
+    await Promise.resolve();
+
+    expect(enrichSpeciesReference).toHaveBeenCalledTimes(1);
+    expect(enrichSpeciesReference).toHaveBeenCalledWith("Rosa", "canina", null);
+    expect(revalidatePath).toHaveBeenCalledWith("/plants/plant-1");
+  });
+
+  it("enriches a successful retry even when nothing was corrected", async () => {
+    vi.mocked(performLookup).mockResolvedValue({ ...BASE_LOOKUP });
+    setupSupabase(plant({ species: "canina" }));
+    await callRoute();
+
+    expect(enrichSpeciesReference).toHaveBeenCalledWith("Rosa", "canina", null);
+  });
+
+  it("with a genus present, never moves the genus into species or cultivar", async () => {
+    vi.mocked(performLookup).mockResolvedValue({
+      ...BASE_LOOKUP,
+      corrected_species: "verbena bonariensis",
+      corrected_cultivar: "Verbena Lollipop",
+    });
+    const { capturedUpdate } = setupSupabase(plant({ genus: "Verbena", species: "bonarensis", cultivar: "Lolipop" }));
+    await callRoute();
+
+    expect(capturedUpdate()).toMatchObject({ species: "bonariensis" });
+    expect(capturedUpdate()).not.toHaveProperty("cultivar");
+    expect(capturedUpdate()).not.toHaveProperty("genus");
+    expect(enrichSpeciesReference).toHaveBeenCalledWith("Verbena", "bonariensis", "Lolipop");
+  });
+
+  it("blank genus the lookup resolves: writes the genus and enriches under the resolved key", async () => {
+    vi.mocked(performLookup).mockResolvedValue({
+      ...BASE_LOOKUP,
+      resolved_name: { genus: "Allium", species: "sphaerocephalon", cultivar: null, confidence: "high", kind: "latin" },
+    });
+    const { capturedUpdate } = setupSupabase(plant({ genus: "", species: "allium", cultivar: "Spherocephalon" }));
+    const response = await callRoute();
+
+    expect(capturedUpdate()).toMatchObject({ genus: "Allium", species: "sphaerocephalon", cultivar: null });
+    expect(enrichSpeciesReference).toHaveBeenCalledTimes(1);
+    expect(enrichSpeciesReference).toHaveBeenCalledWith("Allium", "sphaerocephalon", null);
+    const body = await response.json();
+    expect(body).toMatchObject({ genus: "Allium", species: "sphaerocephalon", cultivar: null });
+    expect(body).not.toHaveProperty("resolved_name");
+  });
+
+  it("blank genus the lookup cannot resolve: respects the guard — no enrichment, no after()", async () => {
+    vi.mocked(performLookup).mockResolvedValue({
+      ...BASE_LOOKUP,
+      corrected_species: "officinalis",
+      resolved_name: { genus: "Salvia", species: "officinalis", cultivar: null, confidence: "low", kind: "latin" },
+    });
+    const { capturedUpdate } = setupSupabase(plant({ genus: "", species: "oficinalis" }));
+    await callRoute();
+
+    expect(capturedUpdate()).not.toHaveProperty("genus");
+    expect(enrichSpeciesReference).not.toHaveBeenCalled();
+    expect(after).not.toHaveBeenCalled();
+  });
+
+  it("photo-identified plant: enriches under the identified name, ignoring any resolved one", async () => {
+    vi.mocked(performLookup).mockResolvedValue({
+      ...BASE_LOOKUP,
+      corrected_species: "thapsus",
+      resolved_name: { genus: "Verbascum", species: "thapsus", cultivar: null, confidence: "high", kind: "latin" },
+    });
+    setupSupabase(plant({ genus: "Digitalis", species: "thapsi", species_source: "identification" }));
+    await callRoute();
+
+    expect(enrichSpeciesReference).toHaveBeenCalledWith("Digitalis", "thapsi", null);
+  });
+
+  it("a failed lookup enriches nothing", async () => {
+    vi.mocked(performLookup).mockRejectedValue(new Error("boom"));
+    setupSupabase(plant({}));
+    const response = await callRoute();
+
+    expect(response.status).toBe(500);
+    expect(enrichSpeciesReference).not.toHaveBeenCalled();
   });
 });

@@ -402,8 +402,12 @@ export default function PlantDetail({
         flowering_season_to: data.flowering_season_to ?? p.flowering_season_to,
         eventual_height_cm: data.eventual_height_cm ?? p.eventual_height_cm,
         eventual_spread_cm: data.eventual_spread_cm ?? p.eventual_spread_cm,
-        ...(data.species != null ? { species: data.species } : {}),
-        ...(data.cultivar != null ? { cultivar: data.cultivar } : {}),
+        // Present only when the retry changed them. A resolved name can set
+        // the genus and clear a species or cultivar (null), so test for the
+        // key rather than a non-null value.
+        ...(typeof data.genus === "string" ? { genus: data.genus } : {}),
+        ...("species" in data ? { species: data.species } : {}),
+        ...("cultivar" in data ? { cultivar: data.cultivar } : {}),
       }));
       if (data.lookup_status === "success" || data.lookup_status === "not_found") {
         markLookupNoticeSeen(plant.id);

@@ -1,7 +1,9 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
+import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { performLookup } from "@/lib/plant-lookup";
-import { applyLookupResult } from "@/lib/lookup-apply";
+import { applyLookupResult, hasGenusForEnrichment } from "@/lib/lookup-apply";
+import { enrichSpeciesReference } from "@/lib/species-reference-enrichment";
 
 export async function POST(
   _request: NextRequest,
@@ -47,9 +49,12 @@ export async function POST(
 
   try {
     const result = await performLookup(plant.genus, plant.species, plant.cultivar ?? null);
-    const { updates, lookup_status } = applyLookupResult(
+    // Same name handling as plant creation (applyLookupResult): a blank
+    // genus is resolved from the typed name where the lookup is confident,
+    // and a genus already present is kept out of species and cultivar.
+    const { updates, lookup_status, names } = applyLookupResult(
       result,
-      { species: plant.species, cultivar: plant.cultivar ?? null },
+      { genus: plant.genus, species: plant.species, cultivar: plant.cultivar ?? null },
       {
         skipCorrection: fromIdentification,
         existingCommonNames: fromIdentification ? plant.common_names : undefined,
@@ -57,7 +62,22 @@ export async function POST(
     );
     // RLS ensures only the plant owner can update
     await supabase.from("plants").update({ ...updates, lookup_status }).eq("id", id).eq("user_id", user.id);
-    return NextResponse.json({ ...result, ...updates, lookup_status });
+
+    // Enrich under the post-correction name, so a corrected plant isn't left
+    // without frost data or pointing at the old key. Subject to the genus
+    // guard like every other path. revalidatePath here is cache hygiene for a
+    // later navigation, not a live push (see CLAUDE.md).
+    if (hasGenusForEnrichment(names.genus)) {
+      after(async () => {
+        await enrichSpeciesReference(names.genus, names.species, names.cultivar);
+        revalidatePath(`/plants/${id}`);
+      });
+    }
+
+    // resolved_name is the lookup's working, not something the client needs.
+    const { resolved_name: _resolved, ...fields } = result;
+    void _resolved;
+    return NextResponse.json({ ...fields, ...updates, lookup_status });
   } catch {
     // RLS ensures only the plant owner can update
     await supabase.from("plants").update({ lookup_status: "error" }).eq("id", id).eq("user_id", user.id);
