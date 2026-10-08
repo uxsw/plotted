@@ -11,6 +11,7 @@ import {
   storedNameKey,
   undoEntry,
   undoEntryFor,
+  withCurrentSpeciesInputRule,
   withNameSetByHand,
   type ApplyDeps,
   type BlankGenusPlant,
@@ -369,5 +370,38 @@ describe("orphanedReferenceKeys", () => {
       { match_key: "|apple", matched_by_removed: true },
       { match_key: "|officinalis", matched_by_removed: false },
     ]);
+  });
+});
+
+describe("species_input is written only for typed common names", () => {
+  it("a corrected Latin name never sets it", () => {
+    const proposal = proposeForPlant(
+      { ...PLANT, species: "dodonea", cultivar: "Viscosa purpurea" },
+      lookup({ genus: "Dodonaea", species: "viscosa", cultivar: "Purpurea", kind: "latin" })
+    );
+    expect(proposal.change).toBe("changed");
+    expect(plantUpdateFor(proposal)).not.toHaveProperty("species_input");
+  });
+
+  it("a plain split never sets it, even when the model calls the typed text a common name", () => {
+    const proposal = proposeForPlant(PLANT, lookup({ kind: "common" }));
+    expect(plantUpdateFor(proposal)).not.toHaveProperty("species_input");
+  });
+
+  it("a typed common name sets it to what was typed", () => {
+    const proposal = proposeForPlant({ ...PLANT, species: "dwarf bean" }, lookup({ genus: "Phaseolus", species: "vulgaris", kind: "common" }));
+    expect(plantUpdateFor(proposal).species_input).toBe("dwarf bean");
+  });
+
+  it("an older report's species_input on a corrected Latin name is dropped when the report is loaded", () => {
+    const latin = proposeForPlant(
+      { ...PLANT, species: "dodonea", cultivar: "Viscosa purpurea" },
+      lookup({ genus: "Dodonaea", species: "viscosa", cultivar: "Purpurea", kind: "latin" })
+    );
+    const fromOldReport = { ...latin, species_input: "dodonea" };
+    expect(plantUpdateFor(withCurrentSpeciesInputRule(fromOldReport))).not.toHaveProperty("species_input");
+
+    const common = proposeForPlant({ ...PLANT, species: "apple" }, lookup({ genus: "Malus", species: "domestica", kind: "common" }));
+    expect(withCurrentSpeciesInputRule(common)).toEqual(common);
   });
 });

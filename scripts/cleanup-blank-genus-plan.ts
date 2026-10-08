@@ -81,6 +81,20 @@ export function constraintViolations(row: {
   return violations;
 }
 
+/**
+ * Re-applies the species_input rule to a proposal read from a saved report:
+ * only a typed common name whose stored words change sets it. Reports made
+ * before that rule also set it for corrected Latin ("dodonea" → Dodonaea);
+ * this drops those, so an old report can't write one.
+ */
+export function withCurrentSpeciesInputRule(proposal: Proposal): Proposal {
+  if (proposal.species_input === undefined) return proposal;
+  if (proposal.typed_kind === "common" && proposal.change === "changed") return proposal;
+  const { species_input: _dropped, ...rest } = proposal;
+  void _dropped;
+  return rest;
+}
+
 /** The name columns a proposal would write. */
 export function plantUpdateFor(proposal: Proposal): Record<string, string | null> {
   if (!proposal.proposed) throw new Error("No proposed name to write");

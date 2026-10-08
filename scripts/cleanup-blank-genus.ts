@@ -61,6 +61,7 @@ import {
   storedNameKey,
   undoEntry,
   undoEntryFor,
+  withCurrentSpeciesInputRule,
   withNameSetByHand,
   type ApplyOutcome,
   type BlankGenusPlant,
@@ -262,6 +263,8 @@ async function loadBatch(): Promise<{ batch: Proposal[]; ids: Set<string> }> {
 
   const batch = report.rows
     .filter((row) => ids.has(row.plant_id))
+    // The report may predate the current species_input rule; re-apply it.
+    .map(withCurrentSpeciesInputRule)
     .map((row) => (names.has(row.plant_id) ? withNameSetByHand(row, names.get(row.plant_id)!) : row));
   return { batch, ids };
 }
@@ -290,13 +293,13 @@ async function inspectBatch(client: ReturnType<typeof db>, batch: Proposal[]): P
 }
 
 function printBatch(rows: BatchRow[]) {
-  console.log("| plant id | current genus / species / cultivar | will become | species_input | new key | species_reference | confidence | note |");
-  console.log("|---|---|---|---|---|---|---|---|");
+  console.log("| plant id | current genus / species / cultivar | will become | typed as | species_input written | new key | species_reference | confidence | note |");
+  console.log("|---|---|---|---|---|---|---|---|---|");
   for (const { proposal, blocked, existing } of rows) {
     const update = proposal.proposed ? plantUpdateFor(proposal) : null;
     console.log(
       `| ${proposal.plant_id} | ${nameCell(proposal.current)} | ${blocked ? "NO CHANGE" : nameCell(proposal.proposed)} | ` +
-        `${update && "species_input" in update ? `set to "${update.species_input}"` : "unchanged"} | ${cell(proposal.new_key)} | ` +
+        `${proposal.typed_kind ?? "–"} | ${!blocked && update && "species_input" in update ? `"${update.species_input}"` : "none (left as it is)"} | ${cell(proposal.new_key)} | ` +
         `${blocked ? "–" : existing === "complete" ? "reuses existing row" : "new row (one model call)"} | ${proposal.confidence} | ${cell(blocked ?? proposal.reason)} |`
     );
   }
