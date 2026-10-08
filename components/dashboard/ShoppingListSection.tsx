@@ -1,7 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { shoppingItemDisplayName, toShoppingListItemData, type ShoppingListItemData } from "@/lib/shopping-list";
+import {
+  manualItemNames,
+  shoppingItemDisplayName,
+  shoppingItemLatinName,
+  toShoppingListItemData,
+  type ShoppingListItemData,
+} from "@/lib/shopping-list";
 import clsx from "clsx";
 import buttonStyles from "@/components/ui/Button.module.css";
 import { Icon } from "@/components/ui/Icon";
@@ -9,6 +15,7 @@ import { Icon } from "@/components/ui/Icon";
 function ShoppingItemCard({ item }: { item: ShoppingListItemData }) {
   const isManual = item.source === "manual";
   const displayName = shoppingItemDisplayName(item);
+  const manualNames = manualItemNames(item);
   const nameLabel = item.common_names?.[0] ?? (item.cultivar ? `'${item.cultivar}'` : null);
 
   const inner = (
@@ -30,10 +37,18 @@ function ShoppingItemCard({ item }: { item: ShoppingListItemData }) {
       </div>
       <div>
         {isManual ? (
-          <p className="o-type-display brevier">{displayName}</p>
+          <p className="o-type-display brevier">
+            {/* Italic only for a Latin name a lookup has resolved; typed text never is. */}
+            <span className={manualNames.primaryIsLatin ? "o-type--italic" : undefined}>
+              {manualNames.primary}
+            </span>
+            {manualNames.primaryIsLatin && manualNames.cultivar && (
+              <> &lsquo;{manualNames.cultivar}&rsquo;</>
+            )}
+          </p>
         ) : (
           <>
-            <p className="o-type-display brevier o-type--italic">{item.species}</p>
+            <p className="o-type-display brevier o-type--italic">{shoppingItemLatinName(item)}</p>
             {nameLabel && (
               <p className="minion">{nameLabel}</p>
             )}

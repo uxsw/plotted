@@ -94,3 +94,17 @@ Saving a draft (`POST /api/plant-scheme/[draftId]/save`, triggered by `SchemeGen
 - **One scheme per draft** (unique index on `schemes.draft_id`). A retry reuses the failed row; the old `/api/schemes/[id]/retry` can't rebuild these (suggestion-origin plants have no `plants` row), so failed `origin='conversation'` schemes are filtered out of the `/schemes` and hub lists — retry happens from the draft's own button.
 - **Draft is untouched until success.** On success (server-side, inside `after()`) the draft becomes `status = 'saved'`, `scheme_id` set, transcript cleared. `updatePlantSchemeDraft` refuses saved drafts so a stale client write can't undo that. `generationStatus` is never persisted: after a refresh mid-save, `[draftId]/page.tsx` derives it from the scheme row (found via `schemes.draft_id`); a `generating` row untouched for `STALE_GENERATING_MS` counts as abandoned.
 - `space` is a fixed `'medium'` — the question flow doesn't ask about bed size yet (known content gap, revisit with the default questions).
+
+## Shopping list name lookup (manual items)
+
+Spec: `docs/specs/shopping-list-manual-add.md` §3. Code: `lib/shopping-lookup/`. A manual shopping list item's typed or dictated name is resolved to a plant in the background.
+
+- **Resolve first, then verify.** The typed text is usually a mangled dictation of a Latin name, so the model resolves it to candidates and Wikipedia only verifies them and grounds the summary. Don't reorder this to "search Wikipedia for the raw text first"; that was the original spec and it misses most real inputs.
+- **`shopping_list_items.species` means different things by source.** Scheme items: the full binomial. Manual items: the epithet only, genus in `genus`. Never read `species` directly; use `shoppingItemLatinName`, `manualItemNames` or `plantNameFromShoppingItem` (`lib/shopping-list.ts`).
+- **`entered_name` is never written by a lookup.** Only `updateManualItemName` (the user's own rename) changes it.
+- **Confidence rules live in `finalConfidence` (`verify.ts`).** A candidate with a cultivar, or one that leaves part of the note unexplained, is capped at medium and shown as a "might be" choice, never auto-applied. These caps were set from eval failures (a confidently wrong Clematis cultivar, an invented cultivar echoed back); don't loosen them without re-running the eval.
+- **Run `scripts/eval-shopping-lookup.ts` after any change to the resolver prompt or the confidence rules.** It costs about $0.40 a run against the live API. Ask John before running it.
+- **Isolation:** this path must not read or write `species_reference`, or call `performLookup` / `enrichSpeciesReference`. A test enforces it.
+- **`after()` uses a bearer-token client, not the cookie client** (`userClientForBackground`): `after()` in a Server Component may not touch cookies, and the page-load pickup runs there. Results are written only while the claim (`lookup_requested_at`) still matches, so a late result can't overwrite a rename or retry.
+- **Live updates are by polling** (`router.refresh()` every 5s in `ShoppingList.tsx` while a lookup is in flight), for the same reason as the frost tolerance lookup above.
+- **`sounds_like`** (the resolver's scratch field) must never be stored, logged or displayed. `unmatched_text` shown to users is restricted to words from their own note.

@@ -2,15 +2,72 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { sanitizePlantName } from "@/lib/sanitize";
 import { createPlantWithLookup } from "@/lib/plant-create";
 import {
+  parseLookupCandidates,
   plantNameFromShoppingItem,
   toShoppingListItemData,
   validateManualItemInput,
   type ManualItemInput,
   type ShoppingListItemData,
 } from "@/lib/shopping-list";
+import {
+  claimLookup,
+  resolvedFields,
+  runAcceptedCandidate,
+  runClaimedLookup,
+  userClientForBackground,
+  type ClaimedLookup,
+} from "@/lib/shopping-lookup/run";
+import { LOOKUP_PENDING_STALE_MS } from "@/lib/shopping-lookup/timing";
+
+type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
+
+/**
+ * Starts the background name lookup for a manual item, if the user has a
+ * lookup slot free; otherwise the item keeps its null status and the
+ * shopping list page picks it up on a later load. Never throws: capturing,
+ * editing or retrying an item must not depend on the lookup starting.
+ *
+ * The lookup runs in after(), once the response has gone. It does not (and
+ * cannot) push its result to an open page — the list polls for that; see
+ * CLAUDE.md on revalidatePath inside after().
+ */
+async function startLookup(
+  supabase: SupabaseServerClient,
+  userId: string,
+  itemId: string
+): Promise<ClaimedLookup | null> {
+  try {
+    const db = await userClientForBackground(supabase);
+    if (!db) return null;
+    const claim = await claimLookup(supabase, userId, itemId);
+    if (!claim) return null;
+    after(() => runClaimedLookup(db, userId, claim));
+    return claim;
+  } catch (err) {
+    console.error("[shopping-list] lookup start failed:", err);
+    return null;
+  }
+}
+
+// Everything a lookup writes, blanked — for when the name it was based on
+// changes, or the lookup is run again from scratch.
+const CLEARED_LOOKUP = {
+  genus: null,
+  species: null,
+  cultivar: null,
+  common_names: null,
+  summary: null,
+  summary_scope: null,
+  growth_type: null,
+  lookup_confidence: null,
+  lookup_candidates: null,
+  lookup_status: null,
+  lookup_requested_at: null,
+} as const;
 
 export async function markShoppingListNoticeSeen(): Promise<void> {
   const supabase = await createClient();
@@ -62,10 +119,11 @@ export async function deleteShoppingListItem(id: string): Promise<{ error?: stri
 /**
  * Add a plant to the shopping list by name (docs/specs/shopping-list-manual-add.md §2).
  *
- * Capture only: nothing is looked up here, and lookup_status /
- * lookup_requested_at stay null — the Phase 2 lookup sets 'pending' itself
- * when it starts, and picks up manual items whose status is still null.
- * Duplicates are allowed, so there is no existence check.
+ * Capture never waits on the lookup: the row is inserted and returned, and
+ * the name lookup (§3) is started in after(). If it can't start now (no
+ * lookup slot free), lookup_status stays null and the shopping list page
+ * picks the item up later. Duplicates are allowed, so there is no existence
+ * check.
  */
 export async function createManualShoppingListItem(
   input: ManualItemInput
@@ -92,10 +150,179 @@ export async function createManualShoppingListItem(
     return { error: "Couldn't add that to your shopping list — please try again." };
   }
 
+  const claim = await startLookup(supabase, user.id, row.id);
+
   revalidatePath("/shopping-list");
   revalidatePath("/dashboard");
 
-  return { item: toShoppingListItemData(row, null) };
+  return {
+    item: toShoppingListItemData(
+      claim ? { ...row, lookup_status: "pending", lookup_requested_at: claim.token } : row,
+      null
+    ),
+  };
+}
+
+/**
+ * Change what a manual item is called. This is the user rewriting their own
+ * note, so entered_name does change here — and everything the previous
+ * lookup worked out from the old text (names, summary, image, suggestions)
+ * is cleared before the lookup runs again from the new text.
+ */
+export async function updateManualItemName(
+  itemId: string,
+  name: string
+): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const validated = validateManualItemInput({ name });
+  if (!validated.ok) return { error: validated.error };
+  const enteredName = validated.value.entered_name;
+
+  const { data: item } = await supabase
+    .from("shopping_list_items")
+    .select("id, entered_name, thumbnail_storage_path")
+    .eq("id", itemId)
+    .eq("user_id", user.id)
+    .eq("source", "manual")
+    .maybeSingle();
+  if (!item) return { error: "Item not found" };
+  if (item.entered_name === enteredName) return {};
+
+  const { error } = await supabase
+    .from("shopping_list_items")
+    .update({
+      entered_name: enteredName,
+      ...CLEARED_LOOKUP,
+      thumbnail_storage_path: null,
+      wikimedia_attribution: null,
+    })
+    .eq("id", itemId)
+    .eq("user_id", user.id);
+  if (error) {
+    console.error("[shopping-list] rename failed:", error);
+    return { error: "Couldn't change that name — please try again." };
+  }
+
+  if (item.thumbnail_storage_path) {
+    const { error: storageError } = await supabase.storage
+      .from("plant-photos")
+      .remove([item.thumbnail_storage_path]);
+    if (storageError) console.error("[shopping-list] old image delete failed:", storageError);
+  }
+
+  await startLookup(supabase, user.id, itemId);
+  revalidatePath("/shopping-list");
+  revalidatePath("/dashboard");
+  return {};
+}
+
+/**
+ * Run the lookup again for an item whose lookup failed, or has been pending
+ * so long it must have died. Starts from scratch, from the typed name.
+ */
+export async function retryShoppingItemLookup(itemId: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const cutoff = new Date(Date.now() - LOOKUP_PENDING_STALE_MS).toISOString();
+  const { data: reset, error } = await supabase
+    .from("shopping_list_items")
+    .update(CLEARED_LOOKUP)
+    .eq("id", itemId)
+    .eq("user_id", user.id)
+    .eq("source", "manual")
+    .or(`lookup_status.eq.failed,and(lookup_status.eq.pending,lookup_requested_at.lt."${cutoff}")`)
+    .select("id");
+  if (error) {
+    console.error("[shopping-list] retry reset failed:", error);
+    return { error: "Couldn't retry — please try again." };
+  }
+
+  // Nothing matched: the item isn't in a retryable state (already running,
+  // already done, or gone). Not an error worth showing.
+  if (reset?.length) await startLookup(supabase, user.id, itemId);
+  revalidatePath("/shopping-list");
+  return {};
+}
+
+/**
+ * "Could this be…?" → yes, that one. The chosen plant's names are written
+ * straight away (this is the user's explicit choice; entered_name is left as
+ * it was), and its summary and image are fetched in the background.
+ */
+export async function acceptShoppingItemCandidate(
+  itemId: string,
+  candidateIndex: number
+): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { data: item } = await supabase
+    .from("shopping_list_items")
+    .select("id, lookup_candidates")
+    .eq("id", itemId)
+    .eq("user_id", user.id)
+    .eq("source", "manual")
+    .maybeSingle();
+  const candidate = parseLookupCandidates(item?.lookup_candidates)[candidateIndex];
+  if (!item || !candidate) return { error: "That suggestion is no longer available." };
+
+  const db = await userClientForBackground(supabase);
+  const { data: updated, error } = await supabase
+    .from("shopping_list_items")
+    .update({
+      ...resolvedFields(candidate),
+      lookup_confidence: "high",
+      lookup_candidates: null,
+      summary: null,
+      summary_scope: null,
+      // With a background client: pending while the summary and image are
+      // fetched. Without one there is nothing to wait for.
+      lookup_status: db ? "pending" : "complete",
+      lookup_requested_at: new Date().toISOString(),
+    })
+    .eq("id", itemId)
+    .eq("user_id", user.id)
+    .not("lookup_candidates", "is", null)
+    .select("id, lookup_requested_at")
+    .maybeSingle();
+  if (error || !updated) {
+    if (error) console.error("[shopping-list] accept failed:", error);
+    return { error: "Couldn't save that — please try again." };
+  }
+
+  if (db) {
+    const claim = { id: updated.id, token: updated.lookup_requested_at };
+    after(() => runAcceptedCandidate(db, user.id, claim, candidate));
+  }
+  revalidatePath("/shopping-list");
+  revalidatePath("/dashboard");
+  return {};
+}
+
+/** "Could this be…?" → no, keep what I typed. Clears the suggestions; nothing else changes. */
+export async function keepShoppingItemAsTyped(itemId: string): Promise<{ error?: string }> {
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return { error: "Not authenticated" };
+
+  const { error } = await supabase
+    .from("shopping_list_items")
+    .update({ lookup_candidates: null })
+    .eq("id", itemId)
+    .eq("user_id", user.id)
+    .eq("source", "manual");
+  if (error) {
+    console.error("[shopping-list] keep-as-typed failed:", error);
+    return { error: "Couldn't save that — please try again." };
+  }
+  revalidatePath("/shopping-list");
+  return {};
 }
 
 type PurchaseResult =

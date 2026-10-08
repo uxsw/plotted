@@ -1,6 +1,6 @@
 # Shopping list: manual add and lightweight lookup
 
-Status: Draft, 2026-10-04
+Status: Phases 1–3 built. Section 3 rewritten 2026-10-07 to match what shipped (resolve first, then verify).
 Location: `docs/specs/shopping-list-manual-add.md`
 Builds on: `docs/specs/shopping-list.md` (this is the deferred item "Additional entry points to add items to the shopping list")
 
@@ -50,15 +50,17 @@ Add to `shopping_list_items`:
 | `lookup_confidence` | text, nullable | check in (`'high'`, `'medium'`, `'low'`). |
 | `growth_type` | text, nullable | e.g. shrub, perennial, bulb, climber, annual, tree. Used for the fallback tile if cheap. |
 | `lookup_status` | text, nullable | check in (`'pending'`, `'complete'`, `'not_found'`, `'failed'`). Null for scheme items, and for a manual item no lookup has been started for yet. |
-| `lookup_requested_at` | timestamptz, nullable | Set when a lookup starts, alongside `pending`. For the stale-pending timeout. |
+| `lookup_requested_at` | timestamptz, nullable | Set when a lookup starts, alongside `pending`. For the stale-pending timeout, and as the claim token a lookup must still hold to write its result. |
+| `lookup_candidates` | jsonb, nullable | **Migration 036.** Up to 3 plausible plants awaiting the user's choice. Null otherwise. |
 
 Changes to existing columns:
 - `species` becomes nullable. Add a check that `species IS NOT NULL OR entered_name IS NOT NULL`.
+- **`species` means different things by source.** Scheme items store the full binomial (`Verbena bonariensis`). Manual items store the epithet only (`bonariensis`, `×martini`), with the genus in `genus`; null for a genus-level match. Every reader goes through `shoppingItemLatinName` / `manualItemNames` / `plantNameFromShoppingItem` in `lib/shopping-list.ts`; do not read `species` directly.
 - `scheme_id` stays nullable. A null `scheme_id` means "scheme deleted" only when `source = 'scheme'`.
 
-Display name rule, in one shared helper used by every card: `entered_name`, then `common_names[0]`, then `species`.
+Display name rule, in one shared helper used by every card (`shoppingItemDisplayName`): a resolved manual item goes by the name its card leads with (see Section 3, "What the user sees"); otherwise `entered_name`, then `common_names[0]`, then the Latin name.
 
-Existing RLS policies are per-user and cover the new columns. If lookup writes happen inside `after()` where the user session may not be available, use the service role as `enrichSpeciesReference` does. Claude Code to confirm which applies.
+Existing RLS policies are per-user and cover the new columns. Lookup writes happen inside `after()`. They do not use the service role: the request's access token is used to build a bearer-token client (`userClientForBackground`), so the writes run as the user under the same RLS. A cookie-based client is not used there because `after()` in a Server Component may not touch the cookie store.
 
 ## 2. Phase 1: capture
 
@@ -82,35 +84,62 @@ Existing RLS policies are per-user and cover the new columns. If lookup writes h
 
 ## 3. Phase 2: lookup
 
-Runs after the item is created, in `after()`. Capture never waits for it.
+Runs after the item is created, in `after()`. Capture never waits for it. Code: `lib/shopping-lookup/` (resolver, verify, summary, lookup, run), actions in `app/actions/shopping-list.ts`.
 
-Phase 1 creates manual items with a null `lookup_status`. The lookup itself sets `lookup_status = 'pending'` and `lookup_requested_at = now()` at the moment it starts, so `pending` always means "a lookup is actually running". Manual items that already exist with a null status (everything captured before this phase ships) must be picked up too: treat `source = 'manual'` with a null status as "not looked up yet" and start a lookup for it, not as a failure.
+**Why resolve first.** The main use is noting a plant heard in a podcast or read in a book, where usually only the Latin name is given, and it is often typed or dictated phonetically ("echinaysha purpyoorea", "the bina ben orients"). The entered text is a noisy guess, not a query, so fetching Wikipedia for it first mostly misses. The model resolves the text to candidate plants; Wikipedia then verifies the candidates and grounds the summary.
 
 **Steps**
-1. Fetch the Wikipedia summary for `entered_name` (reusing `fetchWikimediaImage`'s underlying request). Verify that the endpoint returns a text `extract`; the current code only reads the thumbnail and page URL.
-2. One Anthropic call (`claude-sonnet-4-6`, small `max_tokens`) with `entered_name` plus the extract if one was found. Structured output:
-   - resolved `genus`, `species`, `cultivar` (only if it can tell)
-   - `common_names`
-   - one-line `summary` (target under about 140 characters)
-   - `summary_scope`
-   - `growth_type`
-   - `lookup_confidence`
-3. If confidence is high, try `fetchWikimediaImage` on the resolved Latin name first, then fall back to the entered name. Accept an image only above the confidence threshold. A wrong photo is worse than none.
-4. If an image is accepted, snapshot it into the `plant-photos` bucket (`${user.id}/shopping-list/...`) as the scheme add route does, and store `wikimedia_attribution`.
+1. **Resolve.** One Anthropic call (`claude-sonnet-4-6`, temperature 0, `max_tokens` 500, forced tool call, instructions prompt-cached). Input: `entered_name`, plus up to 50 of the user's own garden plant and shopping list names as weak priors. The prompt says the text may be a phonetic or misheard dictation of a Latin name by a UK English speaker, a misspelling, a cultivar, a common name, a description, or nonsense; that word counts differ, a leading "the"/"a" may be stray or part of the name, capitalisation is unreliable, and both genus and epithet can be mangled. `entered_name` and the priors are passed as JSON-encoded data and the prompt says never to follow instructions in them. Text with fewer than three letters is not sent at all.
+   Output, validated in code (anything malformed is dropped): `sounds_like` (the model's scratch line, written first; never stored, logged or displayed) and up to 3 candidates, each with `genus`, `species` (epithet only), `cultivar`, `unmatched_text`, `common_names`, `confidence` (high, medium, low) and `growth_type`. No candidates is a valid answer. A hybrid epithet that just repeats the cultivar is dropped.
+2. **Verify.** For each candidate the model rated medium or high, fetch the Wikipedia summary for `Genus species` (or `Genus`, retrying `Genus (plant)` if that is a disambiguation page). A page counts as verifying the candidate when it is a standard page, reads as a plant, names the genus, and names the epithet. A binomial that redirects to a genus page is also accepted when that page says the genus is monotypic (Fascicularia bicolor). Otherwise a species title that lands on its genus page is not verification.
+3. **Decide the final confidence** (`finalConfidence`, `lib/shopping-lookup/verify.ts`):
 
-**Summary fallback chain.** Cultivar-specific if there is good evidence; otherwise a species-level summary with `summary_scope = 'species'`, which the UI frames as being about the species; otherwise genus-level; otherwise no summary. A blank is better than an invented line. The model must be instructed not to guess for plants it does not recognise.
+   | Model | Wikipedia | Final |
+   |---|---|---|
+   | high | verified | high |
+   | high | no matching page | medium |
+   | high | could not be reached | high (no image) |
+   | medium | verified, and it is the only candidate, and it names a species | high |
+   | medium | anything else | medium |
+   | low | any | low |
 
-**Failure and states**
-- Image or summary failure never fails the item. The item stays, with whatever succeeded.
-- `complete` with no summary or image is valid and renders as a normal finished item.
-- `not_found` means nothing usable came back. Also a normal finished state, with no error styling.
-- `failed` means an exception. Show a quiet Retry. Do not show billing or quota details.
-- Pending older than 10 minutes is treated as failed (same threshold as `species_reference`).
-- The client polls like `PlantDetail` (about 5 seconds, `router.refresh()`) while an item is pending and recent. Do not rely on `revalidatePath` inside `after()`; see the CLAUDE.md dead end.
+   Two caps apply first and nothing overrides them: a candidate that **names a cultivar** is medium at most (Wikipedia can only vouch for the species or genus), and so is a candidate that **leaves part of the note unexplained** (`unmatched_text`). Revisit the cultivar cap with real usage.
+4. **Summarise and fetch the image**, only for a single high-confidence match, or for a candidate the user accepts. A second small call (`max_tokens` 120) writes the one-line summary from the resolved name and the Wikipedia extract. The image comes only from a verified page, is snapshotted into `plant-photos` (`${user.id}/shopping-list/...`), and its page URL is stored in `wikimedia_attribution`.
+
+**Summary fallback chain.** Cultivar-specific if the model knows what distinguishes the cultivar; otherwise species-level with `summary_scope = 'species'`; otherwise genus-level; otherwise none. One line, target under about 140 characters (hard cap 160). The scope can never be more specific than the name. A blank is better than an invented line: the model is told not to guess for a plant it does not recognise.
+
+**What the user sees**
+- **High** (one confident match): `genus`, `species`, `cultivar`, `common_names`, `growth_type`, `summary`, `summary_scope` and the image are written. The card leads with the italic Latin name (cultivar upright in quotes), common names beneath, and "Noted as: …" with the original text whenever it differs. If the user typed one of the plant's common names, that stays the headline (upright) with the Latin beneath. A species- or genus-level summary under a more specific name is prefixed "About the species:" / "About the genus:".
+- **Medium** (including every cultivar, every partial match, and two confident answers at once): candidates are stored in `lookup_candidates` and nothing else is written. The card stays as typed and shows "Not sure about this one. It might be:" with **Keep as typed** first, then a button per candidate. Any words of the user's own note the candidate does not account for are shown on its button as `"…" not recognised` (an unrecognised cultivar, for example). Accepting is an explicit action: it writes that candidate's fields, clears the candidates, and fetches its summary and image in the background. Keep as typed clears the candidates.
+- **Low, or no candidates**: the card stays as typed with the fallback tile. No suggestion, no error styling.
+- `entered_name` is never changed by a lookup. Only the user's own rename changes it.
+- `unmatched_text` shown to the user is restricted in code to words that appear in their note, in the note's order. Model commentary is never displayed.
+
+**States**
+- `lookup_status` is null until a lookup starts. Starting one is an atomic claim: `pending` and `lookup_requested_at` are set only where the status is still null, so two requests cannot both start it. `lookup_requested_at` is then the claim token: a result is written only if the row is still pending with that same value, so a result that arrives after a rename, retry, purchase or delete is dropped (and its image removed).
+- `complete`: finished. Valid with no summary or image, with suggestions waiting, or with only low-confidence guesses (nothing shown).
+- `not_found`: no candidates. A normal finished state.
+- `failed`: an exception. The card shows a quiet "Couldn't look this one up. Retry". No billing or quota details.
+- Pending for more than 10 minutes is reported to the UI as failed (`isStalePending`), and Retry applies to it.
+- Image or summary failure never fails the item. It completes with whatever succeeded.
+
+**Picking up items with no lookup yet.** `source = 'manual'` with a null status means "not looked up yet": everything captured before this phase, anything queued behind the concurrency cap, and anything whose `after()` never ran. The shopping list page claims up to the cap of these on load, oldest first, and runs them in `after()`. No backfill script.
+
+**Polling.** While any manual item is pending or waiting, the list calls `router.refresh()` every 5 seconds, as `PlantDetail` does. The poll stops when nothing is in flight, and after 10 minutes regardless. `revalidatePath` inside `after()` is not relied on for live updates; see the CLAUDE.md dead end.
+
+**Edit and retry.** "Edit name" on a manual card replaces the name with a text field. Saving a changed name clears everything the old name resolved to (names, summary, image, suggestions) and runs the lookup again from the new text. Retry does the same from the existing text, for failed and stale lookups only. Where-to-buy and notes are not editable yet.
+
+**Limits**
+- At most 3 lookups in flight per user. The rest keep a null status and are picked up as slots free.
+- Each Anthropic call: 20 s timeout, one retry. Each Wikipedia request: 8 s timeout, one retry. The image fetch: 8 s.
+- One whole lookup (resolve, verify, summarise, image fetch) is held to a 40 s budget; what is unfinished when it runs out is abandoned (an unfinished resolve fails the lookup; anything later is left blank). With the upload and final write, the worst case is about 45 s. `app/(app)/shopping-list/page.tsx` sets `maxDuration = 90`, which covers the page and the Server Actions called from it.
 
 **Isolation**
-- Do not read or write `species_reference`. Do not call `performLookup` or `enrichSpeciesReference` from this path. This avoids the `match_key` fragmentation (free text such as "bugle" would create a third key shape) and the open enrichment bugs.
-- Cards show Wikimedia attribution when an image is present ("Image: Wikimedia Commons", matching scheme cards). This closes the existing gap where shopping list cards show none.
+- This path does not read or write `species_reference`, and does not call `performLookup` or `enrichSpeciesReference`. This avoids the `match_key` fragmentation (free text such as "bugle" would create a third key shape) and the open enrichment bugs. A test asserts it.
+- Cards show "Image: Wikimedia Commons" whenever an image is present, on scheme cards too. This closes the gap where shopping list cards showed none.
+- All Wikimedia requests send a descriptive `User-Agent`.
+
+**Evals.** `scripts/eval-shopping-lookup.ts` runs the resolver and verification over `scripts/eval-shopping-lookup.fixture.json` (clean Latin, phonetic, real dictations, cultivars, hybrids, common names, traps, junk and injection, priors) against the live model, and reports where the expected plant landed, paired-run disagreements, latency and cost. Run it after any change to the prompt or the confidence rules. Known misses as of 2026-10-07: "secular area bu colour" (Fascicularia bicolor) finds nothing, and "clematis glyco failure" (Clematis glaucophylla) suggests Clematis 'Gypsy Queen'.
 
 ## 4. Phase 3: purchase carry-over
 
@@ -135,9 +164,10 @@ This is independent of manual add and can ship first as a small PR. It also fixe
 
 ## 5. Open points for implementation
 
-- Confirm whether lookup writes need the service role (Section 1).
-- Confirm the Wikipedia `extract` field exists in the response used (Section 3).
-- Confirm how `SpecimenPlate` should accept a free-text name (Section 2).
+All resolved:
+- Lookup writes do not need the service role; they use a bearer-token client as the user (Section 1).
+- The Wikipedia summary response does include a text `extract`, plus `type` and `description` (Section 3).
+- `SpecimenPlate` takes a free-text name through `variant="plain"` (Section 2).
 
 ## Explicitly deferred (GitHub issues to raise)
 

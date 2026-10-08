@@ -261,3 +261,141 @@
         }
     }
 }
+
+/* Manual items once the name lookup has run (or while it is running): the
+   resolved names, the one-line summary, and the lookup's own states. All of
+   it is quiet — "nothing found" is a normal outcome, not an error. */
+.c-shopping-item {
+    &__noted,
+    &__summary,
+    &__status,
+    &__credit {
+        color: var(--color-ink-soft);
+        overflow-wrap: anywhere;
+    }
+
+    /* The original text stays in view under a resolved name. */
+    &__noted {
+        color: color-mix(in oklab, var(--color-ink-soft) 75%, transparent);
+    }
+
+    &__summary {
+        margin-block-start: var(--space-xs);
+    }
+
+    &__status {
+        margin-block-start: var(--space-xs);
+    }
+
+    &__retry {
+        color: var(--color-ink);
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+    }
+
+    &__problem {
+        color: var(--sem-color-error-bg);
+    }
+
+    &__credit {
+        margin-block-start: var(--space-xs);
+        align-self: flex-start;
+
+        &:is(a) {
+            text-decoration: underline;
+            text-underline-offset: 0.2em;
+
+            &:focus-visible {
+                outline: var(--border-width-thin) solid var(--sem-focus-color);
+            }
+        }
+    }
+
+    /* "It might be…": a choice for the user, with keeping their own text
+       always first. */
+    &__suggest {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-xs);
+        margin-block-start: var(--space-sm);
+        color: var(--color-ink-soft);
+    }
+
+    &__choices {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-xs);
+    }
+
+    &__choice {
+        display: inline-flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.125rem;
+        max-inline-size: 100%;
+        padding: 6px 10px;
+        border: var(--border-width-thin) solid var(--color-sand-line);
+        border-radius: var(--radius-m);
+        background-color: transparent;
+        color: var(--color-ink);
+        text-align: start;
+        overflow-wrap: anywhere;
+        cursor: pointer;
+        transition: background-color var(--transition-time-default) var(--transition-easing-default);
+
+        &:hover:not(:disabled) {
+            background-color: rgba(226, 234, 221, 0.6);
+        }
+
+        &:focus-visible {
+            outline: var(--border-width-thin) solid var(--sem-focus-color);
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: default;
+        }
+
+        .is-latin {
+            font-style: italic;
+        }
+
+        .is-common,
+        .is-unmatched {
+            color: var(--color-ink-soft);
+        }
+    }
+
+    /* Renaming a manual item, in place of its names. */
+    &__edit {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-xs);
+    }
+
+    &__edit-actions {
+        display: flex;
+        align-items: center;
+        gap: var(--space-sm);
+        margin-block-start: var(--space-xs);
+    }
+}
+
+/* Resolved names, summaries and suggestions run longer than a typed name:
+   let a manual card's text wrap instead of truncating it. */
+.c-shopping-item--manual {
+    .c-shopping-item__name,
+    .c-shopping-item__subname {
+        white-space: normal;
+        overflow-wrap: anywhere;
+    }
+
+    .c-shopping-item__actions {
+        flex-wrap: wrap;
+    }
+}
