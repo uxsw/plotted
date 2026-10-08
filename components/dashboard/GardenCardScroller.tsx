@@ -5,13 +5,33 @@ import clsx from "clsx";
 import Image from "next/image";
 import Link from "next/link";
 import { PlantName } from "@/components/plants/PlantName";
+import { ScientificName, typedPlantName } from "@/lib/plantName";
 import type { Plant } from "@/lib/types";
 import carouselStyles from "@/components/ui/Carousel.module.css";
 import { Icon } from "@/components/ui/Icon";
 type PlantSummary = Pick<
   Plant,
-  "id" | "genus" | "species" | "cultivar" | "common_names" | "photo_url" | "identification_status"
+  "id" | "genus" | "species" | "cultivar" | "species_input" | "common_names" | "photo_url" | "identification_status"
 >;
+
+/**
+ * A typed common name leads (upright) with the Latin name beneath; otherwise
+ * the Latin name leads (italic) with the first common name beneath.
+ */
+export function PlantCardName({ plant }: { plant: PlantSummary }) {
+  const typedName = typedPlantName(plant);
+  const secondary = typedName
+    ? <ScientificName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} className="o-type--italic" />
+    : plant.common_names?.[0];
+  return (
+    <div className="o-stack--compact u-island">
+      <p className={clsx("o-type-display long-primer kirk", !typedName && "o-type--italic")}>
+        <PlantName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} typedName={typedName} variant="card" />
+      </p>
+      {secondary && <p className="brevier">{secondary}</p>}
+    </div>
+  );
+}
 
 export function GardenCardScroller({ plants }: { plants: PlantSummary[] }) {
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -62,16 +82,7 @@ export function GardenCardScroller({ plants }: { plants: PlantSummary[] }) {
                 </div>
               )}
             </div>
-            <div className="o-stack--compact u-island">
-              <p className="o-type-display long-primer o-type--italic kirk">
-                <PlantName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} variant="card" />
-              </p>
-              {plant.common_names?.[0] && (
-                <p className="brevier">
-                  {plant.common_names[0]}
-                </p>
-              )}
-            </div>
+            <PlantCardName plant={plant} />
           </Link>
         ))}
       </div>

@@ -94,3 +94,16 @@ describe("isFrostLookupPending", () => {
     }
   });
 });
+
+describe("PlantDetail – a plant typed as a common name", () => {
+  it("heads the page with the typed name and puts the Latin name beneath", () => {
+    const html = render({ ...PLANT, species_input: "apple", common_names: ["Apple"] }, null, false);
+    expect(html.indexOf("Apple")).toBeGreaterThan(-1);
+    expect(html.indexOf("Apple")).toBeLessThan(html.indexOf("Malus domestica"));
+  });
+
+  it("heads the page with the Latin name when nothing typed was kept", () => {
+    const html = render({ ...PLANT, common_names: ["Apple"] }, null, false);
+    expect(html.indexOf("Malus domestica")).toBeLessThan(html.indexOf("Apple"));
+  });
+});

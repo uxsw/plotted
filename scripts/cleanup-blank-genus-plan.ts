@@ -144,9 +144,12 @@ export function proposeForPlant(plant: BlankGenusPlant, lookup: LookupResult | n
     typed_kind: resolved.kind,
     change,
     new_key,
-    // What they typed is kept when the stored words change — and never over
-    // a species_input that is already there.
-    ...(change === "changed" && !plant.species_input ? { species_input: plant.species } : {}),
+    // A typed common name is kept as species_input (it stays the plant's
+    // primary name on screen) — never over one that is already there, and
+    // not for typed Latin, where the Latin name is the primary one.
+    ...(change === "changed" && resolved.kind === "common" && !plant.species_input
+      ? { species_input: plant.species }
+      : {}),
   };
 
   const after = { genus: proposed.genus, species: proposed.species, identification_status: plant.identification_status };

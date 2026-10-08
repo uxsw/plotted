@@ -14,14 +14,14 @@ export default async function GardenSection() {
   // added *and* recently changed plants surface here, not just the newest.
   const { data } = await supabase
     .from("plants")
-    .select("id, genus, species, cultivar, common_names, photo_url, sun_needs, identification_status")
+    .select("id, genus, species, cultivar, species_input, common_names, photo_url, sun_needs, identification_status")
     .eq("status", "active")
     .order("updated_at", { ascending: false })
     .limit(6);
 
   const plants = (data ?? []) as Pick<
     Plant,
-    "id" | "genus" | "species" | "cultivar" | "common_names" | "photo_url" | "sun_needs" | "identification_status"
+    "id" | "genus" | "species" | "cultivar" | "species_input" | "common_names" | "photo_url" | "sun_needs" | "identification_status"
   >[];
 
   if (plants.length === 0) {

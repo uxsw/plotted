@@ -5,7 +5,7 @@ import clsx from "clsx";
 import * as Popover from "@radix-ui/react-popover";
 import { useRouter } from "next/navigation";
 import type { Plant } from "@/lib/types";
-import { scientificNameString, autocompleteTitle } from "@/lib/plantName";
+import { scientificNameString, autocompleteTitle, typedPlantName, ScientificName } from "@/lib/plantName";
 import { PlantName } from "@/components/plants/PlantName";
 import { SpecimenPlate } from "@/components/plants/SpecimenPlate";
 import { InBloomMark } from "@/components/plants/InBloomMark";
@@ -47,6 +47,7 @@ function matchesSearch(plant: Plant, q: string): boolean {
   const lower = q.toLowerCase();
   return (
     (plant.species?.toLowerCase().includes(lower) ?? false) ||
+    (plant.species_input?.toLowerCase().includes(lower) ?? false) ||
     (plant.cultivar?.toLowerCase().includes(lower) ?? false) ||
     (plant.common_names?.some(n => n.toLowerCase().includes(lower)) ?? false)
   );
@@ -472,6 +473,8 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
         <div className="c-plant-grid">
           {filtered.map((plant, index) => {
             const sciName = scientificNameString(plant);
+            // A typed common name leads, with the Latin name beneath it.
+            const typedName = typedPlantName(plant);
             const hasSeason = plant.flowering_season_from !== null && plant.flowering_season_to !== null;
             const seasonBand = hasSeason
               ? getSeasonBand(plant.flowering_season_from!, plant.flowering_season_to!)
@@ -489,14 +492,18 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
                     genus={plant.genus}
                     species={plant.species}
                     cultivar={plant.cultivar}
-                    commonName={plant.common_names?.[0]}
+                    commonName={typedName ?? plant.common_names?.[0]}
                     plateNumber={plateNumbers.get(plant.id) ?? index + 1}
                     seasonBand={seasonBand}
                   />
                 }
                 marker={inBloom && seasonBand ? <InBloomMark seasonBand={seasonBand} /> : undefined}
-                title={<PlantName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} variant="card" />}
-                subtitle={plant.common_names?.[0]}
+                title={<PlantName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} typedName={typedName} variant="card" />}
+                subtitle={
+                  typedName
+                    ? <ScientificName genus={plant.genus} species={plant.species} cultivar={plant.cultivar} className="o-type--italic" />
+                    : plant.common_names?.[0]
+                }
                 sunBadge={plant.sun_needs ? <SunBadge value={plant.sun_needs} /> : undefined}
                 tags={
                   hasSeason ? (

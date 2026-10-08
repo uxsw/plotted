@@ -156,11 +156,14 @@ export function applyLookupResult(
       updates.genus = resolved.genus;
       if (resolved.species !== searched.species) updates.species = resolved.species;
       if (resolved.cultivar !== searched.cultivar) updates.cultivar = resolved.cultivar;
-      // What they typed, kept whenever the stored name no longer says it
-      // (a common name, a corrected spelling) — not for a plain split of
-      // "verbena bonariensis" into its two columns.
+      // A typed common name ("apple") is kept in species_input, which is
+      // what makes it the plant's primary name on screen with the Latin
+      // beneath (typedPlantName). Typed Latin — split, or misspelt and
+      // corrected — is not kept: there the Latin name is the primary one.
       const binomial = [resolved.genus, resolved.species].filter(Boolean).join(" ");
-      if (squash(searched.species) !== squash(binomial)) updates.species_input = searched.species;
+      if (result.resolved_name?.kind === "common" && squash(searched.species) !== squash(binomial)) {
+        updates.species_input = searched.species;
+      }
       Object.assign(names, resolved);
     } else {
       if (

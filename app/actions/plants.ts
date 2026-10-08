@@ -48,6 +48,8 @@ export async function updatePlantField(
     clean.species = data.species ? sanitizeSpecies(data.species) : null;
     if (!clean.species) return { error: "Species is required." };
     Object.assign(clean, manualSpeciesTransition());
+    // The name typed when the plant was added no longer describes it.
+    clean.species_input = null;
   }
   if ("cultivar" in data) {
     clean.cultivar = data.cultivar ? sanitizePlantName(data.cultivar) : null;

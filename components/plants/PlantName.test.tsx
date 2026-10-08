@@ -84,4 +84,35 @@ describe("PlantName", () => {
     );
     expect(html).toContain("Ajuga reptans");
   });
+
+  // A typed common name stays primary; the Latin name is secondary.
+  it("card variant: a typed name is the primary line, and the Latin name is left to the caller's secondary slot", () => {
+    const html = renderToStaticMarkup(
+      <PlantName genus="Malus" species="domestica" cultivar={null} typedName="Apple" variant="card" />
+    );
+    expect(html).toBe("<span>Apple</span>");
+  });
+
+  it("detail variant: typed name first, Latin beneath, and the typed name is not repeated among common names", () => {
+    const html = renderToStaticMarkup(
+      <PlantName genus="Malus" species="domestica" cultivar={null} commonNames={["Apple", "Eating apple"]} typedName="Apple" variant="detail" />
+    );
+    expect(html.indexOf("Apple")).toBeLessThan(html.indexOf("Malus domestica"));
+    expect(html.match(/Apple/g)).toHaveLength(1);
+    expect(html).toContain("Eating apple");
+  });
+
+  it("detail variant: a typed name over a genus-only resolution shows the genus beneath", () => {
+    const html = renderToStaticMarkup(
+      <PlantName genus="Rosa" species={null} cultivar={null} typedName="Climbing rose" variant="detail" />
+    );
+    expect(html.indexOf("Climbing rose")).toBeLessThan(html.indexOf("Rosa"));
+  });
+
+  it("with no typed name the Latin name stays primary (typed Latin, photo identification)", () => {
+    const html = renderToStaticMarkup(
+      <PlantName genus="Malus" species="domestica" cultivar={null} commonNames={["Apple"]} typedName={null} variant="detail" />
+    );
+    expect(html.indexOf("Malus domestica")).toBeLessThan(html.indexOf("Apple"));
+  });
 });

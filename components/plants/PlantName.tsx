@@ -5,6 +5,13 @@ interface PlantNameProps {
   species?: string | null;
   cultivar?: string | null;
   commonNames?: string[] | null;
+  /**
+   * The gardener's own common name for the plant (typedPlantName). When set
+   * it is the primary name, upright, and the Latin name moves beneath it:
+   * the detail variant renders that line itself, card callers put
+   * <ScientificName genus=…> in their own secondary slot.
+   */
+  typedName?: string | null;
   variant?: "card" | "detail";
 }
 
@@ -23,9 +30,34 @@ interface PlantNameProps {
  * Species-line formatting (capitalization, genus prefixing) lives in
  * lib/plantName.tsx's speciesLine, shared with ScientificName there.
  */
-export function PlantName({ genus, species, cultivar, commonNames, variant = "card" }: PlantNameProps) {
+export function PlantName({ genus, species, cultivar, commonNames, typedName, variant = "card" }: PlantNameProps) {
   const hasScientific = !!(species || cultivar);
   const bareGenus = !hasScientific && genus ? genus : null;
+
+  if (typedName && variant === "detail") {
+    // The typed name is not repeated among the common names beneath it.
+    const others = (commonNames ?? []).filter((name) => name.toLowerCase() !== typedName.toLowerCase());
+    return (
+      <div>
+        <div className="o-type-display pica kirk">{typedName}</div>
+        {(hasScientific || bareGenus) && (
+          <p className="brevier o-type--italic">
+            {hasScientific ? (
+              <>
+                {species && speciesLine(genus, species)}
+                {cultivar && <> <em>&lsquo;{cultivar}&rsquo;</em></>}
+              </>
+            ) : (
+              <span>{bareGenus}</span>
+            )}
+          </p>
+        )}
+        {others.length > 0 && <p className="brevier">{others.join(", ")}</p>}
+      </div>
+    );
+  }
+
+  if (typedName) return <span>{typedName}</span>;
 
   if (variant === "detail") {
     return (

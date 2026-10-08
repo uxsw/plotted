@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { plantDisplayTitle } from "./plantName";
+import { latinNameString, plantDisplayTitle, plantPageTitle, typedPlantName } from "./plantName";
 
 describe("plantDisplayTitle", () => {
   it("uses the first common name when set", () => {
@@ -74,5 +74,39 @@ describe("plantDisplayTitle", () => {
     expect(
       plantDisplayTitle({ common_names: [], genus: "", species: "allium", cultivar: null })
     ).toBe("allium");
+  });
+});
+
+// A plant typed as a common name keeps that name as its primary one, with the
+// Latin name secondary; typed Latin leaves the Latin name primary.
+describe("typed common names", () => {
+  const apple = { genus: "Malus", species: "domestica", cultivar: null, common_names: ["Apple", "Eating apple"], species_input: "apple" };
+  const latin = { ...apple, species_input: null };
+
+  it("typedPlantName capitalises what was typed, and is null when nothing was kept", () => {
+    expect(typedPlantName(apple)).toBe("Apple");
+    expect(typedPlantName({ species_input: "dwarf bean" })).toBe("Dwarf bean");
+    expect(typedPlantName(latin)).toBeNull();
+    expect(typedPlantName({ species_input: "  " })).toBeNull();
+    expect(typedPlantName({})).toBeNull();
+  });
+
+  it("plantDisplayTitle leads with the typed name, ahead of the lookup's common names", () => {
+    expect(plantDisplayTitle({ ...apple, species_input: "dwarf apple", common_names: ["Apple"] })).toBe("Dwarf apple");
+    expect(plantDisplayTitle(latin)).toBe("Apple");
+    expect(plantDisplayTitle({ ...latin, common_names: [] })).toBe("Malus domestica");
+  });
+
+  it("plantPageTitle: typed name first with the Latin after it; Latin alone otherwise", () => {
+    expect(plantPageTitle(apple)).toBe("Apple (Malus domestica)");
+    expect(plantPageTitle(latin)).toBe("Malus domestica");
+    expect(plantPageTitle({ genus: "Rosa", species: null, cultivar: null, species_input: "climbing rose" })).toBe("Climbing rose (Rosa)");
+    expect(plantPageTitle({ genus: "", species: null, cultivar: null })).toBeNull();
+  });
+
+  it("latinNameString gives the binomial with a quoted cultivar", () => {
+    expect(latinNameString({ genus: "Malus", species: "domestica", cultivar: "Bramley" })).toBe("Malus domestica 'Bramley'");
+    expect(latinNameString({ genus: "Rosa", species: null, cultivar: null })).toBe("Rosa");
+    expect(latinNameString({ genus: "", species: null, cultivar: null })).toBeNull();
   });
 });

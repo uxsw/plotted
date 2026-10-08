@@ -40,12 +40,49 @@ export function ScientificName({
 }
 
 /**
+ * The name the gardener typed, when that is how the plant should be headed:
+ * they typed a common name ("apple", "dwarf bean") and the lookup resolved it
+ * to a Latin one. It stays the primary name everywhere, with the Latin name
+ * beneath. Null when they typed Latin (even misspelt Latin that was
+ * corrected) — then the Latin name is the primary one, as before.
+ *
+ * Stored lowercased in species_input; shown with a leading capital.
+ */
+export function typedPlantName(plant: { species_input?: string | null }): string | null {
+  const typed = plant.species_input?.trim();
+  return typed ? typed[0].toUpperCase() + typed.slice(1) : null;
+}
+
+/** "Malus domestica 'Bramley'" as a plain string; null with no name at all. */
+export function latinNameString({ genus, species, cultivar }: NameParts): string | null {
+  const binomial = [genus, species].filter(Boolean).join(" ");
+  if (binomial && cultivar) return `${binomial} '${cultivar}'`;
+  return binomial || cultivar || null;
+}
+
+/**
+ * The browser-tab title for a plant: the typed common name with the Latin
+ * name after it, or the Latin name alone.
+ */
+export function plantPageTitle(plant: Partial<NameParts> & { species_input?: string | null }): string | null {
+  const latin = [plant.genus, plant.species, plant.cultivar].filter(Boolean).join(" ") || null;
+  const typed = typedPlantName(plant);
+  if (typed) return latin ? `${typed} (${latin})` : typed;
+  return latin;
+}
+
+/**
  * Returns the plant's display title as a plain string.
- * Uses first common name if set. Otherwise falls back to the full binomial
+ * Uses the name the gardener typed if there is one (typedPlantName), then
+ * the first common name. Otherwise falls back to the full binomial
  * (genus + species) rather than the bare epithet alone — "serpyllum" isn't a
  * name anyone recognises or could search for; "Thymus serpyllum" is.
  */
-export function plantDisplayTitle(plant: Pick<Plant, "common_names" | "genus" | "species" | "cultivar">): string {
+export function plantDisplayTitle(
+  plant: Pick<Plant, "common_names" | "genus" | "species" | "cultivar"> & { species_input?: string | null }
+): string {
+  const typed = typedPlantName(plant);
+  if (typed) return typed;
   if (plant.common_names?.length) return plant.common_names[0];
   const binomial = [plant.genus, plant.species].filter(Boolean).join(" ") || null;
   if (binomial && plant.cultivar) return `${binomial} '${plant.cultivar}'`;

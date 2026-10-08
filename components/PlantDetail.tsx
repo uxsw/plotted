@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import clsx from "clsx";
 import Link from "next/link";
 import Image from "next/image";
-import { plantDisplayTitle } from "@/lib/plantName";
+import { plantDisplayTitle, typedPlantName } from "@/lib/plantName";
 import { PlantName } from "@/components/plants/PlantName";
 import { SunBadgePill } from "@/components/ui/SunBadge";
 import { FloweringSeasonBadge } from "@/components/ui/FloweringSeasonBadge";
@@ -303,7 +303,9 @@ export default function PlantDetail({
     try {
       const result = await updatePlantField(plant.id, data);
       if (result?.error) { setErr(result.error); return; }
-      setPlant(p => ({ ...p, ...(data as Partial<Plant>) }));
+      // A hand-edited species replaces whatever was typed at add time; the
+      // server clears species_input too (updatePlantField).
+      setPlant(p => ({ ...p, ...(data as Partial<Plant>), ...("species" in data ? { species_input: null } : {}) }));
       setEditing(null);
       setErr(null);
     } catch {
@@ -552,6 +554,7 @@ export default function PlantDetail({
             species={plant.species}
             cultivar={plant.cultivar}
             commonNames={plant.common_names}
+            typedName={typedPlantName(plant)}
             variant="detail"
           />
 

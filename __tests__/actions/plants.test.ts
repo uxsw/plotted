@@ -589,6 +589,15 @@ describe("update paths – genus guard", () => {
     expect(after).not.toHaveBeenCalled();
   });
 
+  it("updatePlantField: editing the species clears the name typed at add time", async () => {
+    setupUpdate({ genus: "Malus", species: "sylvestris", cultivar: null });
+    const client = await createClient();
+    await updatePlantField("plant-1", { species: "sylvestris" });
+
+    const update = vi.mocked(client.from("plants").update);
+    expect(update).toHaveBeenCalledWith(expect.objectContaining({ species: "sylvestris", species_input: null }));
+  });
+
   it("updatePlantField on a plant with a genus still enriches", async () => {
     setupUpdate({ genus: "Rosa", species: "rugosa", cultivar: null });
     await updatePlantField("plant-1", { species: "rugosa" });

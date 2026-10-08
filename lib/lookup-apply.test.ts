@@ -226,6 +226,24 @@ describe("applyLookupResult — resolving a typed name when genus is blank", () 
   });
 });
 
+describe("applyLookupResult — species_input", () => {
+  it("is not set when typed Latin is corrected: the Latin name stays the primary one", () => {
+    const { updates } = applyLookupResult(
+      { ...BASE_LOOKUP, resolved_name: resolved("Dodonaea", "viscosa", null, "high", "latin") },
+      { genus: "", species: "dodonea viscosa", cultivar: null }
+    );
+    expect(updates).toEqual({ genus: "Dodonaea", species: "viscosa" });
+  });
+
+  it("is not set when a typed common name is also the genus", () => {
+    const { updates } = applyLookupResult(
+      { ...BASE_LOOKUP, resolved_name: resolved("Hydrangea", null, null, "high", "common") },
+      { genus: "", species: "hydrangea", cultivar: null }
+    );
+    expect(updates).not.toHaveProperty("species_input");
+  });
+});
+
 describe("applyLookupResult — a plant that already has a genus", () => {
   it("never changes the genus, even when the model resolves a different one", () => {
     const { updates, names } = applyLookupResult(

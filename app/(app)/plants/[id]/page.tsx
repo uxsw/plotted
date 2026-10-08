@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { plantPageTitle } from "@/lib/plantName";
 
 export async function generateMetadata(
   { params }: { params: Promise<{ id: string }> }
@@ -9,12 +10,12 @@ export async function generateMetadata(
   const supabase = await createClient();
   const { data: plant } = await supabase
     .from("plants")
-    .select("genus, species, cultivar")
+    .select("genus, species, cultivar, species_input")
     .eq("id", id)
     .eq("status", "active")
     .single();
 
-  const displayName = [plant?.genus, plant?.species, plant?.cultivar].filter(Boolean).join(" ") || null;
+  const displayName = plant ? plantPageTitle(plant) : null;
 
   return {
     title: displayName ? `${displayName} | Plotted` : "Plant | Plotted",
