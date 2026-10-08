@@ -156,10 +156,10 @@ This is independent of manual add and can ship first as a small PR. It also fixe
   - names split into the wrong fields (`|allium|spherocephalon` has species `allium` and cultivar `Spherocephalon`, and the spelling is also wrong)
 
   A normalised-key check found no exact duplicates, but same-plant pairs exist across the two shapes, e.g. `|allium|spherocephalon` (bad) and `allium|sphaerocephalon` (well-formed). The collision risk for epithet-only keys is still latent. Purchase must not add to these shapes.
-- **Out of scope here.** Fixing garden manual-add (`PlantForm` sends `genus: ""`), resolving genus inside `performLookup`, and cleaning up or re-enriching the existing rows. Track these as a separate GitHub issue. Do not delete existing rows as part of this work: plants find their row by recomputing the key, so deleting removes frost data until it is re-enriched.
+- **Out of scope here, done since (issues #97 and #98).** Fixing garden manual-add, resolving genus inside `performLookup`, and cleaning up the existing rows were tracked separately and are now built: see "Genus resolution and the genus guard" in CLAUDE.md. In short: the guard applies on every enrichment path with no opt-out (the `requireGenus` option is gone); `PlantForm` sends no genus and `performLookup` resolves one from the typed name in its existing call, applied only at high confidence; an unresolved manual item bought from the shopping list gets the same resolution. Existing blank-genus plants are corrected with `scripts/cleanup-blank-genus.ts`, which never deletes `species_reference` rows: plants find their row by recomputing the key, so deleting removes frost data until it is re-enriched.
 - Set `lookup_status`, `species_source` and `identification_status` consistently with the add-to-garden path.
 - Carry notes across if `plants` has an equivalent field; otherwise add to Explicitly Deferred.
-- The retry route `lookup/route.ts` never calls `enrichSpeciesReference` after applying a corrected species. That is a related residual bug, to be tracked separately unless it is trivial to fix in the same helper.
+- The retry route `lookup/route.ts` used to stop after applying a corrected species. It now enriches in `after()` with the post-correction name, under the genus guard, through the same `applyLookupResult` as plant creation (issue #98).
 - Tests: purchase from a scheme item, purchase from a resolved manual item, purchase from an unresolved manual item, and the genus guard (blank genus after lookup means no `species_reference` write and no enrichment call).
 
 ## 5. Open points for implementation
@@ -177,5 +177,5 @@ All resolved:
 - Other capture sources (e.g. adding from photo identification).
 - User-attached photo on an item.
 - A "bought" status. Currently purchase deletes the item.
-- Retry route enrichment gap, if not fixed in Phase 3.
+- Inline edit (`updatePlantField`) does not run the plant lookup, so it gets no genus resolution or spelling correction. (The retry route enrichment gap is fixed.)
 - `species_reference` key integrity: resolve genus in `performLookup`, fix garden manual-add sending a blank genus, then re-resolve and re-enrich the existing blank-genus rows (do not delete them first). Dedupe and `match_key` normalisation only if duplicates appear after that.
