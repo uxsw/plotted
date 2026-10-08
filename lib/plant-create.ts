@@ -27,15 +27,15 @@ type SupabaseServerClient = Awaited<ReturnType<typeof createClient>>;
  * options.fromIdentification: see upsertPlant's doc comment — trusts a
  * photo-identified name over lookup correction.
  *
- * options.requireGenus: switches the genus guard on — enrichment is skipped
- * (and no species_reference row written) unless the plant has a non-blank
- * genus. Off by default so garden manual add, which still sends genus: "",
- * keeps getting frost data.
+ * The genus guard (hasGenusForEnrichment) always applies: enrichment is
+ * skipped, and no species_reference row written, unless the plant has a
+ * non-blank genus once the lookup has run. A missing frost value is better
+ * than a wrongly shaped key.
  */
 export async function createPlantWithLookup(
   supabase: SupabaseServerClient,
   row: PlantInsert,
-  options: { fromIdentification?: boolean; requireGenus?: boolean } = {}
+  options: { fromIdentification?: boolean } = {}
 ): Promise<{ id: string } | { error: string }> {
   const { data: inserted, error } = await supabase
     .from("plants")
@@ -81,11 +81,7 @@ export async function createPlantWithLookup(
 
   // `names` is the plant's name after any resolution or correction — a
   // typed name that the lookup resolved now has its genus here.
-  const shouldEnrich = options.requireGenus
-    ? hasGenusForEnrichment(names.genus)
-    : !!(names.genus || names.species);
-
-  if (shouldEnrich) {
+  if (hasGenusForEnrichment(names.genus)) {
     // This is the call site the frost-tolerance-bug race actually showed up
     // on: a freshly-inserted plant, navigated to immediately, with enrichment
     // for a genuinely new species still running in the background.

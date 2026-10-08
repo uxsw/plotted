@@ -389,9 +389,10 @@ export async function purchaseShoppingListItem(itemId: string): Promise<Purchase
     ? (item.wikimedia_attribution ?? null)
     : null;
 
-  // requireGenus: purchase must not add blank-genus keys to
-  // species_reference — see hasGenusForEnrichment. An unresolved manual item
-  // has a blank genus, so it gets the plant lookup but no enrichment.
+  // The helper's genus guard keeps blank-genus keys out of species_reference
+  // (see hasGenusForEnrichment). An unresolved manual item arrives with a
+  // blank genus: the plant lookup resolves one where it confidently can, and
+  // otherwise the plant is saved without enrichment.
   const plant = await createPlantWithLookup(
     supabase,
     {
@@ -417,8 +418,7 @@ export async function purchaseShoppingListItem(itemId: string): Promise<Purchase
       // may correct it.
       identification_status: "identified",
       species_source: "manual",
-    },
-    { requireGenus: true }
+    }
   );
 
   if ("error" in plant) {

@@ -13,6 +13,7 @@ import { createClient } from "@/lib/supabase/server";
 import { performLookup } from "@/lib/plant-lookup";
 import { enrichSpeciesReference } from "@/lib/species-reference-enrichment";
 import { revalidatePath } from "next/cache";
+import { after } from "next/server";
 import { updatePlantField, upsertPlant } from "@/app/actions/plants";
 
 // A minimal valid plant that passes sanitization and validation
@@ -273,14 +274,6 @@ describe("upsertPlant – identification_status", () => {
     expect(enrichSpeciesReference).toHaveBeenCalledWith("Rosa", "rugosa", null);
   });
 
-  // The genus guard is opt-in and garden add leaves it off for now (PlantForm
-  // still sends genus: "") — see the TODO(genus-guard) notes in plants.ts.
-  it("manual garden add with a blank genus still enriches — guard is off on this path", async () => {
-    setupInsertCapture();
-    await upsertPlant(null, { ...BASE_PLANT, genus: "", species: "verbena bonariensis" });
-    expect(enrichSpeciesReference).toHaveBeenCalledWith("", "verbena bonariensis", null);
-  });
-
   it("does not trigger enrichment for a fully unidentified save — nothing to describe", async () => {
     setupInsertCapture();
     await upsertPlant(null, {
@@ -460,5 +453,161 @@ describe("upsertPlant/updatePlantField – frost tolerance revalidation", () => 
     await Promise.resolve();
 
     expect(revalidatePath).toHaveBeenCalledWith("/plants/plant-1");
+  });
+});
+
+// ─── genus resolution and the genus guard ────────────────────────────────────
+//
+// species_reference is keyed genus-first, so nothing may enrich — or write a
+// row — for a plant whose genus is blank. A typed name gets its genus from the
+// lookup; where the lookup can't supply one, the plant is saved without frost
+// data.
+
+const resolvedName = (
+  genus: string,
+  species: string | null,
+  confidence: "high" | "medium" | "low" = "high",
+  kind: "latin" | "common" = "latin"
+) => ({ genus, species, cultivar: null, confidence, kind });
+
+// What PlantForm's manual path sends: typed text in species and no genus.
+const { genus: _omitted, ...TYPED_PLANT } = BASE_PLANT;
+void _omitted;
+
+describe("garden add – genus resolution", () => {
+  let capturedAIUpdate: () => Record<string, unknown> | null;
+
+  beforeEach(() => {
+    vi.mocked(enrichSpeciesReference).mockReset();
+    vi.mocked(after).mockClear();
+    ({ capturedAIUpdate } = setupAISupabase());
+  });
+
+  it("typed binomial: genus and epithet land in their own columns and enrich under the full key", async () => {
+    vi.mocked(performLookup).mockResolvedValue({
+      ...BASE_LOOKUP,
+      resolved_name: resolvedName("Verbena", "bonariensis"),
+    });
+    await upsertPlant(null, { ...TYPED_PLANT, species: "Verbena bonariensis" });
+
+    expect(performLookup).toHaveBeenCalledWith("", "verbena bonariensis", null);
+    expect(capturedAIUpdate()).toMatchObject({ genus: "Verbena", species: "bonariensis" });
+    expect(enrichSpeciesReference).toHaveBeenCalledTimes(1);
+    expect(enrichSpeciesReference).toHaveBeenCalledWith("Verbena", "bonariensis", null);
+  });
+
+  it("typed common name: resolves to a real genus and keeps what was typed", async () => {
+    vi.mocked(performLookup).mockResolvedValue({
+      ...BASE_LOOKUP,
+      common_names: ["Apple"],
+      resolved_name: resolvedName("Malus", "domestica", "high", "common"),
+    });
+    await upsertPlant(null, { ...TYPED_PLANT, species: "apple" });
+
+    expect(capturedAIUpdate()).toMatchObject({ genus: "Malus", species: "domestica", species_input: "apple" });
+    expect(enrichSpeciesReference).toHaveBeenCalledWith("Malus", "domestica", null);
+  });
+
+  it("low-confidence name: genus stays blank, nothing is enriched and no after() is scheduled", async () => {
+    vi.mocked(performLookup).mockResolvedValue({
+      ...BASE_LOOKUP,
+      resolved_name: resolvedName("Salvia", "officinalis", "low"),
+    });
+    await upsertPlant(null, { ...TYPED_PLANT, species: "officinalis" });
+
+    expect(capturedAIUpdate()).not.toHaveProperty("genus");
+    expect(enrichSpeciesReference).not.toHaveBeenCalled();
+    expect(after).not.toHaveBeenCalled();
+  });
+
+  it("a failed lookup leaves genus blank and enriches nothing", async () => {
+    vi.mocked(performLookup).mockRejectedValue(new Error("boom"));
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    await upsertPlant(null, { ...TYPED_PLANT, species: "verbena bonariensis" });
+
+    expect(enrichSpeciesReference).not.toHaveBeenCalled();
+  });
+
+  it("the genus never ends up in species or cultivar", async () => {
+    vi.mocked(performLookup).mockResolvedValue({
+      ...BASE_LOOKUP,
+      corrected_species: "verbena bonariensis",
+      corrected_cultivar: "Verbena Lollipop",
+    });
+    await upsertPlant(null, { ...BASE_PLANT, genus: "Verbena", species: "bonarensis", cultivar: "Lolipop" });
+
+    const update = capturedAIUpdate()!;
+    expect(update.species).toBe("bonariensis");
+    expect(update).not.toHaveProperty("cultivar");
+    expect(update).not.toHaveProperty("genus");
+    expect(enrichSpeciesReference).toHaveBeenCalledWith("Verbena", "bonariensis", "Lolipop");
+  });
+
+  it("photo-identified add is unchanged: a resolved name is ignored and the identified name enriched", async () => {
+    vi.mocked(performLookup).mockResolvedValue({
+      ...BASE_LOOKUP,
+      corrected_species: "thapsus",
+      resolved_name: resolvedName("Verbascum", "thapsus"),
+    });
+    await upsertPlant(
+      null,
+      { ...BASE_PLANT, genus: "Digitalis", species: "thapsi" },
+      { fromIdentification: true }
+    );
+
+    const update = capturedAIUpdate()!;
+    expect(update).not.toHaveProperty("genus");
+    expect(update).not.toHaveProperty("species");
+    expect(enrichSpeciesReference).toHaveBeenCalledWith("Digitalis", "thapsi", null);
+  });
+});
+
+describe("update paths – genus guard", () => {
+  beforeEach(() => {
+    vi.mocked(enrichSpeciesReference).mockReset();
+    vi.mocked(after).mockClear();
+  });
+
+  function setupUpdate(returned: { genus: string; species: string | null; cultivar: string | null }) {
+    const terminal = {
+      select: vi.fn().mockReturnValue({ single: vi.fn().mockResolvedValue({ data: returned, error: null }) }),
+      then: (resolve: (v: { error: null }) => void) => resolve({ error: null }),
+    };
+    vi.mocked(createClient).mockResolvedValue({
+      auth: { getUser: vi.fn().mockResolvedValue({ data: { user: { id: "user-123" } } }) },
+      from: vi.fn().mockReturnValue({
+        update: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue({ eq: vi.fn().mockReturnValue(terminal) }) }),
+      }),
+    } as unknown as Awaited<ReturnType<typeof createClient>>);
+  }
+
+  it("updatePlantField on a blank-genus plant: no enrichment, no after()", async () => {
+    setupUpdate({ genus: "", species: "officinalis", cultivar: null });
+    await updatePlantField("plant-1", { species: "officinalis" });
+
+    expect(enrichSpeciesReference).not.toHaveBeenCalled();
+    expect(after).not.toHaveBeenCalled();
+  });
+
+  it("updatePlantField on a plant with a genus still enriches", async () => {
+    setupUpdate({ genus: "Rosa", species: "rugosa", cultivar: null });
+    await updatePlantField("plant-1", { species: "rugosa" });
+
+    expect(enrichSpeciesReference).toHaveBeenCalledWith("Rosa", "rugosa", null);
+  });
+
+  it("upsertPlant update branch with a blank genus: no enrichment, no after()", async () => {
+    setupUpdate({ genus: "", species: "officinalis", cultivar: null });
+    await upsertPlant("existing-plant-id", { ...TYPED_PLANT, species: "officinalis" });
+
+    expect(enrichSpeciesReference).not.toHaveBeenCalled();
+    expect(after).not.toHaveBeenCalled();
+  });
+
+  it("upsertPlant update branch with a genus still enriches", async () => {
+    setupUpdate({ genus: "Rosa", species: "canina", cultivar: null });
+    await upsertPlant("existing-plant-id", BASE_PLANT);
+
+    expect(enrichSpeciesReference).toHaveBeenCalledWith("Rosa", "canina", null);
   });
 });

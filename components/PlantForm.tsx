@@ -111,8 +111,9 @@ export default function PlantForm() {
     try {
       const photoUrl = await uploadPhoto();
 
-      const payload: PlantInsert = {
-        genus: "",
+      // No genus: this field takes whatever the gardener types (a Latin name,
+      // a common name), and the server resolves it into genus and species.
+      const payload: Omit<PlantInsert, "genus"> = {
         species: species || null,
         cultivar: cultivar || null,
         date_planted: defaultDatePlanted,

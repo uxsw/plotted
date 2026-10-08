@@ -258,8 +258,7 @@ describe("purchaseShoppingListItem – lookup correction with a genus present", 
 // The scheme path can't actually produce a blank genus alongside a species —
 // parseScientificName always takes the first token as the genus — so the
 // blank-genus case is exercised directly on the shared helper, with the same
-// requireGenus option purchase passes. It's what protects the manual-item
-// path once that exists.
+// guard purchase gets. It's what protects an unresolved manual item.
 describe("purchase path – genus guard", () => {
   const BLANK_GENUS_ROW: PlantInsert = {
     genus: "",
@@ -286,7 +285,7 @@ describe("purchase path – genus guard", () => {
     vi.mocked(performLookup).mockResolvedValue({ ...BASE_LOOKUP, corrected_species: "officinalis" });
     const db = setupPurchaseSupabase(null);
 
-    const result = await createPlantWithLookup(await client(), BLANK_GENUS_ROW, { requireGenus: true });
+    const result = await createPlantWithLookup(await client(), BLANK_GENUS_ROW);
 
     expect(result).toEqual({ id: "new-plant-id" });
     expect(db.plantUpdates()[0]).toMatchObject({ species: "officinalis" });
@@ -294,13 +293,18 @@ describe("purchase path – genus guard", () => {
     expect(after).not.toHaveBeenCalled();
   });
 
-  it("the same row without requireGenus still enriches (garden add is unguarded for now)", async () => {
-    vi.mocked(performLookup).mockResolvedValue({ ...BASE_LOOKUP, corrected_species: "officinalis" });
-    setupPurchaseSupabase(null);
+  it("blank genus that the lookup resolves confidently: enriches under the resolved key", async () => {
+    vi.mocked(performLookup).mockResolvedValue({
+      ...BASE_LOOKUP,
+      resolved_name: { genus: "Salvia", species: "officinalis", cultivar: null, confidence: "high", kind: "latin" },
+    });
+    const db = setupPurchaseSupabase(null);
 
-    await createPlantWithLookup(await client(), BLANK_GENUS_ROW);
+    await createPlantWithLookup(await client(), { ...BLANK_GENUS_ROW, species: "salvia oficinalis" });
 
-    expect(enrichSpeciesReference).toHaveBeenCalledWith("", "officinalis", null);
+    expect(db.plantUpdates()[0]).toMatchObject({ genus: "Salvia", species: "officinalis" });
+    expect(enrichSpeciesReference).toHaveBeenCalledTimes(1);
+    expect(enrichSpeciesReference).toHaveBeenCalledWith("Salvia", "officinalis", null);
   });
 
   it("refuses an item with no parseable name before writing anything", async () => {

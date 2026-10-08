@@ -10,6 +10,7 @@ import type { PlantInsert } from "@/lib/types";
 import { enrichSpeciesReference } from "@/lib/species-reference-enrichment";
 import { manualSpeciesTransition } from "@/lib/species-transition";
 import { createPlantWithLookup } from "@/lib/plant-create";
+import { hasGenusForEnrichment } from "@/lib/lookup-apply";
 
 // ─── revalidatePath from inside after(): cache hygiene only, not live push ───
 //
@@ -71,14 +72,14 @@ export async function updatePlantField(
     // write above — cache hygiene for a later navigation, not a live push to
     // an open tab. See the file-level note above before touching this.
     //
-    // TODO(genus-guard): unguarded — a blank-genus plant still enriches here.
-    // Gate on hasGenusForEnrichment (lib/plant-create.ts) once genus
-    // resolution lands (performLookup returning a genus, PlantForm no longer
-    // sending genus: "").
-    after(async () => {
-      await enrichSpeciesReference(updated.genus, updated.species, updated.cultivar);
-      revalidatePath(`/plants/${plantId}`);
-    });
+    // Genus guard: this edit doesn't run the plant lookup, so a plant whose
+    // genus is still blank stays blank here and is not enriched.
+    if (hasGenusForEnrichment(updated.genus)) {
+      after(async () => {
+        await enrichSpeciesReference(updated.genus, updated.species, updated.cultivar);
+        revalidatePath(`/plants/${plantId}`);
+      });
+    }
   }
 
   revalidatePath(`/plants/${plantId}`);
@@ -106,7 +107,9 @@ type UpsertError = { error: string } | { fieldErrors: FieldErrors };
  */
 export async function upsertPlant(
   plantId: string | null,
-  data: PlantInsert,
+  // genus is optional: the manual form has only typed text and no genus to
+  // send. Photo identification and edits supply one.
+  data: Omit<PlantInsert, "genus"> & { genus?: string },
   options: { fromIdentification?: boolean } = {}
 ): Promise<UpsertError | void> {
   const supabase = await createClient();
@@ -141,15 +144,10 @@ export async function upsertPlant(
       .eq("id", plantId)
       .eq("user_id", user.id);
     if (error) return { error: error.message };
-    // Nothing to enrich for a fully unidentified plant — genus-only is still
+    // Genus guard: nothing is enriched without a genus. Genus-only is still
     // enriched (a genus-level lookup is a real, if hedged, answer; see spec's
     // "Enrichment of genus-level records").
-    //
-    // TODO(genus-guard): unguarded — a blank-genus plant still enriches here.
-    // Gate on hasGenusForEnrichment (lib/plant-create.ts) once genus
-    // resolution lands (performLookup returning a genus, PlantForm no longer
-    // sending genus: "").
-    if (clean.genus || clean.species) {
+    if (hasGenusForEnrichment(clean.genus)) {
       // revalidatePath fires post-enrichment, inside the after() callback —
       // cache hygiene for a later navigation, not a live push to an open
       // tab. See the file-level note above before touching this.
@@ -161,10 +159,8 @@ export async function upsertPlant(
     revalidatePath("/plants");
     redirect(`/plants/${plantId}`);
   } else {
-    // TODO(genus-guard): requireGenus is left off here so manual garden add
-    // (PlantForm still sends genus: "") keeps getting frost data. Switch it
-    // on once genus resolution lands — performLookup returning a genus and
-    // PlantForm no longer sending a blank one.
+    // A typed name arrives with no genus; the lookup inside resolves one
+    // where it confidently can, and enrichment is skipped where it can't.
     const row = await createPlantWithLookup(supabase, clean, {
       fromIdentification: options.fromIdentification,
     });

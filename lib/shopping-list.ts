@@ -362,8 +362,8 @@ export function validateManualItemInput(raw: {
  * Manual items: once a lookup has resolved a genus, use it (with the epithet,
  * tolerating a binomial in `species`). Until then there is only free text, so
  * it goes in as the name with a blank genus — exactly what garden manual add
- * sends — and the plant lookup corrects it. The blank genus is what makes the
- * purchase path's requireGenus guard skip species_reference enrichment.
+ * sends — and the plant lookup resolves it. If it can't, the genus stays blank
+ * and the genus guard skips species_reference enrichment.
  */
 export function plantNameFromShoppingItem(item: {
   source?: ShoppingListItemSource | null;
