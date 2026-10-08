@@ -89,20 +89,56 @@ function promptJson(value: unknown): string {
   return JSON.stringify(value).replace(/</g, "\\u003c");
 }
 
+/**
+ * The first balanced JSON object in a model reply. The model is asked for
+ * JSON only but sometimes adds a sentence or a code fence around it; this
+ * ignores anything before the first "{" and after its matching "}". Braces
+ * inside strings don't count. Throws if there is no complete object.
+ */
+export function extractFirstJsonObject(text: string): Record<string, unknown> {
+  for (let start = text.indexOf("{"); start !== -1; start = text.indexOf("{", start + 1)) {
+    let depth = 0;
+    let inString = false;
+    for (let i = start; i < text.length; i++) {
+      const char = text[i];
+      if (inString) {
+        if (char === "\\") i++;
+        else if (char === '"') inString = false;
+      } else if (char === '"') {
+        inString = true;
+      } else if (char === "{") {
+        depth++;
+      } else if (char === "}" && --depth === 0) {
+        try {
+          const parsed: unknown = JSON.parse(text.slice(start, i + 1));
+          if (typeof parsed === "object" && parsed !== null && !Array.isArray(parsed)) {
+            return parsed as Record<string, unknown>;
+          }
+        } catch {
+          // Not valid JSON from this "{" — try the next one.
+        }
+        break;
+      }
+    }
+  }
+  throw new LookupParseError("No JSON object in model reply");
+}
+
+/** The model replied, but not with something we could read. Worth one retry. */
+export class LookupParseError extends Error {}
+
 export function validMonth(v: unknown): number | null {
   if (typeof v !== "number" || !Number.isFinite(v)) return null;
   const n = Math.round(v);
   return n >= 1 && n <= 12 ? n : null;
 }
 
-export async function performLookup(
+async function requestLookup(
   genus: string,
   species: string,
   cultivar: string | null,
-  // temperature is left at the API default on the add path; the cleanup
-  // script passes 0 so a re-run proposes the same names.
-  options: { temperature?: number } = {}
-): Promise<LookupResult> {
+  options: { temperature?: number }
+): Promise<Record<string, unknown>> {
   const message = await anthropic.messages.create({
     model: "claude-sonnet-4-6",
     max_tokens: 512,
@@ -160,16 +196,28 @@ Field notes:
     ],
   });
 
-  const raw_text =
-    message.content[0].type === "text" ? message.content[0].text.trim() : "";
-  // Strip markdown code fences if the model wraps the response despite instructions
-  const text = raw_text.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "");
-  const raw: unknown = JSON.parse(text);
+  const text = message.content[0]?.type === "text" ? message.content[0].text : "";
+  return extractFirstJsonObject(text);
+}
 
-  if (typeof raw !== "object" || raw === null || Array.isArray(raw)) {
-    throw new Error("Invalid response shape");
+export async function performLookup(
+  genus: string,
+  species: string,
+  cultivar: string | null,
+  // temperature is left at the API default on the add path; the cleanup
+  // script passes 0 so a re-run proposes the same names.
+  options: { temperature?: number } = {}
+): Promise<LookupResult> {
+  // One retry when the reply can't be read as JSON (the model occasionally
+  // answers in prose). Network and API errors are not retried here — the SDK
+  // already does that.
+  let r: Record<string, unknown>;
+  try {
+    r = await requestLookup(genus, species, cultivar, options);
+  } catch (err) {
+    if (!(err instanceof LookupParseError)) throw err;
+    r = await requestLookup(genus, species, cultivar, options);
   }
-  const r = raw as Record<string, unknown>;
 
   const common_names =
     Array.isArray(r.common_names) &&

@@ -7,7 +7,7 @@ vi.mock("@anthropic-ai/sdk", () => ({
   },
 }));
 
-import { parseResolvedName, performLookup } from "./plant-lookup";
+import { extractFirstJsonObject, parseResolvedName, performLookup } from "./plant-lookup";
 
 function reply(json: Record<string, unknown>) {
   create.mockResolvedValue({ content: [{ type: "text", text: JSON.stringify(json) }] });
@@ -118,5 +118,65 @@ describe("performLookup", () => {
     create.mockClear();
     await performLookup("Rosa", "canina", null, { temperature: 0 });
     expect(create.mock.calls[0][0].temperature).toBe(0);
+  });
+});
+
+describe("extractFirstJsonObject", () => {
+  it("reads a bare object, a fenced one, and one wrapped in prose", () => {
+    expect(extractFirstJsonObject('{"a":1}')).toEqual({ a: 1 });
+    expect(extractFirstJsonObject('```json\n{"a":1}\n```')).toEqual({ a: 1 });
+    expect(extractFirstJsonObject('Here the genus is ambiguous.\n{"a":1}\nHope that helps.')).toEqual({ a: 1 });
+  });
+
+  it("takes the first balanced object, ignoring braces inside strings", () => {
+    expect(extractFirstJsonObject('{"a":"} {","b":{"c":2}} {"later":true}')).toEqual({ a: "} {", b: { c: 2 } });
+    expect(extractFirstJsonObject('{"a":"say \\"{hi}\\""}')).toEqual({ a: 'say "{hi}"' });
+  });
+
+  it("skips a stray brace in the prose before the real object", () => {
+    expect(extractFirstJsonObject('Set notation {x} aside: {"a":1}')).toEqual({ a: 1 });
+  });
+
+  it("throws when there is no complete object", () => {
+    expect(() => extractFirstJsonObject("I cannot help with that.")).toThrow();
+    expect(() => extractFirstJsonObject('{"a":1')).toThrow();
+    expect(() => extractFirstJsonObject("[1,2]")).toThrow();
+  });
+});
+
+describe("performLookup – unreadable replies", () => {
+  beforeEach(() => create.mockReset());
+  const text = (value: string) => ({ content: [{ type: "text", text: value }] });
+
+  it("reads JSON that arrives after a sentence of prose, without a second call", async () => {
+    create.mockResolvedValue(text('Here the genus is Silene.\n{"common_names":["Maltese cross"]}'));
+    const result = await performLookup("", "lychnis chalcedonica", null);
+    expect(result.common_names).toEqual(["Maltese cross"]);
+    expect(create).toHaveBeenCalledTimes(1);
+  });
+
+  it("retries once when the reply has no JSON at all", async () => {
+    create.mockResolvedValueOnce(text("I am not sure which plant this is.")).mockResolvedValueOnce(text('{"sun_needs":"full sun"}'));
+    const result = await performLookup("", "lychnis", null);
+    expect(result.sun_needs).toBe("full sun");
+    expect(create).toHaveBeenCalledTimes(2);
+  });
+
+  it("gives up after the one retry", async () => {
+    create.mockResolvedValue(text("Still prose."));
+    await expect(performLookup("", "lychnis", null)).rejects.toThrow();
+    expect(create).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not retry an API error", async () => {
+    create.mockRejectedValueOnce(new Error("overloaded"));
+    let caught: unknown;
+    try {
+      await performLookup("", "lychnis", null);
+    } catch (err) {
+      caught = err;
+    }
+    expect((caught as Error).message).toBe("overloaded");
+    expect(create).toHaveBeenCalledTimes(1);
   });
 });
