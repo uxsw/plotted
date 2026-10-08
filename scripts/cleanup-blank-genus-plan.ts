@@ -37,7 +37,10 @@ export type Proposal = {
   confidence: NameConfidence | "none";
   typed_kind: "latin" | "common" | null;
   change: ChangeKind | null;
-  /** apply: safe unattended. review: only with the id named in --ids. skip: never. */
+  /**
+   * apply: only adds a genus. review: changes stored words. skip: no usable
+   * name, or not confident. Nothing is written unless its id is in --ids.
+   */
   decision: Decision;
   reason: string;
   /** species_input to write alongside, or undefined to leave the column alone. */
@@ -123,13 +126,31 @@ export function proposeForPlant(plant: BlankGenusPlant, lookup: LookupResult | n
   const resolved = lookup.resolved_name;
   if (!resolved) return skip("the lookup could not name a genus");
 
-  // Shown in the report at any confidence; only ever applied at high.
+  // Shown in the report at any confidence; only ever applied unattended at high.
   const proposed = namesFromResolution(
     { ...resolved, confidence: "high" },
     { species: plant.species, cultivar: plant.cultivar }
   )!;
-  const new_key = computeSpeciesMatchKey(proposed.genus, proposed.species, proposed.cultivar);
+  const { summary, ...details } = describeChange(plant, proposed, resolved.kind);
+  const named = { ...base, ...details, proposed, confidence: resolved.confidence, typed_kind: resolved.kind };
 
+  const violations = constraintViolations({
+    genus: proposed.genus,
+    species: proposed.species,
+    identification_status: plant.identification_status,
+  });
+  if (violations.length) return { ...named, decision: "skip", reason: `would violate ${violations.join(", ")}` };
+  if (resolved.confidence !== "high") return { ...named, decision: "skip", reason: `${resolved.confidence} confidence` };
+  if (details.change === "changed") return { ...named, decision: "review", reason: summary };
+  return { ...named, decision: "apply", reason: "adds the genus; stored words unchanged" };
+}
+
+/** How a proposed name differs from what is stored, and what goes with it. */
+function describeChange(
+  plant: Pick<BlankGenusPlant, "species" | "cultivar" | "species_input">,
+  proposed: PlantNames,
+  kind: "latin" | "common"
+): { change: ChangeKind; new_key: string; species_input?: string; summary: string } {
   const stored = [...words(plant.species), ...words(plant.cultivar)];
   const next = [...words(proposed.species), ...words(proposed.cultivar)];
   const genusWord = proposed.genus.toLowerCase();
@@ -137,36 +158,44 @@ export function proposeForPlant(plant: BlankGenusPlant, lookup: LookupResult | n
   const lost = stored.filter((word) => word !== genusWord && !next.includes(word));
   const added = next.filter((word) => !stored.includes(word));
   const change: ChangeKind = lost.length === 0 && added.length === 0 ? "split" : "changed";
+  const parts = [
+    lost.length ? `drops "${lost.join(" ")}"` : "",
+    added.length ? `adds "${added.join(" ")}"` : "",
+  ].filter(Boolean);
 
-  const details = {
-    proposed,
-    confidence: resolved.confidence,
-    typed_kind: resolved.kind,
+  return {
     change,
-    new_key,
+    new_key: computeSpeciesMatchKey(proposed.genus, proposed.species, proposed.cultivar),
     // A typed common name is kept as species_input (it stays the plant's
     // primary name on screen) — never over one that is already there, and
     // not for typed Latin, where the Latin name is the primary one.
-    ...(change === "changed" && resolved.kind === "common" && !plant.species_input
+    ...(change === "changed" && kind === "common" && plant.species && !plant.species_input
       ? { species_input: plant.species }
       : {}),
+    summary: parts.length ? `changes stored words: ${parts.join(", ")}` : "stored words unchanged",
   };
+}
 
-  const after = { genus: proposed.genus, species: proposed.species, identification_status: plant.identification_status };
-  const violations = constraintViolations(after);
-  if (violations.length) return skip(`would violate ${violations.join(", ")}`, details);
-
-  if (resolved.confidence !== "high") {
-    return skip(`${resolved.confidence} confidence`, details);
-  }
-  if (change === "changed") {
-    const parts = [
-      lost.length ? `drops "${lost.join(" ")}"` : "",
-      added.length ? `adds "${added.join(" ")}"` : "",
-    ].filter(Boolean);
-    return { ...base, ...details, decision: "review", reason: `changes stored words: ${parts.join(", ")}` };
-  }
-  return { ...base, ...details, decision: "apply", reason: "adds the genus; stored words unchanged" };
+/**
+ * Replaces a proposal's name with one chosen by hand (--name), for a plant
+ * the lookup got wrong or answered inconsistently. The name is used exactly
+ * as given.
+ */
+export function withNameSetByHand(proposal: Proposal, names: PlantNames): Proposal {
+  const details = describeChange(
+    { species: proposal.current.species, cultivar: proposal.current.cultivar, species_input: null },
+    names,
+    proposal.typed_kind ?? "latin"
+  );
+  const { summary, ...rest } = details;
+  return {
+    ...proposal,
+    ...rest,
+    species_input: proposal.species_input !== undefined ? rest.species_input : undefined,
+    proposed: names,
+    decision: "review",
+    reason: `name set by hand; ${summary}`,
+  };
 }
 
 export type ApplyOutcome =
@@ -193,18 +222,22 @@ const sameNames = (a: PlantNames, b: PlantNames) =>
  * complete. If enrichment fails or is still pending, the plant keeps its old
  * name and its old (blank-genus) frost row — a plant is never left pointing
  * at a key with no row.
+ *
+ * Nothing is applied unless its plant id is in `ids`: a batch is always an
+ * explicit list. Naming an id is the human sign-off, so it also covers
+ * "review" proposals and ones skipped only for medium or low confidence.
+ * It never overrides a missing name, a constraint violation, a plant that
+ * has changed since the report, or (without includeRemoved) a removed plant.
  */
 export async function applyProposal(
   proposal: Proposal,
   deps: ApplyDeps,
-  options: { includeRemoved?: boolean; reviewedIds?: ReadonlySet<string> } = {}
+  options: { ids: ReadonlySet<string>; includeRemoved?: boolean }
 ): Promise<ApplyOutcome> {
   const untouched = (why: string): ApplyOutcome => ({ plant_id: proposal.plant_id, result: "untouched", why });
 
-  if (!proposal.proposed || !proposal.new_key || proposal.decision === "skip") return untouched(proposal.reason);
-  if (proposal.decision === "review" && !options.reviewedIds?.has(proposal.plant_id)) {
-    return untouched(`needs review (${proposal.reason}); name its id in --ids to apply`);
-  }
+  if (!options.ids.has(proposal.plant_id)) return untouched("not in this batch");
+  if (!proposal.proposed || !proposal.new_key) return untouched(proposal.reason);
   if (proposal.status !== "active" && !options.includeRemoved) return untouched("removed plant; active only by default");
 
   const plant = await deps.readPlant(proposal.plant_id);
@@ -231,6 +264,80 @@ export async function applyProposal(
   return updated
     ? { plant_id: proposal.plant_id, result: "updated", new_key: proposal.new_key }
     : untouched("name changed while applying; nothing written");
+}
+
+/** One row of an undo file: what a plant held before an apply, and what the apply wrote. */
+export type UndoEntry = {
+  plant_id: string;
+  previous: { genus: string; species: string | null; cultivar: string | null; species_input: string | null };
+  applied: Record<string, string | null>;
+};
+
+/** Built from a fresh read of the plant, before anything is written. */
+export function undoEntryFor(proposal: Proposal, plant: BlankGenusPlant): UndoEntry {
+  return {
+    plant_id: proposal.plant_id,
+    previous: {
+      genus: plant.genus ?? "",
+      species: plant.species,
+      cultivar: plant.cultivar,
+      species_input: plant.species_input,
+    },
+    applied: plantUpdateFor(proposal),
+  };
+}
+
+export type UndoDeps = {
+  /**
+   * Writes `restore` only if the row still holds every value in `expected`.
+   * Returns whether a row was updated.
+   */
+  restorePlant(id: string, expected: Record<string, string | null>, restore: Record<string, string | null>): Promise<boolean>;
+};
+
+/**
+ * Puts one plant back as it was — but only if it still holds exactly what the
+ * apply wrote, so an edit made since then is never overwritten. species_input
+ * is restored only if the apply wrote it. species_reference is not touched:
+ * rows the apply created stay (nothing is ever deleted).
+ */
+export async function undoEntry(entry: UndoEntry, deps: UndoDeps): Promise<ApplyOutcome> {
+  const { species_input: _typed, ...names } = entry.previous;
+  void _typed;
+  const restore = "species_input" in entry.applied ? { ...entry.previous } : names;
+  const restored = await deps.restorePlant(entry.plant_id, entry.applied, restore);
+  return restored
+    ? { plant_id: entry.plant_id, result: "updated", new_key: computeSpeciesMatchKey(names.genus, names.species, names.cultivar) }
+    : { plant_id: entry.plant_id, result: "untouched", why: "no longer holds what the apply wrote (never applied, or edited since)" };
+}
+
+/** Full plant ids for a list that may use the short form (first 8 characters). */
+export function resolveIds(wanted: string[], known: string[]): { ids: Set<string>; problems: string[] } {
+  const ids = new Set<string>();
+  const problems: string[] = [];
+  for (const want of wanted) {
+    const matches = known.filter((id) => id === want || id.startsWith(want));
+    if (matches.length === 1) ids.add(matches[0]);
+    else problems.push(matches.length ? `${want} matches ${matches.length} plants` : `${want} is not in the report`);
+  }
+  return { ids, problems };
+}
+
+/** The stored name, ignoring case: "Boskoop Ruby" and "Boskoop ruby" are one plant and get one answer. */
+export function storedNameKey(plant: Pick<BlankGenusPlant, "species" | "cultivar">): string {
+  const fold = (text: string | null) => (text ?? "").trim().toLowerCase().replace(/\s+/g, " ");
+  return `${fold(plant.species)}\u0000${fold(plant.cultivar)}`;
+}
+
+/** Plants whose proposal differs between two reports (or is in only one). */
+export function changedProposals(before: Proposal[], after: Proposal[]): { plant_id: string; before: Proposal | null; after: Proposal | null }[] {
+  const view = (p: Proposal | undefined) =>
+    p ? JSON.stringify([p.proposed, p.confidence, p.decision, p.species_input ?? null]) : "absent";
+  const old = new Map(before.map((p) => [p.plant_id, p]));
+  const next = new Map(after.map((p) => [p.plant_id, p]));
+  return [...new Set([...old.keys(), ...next.keys()])]
+    .filter((id) => view(old.get(id)) !== view(next.get(id)))
+    .map((id) => ({ plant_id: id, before: old.get(id) ?? null, after: next.get(id) ?? null }));
 }
 
 /**

@@ -2,10 +2,16 @@ import { describe, it, expect, vi } from "vitest";
 import type { LookupResult, ResolvedName } from "@/lib/plant-lookup";
 import {
   applyProposal,
+  changedProposals,
   constraintViolations,
   orphanedReferenceKeys,
   plantUpdateFor,
   proposeForPlant,
+  resolveIds,
+  storedNameKey,
+  undoEntry,
+  undoEntryFor,
+  withNameSetByHand,
   type ApplyDeps,
   type BlankGenusPlant,
 } from "./cleanup-blank-genus-plan";
@@ -155,12 +161,14 @@ describe("the cleanup never produces a row that violates the name constraints", 
   it("apply refuses a hand-edited report entry that would blank an identified plant's name", async () => {
     const proposal = { ...proposeForPlant(PLANT, lookup({})), proposed: { genus: "", species: null, cultivar: null } };
     const deps = makeDeps();
-    const outcome = await applyProposal(proposal, deps);
+    const outcome = await applyProposal(proposal, deps, BATCH);
     expect(outcome).toMatchObject({ result: "untouched", why: expect.stringContaining("plants_identified_requires_name_check") });
     expect(deps.enrich).not.toHaveBeenCalled();
     expect(deps.updatePlant).not.toHaveBeenCalled();
   });
 });
+
+const BATCH = { ids: new Set(["plant-1"]) };
 
 function makeDeps(overrides: Partial<ApplyDeps> = {}) {
   return {
@@ -182,7 +190,7 @@ describe("applyProposal", () => {
       referenceStatus: vi.fn(async () => (order.push("check"), "complete")),
       updatePlant: vi.fn(async () => (order.push("update"), true)),
     });
-    const outcome = await applyProposal(proposal, deps);
+    const outcome = await applyProposal(proposal, deps, BATCH);
 
     expect(order).toEqual(["enrich", "check", "update"]);
     expect(deps.enrich).toHaveBeenCalledWith({ genus: "Verbena", species: "bonariensis", cultivar: null });
@@ -196,7 +204,7 @@ describe("applyProposal", () => {
 
   it.each(["failed", "pending", null])("enrichment ending %s leaves the plant untouched and reports it", async (status) => {
     const deps = makeDeps({ referenceStatus: vi.fn(async () => status) });
-    const outcome = await applyProposal(proposal, deps);
+    const outcome = await applyProposal(proposal, deps, BATCH);
 
     expect(deps.updatePlant).not.toHaveBeenCalled();
     expect(outcome).toMatchObject({ result: "untouched", why: expect.stringContaining("not complete") });
@@ -204,24 +212,30 @@ describe("applyProposal", () => {
 
   it("does nothing if the plant's name changed since the report", async () => {
     const deps = makeDeps({ readPlant: vi.fn(async () => ({ ...PLANT, species: "verbena hastata" })) });
-    const outcome = await applyProposal(proposal, deps);
+    const outcome = await applyProposal(proposal, deps, BATCH);
 
     expect(deps.enrich).not.toHaveBeenCalled();
     expect(deps.updatePlant).not.toHaveBeenCalled();
     expect(outcome).toMatchObject({ result: "untouched" });
   });
 
-  it("a review proposal is applied only when its id is named", async () => {
-    const review = proposeForPlant({ ...PLANT, species: "apple" }, lookup({ genus: "Malus", species: "domestica", kind: "common" }));
+  it("applies nothing that is not named in the batch, even a safe proposal", async () => {
+    const deps = makeDeps();
+    expect(await applyProposal(proposal, deps, { ids: new Set(["another-plant"]) })).toMatchObject({
+      result: "untouched",
+      why: "not in this batch",
+    });
+    expect(deps.readPlant).not.toHaveBeenCalled();
+    expect(deps.enrich).not.toHaveBeenCalled();
+  });
+
+  it("a named review proposal is applied, with the typed common name kept", async () => {
     const plant = { ...PLANT, species: "apple" };
+    const review = proposeForPlant(plant, lookup({ genus: "Malus", species: "domestica", kind: "common" }));
+    const deps = makeDeps({ readPlant: vi.fn(async () => plant) });
 
-    const unnamed = makeDeps({ readPlant: vi.fn(async () => plant) });
-    expect(await applyProposal(review, unnamed)).toMatchObject({ result: "untouched" });
-    expect(unnamed.enrich).not.toHaveBeenCalled();
-
-    const named = makeDeps({ readPlant: vi.fn(async () => plant) });
-    expect(await applyProposal(review, named, { reviewedIds: new Set(["plant-1"]) })).toMatchObject({ result: "updated" });
-    expect(named.updatePlant).toHaveBeenCalledWith("plant-1", expect.anything(), {
+    expect(await applyProposal(review, deps, BATCH)).toMatchObject({ result: "updated" });
+    expect(deps.updatePlant).toHaveBeenCalledWith("plant-1", expect.anything(), {
       genus: "Malus",
       species: "domestica",
       cultivar: null,
@@ -229,24 +243,119 @@ describe("applyProposal", () => {
     });
   });
 
+  it("a named medium-confidence proposal is applied: naming the id is the sign-off", async () => {
+    const plant = { ...PLANT, species: "guaranitica" };
+    const medium = proposeForPlant(plant, lookup({ genus: "Salvia", species: "guaranitica", confidence: "medium" }));
+    expect(medium.decision).toBe("skip");
+    const deps = makeDeps({ readPlant: vi.fn(async () => plant) });
+
+    expect(await applyProposal(medium, deps, BATCH)).toMatchObject({ result: "updated", new_key: "salvia|guaranitica" });
+  });
+
+  it("a named proposal with no name to write is still not applied", async () => {
+    const deps = makeDeps();
+    const noName = proposeForPlant({ ...PLANT, species: "officinalis" }, lookup(null));
+    expect(await applyProposal(noName, deps, BATCH)).toMatchObject({ result: "untouched" });
+    expect(deps.enrich).not.toHaveBeenCalled();
+  });
+
   it("removed plants are left alone unless included", async () => {
     const removed = { ...PLANT, status: "removed" as const };
     const removedProposal = proposeForPlant(removed, lookup({}));
 
     const deps = makeDeps({ readPlant: vi.fn(async () => removed) });
-    expect(await applyProposal(removedProposal, deps)).toMatchObject({ result: "untouched" });
+    expect(await applyProposal(removedProposal, deps, BATCH)).toMatchObject({ result: "untouched" });
     expect(deps.enrich).not.toHaveBeenCalled();
 
-    expect(await applyProposal(removedProposal, makeDeps({ readPlant: vi.fn(async () => removed) }), { includeRemoved: true })).toMatchObject({
-      result: "updated",
+    expect(
+      await applyProposal(removedProposal, makeDeps({ readPlant: vi.fn(async () => removed) }), { ...BATCH, includeRemoved: true })
+    ).toMatchObject({ result: "updated" });
+  });
+});
+
+describe("withNameSetByHand", () => {
+  it("uses the given name exactly, as a review proposal, for both spellings of one plant", () => {
+    const name = { genus: "Cytisus", species: "scoparius", cultivar: "Boskoop Ruby" };
+    for (const cultivar of ["Boskoop Ruby", "Boskoop ruby"]) {
+      const plant = { ...PLANT, species: "cytisus", cultivar };
+      const set = withNameSetByHand(proposeForPlant(plant, lookup({ genus: "Cytisus", species: null, cultivar })), name);
+      expect(set).toMatchObject({ proposed: name, decision: "review", new_key: "cytisus|scoparius|boskoop ruby" });
+      expect(set.reason).toContain("name set by hand");
+      expect(plantUpdateFor(set)).toEqual(name);
+    }
+  });
+});
+
+describe("undo", () => {
+  const plant = { ...PLANT, species: "apple" };
+  const proposal = proposeForPlant(plant, lookup({ genus: "Malus", species: "domestica", kind: "common" }));
+  const entry = undoEntryFor(proposal, plant);
+
+  it("records the previous values of every field the apply writes", () => {
+    expect(entry).toEqual({
+      plant_id: "plant-1",
+      previous: { genus: "", species: "apple", cultivar: null, species_input: null },
+      applied: { genus: "Malus", species: "domestica", cultivar: null, species_input: "apple" },
     });
   });
 
-  it("skipped proposals are never applied", async () => {
-    const deps = makeDeps();
-    const skipped = proposeForPlant({ ...PLANT, species: "officinalis" }, lookup({ confidence: "low" }));
-    expect(await applyProposal(skipped, deps, { reviewedIds: new Set(["plant-1"]) })).toMatchObject({ result: "untouched" });
-    expect(deps.enrich).not.toHaveBeenCalled();
+  it("restores the previous values, conditional on the plant still holding what was applied", async () => {
+    const restorePlant = vi.fn(async () => true);
+    expect(await undoEntry(entry, { restorePlant })).toMatchObject({ result: "updated", new_key: "|apple" });
+    expect(restorePlant).toHaveBeenCalledWith("plant-1", entry.applied, entry.previous);
+  });
+
+  it("leaves species_input alone when the apply did not write it", async () => {
+    const split = undoEntryFor(proposeForPlant(PLANT, lookup({})), { ...PLANT, species_input: null });
+    const restorePlant = vi.fn(async () => true);
+    await undoEntry(split, { restorePlant });
+    expect(restorePlant).toHaveBeenCalledWith(
+      "plant-1",
+      { genus: "Verbena", species: "bonariensis", cultivar: null },
+      { genus: "", species: "verbena bonariensis", cultivar: null }
+    );
+  });
+
+  it("reports a plant edited since the apply as untouched", async () => {
+    expect(await undoEntry(entry, { restorePlant: vi.fn(async () => false) })).toMatchObject({ result: "untouched" });
+  });
+
+  it("the restored row satisfies the name constraints", () => {
+    expect(
+      constraintViolations({ genus: entry.previous.genus, species: entry.previous.species, identification_status: "identified" })
+    ).toEqual([]);
+  });
+});
+
+describe("batch helpers", () => {
+  it("resolveIds accepts full ids and unique 8-character prefixes, and reports the rest", () => {
+    const known = ["07c707d7-aaaa", "07c7ffff-bbbb", "6069b90c-cccc"];
+    expect(resolveIds(["6069b90c", "07c707d7-aaaa"], known)).toEqual({
+      ids: new Set(["6069b90c-cccc", "07c707d7-aaaa"]),
+      problems: [],
+    });
+    expect(resolveIds(["07c7", "ffffffff"], known).problems).toEqual([
+      "07c7 matches 2 plants",
+      "ffffffff is not in the report",
+    ]);
+  });
+
+  it("storedNameKey ignores case and spacing, so identical plants share one lookup", () => {
+    expect(storedNameKey({ species: "cytisus", cultivar: "Boskoop Ruby" })).toBe(
+      storedNameKey({ species: "Cytisus ", cultivar: "boskoop  ruby" })
+    );
+    expect(storedNameKey({ species: "cytisus", cultivar: null })).not.toBe(
+      storedNameKey({ species: "cytisus", cultivar: "Boskoop Ruby" })
+    );
+  });
+
+  it("changedProposals flags plants whose proposal, confidence or decision moved", () => {
+    const same = proposeForPlant(PLANT, lookup({}));
+    const before = proposeForPlant({ ...PLANT, id: "plant-2", species: "lychnis" }, null);
+    const after = proposeForPlant({ ...PLANT, id: "plant-2", species: "lychnis" }, lookup({ genus: "Silene", species: "chalcedonica" }));
+    const changed = changedProposals([same, before], [same, after]);
+    expect(changed.map((c) => c.plant_id)).toEqual(["plant-2"]);
+    expect(changed[0].after?.proposed?.genus).toBe("Silene");
   });
 });
 
