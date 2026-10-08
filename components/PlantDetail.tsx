@@ -25,6 +25,7 @@ import {
 } from "@/lib/upload";
 import { resizeImage } from "@/lib/resize";
 import { uploadPlantPhoto } from "@/lib/uploadPhoto";
+import { isFrostLookupPending } from "@/lib/species-reference-timing";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const SUN_OPTIONS: SunNeeds[] = ["full sun", "full sun / partial shade", "partial shade", "full shade"];
@@ -258,8 +259,11 @@ export default function PlantDetail({
   // Server Component has no such restriction. The polling below re-fetches
   // that Server Component on every tick anyway, so recentlyAdded is
   // recomputed against the real current time each time regardless.
-  const frostLookingUp =
-    recentlyAdded && (speciesRef === null || speciesRef.lookup_status === "pending");
+  //
+  // A plant with no genus is never enriched (the genus guard), so it has
+  // nothing to wait for: no message and no polling, and the frost block below
+  // simply renders nothing.
+  const frostLookingUp = isFrostLookupPending({ recentlyAdded, genus: plant.genus, speciesRef });
 
   // Polling, not server push: revalidatePath called from inside upsertPlant's
   // after() callback cannot deliver a live update here — that "updates the
@@ -773,7 +777,8 @@ export default function PlantDetail({
                     null value (a real lookup with no answer); or pending/no-row
                     outside the recently-added window (frostLookingUp false) —
                     an indefinitely stuck or never-triggered lookup on an older
-                    plant, not worth a permanent spinner. */}
+                    plant, not worth a permanent spinner; or a plant with no
+                    genus, which is never enriched. */}
               </div>
             </section>
 
