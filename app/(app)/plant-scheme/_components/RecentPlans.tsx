@@ -19,6 +19,7 @@ import clsx from "clsx";
 import buttonStyles from "@/components/ui/Button.module.css";
 import { Icon } from "@/components/ui/Icon";
 import type { SchemeSummary } from "@/components/SchemeList";
+import { SpecimenPlate } from "@/components/plants/SpecimenPlate";
 
 const RECENT_COUNT = 3;
 
@@ -120,9 +121,11 @@ export default function RecentPlans({
                       className="c-recent-plans__photo"
                     />
                   ) : (
-                    <div className="c-recent-plans__placeholder">
-                      <SchemeIllustration />
-                    </div>
+                    <SpecimenPlate seed={scheme.id}>
+                      <div className="c-recent-plans__placeholder">
+                        <SchemeIllustration />
+                      </div>
+                    </SpecimenPlate>
                   )}
                 </div>
                 <div className="c-recent-plans__body">

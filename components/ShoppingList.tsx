@@ -458,13 +458,10 @@ function ManualItemDetails({ item }: { item: ShoppingListItemData }) {
 
 function ItemCard({
   item,
-  plateNumber,
   onPurchase,
   onDelete,
 }: {
   item: ShoppingListItemData;
-  /** 1-based position in the list — the fallback tile's plate number. */
-  plateNumber: number;
   onPurchase: () => void;
   onDelete: () => void;
 }) {
@@ -494,15 +491,11 @@ function ItemCard({
         ) : isManual ? (
           <SpecimenPlate
             variant={isResolvedManualItem(item) ? "latin" : "plain"}
-            compact
             genus={item.genus}
             name={displayName}
-            plateNumber={plateNumber}
           />
         ) : (
-          <div className="is-placeholder">
-            <SproutIcon />
-          </div>
+          <SpecimenPlate genus={shoppingItemLatinName(item)} commonName={displayName} />
         )}
       </div>
 
@@ -804,11 +797,10 @@ export default function ShoppingList({ initialItems }: { initialItems: ShoppingL
 
       {items.length === 0 && <EmptyState />}
 
-      {items.map((item, index) => (
+      {items.map((item) => (
         <ItemCard
           key={item.id}
           item={item}
-          plateNumber={index + 1}
           onPurchase={() => { setPurchaseTarget(item); setPurchaseError(null); }}
           onDelete={() => setDeleteTarget(item)}
         />

@@ -9,6 +9,7 @@ import * as Popover from "@radix-ui/react-popover";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { PlaceholderSchemeCard } from "@/components/ui/PlaceholderSchemeCard";
 import buttonStyles from "@/components/ui/Button.module.css";
+import { SpecimenPlate } from "@/components/plants/SpecimenPlate";
 
 export type SchemeSummary = {
   id: string;
@@ -125,9 +126,11 @@ function SchemeCard({
           {scheme.source_plant_photos.length > 0 ? (
             <ThumbnailStack photos={scheme.source_plant_photos} />
           ) : (
-            <div className="w-16 h-16 text-sand-line">
-              <SchemeIllustration />
-            </div>
+            <SpecimenPlate seed={scheme.id}>
+              <div className="w-16 h-16">
+                <SchemeIllustration />
+              </div>
+            </SpecimenPlate>
           )}
         </div>
       </div>
@@ -281,9 +284,11 @@ function FailedSchemeCard({
           {scheme.source_plant_photos.length > 0 ? (
             <ThumbnailStack photos={scheme.source_plant_photos} />
           ) : (
-            <div className="w-16 h-16">
-              <SchemeIllustration />
-            </div>
+            <SpecimenPlate seed={scheme.id}>
+              <div className="w-16 h-16">
+                <SchemeIllustration />
+              </div>
+            </SpecimenPlate>
           )}
         </div>
       </div>

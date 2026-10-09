@@ -43,15 +43,6 @@
         > .is-image {
             object-fit: cover;
         }
-
-        > .is-placeholder {
-            position: absolute;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--color-sand-line);
-        }
     }
 
     &__body {

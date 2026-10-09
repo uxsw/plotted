@@ -186,14 +186,6 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
     [plants, query, activeFilter]
   );
 
-  // Plate numbers run over the full portfolio in its sort order (most recently
-  // planted = Pl. 01), so a specimen keeps its number through any search/filter.
-  const plateNumbers = useMemo(() => {
-    const m = new Map<string, number>();
-    plants.forEach((p, i) => m.set(p.id, i + 1));
-    return m;
-  }, [plants]);
-
   const bloomCount = useMemo(
     () => plants.filter(isInBloomThisMonth).length,
     [plants]
@@ -493,8 +485,6 @@ export default function PlantGrid({ plants }: { plants: Plant[] }) {
                     species={plant.species}
                     cultivar={plant.cultivar}
                     commonName={typedName ?? plant.common_names?.[0]}
-                    plateNumber={plateNumbers.get(plant.id) ?? index + 1}
-                    seasonBand={seasonBand}
                   />
                 }
                 marker={inBloom && seasonBand ? <InBloomMark seasonBand={seasonBand} /> : undefined}

@@ -34,6 +34,7 @@ import Link from "next/link";
 import { plantDisplayTitle } from "@/lib/plantName";
 import { Icon } from "@/components/ui/Icon";
 import type { PickerPlant } from "./StartPanel";
+import { SpecimenPlate } from "@/components/plants/SpecimenPlate";
 
 function latinName(p: PickerPlant): string {
   const binomial = [p.genus, p.species].filter(Boolean).join(" ").trim();
@@ -178,9 +179,12 @@ export default function GardenGallery({
                             className="is-image"
                           />
                         ) : (
-                          <div className="is-placeholder">
-                            <Icon name="sprout" size={28} />
-                          </div>
+                          <SpecimenPlate
+                            genus={plant.genus}
+                            species={plant.species}
+                            cultivar={plant.cultivar}
+                            commonName={plant.common_names?.[0]}
+                          />
                         )}
                         <span className="c-garden-gallery__mark" aria-hidden="true">
                           <Icon name="check" size={11} />

@@ -11,6 +11,7 @@ import {
 import clsx from "clsx";
 import buttonStyles from "@/components/ui/Button.module.css";
 import { Icon } from "@/components/ui/Icon";
+import { SpecimenPlate } from "@/components/plants/SpecimenPlate";
 
 function ShoppingItemCard({ item }: { item: ShoppingListItemData }) {
   const isManual = item.source === "manual";
@@ -30,9 +31,12 @@ function ShoppingItemCard({ item }: { item: ShoppingListItemData }) {
             className="is-image"
           />
         ) : (
-          <div className="is-placeholder">
-            <Icon name="sprout" />
-          </div>
+          <SpecimenPlate
+            variant={isManual && !manualNames.primaryIsLatin ? "plain" : "latin"}
+            genus={shoppingItemLatinName(item)}
+            commonName={displayName}
+            name={displayName}
+          />
         )}
       </div>
       <div>

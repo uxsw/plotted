@@ -71,17 +71,6 @@
     .is-image {
         object-fit: cover;
     }
-
-    .missing-image {
-        background-color: var(--color-y-yellow);
-        color: var(--color-r-marigold);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        inline-size: 100%;
-        block-size: 100%;
-    }
-
     .overlay-text {
         position: absolute;
         bottom: var(--space-sm);
@@ -180,17 +169,6 @@
     .is-image {
         object-fit: cover;
     }
-
-    .missing-image {
-        background-color: var(--color-y-yellow);
-        inline-size: 100%;
-        block-size: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: var(--color-r-marigold);
-    }
-
     .is-remove {
         position: absolute;
         top: -6px;
