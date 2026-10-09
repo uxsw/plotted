@@ -22,7 +22,7 @@ const CONFIRMATION_URL =
 // CSS custom properties, so values are inlined as literal hex here. Fonts:
 // Inter (--font-sans) with a web-safe fallback stack, not IBM Plex — this
 // codebase doesn't use IBM Plex anywhere (see AGENTS.md task assumption
-// vs. app/layout.tsx's actual Fraunces/Inter/Spline Sans Mono setup).
+// vs. app/layout.tsx's actual Zodiak/Inter/Spline Sans Mono setup).
 const colors = {
   paper: "#FAF6EC",
   ink: "#2d2d2d",

@@ -113,7 +113,7 @@ Explicitly undecided:
   collection prompt, not a score.
 - AI is scoped narrow on purpose: it does botanical lookup and scheme drafting
   and is invisible everywhere else. Not a chatbot, not a co-pilot.
-- Typography in use: Fraunces (display, italic, weight 400) / Inter (body) /
+- Typography in use: Zodiak (display, italic, weight 400) / Inter (body) /
   Spline Sans Mono (mono accents). Palette in use: paper / ink / sand / moss /
   terracotta warm-neutral world.
 - An incumbent visual system exists in code (`styles/` ITCSS SCSS, mid-migration

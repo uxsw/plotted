@@ -32,7 +32,7 @@ export default function DesignCheckPage() {
         <section className="space-y-4">
           <SectionTitle>Typography</SectionTitle>
           <div className="space-y-2">
-            <p className="font-display text-3xl font-medium text-ink">Display — Fraunces medium</p>
+            <p className="font-display text-3xl font-medium text-ink">Display — Zodiak medium</p>
             <p className="font-display italic text-xl text-ink-soft">Display italic — scientific name</p>
             <p className="primer text-ink">Body — Inter regular</p>
             <p className="brevier text-ink-soft">Small body — ink-soft</p>
