@@ -1,15 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Fraunces, Inter, Spline_Sans_Mono } from "next/font/google";
+import { Inter, Spline_Sans_Mono } from "next/font/google";
+import localFont from "next/font/local";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
 import { PwaInstallPromptProvider } from "@/components/PwaInstallPromptProvider";
 import "./globals.css";
 import "../styles/main.scss";
 
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  weight: ["400", "500", "600"],
-  style: ["normal", "italic"],
-  variable: "--font-fraunces",
+// Zodiak (Fontshare, ITF Free Font License), self-hosted as two variable
+// files covering weights 100–900.
+const zodiak = localFont({
+  src: [
+    { path: "./fonts/Zodiak-Variable.woff2", weight: "100 900", style: "normal" },
+    { path: "./fonts/Zodiak-VariableItalic.woff2", weight: "100 900", style: "italic" },
+  ],
+  variable: "--font-zodiak",
+  fallback: ["Georgia", "serif"],
+  adjustFontFallback: "Times New Roman",
 });
 
 const inter = Inter({
@@ -117,7 +123,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${inter.variable} ${splineSansMono.variable} h-full antialiased`}
+      className={`${zodiak.variable} ${inter.variable} ${splineSansMono.variable} h-full antialiased`}
     > 
       <body className="min-h-full flex flex-col">
         <PwaInstallPromptProvider>

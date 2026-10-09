@@ -132,15 +132,15 @@
       },
       "headline": {
         "displayName": "Headline",
-        "purpose": "App page titles, section headers, empty-state and dialog titles. Fraunces bold roman 600 (.kirk), .paragon step. Marketing section headings take italic 400 instead."
+        "purpose": "App page titles, section headers, empty-state and dialog titles. Zodiak bold roman 600 (.kirk), .paragon step. Marketing section headings take italic 400 instead."
       },
       "title": {
         "displayName": "Title",
-        "purpose": "Card titles and sub-section headers. Fraunces bold roman 600 (.kirk), .pica / .long-primer step. Botanical Latin inside is additionally italicised."
+        "purpose": "Card titles and sub-section headers. Zodiak bold roman 600 (.kirk), .pica / .long-primer step. Botanical Latin inside is additionally italicised."
       },
       "editorial-display-body": {
         "displayName": "Editorial display-body",
-        "purpose": "Long narrative-intro paragraphs set in Fraunces roman 400 (no .kirk), .long-primer / .primer size — e.g. a scheme's narrative_intro. Not a heading; the absence of .kirk is what separates it."
+        "purpose": "Long narrative-intro paragraphs set in Zodiak roman 400 (no .kirk), .long-primer / .primer size — e.g. a scheme's narrative_intro. Not a heading; the absence of .kirk is what separates it."
       },
       "body": {
         "displayName": "Body",
@@ -319,7 +319,7 @@
       "name": "Plant Card",
       "kind": "card",
       "refersTo": "card",
-      "description": "The core content unit. White raised surface on grained paper, 4px corners, flat at rest, lifts on hover; 4:3 media well with badge slot. Bold-roman Fraunces title with the botanical binomial italicised (a pure-Latin title reads fully italic).",
+      "description": "The core content unit. White raised surface on grained paper, 4px corners, flat at rest, lifts on hover; 4:3 media well with badge slot. Bold-roman Zodiak title with the botanical binomial italicised (a pure-Latin title reads fully italic).",
       "html": "<a class=\"ds-card\" href=\"#\"><div class=\"ds-card__media\"><span class=\"ds-card__badge\">Full sun</span></div><div class=\"ds-card__body\"><h3 class=\"ds-card__title\">Digitalis purpurea</h3><p class=\"ds-card__sub\">Foxglove</p></div></a>",
       "css": ".ds-card { display: flex; flex-direction: column; height: 100%; overflow: hidden; border-radius: var(--radius-m, 4px); background-color: var(--color-white); text-decoration: none; color: inherit; transition: box-shadow 150ms, transform 75ms, opacity 75ms; } .ds-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.15); z-index: 1; } .ds-card:active { transform: scale(0.98); opacity: 0.75; } .ds-card__media { position: relative; width: 100%; aspect-ratio: 4 / 3; background-color: var(--color-y-yellow); } .ds-card__badge { position: absolute; top: var(--space-xs, 4px); right: var(--space-xs, 4px); display: inline-flex; align-items: center; border-radius: var(--radius-pill, 32px); border: 1px solid var(--sem-full-sun-bg); background-color: var(--sem-full-sun-bg); color: var(--sem-full-sun-fg); font-family: var(--font-inter), sans-serif; font-size: 0.65rem; line-height: 1.5; padding-inline: var(--space-xs, 4px); } .ds-card__body { display: flex; flex-direction: column; gap: 0.375rem; padding: var(--space-md, 16px); flex: 1; } .ds-card__title { margin: 0; font-family: var(--font-fraunces), serif; font-style: italic; font-weight: 600; font-size: 1.05rem; line-height: 1.2; color: var(--color-ink); } .ds-card__sub { margin: 0; font-family: var(--font-inter), sans-serif; font-size: 0.85rem; color: var(--color-ink-soft); }"
     },
@@ -385,7 +385,7 @@
     "overview": "Plotted takes the rigour of a printed nursery plant catalogue — plate numbers, italic botanical Latin, hairline rules, warm paper stock, a faint printed grain — and pulls it forward into something brighter and unmistakably software. It is a knowingly AI-assisted gardening companion, so the surface is allowed to feel technical and tactile at the same time: real texture and warmth, but crisp edges and no nostalgic cosplay. The Nursery Catalogue is a reference for precision and calm, not for period styling.\n\nColour is drawn from the garden itself and used through the interface to echo that richness — sun needs, flowering seasons, plant traits all carry their own hue — but it is held in restraint so it never competes with the gardener's own plant photographs, which are always the brightest thing on the page. Chrome stays quiet; content brings the colour. The single brand accent, a warm marigold, is spent sparingly on primary action and active navigation.\n\nThe atmosphere to protect is alive, bright, warm, friendly, supportive; simple, informative, and never chaotic or clinical. Depth is achieved with tonal paper layers and 1px hairlines rather than shadow — surfaces are flat at rest, and a shadow only ever appears as a response to interaction.",
     "keyCharacteristics": [
       "Warm paper ground (#FAF6EC) with a faint multiply-blended noise grain — never flat white; white is reserved for raised cards.",
-      "Fraunces for every display and heading level — bold roman (600) in the product UI, italic 400 on marketing/editorial surfaces; Inter for UI text; Spline Sans Mono for labels, plate numbers and botanical metadata.",
+      "Zodiak for every display and heading level — bold roman (600) in the product UI, italic 400 on marketing/editorial surfaces; Inter for UI text; Spline Sans Mono for labels, plate numbers and botanical metadata.",
       "Structure carried by 1px hairline borders and paper/sand tonal layering; flat by default.",
       "One brand accent (marigold) used on ≤10% of a screen; a broad --sem-* semantic-colour system carries all trait, sun, season and status colour.",
       "Print-catalogue devices retained: specimen/plate numbers, italic Latin, caption lines, framed image \"plates\".",
@@ -424,7 +424,7 @@
       },
       {
         "name": "The Two-Register Rule",
-        "body": "**The Two-Register Rule.** Fraunces *headings* are **bold roman (600)** in the product UI and **italic (400)** on marketing/editorial surfaces — never mixed within one surface. An app section header in italic, or a marketing headline in bold roman, is drift. Weight and style are chosen by surface mode (Operate → roman 600; Persuade/Read editorial → italic 400), not by taste per screen.",
+        "body": "**The Two-Register Rule.** Zodiak *headings* are **bold roman (600)** in the product UI and **italic (400)** on marketing/editorial surfaces — never mixed within one surface. An app section header in italic, or a marketing headline in bold roman, is drift. Weight and style are chosen by surface mode (Operate → roman 600; Persuade/Read editorial → italic 400), not by taste per screen.",
         "section": "typography"
       },
       {
@@ -470,7 +470,7 @@
     ],
     "dos": [
       "**Do** keep the page ground `#FAF6EC` *with* its noise grain (multiply, ~8%). White is for raised cards, dialogs and menus — and for the chat composer, the one field on a tinted surface that has to read as an unwritten page.",
-      "**Do** set product-UI headings in Fraunces bold roman (`.kirk` / 600); use Fraunces italic 400 only on marketing/editorial surfaces (the Two-Register Rule).",
+      "**Do** set product-UI headings in Zodiak bold roman (`.kirk` / 600); use Zodiak italic 400 only on marketing/editorial surfaces (the Two-Register Rule).",
       "**Do** use Spline Sans Mono, uppercase, `0.12–0.16em` tracking for eyebrows, plate numbers, field labels and botanical meta.",
       "**Do** render botanical Latin italic, always — including inside a bold-roman title, where it reads as bold-roman with an italic species.",
       "**Do** carry structure with 1px hairlines (`--sem-border-color`) and tonal paper layers; add shadow only on hover / open / overlay.",
@@ -502,7 +502,7 @@
       "**Don't** add dashboards, KPI tiles, stat walls or streak counters (a PRODUCT.md commitment).",
       "**Don't** put `--color-b-cyan` on a focus ring, a focus outline or an active-field border — that is `--sem-focus-color`'s job (the Focus Colour Rule).",
       "**Don't** let a control's boundary get *weaker* when it reacts. Three controls shipped with a hover that swapped a defined edge for pale cyan or for the hover fill itself, leaving the hovered state with less definition than the resting one. Where the highlight-yellow hover also takes the border, the control must already carry a fill at rest; a transparent or lightly-tinted control keeps its edge and changes only the fill.",
-      "**Don't** set a control label in Fraunces. The display face is the heading voice; on a button or an option plate it makes the control read as a card title — as content rather than as something to pick. Inter `--font-weight-medium` is the label voice for controls.",
+      "**Don't** set a control label in Zodiak. The display face is the heading voice; on a button or an option plate it makes the control read as a card title — as content rather than as something to pick. Inter `--font-weight-medium` is the label voice for controls.",
       "**Don't** use `--color-r-marigold` for error text on paper — it clears only ~3:1, below the 4.5:1 AA floor for body-sized text. Use `--sem-color-error-bg` for inline error copy instead (see the Failed turn entry under Chat).",
       "**Don't** reach for `role=\"radiogroup\"` on options that act on click. Arrow keys in a radiogroup move the selection, which there means firing a request per keypress; a labelled `role=\"group\"` of `aria-pressed` buttons is the honest shape and owes no roving tabindex.",
       "**Don't** build a click target as a `div` with `onClick`. Every one of them in this codebase turned out to be the only path to its action, with no tab stop, no accessible name and nowhere to put a focus state.",

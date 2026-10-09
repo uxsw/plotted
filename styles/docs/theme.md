@@ -66,7 +66,7 @@ Living document. Values and semantic intent for every token referenced across `s
 | minion | `.minion` (`.o-minion`) | 0.728 → 0.800rem | **Caption / data** — metadata, timestamps, dense numerals, badge text. `line-height: 1.5`. Also the size of `.o-type-label`. |
 
 **Role classes & utilities** (also in `_typography.scss`):
-- `.o-type-display` — sets the Fraunces family; pair with a size step.
+- `.o-type-display` — sets the Zodiak family; pair with a size step.
 - `.o-type-label` — the single label treatment: Spline Sans Mono, `.minion` size, weight 500, `uppercase`, `letter-spacing: 0.14em`. Replaces ad-hoc `text-xs font-semibold uppercase tracking-wider`. See DESIGN.md "The Mono Label Rule".
 - `.o-type-tabular` — `font-variant-numeric: tabular-nums` for aligned numeral columns.
 - `.o-type--italic`, `.o-type--truncate`, `.o-type--center`, `.o-type-line-clamp-2` — unchanged.
@@ -78,11 +78,11 @@ Living document. Values and semantic intent for every token referenced across `s
 - `--font-weight-medium: 500` → `.o-type-weight--medium`. Added 2026-08-29. Inter 500 and Spline Mono 500 are loaded; this is the weight for mono labels and subtle UI emphasis (replaces Tailwind `font-medium`).
 - `--font-weight-bold: 600` → `.kirk` (the bold-roman product-heading voice; replaces Tailwind `font-semibold`). The old `.o-type-weight--bold` alias (1 call site) was removed in favour of `.kirk`.
 
-**Two-Register Rule (from DESIGN.md):** Fraunces headings are `.kirk` bold roman (600) in the product UI, italic 400 on marketing/editorial surfaces — never mixed within one surface.
+**Two-Register Rule (from DESIGN.md):** Zodiak headings are `.kirk` bold roman (600) in the product UI, italic 400 on marketing/editorial surfaces — never mixed within one surface.
 
 **Tailwind `--font-weight-bold` name collision (theme-var, resolves to 700):** still a real landmine while any plain-Tailwind `font-bold` exists, but the typeset pass confirmed **zero `font-bold`/`font-black` usages** in `app/` and `components/`, so nothing currently trips it. `app/auth/reset-password/page.tsx` uses `font-semibold` and is on the deferred conversion list.
 
-**Fonts loaded** (`app/layout.tsx`): Fraunces 400/500/600 normal+italic; Inter 400/500/600 (700 dropped 2026-08-29, unused); Spline Sans Mono 400/500.
+**Fonts loaded** (`app/layout.tsx`): Zodiak variable 100–900 normal+italic (self-hosted, `app/fonts/`, swapped in for Fraunces 2026-10-09); Inter 400/500/600 (700 dropped 2026-08-29, unused); Spline Sans Mono 400/500.
 
 ## Spacing scale
 

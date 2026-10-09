@@ -15,7 +15,7 @@ export const T = {
   hlStr:    "rgba(60,70,45,0.22)",
   stripe:   "repeating-linear-gradient(135deg,#E6D9BD 0 13px,#EEE3CB 13px 26px)",
   stripeDk: "repeating-linear-gradient(135deg,#DCCFB0 0 14px,#E6DBC0 14px 28px)",
-  d: "var(--font-fraunces),serif",
+  d: "var(--font-zodiak),serif",
   s: "var(--font-inter),sans-serif",
   m: "var(--font-spline-mono),monospace",
 } as const;

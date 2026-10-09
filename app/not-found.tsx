@@ -17,7 +17,7 @@ export default function NotFound() {
               <ellipse cx="98" cy="72" rx="24" ry="10" fill="#4A7051" stroke="#2E5239" strokeOpacity="0.4" transform="rotate(32 98 72)"/>
             </g>
             <ellipse cx="62" cy="52" rx="14" ry="7" fill="#4A7051" opacity="0.85" transform="rotate(-18 62 52)" className="leaf-droop"/>
-            <text x="110" y="58" fontFamily="Fraunces" fontWeight="500" fontSize="28" fill="#C4742A" opacity="0.55">?</text>
+            <text x="110" y="58" style={{ fontFamily: "var(--font-display)" }} fontWeight="500" fontSize="28" fill="#C4742A" opacity="0.55">?</text>
           </g>
         </svg>
 
