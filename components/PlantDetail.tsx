@@ -26,6 +26,7 @@ import {
 import { resizeImage } from "@/lib/resize";
 import { uploadPlantPhoto } from "@/lib/uploadPhoto";
 import { isFrostLookupPending } from "@/lib/species-reference-timing";
+import { plateGradient } from "@/components/plants/SpecimenPlate";
 
 const MONTHS = ["January","February","March","April","May","June","July","August","September","October","November","December"];
 const SUN_OPTIONS: SunNeeds[] = ["full sun", "full sun / partial shade", "partial shade", "full shade"];
@@ -480,7 +481,10 @@ export default function PlantDetail({
                 </div>
               </>
             ) : (
-              <div className="w-full h-full bg-marigold flex flex-col items-center justify-center gap-2 text-marigold/70 group-hover:brightness-95 transition-all">
+              <div
+                className="c-specimen-plate flex-col gap-2"
+                data-gradient={plateGradient(`${plant.genus ?? ""}${plant.species ?? ""}${plant.cultivar ?? ""}`)}
+              >
                 <Icon name="image" aria-label="Add a photo" size={32} />
                 <span className="brevier">Add a photo</span>
               </div>

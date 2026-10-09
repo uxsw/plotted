@@ -11,6 +11,7 @@ import { Toggle } from "@/components/ui/Toggle";
 import type { Plant, SchemeSpace } from "@/lib/types";
 import buttonStyles from "@/components/ui/Button.module.css";
 import { Icon } from "@/components/ui/Icon";
+import { SpecimenPlate } from "@/components/plants/SpecimenPlate";
 
 const MAX_PLANTS = 5;
 
@@ -143,9 +144,7 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
                 {plant.photo_url ? (
                   <Image src={plant.photo_url} alt="" fill sizes="min(60vw, 280px)" className="is-image" />
                 ) : (
-                  <div className="missing-image">
-                    <SproutIcon />
-                  </div>
+                  <SpecimenPlate genus={plant.genus} species={plant.species} cultivar={plant.cultivar} commonName={plant.common_names?.[0]} />
                 )}
                 {selected && (
                   <div className="c-scheme-scroller__check">
@@ -177,9 +176,7 @@ export default function SchemeNewForm({ plants }: { plants: PickerPlant[] }) {
                       {plant.photo_url ? (
                         <Image src={plant.photo_url} alt={plantDisplayTitle(plant)} fill sizes="100px" className="is-image" />
                       ) : (
-                        <div className="missing-image">
-                          <SproutIcon />
-                        </div>
+                        <SpecimenPlate genus={plant.genus} species={plant.species} cultivar={plant.cultivar} commonName={plant.common_names?.[0]} />
                       )}
                     </div>
                     <button

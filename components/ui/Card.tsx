@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Icon } from "@/components/ui/Icon";
+import { SpecimenPlate } from "@/components/plants/SpecimenPlate";
 
 interface CardProps {
   photoUrl?: string | null;
@@ -70,7 +70,7 @@ function Card({
           </div>
         ) : (
           <div className="is-placeholder">
-            <Icon name="sprout" aria-label="none" size={32} /> 
+            <SpecimenPlate name={typeof title === "string" ? title : photoAlt} variant="plain" />
           </div>
         )}
         {sunBadge && (

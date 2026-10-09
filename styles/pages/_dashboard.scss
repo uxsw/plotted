@@ -177,14 +177,6 @@
       filter: blur(12px);
       scale: 110% 110%;
     }
-
-    > .is-placeholder {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
   }
 
   &__scheme-stack {
@@ -261,15 +253,6 @@
 
     > .is-image {
       object-fit: cover;
-    }
-
-    > .is-placeholder {
-      position: absolute;
-      inset: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: var(--color-r-red);
     }
   }
 

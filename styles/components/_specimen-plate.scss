@@ -1,103 +1,102 @@
-/* c-specimen-plate — the photo-less plant card's media well, treated as a
-   nursery-catalogue specimen plate rather than an empty state: a matted
-   hairline frame, a faint italic genus monogram (Latin-in-Italic Rule), and
-   a mono plate number where the plate caption would sit. It hosts inside
-   .o-card__media > .is-placeholder (absolute, inset 0). Calm by construction —
-   a whole grid of these has to stay quiet under the plant photos that will
-   eventually replace them. */
+/* c-specimen-plate — the media well for a plant or scheme with no image: one
+   of three gradient grounds (picked by data-gradient) with the plant's first
+   letter on top. It fills its positioned parent (absolute, inset 0). The class
+   also works on a bare element when only the ground is wanted. */
+
+/* The grain layer shared by all three grounds. The viewBox sets how fine the
+   grain is, so each ground keeps the size it was designed with. */
+@function plate-noise($size) {
+    @return url("data:image/svg+xml,%3Csvg viewBox='0 0 #{$size} #{$size}' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+}
 
 .c-specimen-plate {
+    /* Ink for whatever sits on the ground, and a soft halo in the opposite
+       tone to hold it where the gradient passes through a mid-tone. The two
+       dark grounds take white; the pale one overrides both below. */
+    --plate-ink: var(--color-white);
+    --plate-halo: hsl(236 100% 10% / 0.45);
+
     position: absolute;
     inset: 0;
     container-type: inline-size;
-    padding: var(--space-sm);
-    background-color: var(--color-paper-deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--plate-ink);
 
-    /* A hair of the flowering-season colour mixed into the mat, when known —
-       enough to sort the grid by season out of the corner of your eye, not
-       enough to read as a coloured tile. */
-    &[data-season="winter"]        { background-color: color-mix(in srgb, var(--sem-flowering-winter-bg) 22%, var(--color-paper-deep)); }
-    &[data-season="spring"]        { background-color: color-mix(in srgb, var(--sem-flowering-spring-bg) 22%, var(--color-paper-deep)); }
-    &[data-season="early-summer"]  { background-color: color-mix(in srgb, var(--sem-flowering-early-summer-bg) 22%, var(--color-paper-deep)); }
-    &[data-season="summer"]        { background-color: color-mix(in srgb, var(--sem-flowering-summer-bg) 16%, var(--color-paper-deep)); }
-    &[data-season="autumn"]        { background-color: color-mix(in srgb, var(--sem-flowering-autumn-bg) 22%, var(--color-paper-deep)); }
-
-    &__frame {
-        position: relative;
-        block-size: 100%;
-        inline-size: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        overflow: hidden;
-        border: var(--border-width-hairline) solid color-mix(in srgb, var(--color-ink-soft) 26%, transparent);
-        border-radius: var(--radius-s);
+    /* Ruzz */
+    &[data-gradient="1"] {
+        background-color: hsla(327, 100%, 50%, 1);
+        background-image:
+            plate-noise(1111),
+            radial-gradient(circle at 0% 99%, hsla(11, 100%, 50%, 1) 0%, transparent 67%),
+            radial-gradient(circle at 46% 94%, hsla(327, 100%, 50%, 1) 0%, transparent 81%),
+            radial-gradient(circle at 93% 95%, hsla(236, 100%, 23%, 1) 0%, transparent 66%),
+            radial-gradient(circle at 89% 8%, hsla(206, 100%, 9%, 1) 0%, transparent 150%);
+        background-blend-mode: overlay, normal, normal, normal, normal;
     }
 
-    /* Bottom-right, where a catalogue plate carries its number — and clear of
-       the sun badge (top-right) and the in-bloom mark (top-left). */
-    &__number {
-        position: absolute;
-        inset-block-end: var(--space-xs);
-        inset-inline-end: var(--space-sm);
-        color: color-mix(in srgb, var(--color-ink-soft) 82%, transparent);
+    /* Mealtime */
+    &[data-gradient="2"] {
+        background-color: hsla(359, 100%, 50%, 1);
+        background-image:
+            plate-noise(1746),
+            radial-gradient(circle at 0% 99%, hsla(11, 100%, 50%, 1) 0%, transparent 67%),
+            radial-gradient(circle at 46% 94%, hsla(177, 100%, 50%, 1) 0%, transparent 81%),
+            radial-gradient(circle at 89% 8%, hsla(304, 100%, 9%, 1) 0%, transparent 150%),
+            radial-gradient(circle at 89% 8%, hsla(206, 100%, 9%, 1) 0%, transparent 150%),
+            radial-gradient(circle at 93% 95%, hsla(236, 100%, 23%, 1) 0%, transparent 66%),
+            radial-gradient(circle at 89% 8%, hsla(0, 100%, 99%, 1) 0%, transparent 150%),
+            radial-gradient(circle at 89% 8%, hsla(55, 94%, 54%, 1) 0%, transparent 150%);
+        background-blend-mode: overlay, normal, normal, normal, normal, normal, normal, normal;
+    }
+
+    /* The Miracle */
+    &[data-gradient="3"] {
+        --plate-ink: var(--color-ink);
+        --plate-halo: hsl(0 0% 100% / 0.55);
+
+        background-color: hsla(120, 0%, 0%, 1);
+        background-image:
+            plate-noise(1799),
+            radial-gradient(circle at 7% 84%, hsla(270, 100%, 48%, 0.88) 1%, transparent 85%),
+            radial-gradient(circle at 68% 22%, hsla(38, 91%, 75%, 1) 15%, transparent 58%),
+            radial-gradient(circle at 32% 53%, hsla(61, 84%, 73%, 1) 20%, transparent 61%),
+            radial-gradient(circle at 100% 58%, hsla(247, 99%, 73%, 1) 7%, transparent 70%),
+            radial-gradient(circle at 27% 44%, hsla(221, 73%, 66%, 1) 10%, transparent 81%),
+            radial-gradient(circle at 28% 16%, hsla(5, 84%, 78%, 1) 15%, transparent 74%),
+            radial-gradient(circle at 93% 14%, hsla(51, 89%, 79%, 1) 12%, transparent 88%);
+        background-blend-mode: overlay, normal, normal, normal, normal, normal, normal, normal;
     }
 
     &__monogram {
         font-style: italic;
         font-weight: var(--font-weight-regular);
-        font-size: clamp(2.5rem, 36cqi, 4rem);
+        font-size: clamp(1rem, 40cqi, 4rem);
         line-height: 1;
-        color: color-mix(in srgb, var(--color-ink-soft) 24%, transparent);
+        text-shadow: 0 0 0.35em var(--plate-halo);
         user-select: none;
         /* exponential ease-out — the plate settling toward the light */
-        transition:
-            transform 420ms cubic-bezier(0.16, 1, 0.3, 1),
-            color 420ms cubic-bezier(0.16, 1, 0.3, 1);
+        transition: transform 420ms cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     &__mark {
-        inline-size: clamp(2rem, 34cqi, 3.25rem);
+        inline-size: clamp(1rem, 40cqi, 3.25rem);
         block-size: auto;
-        color: color-mix(in srgb, var(--color-ink-soft) 30%, transparent);
+        filter: drop-shadow(0 0 0.25rem var(--plate-halo));
     }
 }
 
 /* --plain: the plate for a free-text name (a typed or dictated shopping list
-   item). Same frame and number; the monogram stands upright, because italic
-   is the Latin-in-Italic Rule's and this name isn't known to be Latin. */
+   item). The monogram stands upright, because italic is the Latin-in-Italic
+   Rule's and this name isn't known to be Latin. */
 .c-specimen-plate--plain .c-specimen-plate__monogram {
     font-style: normal;
 }
 
-/* --compact: a list-row media well (~4rem) rather than a card. Thinner mat,
-   and the monogram lifted a little so the plate number has its own line
-   underneath instead of colliding with it. */
-.c-specimen-plate--compact {
-    padding: var(--space-xs);
-
-    .c-specimen-plate__monogram {
-        font-size: clamp(1.5rem, 44cqi, 2.5rem);
-        translate: 0 -12%;
-    }
-
-    .c-specimen-plate__mark {
-        translate: 0 -10%;
-    }
-
-    .c-specimen-plate__number {
-        inset-block-end: 2px;
-        inset-inline-end: var(--space-xs);
-        font-size: 0.5625rem;
-        letter-spacing: 0;
-    }
-}
-
-/* The one authored moment: on card hover the plate comes into focus — the
-   monogram settles a touch larger and darker. */
+/* The one authored moment: on card hover the monogram settles a touch larger. */
 .o-card--interactive:hover .c-specimen-plate__monogram {
     transform: scale(1.05);
-    color: color-mix(in srgb, var(--color-ink-soft) 40%, transparent);
 }
 
 @media (prefers-reduced-motion: reduce) {

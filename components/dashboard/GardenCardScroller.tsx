@@ -8,7 +8,7 @@ import { PlantName } from "@/components/plants/PlantName";
 import { ScientificName, typedPlantName } from "@/lib/plantName";
 import type { Plant } from "@/lib/types";
 import carouselStyles from "@/components/ui/Carousel.module.css";
-import { Icon } from "@/components/ui/Icon";
+import { SpecimenPlate } from "@/components/plants/SpecimenPlate";
 type PlantSummary = Pick<
   Plant,
   "id" | "genus" | "species" | "cultivar" | "species_input" | "common_names" | "photo_url" | "identification_status"
@@ -77,9 +77,12 @@ export function GardenCardScroller({ plants }: { plants: PlantSummary[] }) {
                   className="is-plant-image"
                 />
               ) : (
-                <div className="is-placeholder">
-                  <Icon name="sprout" size={32} />
-                </div>
+                <SpecimenPlate
+                  genus={plant.genus}
+                  species={plant.species}
+                  cultivar={plant.cultivar}
+                  commonName={typedPlantName(plant) ?? plant.common_names?.[0]}
+                />
               )}
             </div>
             <PlantCardName plant={plant} />

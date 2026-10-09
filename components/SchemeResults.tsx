@@ -11,6 +11,7 @@ import { markSchemeAiNoticeSeen } from "@/app/actions/schemes";
 import { markShoppingListNoticeSeen } from "@/app/actions/shopping-list";
 import type { Scheme, SchemeSuggestion, SchemeTier } from "@/lib/types";
 import buttonStyles from "@/components/ui/Button.module.css";
+import { SpecimenPlate, plateGradient } from "@/components/plants/SpecimenPlate";
 
 const TIER_ORDER: SchemeTier[] = ["back", "mid", "ground"];
 const TIER_LABELS: Record<SchemeTier, string> = {
@@ -49,14 +50,6 @@ function CheckIcon() {
   return (
     <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
       <path d="M2 6.5l2.5 2.5 5.5-5.5" />
-    </svg>
-  );
-}
-
-function SproutIcon() {
-  return (
-    <svg width="32" height="32" viewBox="0 0 48 48" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-      <path d="M24 8c-4 0-8 4-8 8s4 8 8 8c0 4-2 8-8 12h16c-6-4-8-8-8-12 4 0 8-4 8-8s-4-8-8-8z" />
     </svg>
   );
 }
@@ -161,9 +154,7 @@ function SuggestionCard({
             className="object-cover"
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center text-sand-line">
-            <SproutIcon />
-          </div>
+          <SpecimenPlate genus={suggestion.latin_name} commonName={suggestion.common_name} />
         )}
         <button
           type="button"
@@ -287,7 +278,7 @@ export default function SchemeResults({
             priority
           />
         ) : (
-          <div className="absolute inset-0 bg-marigold" />
+          <div className="c-specimen-plate" data-gradient={plateGradient(scheme.id)} />
         )}
         <div
           className="absolute inset-0"
