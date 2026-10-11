@@ -76,8 +76,16 @@ Confirmed capabilities:
 - Weather: current conditions, hourly strip, and multi-day forecast for the
   garden's location via Open-Meteo (keyless; free tier is non-commercial —
   revisit on monetisation).
-- Shopping list, dashboard, account, and email+password auth (Supabase),
-  including a source-controlled React Email confirmation template.
+- Shopping list: a list of plants the gardener wants to buy, added by typed
+  or dictated name (with optional where-to-buy and notes) or from a planting
+  scheme. A background lookup turns a rough or mis-dictated name into the
+  plant's proper name, a one-line summary and, where one exists, a Wikimedia
+  photo; when it isn't sure it offers choices rather than guessing. Marking a
+  plant as bought can add it straight to the garden. Originally a secondary
+  feature; now treated as a primary one, because remembering plant names is a
+  real problem and buying plants is what gardeners love to do.
+- Dashboard, account, and email+password auth (Supabase), including a
+  source-controlled React Email confirmation template.
 
 Constraints and terminology:
 

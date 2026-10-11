@@ -1,9 +1,8 @@
 "use client";
 
+import { useId } from "react";
 import { Modal } from "./Modal";
 import { Button } from "./Button";
-import clsx from "clsx";
-import buttonStyles from "@/components/ui/Button.module.css";
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -26,32 +25,22 @@ export function ConfirmDialog({
   cancelLabel = "Cancel",
   variant = "default",
 }: ConfirmDialogProps) {
+  const titleId = useId();
+
+  // Cancel comes first in the DOM, so the Modal opens with the caret on it:
+  // Enter can't confirm (or delete) by accident.
   return (
-    <Modal isOpen={isOpen} onClose={onClose}>
+    <Modal isOpen={isOpen} onClose={onClose} labelledBy={titleId}>
       <div className="o-stack">
-        <h2 className="long-primer o-type-display kirk">{title}</h2>
+        <h2 id={titleId} className="long-primer o-type-display kirk">
+          {title}
+        </h2>
         <p className="primer">{message}</p>
         <div className="u-justify-end o-row">
-          <Button
-            type="button"
-            onClick={onClose}
-            className={clsx(
-              buttonStyles["o-button"],
-              buttonStyles["o-button--ghost"]
-            )}  
-          >
+          <Button type="button" variant="ghost" onClick={onClose}>
             {cancelLabel}
           </Button>
-          <Button
-            type="button"
-            onClick={onConfirm}
-            className={clsx(
-                  buttonStyles["o-button"],
-                  variant === "danger"
-                    ? buttonStyles["o-button--danger"]
-                    : buttonStyles["o-button--primary"]
-                )}
-          >
+          <Button type="button" variant={variant === "danger" ? "danger" : "primary"} onClick={onConfirm}>
             {confirmLabel}
           </Button>
         </div>

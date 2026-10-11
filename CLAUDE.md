@@ -120,3 +120,17 @@ Spec: `docs/specs/shopping-list-manual-add.md` §3. Code: `lib/shopping-lookup/`
 - **`after()` uses a bearer-token client, not the cookie client** (`userClientForBackground`): `after()` in a Server Component may not touch cookies, and the page-load pickup runs there. Results are written only while the claim (`lookup_requested_at`) still matches, so a late result can't overwrite a rename or retry.
 - **Live updates are by polling** (`router.refresh()` every 5s in `ShoppingList.tsx` while a lookup is in flight), for the same reason as the frost tolerance lookup above.
 - **`sounds_like`** (the resolver's scratch field) must never be stored, logged or displayed. `unmatched_text` shown to users is restricted to words from their own note.
+
+## Shopping list UI ("the order book")
+
+The look and behaviour of `/shopping-list` and the dashboard's shopping list panel are documented in DESIGN.md → Components → Order book. A few things that are easy to break:
+
+- **Check it without signing in** at `/design-check/shopping-list` (`?empty=1` for the empty sheet, `?view=dashboard` for the dashboard panel). The fixture has one entry per state; server actions fail there by design (no session), which is also how the dialogs' error states can be seen.
+- **Page width is `.o-page:has(> .c-order-book)`, direct child on purpose.** The dashboard panel also wears `.c-order-book`, nested; loosening the selector widens the dashboard.
+- **The sheet is a named container** (`order-book`). Its layout responds to the sheet's width (44rem, 66rem), not the viewport's, which is what lets the same pieces work at dashboard size.
+- **Don't use the `hidden` attribute for anything CSS needs to show.** The base reset pins `[hidden]` to `display: none !important`.
+- **A row's React key is its temporary id for the whole session** (`tempKeys` in `ShoppingList.tsx`), so swapping an optimistic item for the server's row doesn't remount it and replay its entrance.
+- **Border shapes come from list position, not a hash of the name** (`OrderBookBorder`). Removing a plant shifts the shapes of those added after it; that is accepted.
+- **`components/shopping/borderMarks.ts` adds shapes; `plant-scheme/_components/plantMarks.ts` is the scheme journey's and is only imported from.**
+- **The add form exists twice** (`AddItemForm` in `ShoppingList.tsx`, `QuickAdd` in `ShoppingListPanel.tsx`) with the same fields and classes but different submit behaviour: the list page adds optimistically; the dashboard waits for the server and calls `router.refresh()`. A field added to one belongs in both.
+- **The dashboard panel does not poll.** A plant added there shows as typed until the dashboard is next loaded.

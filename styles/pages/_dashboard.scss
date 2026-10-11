@@ -118,8 +118,7 @@
   margin-block-end: var(--space-sm);
 }
 
-.c-weather-section,
-.c-shopping-list {
+.c-weather-section {
   display: flex;
   flex-direction: column;
   gap: var(--space-sm);
@@ -216,39 +215,86 @@
   }
 }
 
-.c-shopping-list {
-  &__grid {
-    display: grid;
-    gap: var(--space-xs);
-    grid-template-rows: repeat(2, minmax(0, 1fr));
-    grid-auto-flow: column;
-    overflow-x: auto;
+// The dashboard's shopping list (ShoppingListPanel.tsx): the order book at
+// glance size. The sheet, letterhead and engraved border are c-order-book's
+// own (styles/components/_shopping-item.scss), worn with --compact; what is
+// below is the part only the dashboard has: the few most recent plants and
+// the way through to the full list. The add form is c-shopping-add, shared.
+.c-order-book--compact {
+  .c-order-book__band {
+    gap: var(--space-md);
+    padding-block-start: var(--space-lg);
   }
 
-  &__card {
-    background-color: var(--color-white);
-    border-radius: var(--radius-m);
-    border: 1px solid transparent;
-    padding: var(--space-sm);
+  .c-order-book__mark {
+    inline-size: 2.75rem;
+  }
+
+  @container order-book (min-width: 44rem) {
+    .c-order-book__band {
+      padding: var(--space-lg) var(--space-lg) 0;
+    }
+
+    .c-order-book__head {
+      padding-block-end: var(--space-md);
+    }
+
+    .c-order-book__mark {
+      inline-size: 3.75rem;
+      margin-inline-end: -0.5rem;
+    }
+  }
+}
+
+// The list page's add form, a size down: same fields, tighter padding.
+.c-order-book--compact .c-shopping-add {
+  padding-block: var(--space-md);
+
+  @container order-book (min-width: 44rem) {
+    padding: var(--space-md) var(--space-lg) var(--space-lg);
+  }
+}
+
+.c-shopping-list {
+  &__empty {
+    max-inline-size: var(--measure);
+    padding: var(--space-md);
+    color: var(--color-ink-soft);
+  }
+
+  &__entries {
+    display: grid;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  // An entry: plate, name, one common name. The whole of it is the link.
+  &__entry {
     display: flex;
-    gap: var(--space-sm);
     align-items: center;
+    gap: var(--space-md);
+    block-size: 100%;
+    padding: var(--space-sm) var(--space-md);
+    border-block-start: var(--border-width-hairline) solid var(--_rule);
     transition: background-color var(--transition-time-default) var(--transition-easing-default);
 
     &:hover {
-      background-color: var(--color-paper-deep);
+      background-color: var(--color-y-yellow);
+    }
+
+    &:focus-visible {
+      outline: var(--border-width-thin) solid var(--sem-focus-color);
+      outline-offset: -2px;
     }
   }
 
-  &__media {
-    background-color: var(--color-y-yellow);
+  &__plate {
     position: relative;
-    width: 40px;
-    height: 40px;
-    border-radius: var(--radius-s);
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;justify-content: center;
+    flex: none;
+    inline-size: 3rem;
+    block-size: 3rem;
+    border-radius: var(--radius-m);
     overflow: hidden;
 
     > .is-image {
@@ -256,9 +302,60 @@
     }
   }
 
+  &__text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+    min-inline-size: 0;
+
+    // one small badge under the name
+    > .c-shopping-item__names {
+      margin-block-start: 0.125rem;
+
+      > .o-badge {
+        --_badge-text-size: clamp(0.728rem, 0.082vw + 0.713rem, 0.800rem);
+        --_badge-line-height: 1.6;
+      }
+    }
+  }
+
+  &__name {
+    color: var(--color-ink);
+    overflow-wrap: anywhere;
+  }
+
+  &__sub {
+    color: var(--color-ink-soft);
+  }
+
   &__footer {
     display: flex;
-    margin-block-start: 0.75rem;
+    padding: var(--space-xs) var(--space-md) var(--space-sm);
+    border-block-start: var(--border-width-hairline) solid var(--_rule);
+  }
+
+  @container order-book (min-width: 36rem) {
+    &__empty {
+      padding-inline: var(--space-lg);
+    }
+
+    &__entries {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    &__entry {
+      padding-inline: var(--space-lg);
+    }
+
+    &__footer {
+      padding-inline: var(--space-lg);
+    }
+  }
+
+  @container order-book (min-width: 56rem) {
+    &__entries {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
   }
 }
 
