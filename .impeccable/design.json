@@ -1,6 +1,6 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-09-20T19:44:25Z",
+  "generatedAt": "2026-10-11T11:37:26Z",
   "title": "Design System: Plotted",
   "extensions": {
     "colorMeta": {
@@ -123,6 +123,66 @@
           "oklch(80% 0 0)",
           "oklch(93% 0 0)"
         ]
+      },
+      "damson": {
+        "role": "tertiary",
+        "displayName": "Damson",
+        "canonical": "#570F3E",
+        "tonalRamp": [
+          "oklch(15% 0.060 345)",
+          "oklch(24% 0.095 345)",
+          "oklch(33% 0.120 345)",
+          "oklch(42% 0.130 345)",
+          "oklch(52% 0.130 345)",
+          "oklch(64% 0.115 345)",
+          "oklch(80% 0.075 345)",
+          "oklch(93% 0.030 345)"
+        ]
+      },
+      "plum": {
+        "role": "tertiary",
+        "displayName": "Plum",
+        "canonical": "#68124A",
+        "tonalRamp": [
+          "oklch(15% 0.062 346)",
+          "oklch(24% 0.100 346)",
+          "oklch(33% 0.128 346)",
+          "oklch(42% 0.138 346)",
+          "oklch(52% 0.136 346)",
+          "oklch(64% 0.118 346)",
+          "oklch(80% 0.076 346)",
+          "oklch(93% 0.030 346)"
+        ]
+      },
+      "mulberry": {
+        "role": "tertiary",
+        "displayName": "Mulberry",
+        "canonical": "#82175D",
+        "tonalRamp": [
+          "oklch(15% 0.066 346)",
+          "oklch(24% 0.108 346)",
+          "oklch(33% 0.140 346)",
+          "oklch(42% 0.155 346)",
+          "oklch(52% 0.150 346)",
+          "oklch(64% 0.128 346)",
+          "oklch(80% 0.080 346)",
+          "oklch(93% 0.032 346)"
+        ]
+      },
+      "blossom": {
+        "role": "tertiary",
+        "displayName": "Blossom",
+        "canonical": "#F8D6EC",
+        "tonalRamp": [
+          "oklch(15% 0.030 338)",
+          "oklch(24% 0.045 338)",
+          "oklch(33% 0.060 338)",
+          "oklch(42% 0.070 338)",
+          "oklch(52% 0.075 338)",
+          "oklch(64% 0.070 338)",
+          "oklch(80% 0.055 338)",
+          "oklch(93% 0.035 338)"
+        ]
       }
     },
     "typographyMeta": {
@@ -221,6 +281,41 @@
         "name": "reduced-motion",
         "value": "@media (prefers-reduced-motion: reduce) { animation: none }",
         "purpose": "Every keyframe animation opts out here; spatial entrance/hover motion is also gated behind (prefers-reduced-motion: no-preference)."
+      },
+      {
+        "name": "order-book-border-draw",
+        "value": "scheme-elevation-draw 0.8s cubic-bezier(0.16, 1, 0.3, 1) backwards; +70ms per plant",
+        "purpose": "The order book's authored moment: each plant's silhouette in the letterhead draws up from the ground line on load (stroke-dashoffset on pathLength-normalised paths), flower heads budding a beat later. A plant added later draws alone, at once."
+      },
+      {
+        "name": "order-line-in",
+        "value": "0.8s cubic-bezier(0.16, 1, 0.3, 1) (opacity + -0.375rem settle), with order-line-wash 1.8s ease",
+        "purpose": "A newly added shopping list entry settling onto the sheet out of the add form's wash, while its silhouette draws into the border."
+      },
+      {
+        "name": "order-resolve-in",
+        "value": "0.8s cubic-bezier(0.16, 1, 0.3, 1) (opacity, 0.375rem rise, 3px un-blur); staggered 0 / 80 / 180 / 300ms",
+        "purpose": "The resolve: when a name lookup comes back with a plant, its picture, name, common-name badges and summary settle in one after another."
+      },
+      {
+        "name": "order-edit-in",
+        "value": "0.4s cubic-bezier(0.16, 1, 0.3, 1) (opacity + -0.25rem settle)",
+        "purpose": "The rename form easing in where the entry's name stood."
+      },
+      {
+        "name": "purchase-plate-in",
+        "value": "0.8s cubic-bezier(0.16, 1, 0.3, 1) (opacity, 0.5rem rise, scale 0.92 to 1)",
+        "purpose": "The plant's plate settling half onto the purchase dialog's dusk strip."
+      },
+      {
+        "name": "order-shimmer",
+        "value": "1.8s ease infinite (background-position sweep)",
+        "purpose": "While a name is being looked up: light across the entry's plate and across the two placeholder lines holding the summary's place. Incidental, looping; off under reduced motion."
+      },
+      {
+        "name": "order-dots",
+        "value": "1.2s ease infinite, staggered 0.15s",
+        "purpose": "Three mulberry dots after 'Looking this up' and 'Adding it to your garden'. Static at 55% opacity under reduced motion."
       }
     ],
     "breakpoints": [
@@ -231,6 +326,14 @@
       {
         "name": "tablet",
         "value": "860px"
+      },
+      {
+        "name": "order-book container: side by side",
+        "value": "44rem"
+      },
+      {
+        "name": "order-book container: two entries abreast",
+        "value": "66rem"
       }
     ]
   },
@@ -239,7 +342,7 @@
       "name": "Primary Button",
       "kind": "button",
       "refersTo": "button-primary",
-      "description": "The single primary action per view. Marigold fill, warm off-white text, near-square corners.",
+      "description": "The single primary action per view. Marigold fill, near-black ink-deep text (the pairing that clears AA), near-square corners.",
       "html": "<button class=\"ds-btn-primary\">Add plant</button>",
       "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; padding: 0.75rem 1rem; border: none; border-radius: var(--radius-s, 2px); font-family: var(--font-inter), sans-serif; font-size: 0.875rem; line-height: 1; white-space: nowrap; inline-size: max-content; cursor: pointer; background-color: var(--color-r-marigold); color: var(--color-ink-deep); transition: background-color 150ms, color 150ms, border-color 150ms; } .ds-btn-primary:hover { background-color: var(--color-o-vermillion); color: var(--color-ink-deep); } .ds-btn-primary:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--color-paper), 0 0 0 4px var(--color-p-lavender); } .ds-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }"
     },
@@ -378,6 +481,46 @@
       "description": "The scheme-list pane's finishing action (SchemeGenerateAction.tsx, added alongside the /plant-scheme/chat workspace) — a plain-language line describing what \"Generate the scheme\" will do, pinned beneath the growing plant list on wide screens the same way the chat composer pins beneath its log. Completing swaps the button for a quiet confirmation in the path's own flowering-season accent, never a second button.",
       "html": "<div class=\"ds-generate\"><p class=\"ds-generate__lead\">Happy with your border? We'll save these 6 plants and put together your planting guide — how to arrange them, and how to care for them through the year.</p><button class=\"ds-generate__button\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M14 9.536V7a4 4 0 0 1 4-4h1.5a.5.5 0 0 1 .5.5V5a4 4 0 0 1-4 4 4 4 0 0 0-4 4c0 2 1 3 1 5a5 5 0 0 1-1 3\"/><path d=\"M4 9a5 5 0 0 1 8 4 5 5 0 0 1-8-4\"/><path d=\"M5 21h14\"/></svg>Generate the scheme</button></div>",
       "css": ".ds-generate { display: flex; flex-direction: column; gap: 8px; padding: 16px; max-inline-size: 22rem; border-block-start: 1px solid var(--sem-border-color); } .ds-generate__lead { margin: 0; color: var(--color-ink-soft); font-family: var(--font-inter), sans-serif; font-size: 0.81rem; line-height: 1.5; } .ds-generate__button { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; inline-size: 100%; padding: 0.75rem 1rem; border: none; border-radius: var(--radius-s, 2px); font-family: var(--font-inter), sans-serif; font-size: 0.875rem; line-height: 1; cursor: pointer; background-color: var(--color-p-lavender); color: var(--color-p-white); transition: background-color 150ms, color 150ms; } .ds-generate__button:hover { background-color: var(--color-o-vermillion); color: var(--color-n-deep-grey); }"
+    },
+    {
+      "name": "Order Book Letterhead",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "The shopping list's head (and its compact copy on the dashboard): the one dark field in the app. Dusk (damson lit by a low marigold glow and a mulberry lift), the title in blossom, one Zodiak-italic aside, and an engraved border with one silhouette per plant, dashed ghosts for ground still to plant, and a bird in gold. The shipped version also carries the specimen plates' grain. Scoped to the shopping list: see the Dusk Field exception.",
+      "html": "<div class=\"ds-ob-band\"><div class=\"ds-ob-head\"><p class=\"ds-ob-title\">Shopping list</p><p class=\"ds-ob-aside\">Four plants to look out for.</p></div><div class=\"ds-ob-border\"><svg class=\"ds-ob-mark\" viewBox=\"0 18 44 60\" aria-hidden=\"true\"><path d=\"M22 78 C 21 58 19 40 12 26\" pathLength=\"1\"/><path d=\"M22 78 C 22 56 21 36 20 22\" pathLength=\"1\"/><path d=\"M22 78 C 23 58 25 40 31 28\" pathLength=\"1\"/><path d=\"M22 78 C 24 60 27 46 36 34\" pathLength=\"1\"/></svg><svg class=\"ds-ob-mark\" viewBox=\"0 18 44 60\" aria-hidden=\"true\"><path d=\"M22 78 C 22 64 23 52 22 41\" pathLength=\"1\"/><path d=\"M12 31 a10 10 0 1 0 20 0 a10 10 0 1 0 -20 0\" pathLength=\"1\"/><path d=\"M22 31 L22 24 M22 31 L28 27.5 M22 31 L28 34.5 M22 31 L22 38 M22 31 L16 34.5 M22 31 L16 27.5\" pathLength=\"1\"/><circle cx=\"22\" cy=\"23\" r=\"1.1\"/><circle cx=\"29\" cy=\"27\" r=\"1.1\"/><circle cx=\"15\" cy=\"35\" r=\"1.1\"/></svg><svg class=\"ds-ob-mark ds-ob-visitor\" viewBox=\"0 18 44 60\" aria-hidden=\"true\"><path d=\"M21 78 L21 47\" pathLength=\"1\"/><path d=\"M13 43 C 15 34 26 33 29 39 C 30 42.5 27 46.5 22 46.5 C 18 46.5 14.5 45.5 13 43\" pathLength=\"1\"/><path d=\"M13.5 43 L7 47.5\" pathLength=\"1\"/><path d=\"M29 38.6 L33.5 39.6 L29.6 41\" pathLength=\"1\"/><path d=\"M17.5 41 C 20.5 38.8 24 39.8 25 43\" pathLength=\"1\"/><circle cx=\"26.4\" cy=\"37.8\" r=\"0.9\"/></svg><svg class=\"ds-ob-mark\" viewBox=\"0 18 44 60\" aria-hidden=\"true\"><path d=\"M22 78 C 21 68 23 58 22 47\" pathLength=\"1\"/><path d=\"M22 66 C 17 62 13 62 11 65\" pathLength=\"1\"/><path d=\"M22 36 L22 31.5 M24.8 37.2 L28 34 M26 40 L30.5 40 M24.8 42.8 L28 46 M19.2 42.8 L16 46 M18 40 L13.5 40 M19.2 37.2 L16 34\" pathLength=\"1\"/><circle cx=\"22\" cy=\"40\" r=\"2.4\"/></svg><svg class=\"ds-ob-mark ds-ob-ghost\" viewBox=\"0 18 44 60\" aria-hidden=\"true\"><path d=\"M22 78 C 22 60 21 40 23 23\" pathLength=\"1\"/><path d=\"M22 64 c4 -1 7 1 7 5 M21.8 56 c4 -1 6.5 1 6.5 4.5 M21.8 48 c3.5 -1 6 1 6 4 M22 40 c3 -1 5 0.5 5 3.5\" pathLength=\"1\"/></svg><svg class=\"ds-ob-mark ds-ob-ghost\" viewBox=\"0 18 44 60\" aria-hidden=\"true\"><path d=\"M22 78 C 22 62 24 44 32 30\" pathLength=\"1\"/><path d=\"M22 70 l-6 -3 M22 70 l6 -2 M22.6 62 l-6 -3 M22.6 62 l6 -2 M23.8 54 l-5 -3 M23.8 54 l5 -1.5 M25.6 46 l-4.5 -3 M25.6 46 l4.5 -1\" pathLength=\"1\"/></svg></div></div>",
+      "css": ".ds-ob-band { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: end; column-gap: 2rem; padding: 2.5rem 2rem 0; border-radius: var(--radius-l, 8px) var(--radius-l, 8px) 0 0; overflow: hidden; background-color: var(--color-damson); background-image: radial-gradient(110% 130% at 92% 118%, color-mix(in oklab, var(--color-r-marigold) 62%, transparent) 0%, color-mix(in oklab, var(--color-mulberry) 45%, transparent) 38%, transparent 68%), radial-gradient(80% 120% at 0% 0%, color-mix(in oklab, var(--color-mulberry) 70%, transparent) 0%, transparent 62%); color: var(--color-blossom); } .ds-ob-head { display: grid; gap: 0.5rem; padding-block-end: 1.5rem; } .ds-ob-title { margin: 0; font-family: var(--font-zodiak), serif; font-weight: 600; font-size: 2.6rem; line-height: 1; letter-spacing: -0.02em; } .ds-ob-aside { margin: 0; font-family: var(--font-zodiak), serif; font-style: italic; font-size: 1.1rem; color: color-mix(in oklab, var(--color-blossom) 86%, var(--color-damson)); } .ds-ob-border { display: flex; align-items: flex-end; min-inline-size: 0; overflow: hidden; border-block-end: 2px solid color-mix(in srgb, var(--color-blossom) 75%, transparent); } .ds-ob-mark { flex: none; inline-size: 4.5rem; block-size: auto; margin-inline-end: -0.5rem; overflow: visible; } .ds-ob-mark path { fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; } .ds-ob-mark circle { fill: var(--color-y-gold); } .ds-ob-ghost { opacity: 0.38; } .ds-ob-ghost path { stroke-width: 1; stroke-dasharray: 0.035 0.05; } .ds-ob-visitor { color: var(--color-y-gold); } .ds-ob-visitor path { stroke-width: 1.25; } .ds-ob-visitor circle { fill: currentColor; }"
+    },
+    {
+      "name": "Mark as Bought",
+      "kind": "button",
+      "refersTo": null,
+      "description": "A shopping list entry's one real action. Outlined, holding an empty mulberry ring: at rest it reads as something still to do. The ring fills and its tick arrives only on hover or focus. The same outline a size down (no ring, a mulberry icon) is the small button used for 'Try again' and 'Edit name' inside an entry.",
+      "html": "<button class=\"ds-bought\"><span class=\"ds-bought-ring\"><svg width=\"14\" height=\"14\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M20 6 9 17l-5-5\"/></svg></span>Mark as bought</button>",
+      "css": ".ds-bought { display: inline-flex; align-items: center; gap: 0.5rem; min-block-size: 2.75rem; padding-inline: 0.625rem 0.875rem; border: 1px solid var(--color-n-dark-grey); border-radius: var(--radius-s, 2px); background-color: transparent; color: var(--color-ink); font-family: var(--font-inter), sans-serif; font-size: 0.875rem; line-height: 1; white-space: nowrap; cursor: pointer; transition: background-color 0.4s ease, border-color 0.4s ease; } .ds-bought-ring { display: flex; align-items: center; justify-content: center; inline-size: 1.25rem; block-size: 1.25rem; border: 1.5px solid var(--color-mulberry); border-radius: 50%; color: var(--color-white); transition: background-color 0.4s ease; } .ds-bought-ring svg { opacity: 0; transform: scale(0.6); transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); } .ds-bought:hover .ds-bought-ring, .ds-bought:focus-visible .ds-bought-ring { background-color: var(--color-mulberry); } .ds-bought:hover .ds-bought-ring svg, .ds-bought:focus-visible .ds-bought-ring svg { opacity: 1; transform: none; } .ds-bought:hover { border-color: var(--color-ink); background-color: var(--color-y-yellow); } .ds-bought:active { background-color: var(--color-y-gold); } .ds-bought:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-p-lavender); }"
+    },
+    {
+      "name": "Suggestion Choice Row",
+      "kind": "custom",
+      "refersTo": null,
+      "description": "'It might be…': the choose-one rows shown when a name lookup can't settle on one plant. Full width, text leading, a choose mark trailing. 'Keep as typed' is always first. Rest is oat with a hairline; hover is highlight-yellow with the mark checking in, in ink; focus is the lavender ring; chosen-while-saving is white with the deep-cyan edge and a cyan tick, and the rows not taken drop to a plain outline.",
+      "html": "<div class=\"ds-choices\"><button class=\"ds-choice\"><span class=\"ds-choice-text\"><span class=\"ds-choice-title\">Keep as typed</span><span class=\"ds-choice-detail\">“clematis glyco failure”</span></span><span class=\"ds-choice-mark\"><svg class=\"ds-choice-empty\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\"/></svg><svg class=\"ds-choice-checked\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\"/><path d=\"m9 12 2 2 4-4\"/></svg></span></button><button class=\"ds-choice ds-choice-chosen\"><span class=\"ds-choice-text\"><span class=\"ds-choice-title ds-choice-latin\"><i>Clematis glycinoides</i></span><span class=\"ds-choice-detail\">forest clematis</span><span class=\"ds-choice-detail\">“failure” not recognised</span></span><span class=\"ds-choice-mark\"><svg class=\"ds-choice-empty\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\"/></svg><svg class=\"ds-choice-checked\" width=\"20\" height=\"20\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect width=\"18\" height=\"18\" x=\"3\" y=\"3\" rx=\"2\"/><path d=\"m9 12 2 2 4-4\"/></svg></span></button></div>",
+      "css": ".ds-choices { display: flex; flex-direction: column; gap: 4px; max-inline-size: 26rem; } .ds-choice { display: flex; align-items: center; gap: 1rem; inline-size: 100%; min-block-size: 3rem; padding: 0.5rem 1rem; border: 1px solid var(--color-sand-line); border-radius: var(--radius-m, 4px); background-color: var(--color-oat); color: var(--color-ink); font-family: var(--font-inter), sans-serif; text-align: start; cursor: pointer; transition: background-color 0.4s ease, border-color 0.4s ease; } .ds-choice:hover { background-color: var(--color-y-yellow); } .ds-choice:active { background-color: var(--color-y-gold); } .ds-choice:focus-visible { outline: none; box-shadow: 0 0 0 2px var(--color-white), 0 0 0 4px var(--color-p-lavender); } .ds-choice-chosen, .ds-choice-chosen:hover { border-color: var(--color-b-cyan-deep); box-shadow: 0 0 0 1px var(--color-b-cyan-deep); background-color: var(--color-white); } .ds-choice-text { display: flex; flex: 1; flex-direction: column; gap: 2px; min-inline-size: 0; } .ds-choice-title { font-size: 1rem; font-weight: 600; line-height: 1.3; } .ds-choice-latin { font-family: var(--font-zodiak), serif; } .ds-choice-detail { font-size: 0.875rem; line-height: 1.4; color: var(--color-ink-soft); } .ds-choice-mark { position: relative; flex: none; inline-size: 1.25rem; block-size: 1.25rem; color: var(--color-ink-soft); } .ds-choice-mark svg { position: absolute; inset: 0; transition: opacity 0.4s ease, transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); } .ds-choice-checked { opacity: 0; transform: scale(0.7); } .ds-choice:hover .ds-choice-mark, .ds-choice-chosen .ds-choice-mark { color: var(--color-ink); } .ds-choice:hover .ds-choice-empty, .ds-choice-chosen .ds-choice-empty { opacity: 0; } .ds-choice:hover .ds-choice-checked, .ds-choice-chosen .ds-choice-checked { opacity: 1; transform: none; } .ds-choice-chosen .ds-choice-mark, .ds-choice-chosen:hover .ds-choice-mark { color: var(--color-b-cyan-deep); }"
+    },
+    {
+      "name": "Common-name Badge",
+      "kind": "chip",
+      "refersTo": "badge",
+      "description": "A plant's common names on a shopping list entry: the standard badge in one of five soft tints picked from the name. The tint is decorative and carries no meaning; it never uses a flowering-season or trait colour. Shopping list only.",
+      "html": "<div class=\"ds-names\"><span class=\"ds-name ds-name-1\">Purple coneflower</span><span class=\"ds-name ds-name-2\">Avens</span><span class=\"ds-name ds-name-3\">Purpletop vervain</span><span class=\"ds-name ds-name-4\">Forest clematis</span><span class=\"ds-name ds-name-5\">Mexican feather grass</span></div>",
+      "css": ".ds-names { display: flex; flex-wrap: wrap; gap: 4px; } .ds-name { display: inline-block; padding-inline: 8px; border: 1px solid transparent; border-radius: var(--radius-pill, 32px); font-family: var(--font-inter), sans-serif; font-size: 0.85rem; line-height: 1.75; white-space: nowrap; } .ds-name-1 { background-color: var(--color-blossom); color: var(--color-damson); } .ds-name-2 { background-color: var(--color-y-hay); color: var(--color-ink); } .ds-name-3 { background-color: var(--color-o-orange); color: var(--color-ink); } .ds-name-4 { background-color: var(--color-p-white); border-color: color-mix(in srgb, var(--color-p-lavender) 35%, transparent); color: var(--color-p-lavender); } .ds-name-5 { background-color: var(--color-clay); color: var(--color-ink); }"
+    },
+    {
+      "name": "Scheme Tag",
+      "kind": "chip",
+      "refersTo": null,
+      "description": "On a shopping list entry that came from a planting scheme: a squared lavender tag with the flower icon naming the scheme, the name being the link. Squared rather than a pill so it doesn't read as another badge.",
+      "html": "<p class=\"ds-scheme-tag\"><svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><path d=\"M12 5a3 3 0 1 1 3 3m-3-3a3 3 0 1 0-3 3m3-3v1M9 8a3 3 0 1 0 3 3M9 8h1m5 0a3 3 0 1 1-3 3m3-3h-1m-2 3v-1\"/><circle cx=\"12\" cy=\"8\" r=\"2\"/><path d=\"M12 10v12\"/><path d=\"M12 22c4.200 0 7-1.667 7-5-4.200 0-7 1.667-7 5Z\"/><path d=\"M12 22c-4.200 0-7-1.667-7-5 4.200 0 7 1.667 7 5Z\"/></svg><span>For <a href=\"#\">Hot border, south wall</a></span></p>",
+      "css": ".ds-scheme-tag { display: inline-flex; align-items: center; gap: 0.375rem; margin: 0; padding: 0.25rem 0.625rem 0.25rem 0.5rem; border-radius: var(--radius-s, 2px); background-color: color-mix(in srgb, var(--color-p-lavender) 11%, var(--color-white)); color: var(--color-p-lavender); font-family: var(--font-inter), sans-serif; font-size: 0.875rem; line-height: 1.5; } .ds-scheme-tag svg { flex: none; } .ds-scheme-tag a { color: inherit; font-weight: 500; text-decoration: underline; text-underline-offset: 0.2em; } .ds-scheme-tag a:hover { text-decoration-thickness: 2px; } .ds-scheme-tag a:focus-visible { outline: 2px solid var(--sem-focus-color); outline-offset: 2px; }"
     }
   ],
   "narrative": {
@@ -423,6 +566,16 @@
         "section": "colors"
       },
       {
+        "name": "The Dusk Field exception",
+        "body": "**The Dusk Field exception** *(scoped to the shopping list).* The second sanctioned large colour field in the app, and the only one that is dark: the order book's letterhead (`/shopping-list`), its compact copy on the dashboard, and the head of the purchase dialog wear **dusk** — damson lit by a marigold glow low on the far side and a mulberry lift in the near corner, under the specimen plates' grain (`@mixin order-book-dusk`, `_shopping-item.scss`). It exists because this page cannot lean on photographs (Wikimedia images are often missing), so the page itself has to bring the colour. Marigold appears inside the gradient as light, not as chrome, so the One Accent Rule's count is unaffected. Like the Semantic Field, this is one surface's licence: a third dark band elsewhere is drift.",
+        "section": "colors"
+      },
+      {
+        "name": "Decorative tint",
+        "body": "**Decorative tint** *(shopping list common-name badges only).* Common names on a shopping list entry are `.o-badge` pills in one of five soft tints (blossom, hay, peach, lavender-white, clay), picked from the name by hash. The tint carries **no meaning** — it is variety on a page without photographs — and it deliberately avoids every `--sem-flowering-*` and trait colour so a badge can never be misread as a season or a trait. Don't extend this to a surface where badges already encode something.",
+        "section": "colors"
+      },
+      {
         "name": "The Two-Register Rule",
         "body": "**The Two-Register Rule.** Zodiak *headings* are **bold roman (600)** in the product UI and **italic (400)** on marketing/editorial surfaces — never mixed within one surface. An app section header in italic, or a marketing headline in bold roman, is drift. Weight and style are chosen by surface mode (Operate → roman 600; Persuade/Read editorial → italic 400), not by taste per screen.",
         "section": "typography"
@@ -449,7 +602,7 @@
       },
       {
         "name": "The Narrow Column Rule",
-        "body": "**The Narrow Column Rule.** App pages hold to the ~800px `.o-page` measure — one readable column, one task. The 1120px editorial container is a marketing device and never appears in the app. The **sanctioned width exception** is the dashboard, which runs the ~1000px companion measure (still one centred column, never multi-column) because it is a stack of peer check-in blocks rather than a single task. The `/plant-scheme/chat` workspace (below) is the other. The planting schemes hub (`/plant-scheme`) is no longer a third at the *page* level — it held a bounded two-column exception until a revision retired it in favour of a single column with a \"Recent plans\" preview, so full browsing/management could move to its own route (`/plant-scheme/plans`) instead of sharing the hub with the starting task. Its garden gallery grid does still break out, but as the breakout device (above) — one element opting itself wider, not the page or a container claiming a new measure — which is why it isn't a fourth page-level exception here. A new app route wanting extra width, at the page or container level, is drift, not a precedent; a single element with a real reason to bloom past its container is a different, and much cheaper, decision.",
+        "body": "**The Narrow Column Rule.** App pages hold to the ~800px `.o-page` measure — one readable column, one task. The 1120px editorial container is a marketing device and never appears in the app. The **sanctioned width exception** is the dashboard, which runs the ~1000px companion measure (still one centred column, never multi-column) because it is a stack of peer check-in blocks rather than a single task. The `/plant-scheme/chat` workspace (below) is another, and the shopping list's order book measure (80rem, above) is the third — granted because buying plants turned out to be a primary job of the product, not a side list, and the page needed room to show two entries abreast. The planting schemes hub (`/plant-scheme`) is no longer a third at the *page* level — it held a bounded two-column exception until a revision retired it in favour of a single column with a \"Recent plans\" preview, so full browsing/management could move to its own route (`/plant-scheme/plans`) instead of sharing the hub with the starting task. Its garden gallery grid does still break out, but as the breakout device (above) — one element opting itself wider, not the page or a container claiming a new measure — which is why it isn't a fourth page-level exception here. A new app route wanting extra width, at the page or container level, is drift, not a precedent; a single element with a real reason to bloom past its container is a different, and much cheaper, decision.",
         "section": "layout"
       },
       {
@@ -479,7 +632,7 @@
       "**Do** let colour enter through plant content — photos and the trait/sun/season badge families — while chrome stays calm.",
       "**Do** treat the planting schemes hub (`/plant-scheme`) as a single-task page — start a scheme, with a light Recent plans glance above it. Its season-washed start panel belongs to the scheme journey; on another Operate screen it is drift. Full plan browsing and management belongs on `/plant-scheme/plans`, not folded back into the hub. \"How it works\" content belongs in the welcome dialog's `OnboardingCarousel`, shown once to a genuinely first-time gardener — not a standing disclosure on the hub.",
       "**Do** carry the scheme's flowering-season accent through the conversation via `--_accent` / `--_accent-wash`, and reuse the journey chrome (`.c-scheme-journey` step marker, the border elevation, the tray pill) rather than reinventing it per screen.",
-      "**Do** hold app pages to the ~800px `.o-page` measure; the 1120px container is a marketing device, the ~1000px companion measure is the dashboard's alone, and full width is the `/plant-scheme/chat` workspace's alone — the Layout section lists every exception. The planting schemes hub sits at the ordinary product measure now too.",
+      "**Do** hold app pages to the ~800px `.o-page` measure; the 1120px container is a marketing device, the ~1000px companion measure is the dashboard's alone, the 80rem order book measure is the shopping list's alone, and full width is the `/plant-scheme/chat` workspace's alone — the Layout section lists every exception. The planting schemes hub sits at the ordinary product measure now too.",
       "**Do** build any new conversation on the `c-chat` primitives (`_chat.scss` / `ChatLog.tsx`) — a boxless internally-scrolling log with `role=\"log\"` + `aria-live` (height capped via `--short` / `--bounded` or flexed to fill; `--bounded` foot-fades toward the composer), attribution once per run, a typing indicator before a reply, an auto-growing composer set a rhythm step off the log, focus back to the composer after send.",
       "**Do** build a choose-one set as a *set* — full-width rows stacked in one column, label leading, a mark drawn in both states held to the trailing edge — and close it once the choice is made, so scrollback reads as a record rather than as live buttons (see Chat → Choose-one options).",
       "**Do** take every focus ring and active-field edge from `--sem-focus-color` (Cyan Deep) — the light `--color-b-cyan` is a fill/selected tint and is too pale to be an indicator.",
@@ -488,9 +641,17 @@
       "**Do** hold every decision point in the chat to ≤4 visible options — split a longer suggestion panel into tier groups (`SuggestionPanel.tsx`) rather than presenting more at once.",
       "**Do** give a closed choose-one group a way back (`.c-chat__options-reopen`) once it's genuinely committed — a permanent choice with no undo is a dead end, not a decision.",
       "**Do** give each pane of a multi-pane layout a real landmark (`<section aria-label>` / `aria-labelledby`) rather than trying to make DOM tab order track pixel position — that only works for one column, and reordering or focus-trapping to chase it is worse than the mismatch itself.",
-      "**Do** pair that landmark with a `.u-skip-link` for keyboard-only users with no screen reader — landmarks are AT-specific and don't help them; a visually-hidden-until-focused `<a href=\"#…\">` to a `tabIndex={-1}` section is the equivalent affordance."
+      "**Do** pair that landmark with a `.u-skip-link` for keyboard-only users with no screen reader — landmarks are AT-specific and don't help them; a visually-hidden-until-focused `<a href=\"#…\">` to a `tabIndex={-1}` section is the equivalent affordance.",
+      "**Do** say \"(optional)\" in an optional field's label, in sentence-case Inter after the mono label — don't leave it to be inferred from a missing asterisk, and don't hide optional fields behind a disclosure when there are only two of them.",
+      "**Do** draw a \"mark this done\" action with an **empty** mark at rest and a verb-led label (\"Mark as bought\"). A resting tick beside a past-tense label reads as a status.",
+      "**Do** keep a dialog open while its action runs and report a failure inside it, beside the thing it concerns — and open any destructive dialog with focus on the safe button.",
+      "**Do** tell the gardener what a background lookup is doing and how it ended: looking, no match, failed (with a way to try again), or resolved. An entry that silently shows nothing looks the same as one never looked up.",
+      "**Do** make a surface that can't rely on photographs carry its own colour and illustration (the order book's dusk letterhead, engraved border and specimen-plate monograms) rather than leaving grey placeholder wells."
     ],
     "donts": [
+      "**Don't** reuse the order book's dusk letterhead, its engraved border, or the decorative badge tints on another route — they are the shopping list's (and its dashboard panel's), as the season washes are the scheme journey's.",
+      "**Don't** colour a shopping list badge with a flowering-season or trait colour; the tints there are deliberately meaningless.",
+      "**Don't** spread a shopping list entry into aligned columns with column heads — tried and retired; sparse entries leave the columns empty. Use the stacked entry and set entries side by side instead.",
       "**Don't** introduce a third palette or bring the marketing `moss` / `terra` / `sage` greens into product UI — `styles/abstracts/_variables.scss` is the single source of truth.",
       "**Don't** use `--color-ink` for body copy — running text is `--color-n-deep-grey`; `ink` / `ink-soft` are for headings and labels.",
       "**Don't** drift toward the plant-ID app look: no dark UI, neon accents, camera-first chrome, or gamified score badges. The \"N/12 spotted\" hook is a gentle prompt, not a scoreboard.",

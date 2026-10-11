@@ -67,10 +67,6 @@ export default async function ShoppingListPage() {
     return toShoppingListItemData(item, thumbnailUrl);
   });
 
-  return (
-    <div className="o-stack">
-      <h1 className="pica o-type-display kirk">Shopping list</h1>
-      <ShoppingList initialItems={mapped} />
-    </div>
-  );
+  // The page title is the order book's own letterhead (ShoppingList.tsx).
+  return <ShoppingList initialItems={mapped} />;
 }

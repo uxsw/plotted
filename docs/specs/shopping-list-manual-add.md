@@ -71,7 +71,7 @@ Existing RLS policies are per-user and cover the new columns. Lookup writes happ
   - Duplicates allowed (no check).
 - **Add form** on `/shopping-list`:
   - Name field is always visible and is the only required field. Use plain text input attributes that do not interfere with keyboard dictation (no aggressive autocorrect or autocomplete behaviour).
-  - "Add details" expands where-to-buy and notes.
+  - "Add details" expands where-to-buy and notes. *(Superseded 2026-10-11: both fields are now always visible and labelled "(optional)", and the same three-field form is on the dashboard. See DESIGN.md → Order book.)*
   - Submit adds optimistically, then reconciles with the server result.
 - **State resync fix:** `useState(initialItems)` in `ShoppingList.tsx` does not pick up new items. Fix as part of this phase.
 - **Cards are source-aware:**
@@ -110,7 +110,7 @@ Runs after the item is created, in `after()`. Capture never waits for it. Code: 
 
 **What the user sees**
 - **High** (one confident match): `genus`, `species`, `cultivar`, `common_names`, `growth_type`, `summary`, `summary_scope` and the image are written. The card leads with the italic Latin name (cultivar upright in quotes), common names beneath, and "Noted as: …" with the original text whenever it differs. If the user typed one of the plant's common names, that stays the headline (upright) with the Latin beneath. A species- or genus-level summary under a more specific name is prefixed "About the species:" / "About the genus:".
-- **Medium** (including every cultivar, every partial match, and two confident answers at once): candidates are stored in `lookup_candidates` and nothing else is written. The card stays as typed and shows "Not sure about this one. It might be:" with **Keep as typed** first, then a button per candidate. Any words of the user's own note the candidate does not account for are shown on its button as `"…" not recognised` (an unrecognised cultivar, for example). Accepting is an explicit action: it writes that candidate's fields, clears the candidates, and fetches its summary and image in the background. Keep as typed clears the candidates.
+- **Medium** (including every cultivar, every partial match, and two confident answers at once): candidates are stored in `lookup_candidates` and nothing else is written. The card stays as typed and shows "Not sure about this one. It might be:" with **Keep as typed** first, then a button per candidate. Any words of the user's own note the candidate does not account for are shown on its button as `"…" not recognised` (an unrecognised cultivar, for example). Accepting is an explicit action: it writes that candidate's fields, clears the candidates, and fetches its summary and image in the background. Keep as typed clears the candidates. *(Presentation updated 2026-10-11: the choices are full-width rows with "Keep as typed" still first, not buttons. A "no match" entry now says so and offers Edit name; a failed lookup offers Try again. See DESIGN.md → Order book.)*
 - **Low, or no candidates**: the card stays as typed with the fallback tile. No suggestion, no error styling.
 - `entered_name` is never changed by a lookup. Only the user's own rename changes it.
 - `unmatched_text` shown to the user is restricted in code to words that appear in their note, in the note's order. Model commentary is never displayed.

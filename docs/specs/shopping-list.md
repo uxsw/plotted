@@ -74,6 +74,8 @@ Simple list view per item:
 - Link to originating scheme, or "This planting scheme has been deleted" if `scheme_id IS NULL`
 - Two actions per item: **Delete** (hard delete) and **Purchased**
 
+> **As built (2026-10-11).** The page is now "the order book": see DESIGN.md → Components → Order book for its design. The behaviour below is unchanged, with these differences in wording and flow: the action is labelled **Mark as bought** (not "Purchased"); the prompt is a dialog titled "Plant purchased!" with **Add to my garden** / **Just remove it**; delete asks first ("Remove from your list?", **Keep it** / **Remove from list**) and the dialog stays open until the removal succeeds. The dashboard shows the six most recent items, each linking to this page, with an add form, and is shown even when the list is empty.
+
 ### Delete
 - Hard delete the row and its associated storage snapshot file.
 
