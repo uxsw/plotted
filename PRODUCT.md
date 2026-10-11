@@ -69,8 +69,11 @@ Confirmed capabilities:
   `species_reference`, populated after the response via `after()`, with
   client-side polling on the detail page while a lookup is pending.
 - Planting schemes: user selects plants from their library and receives an
-  AI-generated, long-form editorial planting recommendation with embedded plant
-  suggestion cards; schemes can be saved and named.
+  AI-generated editorial planting recommendation, set as a catalogue article:
+  the border drawn in elevation, the year in flower, how to arrange it, each
+  plant, and the year's jobs month by month. From it, plants can be added to
+  the shopping list (one at a time or all at once) and marked as planted,
+  which adds them to the garden. Schemes can be saved and named.
 - Garden wildlife: a fixed list of common British garden birds the user can tick
   off as spotted, with a glanceable "N/12 spotted" progress hook.
 - Weather: current conditions, hourly strip, and multi-day forecast for the
@@ -127,7 +130,8 @@ Explicitly undecided:
 - An incumbent visual system exists in code (`styles/` ITCSS SCSS, mid-migration
   off Tailwind; token intent documented in `styles/docs/theme.md` and
   `styles/docs/design.md`) and a high-fidelity marketing homepage design
-  reference (`docs/Plotted Homepage.dc.html`). No DESIGN.md yet.
+  reference (`docs/Plotted Homepage.dc.html`). `DESIGN.md` is the synthesis
+  of that system and the first place to look.
 
 ## Evidence on Hand
 

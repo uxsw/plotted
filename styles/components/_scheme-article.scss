@@ -1,0 +1,914 @@
+/* c-scheme-article — the finished planting scheme, set as a catalogue article
+   (/schemes/[id]; markup in components/SchemeResults.tsx; a signed-out
+   fixture at /design-check/scheme).
+
+   Contract:
+   - The page widens for it: `.o-page:has(> .c-scheme-article)`, direct child
+     on purpose, as the order book's is.
+   - The article is a named container (`scheme-article`); everything inside
+     responds to the article's width, not the viewport's. At 60rem each
+     section sets its heading in a left rail beside its content, and the lead
+     sets the facts in that same rail, so one vertical line runs down the page.
+   - It is designed to hold up with no photographs. The figures (the border in
+     elevation, the year in flower) are drawn from the scheme's own data, and
+     a plant without a picture is set differently (`.is-unpictured`: no plate,
+     its word-picture a step larger) rather than given an empty frame.
+   - Colour: the scheme's own peak flowering season picks the accent
+     (`.is-season-*` → `--_accent` / `--_wash`, the Semantic Field exception
+     carried to the journey's last page). `--_bloom` is a plant's flower
+     colour; it colours that plant's bar, dot and flower heads and nothing else.
+   - One authored motion: the masthead border drawing itself on arrival. */
+
+.o-page:has(> .c-scheme-article) {
+    max-width: 76rem;
+}
+
+/* The flower colours the prompt may name (lib/scheme-article.ts). They are
+   content, like a photograph's colours, not chrome, which is why they sit
+   here as the object's own values and not in the palette. */
+$bloom-colours: (
+    "white": oklch(99% 0.005 100),
+    "cream": oklch(93% 0.06 90),
+    "yellow": oklch(88% 0.15 95),
+    "orange": oklch(75% 0.15 58),
+    "red": oklch(56% 0.19 25),
+    "pink": oklch(76% 0.13 350),
+    "purple": oklch(50% 0.15 312),
+    "blue": oklch(60% 0.12 255),
+    "green": oklch(70% 0.11 135),
+    "bronze": oklch(52% 0.08 55),
+);
+
+.c-scheme-article {
+    --_accent: var(--sem-flowering-spring-fg);
+    --_wash: var(--sem-flowering-spring-bg);
+    --_band: color-mix(in srgb, var(--_wash) 62%, var(--color-paper));
+    --_rail: 15rem;
+    --_bloom: var(--color-paper-deep);
+    --_bloom-edge: var(--color-n-dark-grey);
+
+    container: scheme-article / inline-size;
+    display: grid;
+    gap: var(--space-xl);
+
+    &.is-season-summer {
+        --_accent: var(--sem-flowering-summer-fg);
+        --_wash: var(--sem-flowering-summer-bg);
+    }
+    &.is-season-autumn {
+        --_accent: var(--sem-flowering-autumn-fg);
+        --_wash: var(--sem-flowering-autumn-bg);
+    }
+    &.is-season-winter {
+        --_accent: var(--sem-flowering-winter-fg);
+        --_wash: var(--sem-flowering-winter-bg);
+    }
+
+    ::selection {
+        background-color: var(--_wash);
+        color: var(--_accent);
+    }
+
+    a:not([class]) {
+        color: inherit;
+        text-decoration: underline;
+        text-decoration-thickness: var(--border-width-hairline);
+        text-underline-offset: 0.2em;
+
+        &:hover {
+            color: var(--_accent);
+        }
+
+        &:focus-visible {
+            outline: var(--border-width-thin) solid var(--sem-focus-color);
+            outline-offset: var(--border-width-thin);
+        }
+    }
+
+    > :first-child {
+        justify-self: start;
+        margin-block-end: calc(var(--space-md) * -1);
+    }
+
+    /* ---- Flower colours ------------------------------------------------- */
+
+    @each $name, $value in $bloom-colours {
+        .is-bloom-#{$name} {
+            --_bloom: #{$value};
+            --_bloom-edge: color-mix(in oklch, #{$value} 62%, var(--color-ink));
+        }
+    }
+
+    /* No colour named (an older scheme): the plant takes its flowering
+       season's badge colour, so the chart still reads as a year. */
+    @each $season in (winter, spring, early-summer, summer, autumn) {
+        .is-bloom-season-#{$season} {
+            --_bloom: var(--sem-flowering-#{$season}-bg);
+            --_bloom-edge: var(--sem-flowering-#{$season}-fg);
+        }
+    }
+
+    &__dot {
+        display: inline-block;
+        flex: none;
+        inline-size: 0.625em;
+        block-size: 0.625em;
+        margin-inline-end: 0.4em;
+        border-radius: var(--radius-roundel);
+        background-color: var(--_bloom);
+        border: var(--border-width-hairline) solid var(--_bloom-edge);
+    }
+
+    /* ---- Masthead -------------------------------------------------------- */
+
+    &__masthead {
+        display: grid;
+        gap: var(--space-lg);
+        padding: var(--space-lg) var(--space-md) var(--space-md);
+        border-radius: var(--radius-l);
+        background-color: var(--_band);
+        overflow: clip;
+    }
+
+    /* The heading runs inline so the pencil follows its last word, wherever
+       the name happens to break. */
+    &__title {
+        color: var(--_accent);
+
+        h1:not(.u-visually-hidden) {
+            display: inline;
+            margin-inline-end: var(--space-xs);
+            line-height: 1.02;
+        }
+    }
+
+    &__rename {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        inline-size: 2.75rem;
+        block-size: 2.75rem;
+        border: 0;
+        border-radius: var(--radius-roundel);
+        background-color: transparent;
+        color: var(--_accent);
+        vertical-align: 0.35em;
+        cursor: pointer;
+        transition: background-color var(--transition-time-default) var(--transition-easing-default);
+
+        &:hover {
+            background-color: var(--color-y-yellow);
+            color: var(--color-n-deep-grey);
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 2px var(--color-paper),
+                0 0 0 4px var(--color-p-lavender);
+        }
+    }
+
+    &__title-field {
+        inline-size: 100%;
+        padding: 0;
+        border: 0;
+        border-block-end: var(--border-width-thin) solid var(--sem-focus-color);
+        border-radius: 0;
+        background-color: transparent;
+        color: var(--_accent);
+        line-height: 1.02;
+        caret-color: var(--_accent);
+        outline: none;
+    }
+
+    &__standfirst {
+        max-inline-size: 30rem;
+        margin-block-start: var(--space-md);
+        color: var(--color-ink);
+        line-height: 1.3;
+        text-wrap: pretty;
+    }
+
+    &__meta {
+        margin-block-start: var(--space-md);
+        color: var(--_accent);
+    }
+
+    &__masthead-figure {
+        display: grid;
+        gap: var(--space-md);
+        align-content: end;
+        justify-items: center;
+    }
+
+    /* The gardener's own photograph, when a plant in the scheme has one: the
+       image plate's paper mat and hairline frame, kept small. */
+    &__photo {
+        position: relative;
+        inline-size: min(100%, 15rem);
+        aspect-ratio: 4 / 3;
+        border: 9px solid var(--color-paper);
+        outline: var(--border-width-hairline) solid color-mix(in srgb, var(--_accent) 30%, transparent);
+        background-color: var(--color-paper);
+
+        img {
+            object-fit: cover;
+        }
+    }
+
+    /* ---- The border in elevation ---------------------------------------- */
+
+    &__border-svg {
+        display: block;
+        inline-size: 100%;
+        max-inline-size: 34rem;
+        block-size: auto;
+        overflow: visible;
+    }
+
+    &__ground {
+        fill: none;
+        stroke: color-mix(in srgb, var(--_accent) 55%, transparent);
+        stroke-width: 1;
+        stroke-linecap: round;
+    }
+
+    &__mark {
+        path {
+            fill: none;
+            stroke: var(--_accent);
+            stroke-width: 1.3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Flower heads in the plant's own colour. */
+        circle {
+            fill: var(--_bloom);
+            stroke: var(--_bloom-edge);
+            stroke-width: 0.4;
+        }
+
+        /* Still to go in the ground: pathLength-normalised dashes. */
+        &.is-ghost path {
+            stroke: color-mix(in srgb, var(--_accent) 55%, transparent);
+            stroke-width: 1.1;
+            stroke-dasharray: 0.035 0.045;
+        }
+
+        /* The page's one authored motion. pathLength=1 in the markup, so one
+           dash pair draws any silhouette from its base upward. */
+        &.is-drawn path {
+            stroke-dasharray: 1;
+            animation: scheme-elevation-draw var(--transition-time-slow)
+                var(--transition-easing-emphasis) backwards;
+            animation-delay: var(--_delay, 0s);
+        }
+
+        &.is-drawn circle {
+            animation: scheme-elevation-dot var(--transition-time-default)
+                var(--transition-easing-default) backwards;
+            animation-delay: calc(var(--_delay, 0s) + var(--transition-time-default));
+        }
+    }
+
+    /* ---- Lead: the one passage of prose, beside the facts ---------------- */
+
+    &__lead {
+        display: grid;
+        gap: var(--space-lg);
+    }
+
+    &__lead-text {
+        display: grid;
+        gap: var(--space-md);
+        align-content: start;
+        max-inline-size: 38rem;
+    }
+
+    &__intro {
+        color: var(--color-ink);
+        line-height: 1.4;
+        text-wrap: pretty;
+    }
+
+    &__glance {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(9.5rem, 1fr));
+        gap: 0 var(--space-md);
+        align-content: start;
+
+        > div {
+            padding-block: var(--space-sm);
+            border-block-start: var(--border-width-hairline) solid var(--sem-border-color);
+        }
+
+        dt {
+            color: var(--color-ink-soft);
+        }
+
+        dd {
+            color: var(--color-ink);
+        }
+    }
+
+    /* The arrangement's one idea, set large under the prose it follows. */
+    &__key-idea {
+        margin-block-start: var(--space-sm);
+        padding-block: var(--space-md);
+        border-block: var(--border-width-hairline) solid var(--_accent);
+        color: var(--_accent);
+        line-height: 1.2;
+        text-wrap: balance;
+    }
+
+    /* ---- Sections -------------------------------------------------------- */
+
+    &__section {
+        display: grid;
+        gap: var(--space-lg);
+        padding-block-start: var(--space-lg);
+        border-block-start: var(--border-width-hairline) solid var(--sem-border-color);
+    }
+
+    &__rail {
+        display: grid;
+        gap: var(--space-sm);
+        align-content: start;
+
+        h2 {
+            color: var(--color-ink);
+            text-wrap: balance;
+        }
+
+        p {
+            max-inline-size: 22rem;
+            color: var(--color-ink-soft);
+        }
+    }
+
+    &__footnote {
+        margin-block-start: var(--space-sm);
+        color: var(--color-ink-soft);
+    }
+
+    &__error {
+        margin-block-start: var(--space-sm);
+        color: var(--sem-color-error-bg);
+    }
+
+    /* ---- The year in flower ---------------------------------------------- */
+
+    &__bloom-head,
+    &__bloom-row {
+        display: grid;
+        gap: var(--space-xs) var(--space-md);
+        align-items: center;
+    }
+
+    &__bloom-months {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        padding-block-end: var(--space-xs);
+        color: var(--color-ink-soft);
+        text-align: center;
+        letter-spacing: 0;
+
+        .is-now {
+            color: var(--_accent);
+            box-shadow: inset 0 calc(var(--border-width-thin) * -1) 0 var(--_accent);
+        }
+    }
+
+    &__bloom-row {
+        padding-block: var(--space-sm);
+        border-block-start: var(--border-width-hairline) solid var(--sem-border-color);
+    }
+
+    &__bloom-name {
+        color: var(--color-ink);
+        font-weight: var(--font-weight-medium);
+    }
+
+    &__bloom-strip {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        grid-template-rows: 0.875rem;
+        /* A faint tick at each month, so a bar can be read against the head. */
+        background-image: repeating-linear-gradient(
+            to right,
+            var(--sem-border-color) 0 var(--border-width-hairline),
+            transparent var(--border-width-hairline) calc(100% / 12)
+        );
+    }
+
+    &__bloom-now {
+        grid-row: 1;
+        background-color: color-mix(in srgb, var(--_wash) 55%, transparent);
+    }
+
+    &__bloom-bar {
+        grid-row: 1;
+        z-index: 1;
+        margin-inline: 1px;
+        border-radius: var(--radius-pill);
+        background-color: var(--_bloom);
+        border: var(--border-width-hairline) solid var(--_bloom-edge);
+    }
+
+    /* ---- How to arrange it ------------------------------------------------ */
+
+    &__tier {
+        display: grid;
+        grid-template-columns: 3.5rem minmax(0, 1fr);
+        gap: var(--space-md);
+        align-items: start;
+        padding-block: var(--space-md);
+        border-block-start: var(--border-width-hairline) solid var(--sem-border-color);
+
+        &:first-child {
+            padding-block-start: 0;
+            border-block-start: 0;
+        }
+
+        h3 {
+            color: var(--color-ink);
+        }
+
+        p {
+            max-inline-size: 38rem;
+            margin-block-start: var(--space-xs);
+        }
+    }
+
+    &__tier-mark {
+        display: block;
+        inline-size: 100%;
+        block-size: auto;
+
+        /* A tier's mark stands for no one plant, so its flower heads take
+           the accent and not a flower colour. */
+        circle {
+            fill: var(--_accent);
+            stroke: none;
+        }
+    }
+
+    &__tier-plants {
+        color: var(--color-ink-soft);
+    }
+
+    &__pairings {
+        margin-block-start: var(--space-lg);
+
+        > h3 {
+            color: var(--color-ink);
+        }
+
+        ul {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 12rem), 1fr));
+            gap: var(--space-lg);
+            margin-block-start: var(--space-md);
+        }
+    }
+
+    &__pairing {
+        padding-block-start: var(--space-sm);
+        border-block-start: var(--border-width-hairline) solid var(--_accent);
+
+        p + p {
+            margin-block-start: var(--space-xs);
+        }
+    }
+
+    &__pair {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0 var(--space-sm);
+        color: var(--color-ink);
+        line-height: 1.25;
+    }
+
+    &__pair-with {
+        font-family: var(--font-sans);
+        color: var(--color-ink-soft);
+    }
+
+    /* ---- The plants ------------------------------------------------------ */
+
+    &__plants {
+        display: grid;
+        column-gap: var(--space-xl);
+    }
+
+    &__plant {
+        padding-block: var(--space-lg);
+        border-block-start: var(--border-width-hairline) solid var(--sem-border-color);
+        /* A tier link lands the entry clear of the top of the window. */
+        scroll-margin-block-start: var(--space-md);
+
+        &:first-child {
+            padding-block-start: 0;
+            border-block-start: 0;
+        }
+
+        /* The picture sits beside the name only; everything under it keeps
+           the entry's full width, pictured or not. */
+        &.is-pictured {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 5rem;
+            column-gap: var(--space-md);
+            align-items: start;
+        }
+
+        &:target .c-scheme-article__plant-name {
+            color: var(--_accent);
+        }
+    }
+
+    /* Wikimedia pictures are small and uneven in quality, so the plate stays
+       thumbnail-sized and the words carry the entry. */
+    &__plant-body {
+        grid-column: 1 / -1;
+    }
+
+    &__plate {
+        position: relative;
+        aspect-ratio: 1;
+        border-radius: var(--radius-s);
+        background-color: var(--color-paper-deep);
+        overflow: hidden;
+    }
+
+    &__plate-image {
+        object-fit: cover;
+    }
+
+    &__plant-name {
+        color: var(--color-ink);
+        line-height: 1.15;
+        text-wrap: balance;
+    }
+
+    &__latin {
+        color: var(--color-ink-soft);
+    }
+
+    /* The word-picture. Beside a photograph it is a caption; without one it
+       stands in for the photograph, a step larger and in the accent. */
+    &__look {
+        margin-block-start: var(--space-sm);
+        color: var(--color-ink-soft);
+        line-height: 1.3;
+        text-wrap: pretty;
+    }
+
+    &__plant.is-unpictured &__look {
+        color: var(--_accent);
+        max-inline-size: 30rem;
+    }
+
+    &__role {
+        max-inline-size: 36rem;
+        margin-block-start: var(--space-sm);
+    }
+
+    &__care {
+        max-inline-size: 36rem;
+        margin-block-start: var(--space-xs);
+
+        .o-type-label {
+            margin-inline-end: var(--space-xs);
+            color: var(--color-ink-soft);
+        }
+    }
+
+    &__facts {
+        margin-block-start: var(--space-sm);
+        color: var(--color-ink-soft);
+    }
+
+    &__badges {
+        display: flex;
+        flex-wrap: wrap;
+        gap: var(--space-xs);
+        margin-block-start: var(--space-sm);
+    }
+
+    &__actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-sm);
+        margin-block-start: var(--space-md);
+    }
+
+    /* The small outlined button: quiet at rest so the names lead. It keeps
+       its edge on hover and changes only the fill. */
+    &__action {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-sm);
+        min-block-size: 2.75rem;
+        padding-inline: 0.75rem;
+        border: var(--border-width-hairline) solid var(--color-n-dark-grey);
+        border-radius: var(--radius-s);
+        background-color: transparent;
+        color: var(--color-n-deep-grey);
+        font-family: var(--font-sans);
+        font-size: 0.875rem;
+        font-weight: var(--font-weight-medium);
+        line-height: 1;
+        cursor: pointer;
+        transition: background-color var(--transition-time-default) var(--transition-easing-default);
+
+        @media (pointer: fine) {
+            min-block-size: 2.25rem;
+        }
+
+        &:hover:not(:disabled) {
+            background-color: var(--color-y-yellow);
+        }
+
+        &:active:not(:disabled) {
+            background-color: var(--color-y-gold);
+        }
+
+        &:focus-visible {
+            outline: none;
+            box-shadow:
+                0 0 0 2px var(--color-paper),
+                0 0 0 4px var(--color-p-lavender);
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+    }
+
+    /* "Mark as planted": an empty ring at rest, so it reads as something to
+       do and not as something done. It fills, and its tick arrives, only
+       under the pointer or the caret. */
+    &__ring {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        inline-size: 1rem;
+        block-size: 1rem;
+        border: 1.5px solid var(--_accent);
+        border-radius: var(--radius-roundel);
+        color: transparent;
+        transition:
+            background-color var(--transition-time-default) var(--transition-easing-default),
+            color var(--transition-time-default) var(--transition-easing-default);
+    }
+
+    &__action:hover:not(:disabled) &__ring,
+    &__action:focus-visible &__ring {
+        background-color: var(--_accent);
+        color: var(--color-white);
+    }
+
+    &__status {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-xs);
+        min-block-size: 2.25rem;
+        color: var(--color-ink);
+
+        svg {
+            color: var(--_accent);
+        }
+    }
+
+    &__credit {
+        display: inline-block;
+        margin-block-start: var(--space-sm);
+        color: var(--color-ink-soft);
+        text-decoration: underline;
+        text-underline-offset: 0.2em;
+
+        &:hover {
+            color: var(--color-ink);
+        }
+    }
+
+    /* ---- Month by month --------------------------------------------------- */
+
+    &__now {
+        padding: var(--space-md);
+        border-radius: var(--radius-m);
+        background-color: var(--_band);
+
+        h3 {
+            color: var(--_accent);
+        }
+
+        ul {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 14rem), 1fr));
+            gap: var(--space-md) var(--space-lg);
+            margin-block-start: var(--space-sm);
+        }
+
+        > p {
+            margin-block-start: var(--space-xs);
+        }
+
+        p {
+            color: var(--color-ink);
+        }
+    }
+
+    &__seasons {
+        display: grid;
+        gap: var(--space-lg);
+        margin-block-start: var(--space-lg);
+    }
+
+    &__season {
+        --_season: var(--sem-flowering-spring-fg);
+
+        &.is-summer {
+            --_season: var(--sem-flowering-summer-fg);
+        }
+        &.is-autumn {
+            --_season: var(--sem-flowering-autumn-fg);
+        }
+        &.is-winter {
+            --_season: var(--sem-flowering-winter-fg);
+        }
+    }
+
+    &__season-head {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: var(--space-sm);
+        padding-block-end: var(--space-xs);
+        border-block-end: var(--border-width-thin) solid var(--_season);
+        color: var(--color-ink);
+
+        .o-type-label {
+            color: var(--_season);
+        }
+    }
+
+    &__job {
+        padding-block: var(--space-sm);
+        border-block-start: var(--border-width-hairline) solid var(--sem-border-color);
+
+        &:first-child {
+            border-block-start: 0;
+        }
+
+        .primer {
+            color: var(--color-ink);
+        }
+    }
+
+    &__job-when {
+        color: var(--_season);
+    }
+
+    &__job-plants,
+    &__quiet {
+        color: var(--color-ink-soft);
+    }
+
+    &__quiet {
+        padding-block: var(--space-sm);
+    }
+
+    /* ---- Take it to the nursery ------------------------------------------ */
+
+    &__next {
+        display: grid;
+        gap: var(--space-lg);
+        padding: var(--space-lg) var(--space-md);
+        border-radius: var(--radius-l);
+        background-color: var(--_band);
+
+        h2 {
+            color: var(--_accent);
+            text-wrap: balance;
+        }
+    }
+
+    &__next-text > p {
+        max-inline-size: 36rem;
+        margin-block-start: var(--space-sm);
+        color: var(--color-ink);
+    }
+
+    &__next-actions {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-sm);
+        margin-block-start: var(--space-md);
+    }
+
+    &__so-far {
+        display: grid;
+        gap: var(--space-sm);
+        align-content: end;
+
+        svg {
+            max-inline-size: 24rem;
+        }
+
+        figcaption {
+            color: var(--color-ink);
+        }
+    }
+
+    /* ---- The article at 44rem: figures find room -------------------------- */
+
+    @container scheme-article (min-width: 44rem) {
+        &__masthead {
+            grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+            align-items: end;
+            gap: var(--space-xl);
+            padding: var(--space-xl) var(--space-xl) var(--space-lg);
+        }
+
+        &__masthead-figure {
+            justify-items: end;
+        }
+
+        &__bloom-head,
+        &__bloom-row {
+            grid-template-columns: minmax(8rem, 13rem) minmax(0, 1fr);
+        }
+
+        &__plant.is-pictured {
+            grid-template-columns: minmax(0, 1fr) 6rem;
+        }
+
+        &__seasons {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        &__next {
+            grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr);
+            align-items: end;
+            gap: var(--space-xl);
+            padding: var(--space-xl);
+        }
+    }
+
+    @container scheme-article (min-width: 72rem) {
+        &__seasons {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+    }
+
+    /* ---- The article at 60rem: the rail ---------------------------------- */
+
+    @container scheme-article (min-width: 60rem) {
+        &__lead,
+        &__section {
+            grid-template-columns: var(--_rail) minmax(0, 1fr);
+            gap: var(--space-xl) calc(var(--space-xl) * 1.5);
+        }
+
+        /* The facts take the rail; the prose keeps the content column. */
+        &__glance {
+            order: -1;
+            grid-template-columns: 1fr;
+        }
+
+        &__rail {
+            position: sticky;
+            inset-block-start: var(--space-md);
+            align-self: start;
+        }
+
+        &__plants {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        &__plant:nth-child(2) {
+            padding-block-start: 0;
+            border-block-start: 0;
+        }
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .c-scheme-article__mark.is-drawn path,
+    .c-scheme-article__mark.is-drawn circle {
+        animation: none;
+    }
+
+    .c-scheme-article__action,
+    .c-scheme-article__ring,
+    .c-scheme-article__rename {
+        transition: none;
+    }
+}

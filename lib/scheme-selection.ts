@@ -19,6 +19,7 @@ import type {
 } from "@/app/(app)/plant-scheme/_components/PlantSchemeContext";
 import type { SchemeTier } from "@/lib/types";
 import type { ParsedSuggestion, SchemeGenerationResult } from "@/lib/scheme-generation";
+import { FLOWER_COLOURS, parseSchemeArticle, validFlowerColour, type SchemeArticle } from "@/lib/scheme-article";
 
 const MONTH_NAMES = [
   "January", "February", "March", "April", "May", "June",
@@ -192,23 +193,55 @@ export function buildSelectionPrompt(plants: SelectionPlant[], brief: SelectionB
 
   return `You are an expert horticultural adviser writing a planting scheme for a gardening app called Plotted. Your tone is warm, authoritative and educational — like a knowledgeable garden columnist writing for an informed but non-expert audience. Avoid jargon. Never use the word "tapestry". Prefer the most common, friendly version of a plant's common name.
 
-The gardener has chosen the final list of plants for this scheme. The list is fixed: do NOT add, remove, rename or substitute any plant, and do not recommend plants that aren't on it. Your job is to write the scheme's narrative and the guidance for each chosen plant.
+The gardener has chosen the final list of plants for this scheme. The list is fixed: do NOT add, remove, rename or substitute any plant, and do not recommend plants that aren't on it. Your job is to write the scheme up.
 
 The plants (numbered):
 ${numbered}
 ${notesBlock}
+How the write-up is used: the app sets it as a designed page, not as an essay. Each field below is one short piece that is shown on its own — a headline, a pull line, a caption, a row in a list — so every field must make sense read alone, and none may run on. Keep to the word limits; they are limits, not targets. Do not repeat the same point in two fields. Say specific things about these plants in this arrangement (a colour, a height, a month, a job) rather than general praise. Wherever a field asks for a plant, give its number from the list.
+
 Return a JSON object with exactly this structure:
 {
   "name": "A characterful, memorable name for this planting scheme (e.g. \\"The Mediterranean Succession\\", \\"A Winter-to-Summer Border\\"). Should feel editorial, not date-stamped. 2–6 words.",
-  "summary": "A single sentence (max 20 words) distilling the scheme's planting character and main benefit.",
-  "narrative_intro": "A single opening paragraph. Characterise this collection of plants warmly and say what they achieve together, drawing on what the gardener told us. It appears before the first image in the app, so it should work as a compelling standalone hook.",
-  "narrative_body": "Two paragraphs. First: how to arrange these plants — what goes at the back, middle and front, how to group or drift them, and how their flowering follows on from one another. Second: how to look after the scheme through the year — the key seasonal tasks. Where natural, refer to plants from the list by name.",
+  "summary": "One sentence (max 20 words) distilling the scheme's character and main benefit. Shown directly under the name.",
+  "narrative_intro": "One short opening paragraph (max 55 words). Characterise this collection of plants warmly and say what they achieve together, drawing on what the gardener told us. The only passage of continuous prose on the page.",
+  "key_idea": "One sentence (max 18 words): the single idea the arrangement rests on, said plainly enough to remember at the nursery. Shown large, on its own.",
+  "glance": {
+    "aspect": "Max 6 words: the light and position this scheme wants, e.g. \\"Full sun, south or west facing\\".",
+    "soil": "Max 6 words, e.g. \\"Free-draining, not too rich\\".",
+    "at_its_best": "Max 6 words: when the whole border peaks, e.g. \\"Late June into August\\".",
+    "upkeep": "Max 8 words: how much work it is, honestly, e.g. \\"Light: one cut back in spring\\"."
+  },
+  "arrangement": {
+    "back": "Max 35 words: what stands at the back and how to place it — spacing, groups or drifts, what it screens or frames. Omit this key if no plant is in the back tier.",
+    "mid": "Max 35 words: the same for the middle of the border. Omit if no plant is in the mid tier.",
+    "ground": "Max 35 words: the same for the front edge and ground cover. Omit if no plant is in the ground tier."
+  },
+  "pairings": [
+    {
+      "a": plant number,
+      "b": plant number,
+      "why": "Max 25 words: what these two do for each other when planted side by side — a contrast of form or colour, or one taking over as the other fades."
+    }
+  ],
+  "jobs": [
+    {
+      "from": month number 1-12 when the job can start,
+      "to": month number 1-12 when it should be done by (same as "from" for a one-month job),
+      "title": "Max 6 words, starting with a verb, e.g. \\"Cut the salvias back hard\\".",
+      "detail": "Max 25 words: how to do it and what it achieves.",
+      "plants": [plant numbers the job concerns; an empty array if it is for the whole border]
+    }
+  ],
   "featured_plant": the number of whichever plant you consider most visually striking — used to source a pull image,
   "plants": [
     {
       "id": the plant's number from the list above,
       "tier": "back | mid | ground",
-      "why": "1–2 sentences (max 45 words): the role this plant plays in this arrangement, then one practical care or maintenance tip for it (e.g. pruning, deadheading, feeding, division).",
+      "look": "Max 14 words: what the plant looks like at its best, as a picture in words — colour, form, height — e.g. \\"Violet-blue spires on near-black stems, knee high\\". Many of these plants have no photograph in the app, so this line stands in for one. No full stop needed.",
+      "role": "One sentence (max 25 words): the job this plant does in this arrangement, in relation to the others.",
+      "care": "One sentence (max 22 words): the single most useful care tip for it (e.g. pruning, deadheading, feeding, division).",
+      "flower_colour": "${FLOWER_COLOURS.join(" | ")} — the main colour of the flowers; for a plant grown for its leaves, the colour of the foliage",
       "wildlife_value": true | false,
       "drought_tolerant": true | false,
       "edible": true | false,
@@ -217,7 +250,17 @@ Return a JSON object with exactly this structure:
   ]
 }
 
-Include exactly one entry in "plants" for each numbered plant — ${plants.length} in total. Categorise each into tier: back (tall, structural, 80cm+), mid (border plants, 40-80cm), ground (low-growing, spreading, under 40cm). Return ONLY valid JSON, no markdown, no preamble.`;
+Give 2 or 3 pairings (fewer only if the list has fewer than three plants). Give 5 to 8 jobs, spread across the year rather than bunched in one season, including planting time and at least one winter or early-spring job; use UK timings. Include exactly one entry in "plants" for each numbered plant — ${plants.length} in total. Categorise each into tier: back (tall, structural, 80cm+), mid (border plants, 40-80cm), ground (low-growing, spreading, under 40cm). Return ONLY valid JSON, no markdown, no preamble.`;
+}
+
+/** The prose body kept for surfaces that read `narrative_body`, built from the structured pieces. */
+function proseFromArticle(article: SchemeArticle): string {
+  const arrangement = (["back", "mid", "ground"] as const)
+    .map((tier) => article.arrangement[tier])
+    .filter(Boolean)
+    .join(" ");
+  const care = article.jobs.map((j) => `${j.title}: ${j.detail}`).join(" ");
+  return [arrangement, care].filter(Boolean).join("\n\n");
 }
 
 function heightTier(heightCm: number | null): SchemeTier {
@@ -236,9 +279,20 @@ function heightTier(heightCm: number | null): SchemeTier {
 export function mergeSelectionResponse(raw: unknown, plants: SelectionPlant[]): SchemeGenerationResult {
   if (typeof raw !== "object" || raw === null) throw new Error("Invalid response shape");
   const r = raw as Record<string, unknown>;
-  if (typeof r.narrative_intro !== "string" || typeof r.narrative_body !== "string") {
-    throw new Error("Invalid response shape");
-  }
+  if (typeof r.narrative_intro !== "string") throw new Error("Invalid response shape");
+
+  // The model names plants by their number in the prompt; the article stores Latin names.
+  const article = parseSchemeArticle(r, (ref) => {
+    const n = typeof ref === "number" ? ref : Number(ref);
+    return Number.isInteger(n) && n >= 1 && n <= plants.length ? plants[n - 1].latinName : null;
+  });
+  const narrativeBody =
+    typeof r.narrative_body === "string" && r.narrative_body.trim()
+      ? r.narrative_body
+      : article
+        ? proseFromArticle(article)
+        : "";
+  if (!narrativeBody) throw new Error("Invalid response shape");
 
   const byNumber = new Map<number, Record<string, unknown>>();
   if (Array.isArray(r.plants)) {
@@ -257,7 +311,9 @@ export function mergeSelectionResponse(raw: unknown, plants: SelectionPlant[]): 
       e && typeof e.tier === "string" && (VALID_TIERS as string[]).includes(e.tier)
         ? (e.tier as SchemeTier)
         : null;
-    const why = e && typeof e.why === "string" && e.why.trim() ? e.why.trim() : null;
+    const str = (key: string) => (e && typeof e[key] === "string" && e[key].trim() ? e[key].trim() : null);
+    // "role" is the current field; "why" is what earlier prompts called it.
+    const why = str("role") ?? str("why");
     return {
       common_name: p.commonName,
       latin_name: p.latinName,
@@ -266,6 +322,10 @@ export function mergeSelectionResponse(raw: unknown, plants: SelectionPlant[]): 
       height_cm: p.heightCm,
       flowering_months: p.floweringMonths.length > 0 ? p.floweringMonths : null,
       why: why ?? (p.note.trim() || "Chosen for your scheme."),
+      look: str("look"),
+      care: str("care"),
+      flower_colour: validFlowerColour(e?.flower_colour),
+      plant_id: p.plantId,
       wildlife_value: e?.wildlife_value === true,
       drought_tolerant: e?.drought_tolerant === true,
       edible: e?.edible === true,
@@ -280,7 +340,8 @@ export function mergeSelectionResponse(raw: unknown, plants: SelectionPlant[]): 
     name: typeof r.name === "string" && r.name.trim() ? r.name.trim() : "Your planting scheme",
     summary: typeof r.summary === "string" && r.summary.trim() ? r.summary.trim() : null,
     narrative_intro: r.narrative_intro,
-    narrative_body: r.narrative_body,
+    narrative_body: narrativeBody,
+    article,
     featured_plant_latin: featured?.latinName ?? null,
     suggestions,
   };
