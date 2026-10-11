@@ -97,6 +97,10 @@ async function persistGeneratedScheme(
       drought_tolerant: s.drought_tolerant,
       edible: s.edible,
       british_native: s.british_native,
+      look: s.look ?? null,
+      care: s.care ?? null,
+      flower_colour: s.flower_colour ?? null,
+      plant_id: s.plant_id ?? null,
       wikimedia_image_url: images[index]?.url ?? null,
       wikimedia_attribution: images[index]?.attribution ?? null,
       sort_order: index,
@@ -116,6 +120,7 @@ async function persistGeneratedScheme(
       summary: generated.summary,
       narrative_intro: generated.narrative_intro,
       narrative_body: generated.narrative_body,
+      article: generated.article,
       featured_plant_latin: generated.featured_plant_latin,
     })
     .eq("id", schemeId);

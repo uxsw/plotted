@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { validMonth } from "@/lib/plant-lookup";
 import type { SchemeSpace, SchemeTier } from "@/lib/types";
+import type { FlowerColour, SchemeArticle } from "@/lib/scheme-article";
 
 const anthropic = new Anthropic();
 
@@ -49,6 +50,12 @@ export type ParsedSuggestion = {
   drought_tolerant: boolean;
   edible: boolean;
   british_native: boolean;
+  /** Set only by the conversational save (scheme-selection.ts). */
+  look?: string | null;
+  care?: string | null;
+  flower_colour?: FlowerColour | null;
+  /** The gardener's own `plants` row, for a plant that was already in their garden. */
+  plant_id?: string | null;
 };
 
 export type SchemeGenerationResult = {
@@ -56,6 +63,8 @@ export type SchemeGenerationResult = {
   summary: string | null;
   narrative_intro: string;
   narrative_body: string;
+  /** The structured write-up (see scheme-article.ts); null for the form journey. */
+  article: SchemeArticle | null;
   featured_plant_latin: string | null;
   suggestions: ParsedSuggestion[];
 };
@@ -222,6 +231,7 @@ export async function generateScheme(
     summary,
     narrative_intro: r.narrative_intro,
     narrative_body: r.narrative_body,
+    article: null,
     featured_plant_latin: featuredPlantLatin,
     suggestions,
   };

@@ -263,4 +263,57 @@ describe("mergeSelectionResponse", () => {
     expect(() => mergeSelectionResponse({ narrative_intro: "x", plants: [] }, PLANTS)).toThrow();
     expect(() => mergeSelectionResponse(null, PLANTS)).toThrow();
   });
+
+  it("reads the structured write-up, turning plant numbers into Latin names", () => {
+    const result = mergeSelectionResponse(
+      {
+        name: "A Shady Border",
+        narrative_intro: "Intro",
+        key_idea: "Tall behind, low in front.",
+        glance: { aspect: "Part shade", soil: "Moist", made_up: "ignored" },
+        arrangement: { back: "Foxgloves in threes.", ground: "Geranium along the edge." },
+        pairings: [
+          { a: 1, b: 2, why: "Spires over a carpet." },
+          { a: 1, b: 1, why: "Same plant twice." },
+          { a: 1, b: 7, why: "No such plant." },
+        ],
+        jobs: [
+          { from: 11, to: 2, title: "Leave the seed heads", detail: "They feed the birds.", plants: [2, 9] },
+          { from: 13, title: "Bad month", detail: "Dropped." },
+        ],
+        plants: [
+          { id: 2, tier: "back", role: "Towers.", look: "Purple bells", care: "Let it seed.", flower_colour: "purple" },
+          { id: 1, tier: "ground", why: "Carpets.", flower_colour: "mauve" },
+        ],
+      },
+      PLANTS
+    );
+    expect(result.article).toEqual({
+      key_idea: "Tall behind, low in front.",
+      glance: { aspect: "Part shade", soil: "Moist" },
+      arrangement: { back: "Foxgloves in threes.", ground: "Geranium along the edge." },
+      pairings: [{ a: "Geranium macrorrhizum", b: "Digitalis purpurea", why: "Spires over a carpet." }],
+      jobs: [
+        { from: 11, to: 2, title: "Leave the seed heads", detail: "They feed the birds.", plants: ["Digitalis purpurea"] },
+      ],
+    });
+    // The prose body other surfaces read is built from the structured pieces.
+    expect(result.narrative_body).toContain("Foxgloves in threes.");
+    expect(result.narrative_body).toContain("Leave the seed heads");
+    expect(result.suggestions[1]).toMatchObject({
+      why: "Towers.",
+      look: "Purple bells",
+      care: "Let it seed.",
+      flower_colour: "purple",
+      plant_id: null,
+    });
+    // "role" is preferred but the older "why" still reads; an unknown colour is dropped.
+    expect(result.suggestions[0]).toMatchObject({ why: "Carpets.", flower_colour: null, plant_id: "plant-1" });
+  });
+
+  it("keeps a prose-only reply working, with no article", () => {
+    const result = mergeSelectionResponse({ ...base, plants: [] }, PLANTS);
+    expect(result.article).toBeNull();
+    expect(result.narrative_body).toBe("Body");
+  });
 });

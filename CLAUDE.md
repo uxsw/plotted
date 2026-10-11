@@ -102,10 +102,25 @@ Frost tolerance is not part of the main plant AI lookup (`lib/plant-lookup.ts`) 
 
 Saving a draft (`POST /api/plant-scheme/[draftId]/save`, triggered by `SchemeGenerateAction.tsx`) creates a real `schemes` row (`origin = 'conversation'`, `draft_id` set) and renders through the existing `/schemes/[id]` + `SchemeResults`.
 
-- **"Finalize" mode, not "generate new".** The gardener's `schemePlants` list is the scheme — every add was their explicit choice, and save must never append plants they didn't pick. So it does NOT use `generateScheme()` (which invents companions); it uses `generateSchemeFromSelection` (`lib/scheme-selection-generation.ts`), whose prompt treats the list as fixed. "Add none, drop none" is enforced in code by `mergeSelectionResponse` (`lib/scheme-selection.ts`): exactly one `scheme_suggestions` row per list plant, in order; anything else the model returns is ignored. Per-plant care notes live in `scheme_suggestions.why` for now; a fuller "care through the year" section is deferred (needs a column + UI).
+- **"Finalize" mode, not "generate new".** The gardener's `schemePlants` list is the scheme — every add was their explicit choice, and save must never append plants they didn't pick. So it does NOT use `generateScheme()` (which invents companions); it uses `generateSchemeFromSelection` (`lib/scheme-selection-generation.ts`), whose prompt treats the list as fixed. "Add none, drop none" is enforced in code by `mergeSelectionResponse` (`lib/scheme-selection.ts`): exactly one `scheme_suggestions` row per list plant, in order; anything else the model returns is ignored. The same prompt writes the structured write-up the scheme page is set from (see "Scheme page and its structured write-up" below): per-plant `why` (role), `look`, `care` and `flower_colour`, and the scheme-level `article` with its jobs through the year.
 - **One scheme per draft** (unique index on `schemes.draft_id`). A retry reuses the failed row; the old `/api/schemes/[id]/retry` can't rebuild these (suggestion-origin plants have no `plants` row), so failed `origin='conversation'` schemes are filtered out of the `/schemes` and hub lists — retry happens from the draft's own button.
 - **Draft is untouched until success.** On success (server-side, inside `after()`) the draft becomes `status = 'saved'`, `scheme_id` set, transcript cleared. `updatePlantSchemeDraft` refuses saved drafts so a stale client write can't undo that. `generationStatus` is never persisted: after a refresh mid-save, `[draftId]/page.tsx` derives it from the scheme row (found via `schemes.draft_id`); a `generating` row untouched for `STALE_GENERATING_MS` counts as abandoned.
 - `space` is a fixed `'medium'` — the question flow doesn't ask about bed size yet (known content gap, revisit with the default questions).
+
+## Scheme page (`/schemes/[id]`) and its structured write-up
+
+The look and behaviour are documented in DESIGN.md → Components → Scheme article. What is easy to break:
+
+- **Check it without signing in** at `/design-check/scheme` (`?pictures=none`, `?pictures=all`, `?prose=1` for a scheme with no structured write-up, `?photo=1`). Actions fail there by design.
+- **Two shapes of scheme render through one page.** The conversational save writes `schemes.article` (jsonb) plus `look` / `care` / `flower_colour` on each suggestion; the `/schemes/new` form journey and older schemes have none of it and render from `narrative_intro` / `narrative_body`. Any new section must cope with `article` being null.
+- **Read `schemes.article` only through `readStoredArticle`** (`lib/scheme-article.ts`). `parseSchemeArticle` drops anything malformed rather than repairing it, and is the same parser the model's reply goes through.
+- **The model names plants by number; the stored article names them by Latin name.** `mergeSelectionResponse` converts. The page matches Latin names back to `scheme_suggestions` rows.
+- **`scheme_suggestions.why` is now the plant's role only** for new conversational schemes (the care tip moved to `care`). Older rows hold both in `why`.
+- **The prompt's word limits are what keep the page from growing long paragraphs again.** Each field is set on its own as a headline, caption or list row. If a field is added, give it a limit and say where it is shown.
+- **`flower_colour` is a closed list** in three places that must agree: `FLOWER_COLOURS` (`lib/scheme-article.ts`), the `$bloom-colours` map (`_scheme-article.scss`), and the check constraint in migration 038.
+- **A plant is "in the garden" when its suggestion has a `plant_id`.** Set at save for a plant that was already the gardener's, and by `markSuggestionPlanted` ("Mark as planted"), which creates the plant through `createPlantWithLookup` and clears the scheme's shopping list entry for it. Conversational schemes saved before the column existed are matched through `scheme_source_plants` by `sort_order` in the page.
+- **Migration 038 must be applied before this code is deployed.** The conversational save inserts the new columns, and an insert naming a missing column fails the whole scheme.
+- **Not built yet:** surfacing a scheme's jobs on the dashboard ("this month in your border"). The data is in `schemes.article.jobs`; `jobsInMonth` (`lib/scheme-view.ts`) is the query.
 
 ## Shopping list name lookup (manual items)
 

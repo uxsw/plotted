@@ -99,6 +99,8 @@ export interface Scheme {
   edible: boolean;
   narrative_intro: string | null;
   narrative_body: string | null;
+  /** Structured write-up (lib/scheme-article.ts). Read it with readStoredArticle, never directly. */
+  article: unknown;
   featured_plant_latin: string | null;
   ai_notice_seen_at: string | null;
   /** "form" = the /schemes journey; "conversation" = saved from a /plant-scheme draft. */
@@ -131,6 +133,13 @@ export interface SchemeSuggestion {
   drought_tolerant: boolean;
   edible: boolean;
   british_native: boolean;
+  /** A word-picture of the plant, shown large when it has no photograph. */
+  look: string | null;
+  care: string | null;
+  flower_colour: string | null;
+  /** The gardener's `plants` row: set at save for a plant already in the garden, or when marked as planted. */
+  plant_id: string | null;
+  planted_at: string | null;
   wikimedia_image_url: string | null;
   wikimedia_attribution: string | null;
   saved: boolean;
