@@ -11,6 +11,33 @@
         ],
         "createdAt": "2026-09-19T19:55:51.305Z",
         "reason": "Pre-existing, documented interaction: .o-button--flush-start's padding-inline-start transition is DESIGN.md's own named 'catalogue-margin gesture' (Buttons > Shape modifiers), a single small-delta property on one element, not drift I introduced this session"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "2.75rem",
+        "files": [
+          "styles/pages/_home.scss"
+        ],
+        "createdAt": "2026-10-11T18:41:51.114Z",
+        "reason": "Claude: the drawn phone bezel in the homepage demo is a device illustration, not interface chrome"
+      },
+      {
+        "rule": "design-system-radius",
+        "value": "2.1rem",
+        "files": [
+          "styles/pages/_home.scss"
+        ],
+        "createdAt": "2026-10-11T18:41:51.209Z",
+        "reason": "Claude: the drawn phone screen in the homepage demo is a device illustration, not interface chrome"
+      },
+      {
+        "rule": "design-system-color",
+        "value": "#d99a06",
+        "files": [
+          "styles/pages/_home.scss"
+        ],
+        "createdAt": "2026-10-11T18:41:51.289Z",
+        "reason": "Claude: the app's pale-yellow sun glyph is unreadable on a white sheet; darker gold used on the homepage week sheet only"
       }
     ]
   }

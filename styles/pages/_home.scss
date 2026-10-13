@@ -1,0 +1,1504 @@
+// The marketing homepage — "The Evening Round".
+//
+// One walk round the garden at the end of the day. Seven bands of flat,
+// total colour, each owning one truth about the garden, from high sun to
+// night. This page is deliberately its own world: none of these colours or
+// the border-scale planting belong in the app (see DESIGN.md → Marketing
+// homepage). Markup: app/(marketing)/page.tsx and its _components.
+//
+// Contract, short version:
+//   .c-walk                 the page; holds the palette as --walk-* tokens
+//   .c-walk__band.is-*      one stop; sets --_bg / --_ink / --_soft / --_line
+//   .c-walk__horizon        the planting on a band's ground line
+//   .c-walk__rail           the time-of-day rail (fixed; a top bar when narrow)
+//   .c-walk__sheet          a white sheet showing the app with example content
+//   .c-walk-<stop>__*       each stop's own layout
+
+.c-walk {
+    --walk-lime: #dbe64a;
+    --walk-sky: #a9d4f3;
+    --walk-gold: #f6b73c;
+    --walk-coral: #f28d7c;
+    --walk-mulberry: #82175d;
+    --walk-indigo: #2b2759;
+    --walk-damson: #33082a;
+    --walk-ink: #3d0b2b;
+    --walk-blossom: #f8d6ec;
+    --walk-moon: #e6e0fb;
+    --walk-ease: cubic-bezier(0.16, 1, 0.3, 1);
+    --_rail: 0rem;
+    --_gutter: clamp(1.25rem, 5vw, 3rem);
+
+    background: var(--walk-damson);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+
+    @media (min-width: 80rem) {
+        --_rail: 8.5rem;
+    }
+
+    ::selection {
+        background: var(--walk-ink);
+        color: var(--walk-lime);
+    }
+
+    :focus-visible {
+        outline: 2px solid currentColor;
+        outline-offset: 3px;
+    }
+
+    :where(h1, h2, h3, h4, p, ul, ol, figure) {
+        margin: 0;
+    }
+
+    :where(ul, ol) {
+        padding: 0;
+        list-style: none;
+    }
+}
+
+html:has(.c-walk) {
+    scrollbar-color: #82175d #33082a;
+    scroll-padding-block-start: 1rem;
+
+    @media (prefers-reduced-motion: no-preference) {
+        scroll-behavior: smooth;
+    }
+}
+
+// ── Shared pieces ──────────────────────────────────────────────────────
+
+.c-walk__band {
+    --_bg: var(--walk-lime);
+    --_ink: var(--walk-ink);
+    --_soft: color-mix(in oklab, var(--_ink) 84%, var(--_bg));
+    --_line: color-mix(in oklab, var(--_ink) 34%, var(--_bg));
+
+    position: relative;
+    padding-block-start: clamp(4.5rem, 9vw, 8.5rem);
+    background: var(--_bg);
+    color: var(--_ink);
+
+    &.is-sky {
+        --_bg: var(--walk-sky);
+    }
+
+    &.is-gold {
+        --_bg: var(--walk-gold);
+    }
+
+    &.is-coral {
+        --_bg: var(--walk-coral);
+    }
+
+    &.is-mulberry {
+        --_bg: var(--walk-mulberry);
+        --_ink: var(--walk-blossom);
+        --_soft: #fdeaf6;
+    }
+
+    &.is-indigo {
+        --_bg: var(--walk-indigo);
+        --_ink: var(--walk-moon);
+        --_soft: #efebff;
+    }
+
+    &.is-damson {
+        --_bg: var(--walk-damson);
+        --_ink: var(--walk-blossom);
+        --_soft: #fdeaf6;
+    }
+}
+
+.c-walk__wrap {
+    box-sizing: border-box;
+    max-inline-size: calc(80rem + var(--_rail));
+    margin-inline: auto;
+    padding-inline: calc(var(--_rail) + var(--_gutter)) var(--_gutter);
+}
+
+.c-walk__display,
+.c-walk__heading {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.025em;
+    text-wrap: balance;
+}
+
+.c-walk__display {
+    font-size: clamp(2.6rem, 1.1rem + 5.6vw, 5.75rem);
+    line-height: 0.98;
+}
+
+.c-walk__heading {
+    font-size: clamp(2.1rem, 1.3rem + 3.3vw, 4rem);
+    line-height: 1.02;
+}
+
+.c-walk__lead {
+    max-inline-size: 34rem;
+    margin-block-start: clamp(1.25rem, 2.4vw, 2rem);
+    color: var(--_soft);
+    font-size: clamp(1.05rem, 0.98rem + 0.32vw, 1.25rem);
+    line-height: 1.55;
+    text-wrap: pretty;
+}
+
+.c-walk__aside {
+    max-inline-size: 15rem;
+    color: var(--_soft);
+    font-size: 0.875rem;
+    line-height: 1.4;
+}
+
+.c-walk__mono {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    line-height: 1.4;
+    text-transform: uppercase;
+}
+
+.c-walk__caption {
+    margin-block-start: 0.7rem;
+    color: var(--_soft);
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-style: italic;
+}
+
+.c-walk__window {
+    position: relative;
+    overflow: hidden;
+    border-radius: 4px;
+    background: var(--_line);
+
+    img {
+        object-fit: cover;
+    }
+}
+
+.c-walk__link {
+    color: inherit;
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.3em;
+
+    &:hover {
+        text-decoration-thickness: 2px;
+    }
+}
+
+.c-walk__button {
+    display: inline-block;
+    border: 0;
+    border-radius: 2px;
+    padding: 1rem 1.5rem;
+    background: var(--color-r-marigold);
+    color: var(--color-ink-deep);
+    font: 500 1rem / 1 var(--font-sans);
+    text-decoration: none;
+    cursor: pointer;
+    transition:
+        background-color 0.3s ease,
+        translate 0.5s var(--walk-ease);
+
+    &:hover {
+        background: var(--color-o-vermillion);
+        translate: 0 -2px;
+    }
+
+    &:active {
+        translate: 0 0;
+    }
+
+    &:disabled {
+        cursor: default;
+        opacity: 0.6;
+        translate: none;
+    }
+
+    &.is-quiet {
+        padding: 0.7rem 1.1rem;
+        background: transparent;
+        box-shadow: inset 0 0 0 1px var(--_ink);
+        color: var(--_ink);
+        font-size: 0.9rem;
+
+        &:hover {
+            background: var(--_ink);
+            color: var(--_bg);
+        }
+    }
+}
+
+// A sheet of the app, lying on the colour. Inside it the type is the app's
+// own: bold roman Zodiak, Inter, near-black on white.
+.c-walk__sheet {
+    border-radius: 8px;
+    padding: clamp(1.25rem, 2.6vw, 2.25rem);
+    background: #fff;
+    color: var(--color-n-deep-grey);
+    box-shadow: 0 2rem 3.5rem -2rem color-mix(in oklab, var(--walk-ink) 70%, transparent);
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.c-walk__sheet-title {
+    color: var(--color-ink);
+    font-family: var(--font-display);
+    font-size: 1.2rem;
+    font-weight: 600;
+    line-height: 1.15;
+}
+
+.c-walk__sheet-note {
+    color: var(--color-ink-soft);
+    font-size: 0.8rem;
+}
+
+.c-walk__dot {
+    flex: none;
+    inline-size: 0.8rem;
+    block-size: 0.8rem;
+    border: 1px solid color-mix(in oklab, var(--_bloom) 70%, var(--color-ink-deep));
+    border-radius: 50%;
+    background: var(--_bloom);
+}
+
+// ── The planting on a ground line ──────────────────────────────────────
+
+.c-walk__horizon {
+    display: flex;
+    justify-content: center;
+    overflow: hidden;
+    margin-block-start: clamp(2rem, 4vw, 3.5rem);
+    border-block-end: 3px solid var(--_ink);
+    pointer-events: none;
+}
+
+.c-walk__horizon-row {
+    display: flex;
+    flex: none;
+    align-items: flex-end;
+}
+
+.c-walk__plant {
+    --_scale: 1;
+
+    flex: none;
+    block-size: calc(var(--_h) * 1rem * var(--_scale));
+    aspect-ratio: 44 / 62;
+    margin-inline: calc(var(--_overlap) * -0.5 * var(--_scale));
+    overflow: visible;
+    color: var(--_ink);
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    transform-origin: 50% 100%;
+
+    @media (max-width: 53.75rem) {
+        --_scale: 0.72;
+    }
+
+    &.is-far {
+        color: color-mix(in oklab, var(--_ink) 52%, var(--_bg));
+    }
+
+    // The brush-drawn plants: filled shapes from the sprite, in front.
+    &.is-brush {
+        position: relative;
+        z-index: 1;
+        stroke: none;
+    }
+
+    path {
+        stroke-dasharray: 1;
+    }
+
+    circle {
+        fill: var(--_bloom);
+    }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    // Held back until reached, so the drawing is seen. Without scripting
+    // nothing would ever add .is-in, so the planting is simply there.
+    @media (scripting: enabled) {
+        [data-horizon]:not(.is-in) .c-walk__plant {
+            path {
+                stroke-dashoffset: 1;
+            }
+
+            circle {
+                opacity: 0;
+            }
+
+            &.is-brush {
+                clip-path: inset(100% -20% 0);
+            }
+        }
+    }
+
+    .c-walk__horizon.is-in .c-walk__plant {
+        path {
+            animation: walk-draw 1.5s var(--walk-ease) backwards;
+            animation-delay: var(--_delay);
+        }
+
+        circle {
+            animation: walk-bud 0.6s ease backwards;
+            animation-delay: calc(var(--_delay) + 0.9s);
+        }
+
+        &.is-sway {
+            animation: walk-sway 7s ease-in-out infinite;
+            animation-delay: calc(var(--_delay) * -3);
+        }
+
+        // Engraved plants are drawn; brush plants grow up from the ground.
+        &.is-brush {
+            animation: walk-grow 1.6s var(--walk-ease) backwards;
+            animation-delay: calc(var(--_delay) + 0.25s);
+
+            &.is-sway {
+                animation:
+                    walk-grow 1.6s var(--walk-ease) backwards,
+                    walk-sway 7s ease-in-out infinite;
+                animation-delay:
+                    calc(var(--_delay) + 0.25s),
+                    calc(var(--_delay) * -3);
+            }
+        }
+    }
+}
+
+@keyframes walk-grow {
+    from {
+        clip-path: inset(100% -20% 0);
+    }
+
+    to {
+        clip-path: inset(-10% -20% 0);
+    }
+}
+
+@keyframes walk-draw {
+    from {
+        stroke-dashoffset: 1;
+    }
+
+    to {
+        stroke-dashoffset: 0;
+    }
+}
+
+@keyframes walk-bud {
+    from {
+        opacity: 0;
+        scale: 0.2;
+        transform-box: fill-box;
+        transform-origin: center;
+    }
+
+    to {
+        opacity: 1;
+        scale: 1;
+        transform-box: fill-box;
+        transform-origin: center;
+    }
+}
+
+@keyframes walk-sway {
+    0%,
+    100% {
+        rotate: -1.2deg;
+    }
+
+    50% {
+        rotate: 1.6deg;
+    }
+}
+
+// ── The rail ───────────────────────────────────────────────────────────
+
+.c-walk__rail {
+    --walk-p: 0;
+    --_ink: var(--walk-ink);
+    --_sun: #fffbd6;
+
+    position: fixed;
+    z-index: 20;
+    inset-block-start: 0;
+    inset-inline: 0;
+    block-size: 0;
+    color: var(--_ink);
+    pointer-events: none;
+    transition: color 0.6s ease;
+
+    &.is-dark {
+        --_ink: var(--walk-blossom);
+        --_sun: #f4ecd2;
+    }
+}
+
+// Narrow: a line along the top edge that grows with the walk, the sun at its tip.
+.c-walk__rail::before {
+    position: absolute;
+    inset-block-start: 0;
+    inset-inline-start: 0;
+    inline-size: calc(var(--walk-p) * 100%);
+    border-block-start: 3px solid currentColor;
+    content: "";
+}
+
+.c-walk__sun {
+    position: absolute;
+    inset-block-start: 1.5px;
+    inset-inline-start: calc(var(--walk-p) * 100%);
+    inline-size: 0.7rem;
+    block-size: 0.7rem;
+    border-radius: 50%;
+    background: var(--_sun);
+    box-shadow:
+        0 0 0 2px var(--_ink),
+        0 0.25rem 1rem 0 color-mix(in oklab, var(--_sun) 70%, transparent);
+    translate: -50% -50%;
+    transition:
+        background-color 0.6s ease,
+        box-shadow 0.6s ease;
+}
+
+.c-walk__stops {
+    display: none;
+}
+
+@media (min-width: 80rem) {
+    .c-walk__rail::before {
+        content: none;
+    }
+
+    .c-walk__rail {
+        inset-block: 0;
+        inset-inline-end: auto;
+        inline-size: var(--_rail);
+        block-size: auto;
+    }
+
+    .c-walk__sun {
+        inset-block-start: calc(6.5rem + var(--walk-p) * (100% - 9.5rem));
+        inset-inline-start: 1.75rem;
+        inline-size: 1.125rem;
+        block-size: 1.125rem;
+    }
+
+    .c-walk .c-walk__stops {
+        position: absolute;
+        inset-block: 6.5rem 3rem;
+        inset-inline-start: 1.75rem;
+        display: block;
+        border-inline-start: 1px solid color-mix(in oklab, currentColor 45%, transparent);
+
+        li {
+            position: absolute;
+            inset-block-start: calc(var(--_at, 0) * 100%);
+            inset-inline-start: 0;
+        }
+    }
+
+    .c-walk__stop {
+        display: grid;
+        gap: 0.1rem;
+        padding-inline-start: 1.1rem;
+        color: inherit;
+        text-decoration: none;
+        white-space: nowrap;
+        translate: 0 -0.55rem;
+        pointer-events: auto;
+
+        &::before {
+            position: absolute;
+            inset-block-start: 0.5rem;
+            inset-inline-start: 0;
+            inline-size: 0.5rem;
+            border-block-start: 1px solid currentColor;
+            content: "";
+            transition: inline-size 0.5s var(--walk-ease);
+        }
+
+        &:hover::before,
+        &[aria-current]::before {
+            inline-size: 0.85rem;
+        }
+    }
+
+    .c-walk__stop-time {
+        font-family: var(--font-mono);
+        font-size: 0.7rem;
+        font-weight: 500;
+        letter-spacing: 0.08em;
+        line-height: 1.4;
+        opacity: 0.72;
+        transition: opacity 0.4s ease;
+    }
+
+    .c-walk__stop-label {
+        font-size: 0.8rem;
+        font-weight: 500;
+        line-height: 1.2;
+        opacity: 0;
+        translate: -0.4rem 0;
+        transition:
+            opacity 0.4s ease,
+            translate 0.6s var(--walk-ease);
+    }
+
+    .c-walk__stop:hover,
+    .c-walk__stop:focus-visible,
+    .c-walk__stop[aria-current] {
+        .c-walk__stop-time,
+        .c-walk__stop-label {
+            opacity: 1;
+            translate: 0 0;
+        }
+    }
+}
+
+// ── 4 pm · the garden ──────────────────────────────────────────────────
+
+.c-walk-garden {
+    display: flex;
+    flex-direction: column;
+    min-block-size: 100svh;
+    padding-block-start: 0;
+
+    &__head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        inline-size: 100%;
+        padding-block: 1.5rem;
+    }
+
+    &__wordmark {
+        display: block;
+        inline-size: auto;
+        block-size: 2rem;
+        color: var(--_ink);
+    }
+
+    &__links {
+        display: flex;
+        align-items: center;
+        gap: 1.5rem;
+    }
+
+    &__body {
+        display: grid;
+        flex: 1;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        column-gap: 1.5rem;
+        inline-size: 100%;
+    }
+
+    &__copy {
+        grid-column: 1 / span 7;
+        padding-block: clamp(1rem, 3vh, 3rem) 15rem;
+    }
+
+    &__action {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 1rem 1.5rem;
+        margin-block-start: clamp(1.75rem, 3vw, 2.5rem);
+    }
+
+    &__photo {
+        position: relative;
+        display: flex;
+        grid-column: 8 / span 5;
+        align-self: end;
+        margin-inline-start: 2rem;
+
+        .c-walk__window {
+            flex: 1;
+            block-size: min(74svh, 46rem);
+            border-radius: 4px 4px 0 0;
+        }
+
+        // The caption runs up the photograph's outer edge so the picture can
+        // stand on the ground line.
+        .c-walk__caption {
+            position: absolute;
+            top: 0;
+            right: calc(100% + 0.75rem);
+            margin: 0;
+            white-space: nowrap;
+            writing-mode: vertical-rl;
+            rotate: 180deg;
+        }
+    }
+
+    .c-walk__horizon {
+        position: absolute;
+        z-index: 2;
+        inset-block-end: 0;
+        inset-inline: 0;
+        margin: 0;
+    }
+
+    @media (max-width: 53.75rem) {
+        &__links .c-walk__button {
+            display: none;
+        }
+
+        &__copy {
+            grid-column: 1 / -1;
+            padding-block: 1.5rem 2.5rem;
+        }
+
+        &__photo {
+            grid-column: 1 / -1;
+            margin-inline-start: 0;
+
+            .c-walk__window {
+                block-size: auto;
+                aspect-ratio: 4 / 5;
+            }
+
+            .c-walk__caption {
+                position: static;
+                display: none;
+            }
+        }
+    }
+}
+
+// ── 5 pm · the catalogue ───────────────────────────────────────────────
+
+.c-walk-catalogue {
+    &__body {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 3rem 1.5rem;
+        align-items: start;
+    }
+
+    &__copy {
+        grid-column: 1 / span 7;
+    }
+
+    .c-walk-demo {
+        grid-column: 9 / span 4;
+        justify-self: center;
+    }
+
+    &__thumbs {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        gap: clamp(0.6rem, 1.6vw, 1.5rem);
+        box-sizing: border-box;
+        max-inline-size: calc(80rem + var(--_rail));
+        margin: clamp(2.5rem, 5vw, 4rem) auto 0;
+        padding-inline: calc(var(--_rail) + var(--_gutter)) var(--_gutter);
+
+        li {
+            display: grid;
+            gap: 0.5rem;
+            font-family: var(--font-display);
+            font-size: 0.95rem;
+            rotate: calc((var(--_i) - 3) * 0.7deg);
+            translate: 0 calc(sin(var(--_i) * 1.3rad) * 0.6rem);
+        }
+
+        img {
+            inline-size: 100%;
+            block-size: auto;
+            aspect-ratio: 1;
+            border: 0.4rem solid #fff;
+            border-radius: 2px;
+            object-fit: cover;
+            box-shadow: 0 1rem 1.5rem -1rem color-mix(in oklab, var(--walk-ink) 60%, transparent);
+        }
+    }
+
+    @media (max-width: 53.75rem) {
+        &__copy,
+        .c-walk-demo {
+            grid-column: 1 / -1;
+        }
+
+        &__thumbs {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+
+            li:nth-child(n + 5) {
+                display: none;
+            }
+        }
+    }
+}
+
+// The looked-up plant, set like a specimen label straight onto the sky.
+.c-walk-label {
+    display: grid;
+    gap: 0.75rem;
+    max-inline-size: 36rem;
+    margin-block-start: clamp(2rem, 4vw, 3.25rem);
+    border-block-start: 1px solid var(--_line);
+    padding-block-start: 1.25rem;
+
+    &__typed {
+        display: flex;
+        align-items: baseline;
+        gap: 0.75rem;
+        font-size: 1.05rem;
+
+        .c-walk__mono {
+            color: var(--_soft);
+        }
+    }
+
+    &__name {
+        font-family: var(--font-display);
+        font-size: clamp(2rem, 1.4rem + 2.4vw, 3.25rem);
+        line-height: 1;
+        letter-spacing: -0.02em;
+    }
+
+    &__traits {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+    }
+}
+
+.c-walk-demo {
+    display: grid;
+    justify-items: center;
+    gap: 1.25rem;
+
+    &__caption {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        min-inline-size: 13.5rem;
+        border-radius: 2rem;
+        padding: 0.55rem 1rem;
+        background: #fff;
+        color: var(--walk-ink);
+        font-size: 0.9rem;
+        font-weight: 500;
+
+        .mkt-dot {
+            inline-size: 0.5rem;
+            block-size: 0.5rem;
+            border-radius: 50%;
+            background: var(--color-r-marigold);
+        }
+    }
+}
+
+.c-walk-phone {
+    inline-size: min(20.5rem, 86vw);
+    border-radius: 2.75rem;
+    padding: 0.7rem;
+    background: var(--walk-damson);
+    box-shadow: 0 3rem 4rem -2.25rem color-mix(in oklab, var(--walk-ink) 80%, transparent);
+
+    &__screen {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        block-size: 38rem;
+        overflow: hidden;
+        border-radius: 2.1rem;
+        background: #f6f3eb;
+    }
+
+    @media (prefers-reduced-motion: no-preference) {
+        &__found {
+            animation: walk-found 0.7s var(--walk-ease) backwards;
+        }
+    }
+}
+
+@keyframes walk-found {
+    from {
+        opacity: 0;
+        filter: blur(6px);
+        translate: 0 0.5rem;
+    }
+}
+
+// ── 7 pm · this week ───────────────────────────────────────────────────
+
+.c-walk-week {
+    &__body {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        column-gap: 1.5rem;
+        align-items: start;
+    }
+
+    &__copy {
+        grid-column: 1 / span 5;
+        padding-block-end: 3rem;
+    }
+
+    &__photo {
+        grid-column: 7 / -1;
+        margin-inline-end: calc(var(--_gutter) * -1);
+
+        .c-walk__window {
+            aspect-ratio: 4 / 3;
+        }
+
+        .c-walk__caption {
+            text-align: end;
+            padding-inline-end: var(--_gutter);
+        }
+    }
+
+    &__sheet {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-column: 1 / span 9;
+        grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+        gap: 1.5rem clamp(1.5rem, 3vw, 3rem);
+        margin-block-start: clamp(-9rem, -9vw, -4rem);
+
+        .c-walk__sheet-note {
+            grid-column: 1 / -1;
+        }
+
+        // The app's sun glyph is a pale yellow made for tinted grounds.
+        .text-yellow {
+            color: #d99a06;
+        }
+    }
+
+    &__days {
+        display: grid;
+        grid-template-columns: repeat(7, minmax(0, 1fr));
+        margin-block-start: 1rem;
+        border-block-start: 1px solid var(--color-paper-line);
+
+        li {
+            display: grid;
+            justify-items: center;
+            gap: 0.35rem;
+            padding-block: 0.9rem 0.25rem;
+            font-variant-numeric: tabular-nums;
+
+            & + li {
+                border-inline-start: 1px solid var(--color-paper-line);
+            }
+        }
+
+        .c-walk__mono {
+            color: var(--color-ink-soft);
+        }
+    }
+
+    &__hi {
+        color: var(--color-ink);
+        font-weight: 600;
+    }
+
+    &__lo {
+        color: var(--color-ink-soft);
+        font-size: 0.85rem;
+    }
+
+    &__flower ul {
+        display: grid;
+        margin-block-start: 1rem;
+        border-block-start: 1px solid var(--color-paper-line);
+
+        li {
+            display: flex;
+            align-items: baseline;
+            gap: 0.7rem;
+            padding-block: 0.6rem;
+
+            & + li {
+                border-block-start: 1px solid var(--color-paper-line);
+            }
+        }
+
+        b {
+            display: block;
+            color: var(--color-ink);
+            font-family: var(--font-display);
+            font-size: 1.05rem;
+            font-weight: 600;
+            line-height: 1.2;
+        }
+    }
+
+    &__meta {
+        color: var(--color-ink-soft);
+        font-size: 0.85rem;
+    }
+
+    @media (max-width: 53.75rem) {
+        &__copy,
+        &__sheet {
+            grid-column: 1 / -1;
+        }
+
+        &__photo {
+            grid-column: 1 / -1;
+            margin-inline-start: calc(var(--_gutter) * -1);
+        }
+
+        &__sheet {
+            grid-template-columns: minmax(0, 1fr);
+            margin-block-start: 1.5rem;
+        }
+    }
+}
+
+// ── 8.30 pm · planting schemes ─────────────────────────────────────────
+
+.c-walk-schemes {
+    &__body {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 3rem 1.5rem;
+        align-items: start;
+    }
+
+    &__copy {
+        grid-column: 1 / span 5;
+    }
+
+    &__talk {
+        display: grid;
+        gap: 0.6rem;
+        max-inline-size: 26rem;
+        margin-block-start: clamp(2rem, 4vw, 3rem);
+        color: var(--color-n-deep-grey);
+        font-size: 0.95rem;
+        line-height: 1.45;
+
+        p {
+            max-inline-size: 85%;
+            border-radius: 8px;
+            padding: 0.7rem 0.95rem;
+        }
+
+        .is-you {
+            justify-self: end;
+            border-end-end-radius: 2px;
+            background: var(--color-y-hay);
+        }
+
+        .is-plotted {
+            border-end-start-radius: 2px;
+            background: #fff;
+        }
+    }
+
+    &__sheet {
+        --_plum: var(--color-plum);
+
+        display: grid;
+        grid-column: 7 / -1;
+        gap: 0.9rem;
+    }
+
+    &__title {
+        color: var(--_plum);
+        font-family: var(--font-display);
+        font-size: clamp(1.6rem, 1.3rem + 1.2vw, 2.25rem);
+        font-weight: 600;
+        line-height: 1;
+        letter-spacing: -0.02em;
+    }
+
+    &__summary {
+        font-family: var(--font-display);
+        font-size: 1.05rem;
+        font-style: italic;
+    }
+
+    &__border {
+        inline-size: 100%;
+        block-size: auto;
+        margin-block: 0.5rem 1rem;
+        border-radius: 4px;
+        padding: 1rem 1rem 0;
+        box-sizing: border-box;
+        background: var(--sem-flowering-summer-bg);
+        fill: none;
+        stroke: var(--_plum);
+        stroke-width: 0.75;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+
+        circle {
+            fill: var(--_bloom);
+            stroke-width: 0.35;
+        }
+    }
+
+    &__chart {
+        --_name: 11rem;
+
+        display: grid;
+        gap: 0.45rem;
+        font-size: 0.85rem;
+    }
+
+    &__months {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        margin-inline-start: var(--_name);
+        color: var(--color-ink-soft);
+        text-align: center;
+
+        .c-walk__mono {
+            letter-spacing: 0;
+        }
+    }
+
+    &__row {
+        display: grid;
+        grid-template-columns: var(--_name) minmax(0, 1fr);
+        align-items: center;
+
+        i {
+            overflow: hidden;
+            padding-inline-end: 0.75rem;
+            color: var(--color-ink);
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    &__track {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        block-size: 1.1rem;
+        align-items: center;
+        background: repeating-linear-gradient(
+            to right,
+            var(--color-paper-line) 0 1px,
+            transparent 1px calc(100% / 12)
+        );
+
+        span {
+            block-size: 0.7rem;
+            border: 1px solid color-mix(in oklab, var(--_bloom) 68%, var(--color-ink-deep));
+            border-radius: 2rem;
+            background: var(--_bloom);
+        }
+    }
+
+    @media (max-width: 53.75rem) {
+        &__copy,
+        &__sheet {
+            grid-column: 1 / -1;
+        }
+
+        &__months {
+            margin-inline-start: 0;
+        }
+
+        &__row {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 0.15rem;
+        }
+    }
+}
+
+// ── 9.15 pm · the shopping list ────────────────────────────────────────
+
+.c-walk-list {
+    &__copy {
+        max-inline-size: 44rem;
+    }
+
+    &__notes {
+        display: grid;
+        gap: clamp(1.5rem, 3vw, 2.5rem);
+        margin-block-start: clamp(3rem, 6vw, 5rem);
+
+        > li {
+            display: grid;
+            grid-template-columns: minmax(0, 5fr) minmax(2rem, 1fr) minmax(0, 6fr);
+            align-items: center;
+
+            // What was said and what it became, joined by a dotted line.
+            &::before {
+                grid-area: 1 / 2;
+                border-block-start: 2px dotted var(--_line);
+                content: "";
+            }
+
+            &:nth-child(2) {
+                margin-inline: 6% -0%;
+            }
+
+            &:nth-child(3) {
+                margin-inline-start: 12%;
+            }
+        }
+    }
+
+    &__said {
+        grid-area: 1 / 1;
+        padding-inline-end: 1.25rem;
+        font-family: var(--font-display);
+        font-size: clamp(1.4rem, 1.1rem + 1.4vw, 2.25rem);
+        font-style: italic;
+        line-height: 1.1;
+        text-align: end;
+        text-wrap: balance;
+    }
+
+    &__entry {
+        display: grid;
+        grid-area: 1 / 3;
+        gap: 0.5rem;
+        padding: 1.25rem 1.5rem;
+
+        h3 {
+            color: var(--color-ink);
+            font-family: var(--font-display);
+            font-size: 1.35rem;
+            font-weight: 600;
+            line-height: 1.15;
+        }
+
+        .o-badge {
+            background: var(--color-blossom);
+            border-color: transparent;
+            color: var(--color-damson);
+        }
+
+        &.is-unsure {
+            .c-walk__mono {
+                color: var(--color-mulberry);
+            }
+
+            li {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                gap: 1rem;
+                border: 1px solid var(--color-paper-line);
+                border-radius: 4px;
+                padding: 0.6rem 0.8rem;
+                background: var(--color-oat);
+
+                & + li {
+                    margin-block-start: 0.4rem;
+                }
+
+                // The choose-one mark, drawn in both states.
+                &::after {
+                    flex: none;
+                    inline-size: 1rem;
+                    block-size: 1rem;
+                    border: 1.5px solid var(--color-n-dark-grey);
+                    border-radius: 2px;
+                    content: "";
+                }
+
+                &.is-likely::after {
+                    border-color: var(--color-mulberry);
+                    background: var(--color-mulberry)
+                        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m3.5 8.5 3 3 6-7'/%3E%3C/svg%3E")
+                        center / 100% no-repeat;
+                }
+            }
+
+            i {
+                color: var(--color-ink);
+                font-family: var(--font-display);
+                font-size: 1.1rem;
+            }
+
+            li span {
+                margin-inline: 0.75rem auto;
+                color: var(--color-ink-soft);
+                font-size: 0.85rem;
+            }
+        }
+    }
+
+    @media (max-width: 53.75rem) {
+        &__notes > li {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 0.9rem;
+
+            &::before {
+                display: none;
+            }
+
+            &:nth-child(n) {
+                margin-inline: 0;
+            }
+        }
+
+        &__said {
+            padding: 0;
+            text-align: start;
+        }
+
+        &__entry {
+            grid-area: auto;
+        }
+    }
+}
+
+// ── 9.45 pm · visitors ─────────────────────────────────────────────────
+
+.c-walk-visitors {
+    &__body {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 3rem 1.5rem;
+        align-items: center;
+    }
+
+    &__photo {
+        grid-column: 1 / span 5;
+
+        .c-walk__window {
+            aspect-ratio: 3 / 4;
+        }
+    }
+
+    &__copy {
+        grid-column: 7 / -1;
+    }
+
+    &__birds {
+        display: grid;
+        grid-template-columns: repeat(4, minmax(0, 1fr));
+        gap: 1.5rem 0.75rem;
+        margin-block-start: clamp(2rem, 4vw, 3rem);
+        color: var(--_soft);
+        font-size: 0.8rem;
+        line-height: 1.25;
+        text-align: center;
+
+        li {
+            display: grid;
+            justify-items: center;
+            gap: 0.5rem;
+        }
+    }
+
+    &__portrait {
+        position: relative;
+        inline-size: min(100%, 5rem);
+        aspect-ratio: 1;
+        border-radius: 50%;
+        box-shadow: 0 0 0 1px color-mix(in oklab, var(--_ink) 45%, transparent);
+
+        img {
+            inline-size: 100%;
+            block-size: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            opacity: 0.5;
+            filter: saturate(0.4);
+        }
+
+        .is-spotted & {
+            box-shadow: 0 0 0 2px var(--walk-gold);
+
+            img {
+                opacity: 1;
+                filter: none;
+            }
+
+            // The tick a spotted bird carries.
+            &::after {
+                position: absolute;
+                inset-block-end: -0.1rem;
+                inset-inline-end: -0.1rem;
+                inline-size: 1.35rem;
+                block-size: 1.35rem;
+                border-radius: 50%;
+                background: var(--walk-gold)
+                    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%233d0b2b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m4 8.5 2.6 2.6L12 5.2'/%3E%3C/svg%3E")
+                    center / 100% no-repeat;
+                content: "";
+            }
+        }
+    }
+
+    @media (max-width: 53.75rem) {
+        &__photo,
+        &__copy {
+            grid-column: 1 / -1;
+        }
+
+        &__photo {
+            order: 2;
+        }
+    }
+}
+
+// ── 10 pm · the gate ───────────────────────────────────────────────────
+
+.c-walk-gate {
+    &__body {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 3rem 1.5rem;
+        align-items: start;
+    }
+
+    &__copy {
+        grid-column: 1 / span 6;
+    }
+
+    &__form {
+        display: grid;
+        grid-column: 8 / -1;
+        gap: 0.5rem;
+
+        label {
+            color: var(--color-ink-soft);
+
+            span {
+                font-family: var(--font-sans);
+                font-weight: 400;
+                letter-spacing: 0;
+                text-transform: none;
+            }
+        }
+
+        input,
+        textarea {
+            box-sizing: border-box;
+            inline-size: 100%;
+            margin-block-end: 0.9rem;
+            border: 1px solid var(--color-n-dark-grey);
+            border-radius: 4px;
+            padding: 0.75rem 0.85rem;
+            background: var(--color-paper);
+            color: var(--color-ink);
+            font: 400 1rem / 1.4 var(--font-sans);
+            caret-color: var(--color-r-marigold);
+            resize: none;
+
+            &::placeholder {
+                color: var(--color-ink-soft);
+            }
+
+            &:focus-visible {
+                outline: 2px solid var(--sem-focus-color);
+                outline-offset: 1px;
+                border-color: var(--sem-focus-color);
+            }
+        }
+
+        .c-walk__button {
+            inline-size: 100%;
+
+            &:focus-visible {
+                outline-color: var(--sem-focus-color);
+            }
+        }
+    }
+
+    &__thanks {
+        color: var(--color-damson);
+        font-family: var(--font-display);
+        font-size: 1.6rem;
+        font-weight: 600;
+        line-height: 1.1;
+    }
+
+    &__error {
+        color: var(--sem-color-error-bg);
+        font-size: 0.9rem;
+    }
+
+    &__small {
+        margin-block-start: 0.4rem;
+        color: var(--color-ink-soft);
+        font-size: 0.8rem;
+    }
+
+    &__promises {
+        display: grid;
+        grid-column: 1 / -1;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 2rem clamp(1.5rem, 4vw, 4rem);
+        margin-block-start: clamp(2rem, 5vw, 4rem);
+
+        li {
+            border-block-start: 1px solid var(--_line);
+            padding-block-start: 1.25rem;
+        }
+
+        h3 {
+            font-family: var(--font-display);
+            font-size: clamp(1.25rem, 1.1rem + 0.6vw, 1.6rem);
+            font-style: italic;
+            font-weight: 400;
+            line-height: 1.15;
+        }
+
+        p {
+            max-inline-size: 24rem;
+            margin-block-start: 0.6rem;
+            color: var(--_soft);
+            line-height: 1.55;
+        }
+    }
+
+    &__foot {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 1rem 2rem;
+        margin-block-start: clamp(4rem, 8vw, 7rem);
+        padding-block: 1.75rem 2.25rem;
+        color: var(--_soft);
+        font-size: 0.875rem;
+
+        // Above the padding, not the wrap's own edge, so it stays inside the gutters.
+        background: linear-gradient(var(--_line), var(--_line)) top / calc(100% - var(--_rail) - var(--_gutter) * 2) 1px no-repeat;
+        background-position-x: calc(var(--_rail) + var(--_gutter));
+
+        nav {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: baseline;
+            gap: 0.75rem 1.75rem;
+        }
+
+        .c-walk__link {
+            font-size: inherit;
+            font-weight: 400;
+        }
+    }
+
+    @media (max-width: 53.75rem) {
+        &__copy,
+        &__form {
+            grid-column: 1 / -1;
+        }
+
+        &__promises {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+}

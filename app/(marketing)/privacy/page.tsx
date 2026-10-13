@@ -1,4 +1,6 @@
 import { T, WRAP } from "../_components/tokens";
+import MarketingHeader from "@/components/marketing/MarketingHeader";
+import MarketingFooter from "@/components/marketing/MarketingFooter";
 
 import type { Metadata } from "next";
 
@@ -8,6 +10,8 @@ export const metadata: Metadata = {
 
 export default function PrivacyPage() {
   return (
+    <div style={{ background: T.paper, color: T.ink, overflowX: "hidden" }}>
+    <MarketingHeader />
     <main>
       <div className={WRAP} style={{ paddingTop: 64, paddingBottom: 100 }}>
         <div style={{ maxWidth: 680 }}>
@@ -112,6 +116,8 @@ export default function PrivacyPage() {
         </div>
       </div>
     </main>
+    <MarketingFooter />
+    </div>
   );
 }
 
