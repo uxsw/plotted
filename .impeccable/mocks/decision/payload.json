@@ -1,0 +1,132 @@
+{
+  "title": "Choose the world for the Plotted homepage",
+  "question": "The roll assigned The Evening Round. Keep it, take an alternate, or re-roll.",
+  "options": [
+    {
+      "id": "assigned",
+      "label": "The Evening Round",
+      "kicker": "THE ROLL",
+      "lineage": "the gardener's walk round the garden at the end of the day",
+      "thesis": "The page is one walk down the garden path, and the light changes as you go: high sun, golden hour, rose, dusk.",
+      "palette": ["#DDE63C", "#8FC1EA", "#F5B93F", "#EE8B7E", "#570F3E", "#E26650"],
+      "materials": ["drenched colour fields that turn with the scroll", "engraved single-stroke planting drawn at border scale", "your own photographs as windows in the colour"],
+      "viewport": "A full-bleed euphorbia-lime field under a pale sky band; the headline set huge in Zodiak italic; a border of engraved plants growing along the bottom edge; Request access on marigold beside it.",
+      "risk": "Four drenched grounds in one page is a lot of colour; if any one band is timid the whole walk reads as a gradient gimmick.",
+      "raised": [
+        { "from": "challenger-rail", "raise": "One time-of-day rail runs the whole page; every section registers against it and it doubles as the navigation." },
+        { "from": "challenger-sixpack", "raise": "Each stop on the walk owns exactly one truth about the garden: what's in bloom, what the week holds, what to buy, what to plant together, who's visiting." },
+        { "from": "challenger-kraftwerk", "raise": "Colour is flat and total within a band: no tints, no cream fallback anywhere on the page." }
+      ],
+      "comp": ".impeccable/mocks/decision/assigned.webp"
+    },
+    {
+      "id": "model-pick",
+      "label": "The Seed Rack",
+      "kicker": "IMPECCABLE’S PICK",
+      "lineage": "lithographed seed packets on a nursery rack",
+      "thesis": "Every feature is a packet on the rack: saturated front, growing instructions on the back.",
+      "palette": ["#E4572E", "#F2C230", "#2F6B4F", "#3B4BA3", "#F6E9D0"],
+      "materials": ["flat litho colour", "die-cut packet flaps", "overprinted Latin"],
+      "viewport": "A wall of packets in full colour, the middle one opened out into the headline and the call to action.",
+      "risk": "Charming and familiar; seed-packet nostalgia is where many garden brands already live.",
+      "comp": ".impeccable/mocks/decision/model-pick.webp"
+    },
+    {
+      "id": "challenger-cyclorama",
+      "label": "Cyclorama Dawn",
+      "verdict": "competitive",
+      "lineage": "theatre lighting on a seamless cyclorama",
+      "thesis": "The garden as a stage lit from night to day: stacked horizon bands, features as lighting cues.",
+      "palette": ["#0B0B10", "#2447B8", "#E88BA0", "#FFFFFF"],
+      "materials": ["seamless light washes", "stencil cue labels"],
+      "viewport": "A black field with a cobalt horizon; the headline acquires its shadow as rose light gathers above the band.",
+      "case": "Holds audience identification (gardeners read light) but opens in the dark, which hides the product for a beat too long.",
+      "risk": "Starts black; a gardening product that opens at night can read as a tech demo.",
+      "comp": ".impeccable/mocks/decision/challenger-cyclorama.webp",
+      "hero": "https://impeccable.style/worlds/cards/stagecraft-theater-lighting-cyclorama-dawn-hero.webp"
+    },
+    {
+      "id": "challenger-rail",
+      "label": "Emission-Line Rail",
+      "verdict": "declined",
+      "lineage": "glass spectrograms on a viewing box",
+      "thesis": "Everything hangs off one calibrated rail; colour only as hairlines.",
+      "palette": ["#2A2A2C", "#E9E4D8", "#F5C400"],
+      "materials": ["charcoal continuum", "hairline colour"],
+      "viewport": "A grey band crossed by seven thin bright lines, one per feature.",
+      "case": "Loses both axes: no gardener sees their garden in charcoal.",
+      "kept": "One rail that everything registers against.",
+      "risk": "Colourless.",
+      "hero": "https://impeccable.style/worlds/cards/operate-c-emission-line-rail-hero.webp"
+    },
+    {
+      "id": "challenger-sixpack",
+      "label": "Night Six-Pack",
+      "verdict": "declined",
+      "lineage": "a small aircraft's instrument panel",
+      "thesis": "Six gauges, each owning one truth.",
+      "palette": ["#0C0C0C", "#F4F4F0", "#7CFF8A"],
+      "materials": ["matte panel", "luminous markings"],
+      "viewport": "Six dials: bloom, weather, frost, birds, jobs, list.",
+      "case": "Loses both axes and breaks a product commitment: no dashboards as scorecards.",
+      "kept": "Each element owns one truth.",
+      "risk": "A scorecard, which Plotted refuses.",
+      "hero": "https://impeccable.style/worlds/cards/signals-instruments-night-flight-six-pack-hero.webp"
+    },
+    {
+      "id": "challenger-kraftwerk",
+      "label": "Man-Machine Grid",
+      "verdict": "declined",
+      "lineage": "traffic-signal line diagrams on a strict grid",
+      "thesis": "Features wired together as a neon schematic.",
+      "palette": ["#000000", "#E3211C", "#F4C20D", "#FFFFFF"],
+      "materials": ["enamel flats", "neon rules"],
+      "viewport": "A wiring diagram joining catalogue, schemes and list.",
+      "case": "Clear about how the parts connect, but cold; gardeners would not recognise themselves.",
+      "kept": "Total commitment to flat, untinted colour.",
+      "risk": "Machine-cold.",
+      "hero": "https://impeccable.style/worlds/cards/kraftwerk-man-machine-hero.webp"
+    },
+    {
+      "id": "challenger-pc98",
+      "label": "Sixteen-Colour Field",
+      "verdict": "declined",
+      "lineage": "PC-98 dithered screens",
+      "thesis": "A garden sunset built from dithered pixel pairs.",
+      "palette": ["#1B1B3A", "#E85D75", "#F2C14E", "#EDEDED"],
+      "materials": ["ordered dither", "bitmap type"],
+      "viewport": "A dithered dusk with a text window docked low.",
+      "case": "Loses both axes: retro-computing is not this audience's world.",
+      "kept": "Regions that hold their place while their contents change.",
+      "risk": "Novelty.",
+      "hero": "https://impeccable.style/worlds/cards/digital-design-canon-pc98-sixteen-color-field-hero.webp"
+    },
+    {
+      "id": "challenger-raku",
+      "label": "Raku Smoke",
+      "verdict": "declined",
+      "lineage": "raku firing",
+      "thesis": "Soot black and crackled white with one ember.",
+      "palette": ["#161412", "#E8E6E0", "#F26A1B"],
+      "materials": ["carbonised clay", "crackle glaze"],
+      "viewport": "A black ground with one ember-orange vessel.",
+      "case": "Loses both axes: monochrome against a brief that asks for full bloom.",
+      "kept": "Asymmetry accepted as a rule of composition.",
+      "risk": "Wrong season entirely.",
+      "hero": "https://impeccable.style/worlds/cards/clay-ceramics-fracture-raku-smoke-flash-hero.webp"
+    }
+  ],
+  "reroll": { "registers": ["safer", "bolder"] },
+  "buildPath": { "value": "code" },
+  "canon": true,
+  "canonCard": {
+    "label": "The category standard",
+    "thesis": "Cream paper, serif headline, a phone mockup and three feature cards.",
+    "palette": ["#FAF6EC", "#2B2A24", "#5C6B45"],
+    "materials": ["paper ground", "framed photographs"],
+    "viewport": "Headline left, garden photograph right, Request access below.",
+    "risk": "It is the page you have now.",
+    "comp": ".impeccable/mocks/decision/canon.webp"
+  },
+  "steer": true
+}
