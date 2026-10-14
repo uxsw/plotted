@@ -980,6 +980,21 @@ html:has(.c-walk) {
         grid-column: 1 / span 5;
     }
 
+    // The border itself, wide across the band beneath the copy and the sheet.
+    &__photo {
+        grid-column: 1 / -1;
+
+        .c-walk__window {
+            aspect-ratio: 21 / 9;
+        }
+
+        @media (max-width: 53.75rem) {
+            .c-walk__window {
+                aspect-ratio: 4 / 3;
+            }
+        }
+    }
+
     &__talk {
         display: grid;
         gap: 0.6rem;
@@ -1123,8 +1138,31 @@ html:has(.c-walk) {
 // ── 9.15 pm · the shopping list ────────────────────────────────────────
 
 .c-walk-list {
+    &__head {
+        display: grid;
+        grid-template-columns: repeat(12, minmax(0, 1fr));
+        gap: 2.5rem 1.5rem;
+        align-items: end;
+    }
+
     &__copy {
+        grid-column: 1 / span 7;
         max-inline-size: 44rem;
+    }
+
+    &__photo {
+        grid-column: 9 / -1;
+
+        .c-walk__window {
+            aspect-ratio: 1;
+        }
+    }
+
+    @media (max-width: 53.75rem) {
+        &__copy,
+        &__photo {
+            grid-column: 1 / -1;
+        }
     }
 
     &__notes {

@@ -39,30 +39,35 @@ export function Garden() {
             Every plant you grow, and what this week holds for it.
           </h1>
           <p className="c-walk__lead">
-            Plotted is a companion for your own garden. Tell it what you grow and it keeps
-            the record, watches the weather where you are, and shows you what is coming
-            into flower, what would go with what, and what to buy next.
+            Plotted is a companion for your own garden. Tell it what you grow
+            and it keeps the record, watches the weather where you are, and
+            shows you what is coming into flower, what would go with what, and
+            what to buy next.
           </p>
           <div className="c-walk-garden__action">
             <a href="#gate" className="c-walk__button">
               Request access
             </a>
-            <p className="c-walk__aside">A private beta. We are inviting gardeners a few at a time.</p>
+            <p className="c-walk__aside">
+              A private beta. We are inviting gardeners a few at a time.
+            </p>
           </div>
         </div>
 
         <figure className="c-walk-garden__photo">
           <div className="c-walk__window">
             <Image
-              src="/garden-hero-1.jpg"
-              alt="Lime-green euphorbia and a wine-red cotinus under a bright May sky"
+              src="/home-plants/hero.webp"
+              alt="Drumstick alliums, globes of deep magenta on tall green stems, lit by low sun"
               fill
               sizes="(max-width: 860px) 100vw, 42vw"
               quality={70}
               priority
             />
           </div>
-          <figcaption className="c-walk__caption">Euphorbia and cotinus on a May afternoon</figcaption>
+          <figcaption className="c-walk__caption">
+            Drumstick alliums in high summer
+          </figcaption>
         </figure>
       </div>
 
@@ -80,13 +85,13 @@ export function Garden() {
 /* ── 5 pm · the catalogue ────────────────────────────────────────────── */
 
 const THUMBS = [
-  ["/demo-thumb-geum.jpg", "Geum"],
-  ["/demo-thumb-fern.jpg", "Dryopteris"],
-  ["/demo-thumb-digitalis.jpg", "Digitalis"],
-  ["/demo-thumb-hosta.jpg", "Hosta"],
-  ["/demo-thumb-firecracker.jpg", "Lysimachia"],
-  ["/demo-thumb-thyme.jpg", "Thymus"],
-  ["/demo-thumb-cola.jpg", "Artemisia"],
+  ["/home-plants/plant-strip-geum.webp", "Geum"],
+  ["/home-plants/plant-strip-fern.webp", "Fern"],
+  ["/home-plants/plant-strip-lupin.webp", "Lupin"],
+  ["/home-plants/plant-strip-cardoon.webp", "Cardoon"],
+  ["/home-plants/plant-strip-thyme.webp", "Thyme"],
+  ["/home-plants/plant-strip-caligimastoris.webp", "Feather reed grass"],
+  ["/home-plants/plant-strip-cola-plant.webp", "Cola plant"],
 ] as const;
 
 export function Catalogue() {
@@ -94,15 +99,20 @@ export function Catalogue() {
     <section id="catalogue" className="c-walk__band is-sky c-walk-catalogue">
       <div className="c-walk__wrap c-walk-catalogue__body">
         <div className="c-walk-catalogue__copy">
-          <h2 className="c-walk__heading">Name a plant. Plotted fills in the rest.</h2>
+          <h2 className="c-walk__heading">
+            Name a plant. Plotted fills in the rest.
+          </h2>
           <p className="c-walk__lead">
-            Type a name, or take a photograph and let Plotted identify it. It looks up the
-            common names, sun, flowering season, height and spread, and how much frost the
-            plant will take, from UK growing knowledge. Starting a record costs you a few
-            seconds.
+            Type a name, or take a photograph and let Plotted identify it. It
+            looks up the common names, sun, flowering season, height and spread,
+            and how much frost the plant will take, from UK growing knowledge.
+            Starting a record costs you a few seconds.
           </p>
 
-          <div className="c-walk-label" aria-label="Example of a looked-up plant">
+          <div
+            className="c-walk-label"
+            aria-label="Example of a looked-up plant"
+          >
             <p className="c-walk-label__typed">
               <span className="c-walk__mono">You type</span>
               digitalis
@@ -113,7 +123,9 @@ export function Catalogue() {
             <ul className="c-walk-label__traits">
               <li className="o-badge">Foxglove</li>
               <li className="o-badge is-partial-shade">Part shade</li>
-              <li className="o-badge is-flowering-summer">Flowers Jun to Sep</li>
+              <li className="o-badge is-flowering-summer">
+                Flowers Jun to Sep
+              </li>
               <li className="o-badge is-british-native">British native</li>
               <li className="o-badge is-wildlife-friendly">Good for bees</li>
             </ul>
@@ -123,10 +135,19 @@ export function Catalogue() {
         <PhoneDemo />
       </div>
 
-      <ul className="c-walk-catalogue__thumbs" aria-label="Plants from one garden">
+      <ul
+        className="c-walk-catalogue__thumbs"
+        aria-label="Plants from one garden"
+      >
         {THUMBS.map(([src, name], i) => (
           <li key={src} style={{ "--_i": i } as CSSProperties}>
-            <Image src={src} alt="" width={220} height={220} sizes="(max-width: 860px) 30vw, 12vw" />
+            <Image
+              src={src}
+              alt=""
+              width={220}
+              height={220}
+              sizes="(max-width: 860px) 30vw, 12vw"
+            />
             <i>{name}</i>
           </li>
         ))}
@@ -162,23 +183,25 @@ export function Week() {
         <div className="c-walk-week__copy">
           <h2 className="c-walk__heading">This week, in your garden.</h2>
           <p className="c-walk__lead">
-            Set where your garden is, once. From then on Plotted reads the forecast against
-            what you actually grow, so the week ahead is about your plants and not a
-            weather map.
+            Set where your garden is, once. From then on Plotted reads the
+            forecast against what you actually grow, so the week ahead is about
+            your plants and not a weather map.
           </p>
         </div>
 
         <figure className="c-walk-week__photo">
           <div className="c-walk__window">
             <Image
-              src="/garden-hero-2.jpg"
-              alt="A stone path through a planted garden in low evening sun, foxgloves on either side"
+              src="/home-plants/this-week.webp"
+              alt="A stone path through a planted garden in low evening sun, pink flowers on the left and yellow rudbeckias on the right"
               fill
               sizes="(max-width: 860px) 100vw, 56vw"
               quality={70}
             />
           </div>
-          <figcaption className="c-walk__caption">The path at seven, late May</figcaption>
+          <figcaption className="c-walk__caption">
+            The path at seven, late summer
+          </figcaption>
         </figure>
 
         <div className="c-walk__sheet c-walk-week__sheet">
@@ -200,7 +223,10 @@ export function Week() {
             <ul>
               {IN_FLOWER.map(([latin, common, season, colour]) => (
                 <li key={latin}>
-                  <span className="c-walk__dot" style={{ "--_bloom": colour } as CSSProperties} />
+                  <span
+                    className="c-walk__dot"
+                    style={{ "--_bloom": colour } as CSSProperties}
+                  />
                   <span>
                     <b>
                       <i>{latin}</i>
@@ -213,11 +239,17 @@ export function Week() {
               ))}
             </ul>
           </div>
-          <p className="c-walk__sheet-note">An example week. Yours is drawn from your own plants and location.</p>
+          <p className="c-walk__sheet-note">
+            An example week. Yours is drawn from your own plants and location.
+          </p>
         </div>
       </div>
 
-      <Horizon seed={41} blooms={["#fff", "#E2452F", "#82175D", "#fff"]} visitors={[[27, "bird"]]} />
+      <Horizon
+        seed={41}
+        blooms={["#fff", "#E2452F", "#82175D", "#fff"]}
+        visitors={[[27, "bird"]]}
+      />
     </section>
   );
 }
@@ -253,30 +285,49 @@ export function Schemes() {
     <section id="schemes" className="c-walk__band is-coral c-walk-schemes">
       <div className="c-walk__wrap c-walk-schemes__body">
         <div className="c-walk-schemes__copy">
-          <h2 className="c-walk__heading">Ask what would go with what you have.</h2>
+          <h2 className="c-walk__heading">
+            Ask what would go with what you have.
+          </h2>
           <p className="c-walk__lead">
-            Pick a few plants you already grow, or start with a bare bed, and talk it
-            through. Plotted drafts a planting scheme and sets it out like a page from a
-            good catalogue: the border drawn in elevation, the year in flower, how to
-            arrange it, and the jobs month by month.
+            Pick a few plants you already grow, or start with a bare bed, and
+            talk it through. Plotted drafts a planting scheme and sets it out
+            like a page from a good catalogue: the border drawn in elevation,
+            the year in flower, how to arrange it, and the jobs month by month.
           </p>
-          <div className="c-walk-schemes__talk" aria-label="Example conversation">
-            <p className="is-you">A dry, sunny strip by the path. I already have the salvia.</p>
+          <div
+            className="c-walk-schemes__talk"
+            aria-label="Example conversation"
+          >
+            <p className="is-you">
+              A dry, sunny strip by the path. I already have the salvia.
+            </p>
             <p className="is-plotted">
-              Then build on its violet. Alliums before it, achillea beside it, and grasses to
-              keep the border moving into autumn.
+              Then build on its violet. Alliums before it, achillea beside it,
+              and grasses to keep the border moving into autumn.
             </p>
           </div>
         </div>
 
-        <article className="c-walk__sheet c-walk-schemes__sheet" aria-label="Example planting scheme">
+        <article
+          className="c-walk__sheet c-walk-schemes__sheet"
+          aria-label="Example planting scheme"
+        >
           <h3 className="c-walk-schemes__title">A dry, sunny border</h3>
-          <p className="c-walk-schemes__summary">Violet and rust from May, with grasses carrying it to October.</p>
+          <p className="c-walk-schemes__summary">
+            Violet and rust from May, with grasses carrying it to October.
+          </p>
 
-          <svg className="c-walk-schemes__border" viewBox="0 14 280 66" aria-hidden="true">
+          <svg
+            className="c-walk-schemes__border"
+            viewBox="0 14 280 66"
+            aria-hidden="true"
+          >
             <path d="M0 78 H280" />
             {SCHEME_BORDER.map(([mark, x, scale], i) => (
-              <g key={i} transform={`translate(${x} ${78 - 78 * scale}) scale(${scale})`}>
+              <g
+                key={i}
+                transform={`translate(${x} ${78 - 78 * scale}) scale(${scale})`}
+              >
                 {PLANT_MARKS[mark].paths.map((d, j) => (
                   <path key={j} d={d} />
                 ))}
@@ -286,7 +337,11 @@ export function Schemes() {
                     cx={dot.cx}
                     cy={dot.cy}
                     r={dot.r * 1.3}
-                    style={{ "--_bloom": SCHEME[i % SCHEME.length][3] } as CSSProperties}
+                    style={
+                      {
+                        "--_bloom": SCHEME[i % SCHEME.length][3],
+                      } as CSSProperties
+                    }
                   />
                 ))}
               </g>
@@ -294,7 +349,11 @@ export function Schemes() {
           </svg>
 
           <h4 className="c-walk__sheet-title">The year in flower</h4>
-          <div className="c-walk-schemes__chart" role="img" aria-label="Flowering months for six plants, from May to October">
+          <div
+            className="c-walk-schemes__chart"
+            role="img"
+            aria-label="Flowering months for six plants, from May to October"
+          >
             <div className="c-walk-schemes__months">
               {MONTHS.map((m, i) => (
                 <span key={i} className="c-walk__mono">
@@ -307,14 +366,36 @@ export function Schemes() {
                 <i>{name}</i>
                 <div className="c-walk-schemes__track">
                   <span
-                    style={{ gridColumn: `${from} / ${to + 1}`, "--_bloom": colour } as CSSProperties}
+                    style={
+                      {
+                        gridColumn: `${from} / ${to + 1}`,
+                        "--_bloom": colour,
+                      } as CSSProperties
+                    }
                   />
                 </div>
               </div>
             ))}
           </div>
-          <p className="c-walk__sheet-note">An example scheme, set out as Plotted sets out yours.</p>
+          <p className="c-walk__sheet-note">
+            An example scheme, set out as Plotted sets out yours.
+          </p>
         </article>
+
+        <figure className="c-walk-schemes__photo">
+          <div className="c-walk__window">
+            <Image
+              src="/home-plants/schemes.webp"
+              alt="A border in flower: blue forget-me-nots, pink daisies, violet anemones and red poppies"
+              fill
+              sizes="(max-width: 860px) 100vw, 80rem"
+              quality={70}
+            />
+          </div>
+          <figcaption className="c-walk__caption">
+            Forget-me-nots, anemones and daisies, one border in May
+          </figcaption>
+        </figure>
       </div>
 
       <Horizon seed={58} blooms={["#fff", "#82175D", "#F6B73C", "#5B3FA0"]} />
@@ -328,19 +409,41 @@ export function List() {
   return (
     <section id="list" className="c-walk__band is-mulberry c-walk-list">
       <div className="c-walk__wrap c-walk-list__body">
-        <div className="c-walk-list__copy">
-          <h2 className="c-walk__heading">The name of that plant you saw.</h2>
-          <p className="c-walk__lead">
-            Type or dictate whatever you can remember of it. Plotted works out the proper
-            name, adds a line about the plant and a picture when there is one, and offers
-            you choices when it isn’t sure. Mark it as bought and it goes straight into
-            your garden.
-          </p>
+        <div className="c-walk-list__head">
+          <div className="c-walk-list__copy">
+            <h2 className="c-walk__heading">The name of that plant you saw.</h2>
+            <p className="c-walk__lead">
+              Type or dictate whatever you can remember of it. Plotted works out
+              the proper name, adds a line about the plant and a picture when
+              there is one, and offers you choices when it isn’t sure. Mark it
+              as bought and it goes straight into your garden.
+            </p>
+          </div>
+
+          <figure className="c-walk-list__photo">
+            <div className="c-walk__window">
+              <Image
+                src="/home-plants/shopping-list.webp"
+                alt="Young plants in fibre pots on a sunny bench, with handwritten wooden labels"
+                fill
+                sizes="(max-width: 860px) 100vw, 30vw"
+                quality={70}
+              />
+            </div>
+            <figcaption className="c-walk__caption">
+              New plants, still wearing their labels
+            </figcaption>
+          </figure>
         </div>
 
-        <ol className="c-walk-list__notes" aria-label="Examples of notes and what Plotted makes of them">
+        <ol
+          className="c-walk-list__notes"
+          aria-label="Examples of notes and what Plotted makes of them"
+        >
           <li>
-            <p className="c-walk-list__said">“that purple salvia at the show”</p>
+            <p className="c-walk-list__said">
+              “that purple salvia at the show”
+            </p>
             <div className="c-walk__sheet c-walk-list__entry">
               <h3>
                 <i>Salvia nemorosa</i> ‘Caradonna’
@@ -348,7 +451,10 @@ export function List() {
               <p className="c-walk-list__names">
                 <span className="o-badge">Balkan clary</span>
               </p>
-              <p>Upright violet spikes on near-black stems, from June. Full sun, and loved by bees.</p>
+              <p>
+                Upright violet spikes on near-black stems, from June. Full sun,
+                and loved by bees.
+              </p>
             </div>
           </li>
           <li>
@@ -360,7 +466,10 @@ export function List() {
               <p className="c-walk-list__names">
                 <span className="o-badge">Mexican fleabane</span>
               </p>
-              <p>Small daisies that open white and fade pink, seeding into walls and paving.</p>
+              <p>
+                Small daisies that open white and fade pink, seeding into walls
+                and paving.
+              </p>
             </div>
           </li>
           <li>
@@ -415,21 +524,31 @@ export function Visitors() {
               quality={70}
             />
           </div>
-          <figcaption className="c-walk__caption">One on the wire, a quarter to ten in July</figcaption>
+          <figcaption className="c-walk__caption">
+            One on the wire, a quarter to ten in July
+          </figcaption>
         </figure>
 
         <div className="c-walk-visitors__copy">
           <h2 className="c-walk__heading">And who came by.</h2>
           <p className="c-walk__lead">
-            Twelve garden birds worth knowing by sight. Tick each one off the first time
-            you see it in your own garden. It is a small collection to complete, not a
-            score to keep.
+            Twelve garden birds worth knowing by sight. Tick each one off the
+            first time you see it in your own garden. It is a small collection
+            to complete, not a score to keep.
           </p>
-          <ul className="c-walk-visitors__birds" aria-label="Twelve garden birds, seven marked as spotted in this example">
+          <ul
+            className="c-walk-visitors__birds"
+            aria-label="Twelve garden birds, seven marked as spotted in this example"
+          >
             {BIRDS.map(([file, name, spotted]) => (
               <li key={file} className={spotted ? "is-spotted" : undefined}>
                 <span className="c-walk-visitors__portrait">
-                  <Image src={`/birds/${file}.webp`} alt="" width={120} height={120} />
+                  <Image
+                    src={`/birds/${file}.webp`}
+                    alt=""
+                    width={120}
+                    height={120}
+                  />
                 </span>
                 {name}
               </li>
