@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import WalkRail, { type Stop } from "./_components/WalkRail";
 import { Garden, Catalogue, Week, Schemes, List, Visitors } from "./_components/Stops";
 import Gate from "./_components/Gate";
+import Wind from "./_components/Wind";
 
 export const metadata: Metadata = {
   title: "Plotted",
@@ -41,6 +42,7 @@ export default async function HomePage() {
     <div className="c-walk">
       <div hidden dangerouslySetInnerHTML={{ __html: CONTRACT }} />
       <WalkRail stops={STOPS} />
+      <Wind />
       <main>
         <Garden />
         <Catalogue />

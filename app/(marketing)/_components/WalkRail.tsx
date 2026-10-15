@@ -10,7 +10,8 @@ import { useEffect, useRef, useState } from "react";
  * ink from whichever band is under the middle of the viewport.
  *
  * Also the page's scroll observer: it adds `.is-in` to each `[data-horizon]`
- * the first time it is reached, which is what draws that band's planting.
+ * and `[data-reveal]` the first time it is reached, which is what draws that
+ * band's planting and plays its sheet's arrival.
  */
 
 export type Stop = { id: string; time: string; label: string; tone: "light" | "dark" };
@@ -62,25 +63,27 @@ export default function WalkRail({ stops }: { stops: Stop[] }) {
     );
     bands.forEach((el) => bandObserver.observe(el));
 
-    const horizonObserver = new IntersectionObserver(
+    const arrivalObserver = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
             entry.target.classList.add("is-in");
-            horizonObserver.unobserve(entry.target);
+            arrivalObserver.unobserve(entry.target);
           }
         }
       },
       { rootMargin: "0px 0px -12% 0px" }
     );
-    document.querySelectorAll("[data-horizon]").forEach((el) => horizonObserver.observe(el));
+    document
+      .querySelectorAll("[data-horizon], [data-reveal]")
+      .forEach((el) => arrivalObserver.observe(el));
 
     return () => {
       if (frame) cancelAnimationFrame(frame);
       window.removeEventListener("scroll", onScroll);
       resizeObserver.disconnect();
       bandObserver.disconnect();
-      horizonObserver.disconnect();
+      arrivalObserver.disconnect();
     };
   }, [stops]);
 
