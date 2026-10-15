@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type CSSProperties } from "react";
 import Link from "next/link";
+import { PLANT_MARKS } from "@/components/shopping/borderMarks";
 
 /**
  * 10 pm · the gate. The last band: the request-access form (POST
@@ -21,6 +22,14 @@ const PROMISES = [
     "Your garden is yours.",
     "One private garden for each gardener. Nothing you record is shown to anyone else.",
   ],
+] as const;
+
+/* A few plants for the thank-you sheet: [mark, x, scale, flower colour]. */
+const SEEDLINGS = [
+  [3, 0, 0.9, "#F28D7C"],
+  [9, 30, 1.05, "#82175D"],
+  [1, 62, 0.85, "#F6B73C"],
+  [12, 92, 0.95, "#C86AA6"],
 ] as const;
 
 export default function Gate() {
@@ -67,6 +76,23 @@ export default function Gate() {
 
         {submitted ? (
           <div className="c-walk__sheet c-walk-gate__form" role="status">
+            <svg className="c-walk__drawing c-walk-gate__planting" viewBox="0 14 136 66" aria-hidden="true">
+              <path d="M0 78 H136" pathLength={1} />
+              {SEEDLINGS.map(([mark, x, scale, bloom], i) => (
+                <g
+                  key={i}
+                  transform={`translate(${x} ${78 - 78 * scale}) scale(${scale})`}
+                  style={{ "--_i": i, "--_bloom": bloom } as CSSProperties}
+                >
+                  {PLANT_MARKS[mark].paths.map((d, j) => (
+                    <path key={j} d={d} pathLength={1} />
+                  ))}
+                  {PLANT_MARKS[mark].dots.map((dot, j) => (
+                    <circle key={j} cx={dot.cx} cy={dot.cy} r={dot.r * 1.3} />
+                  ))}
+                </g>
+              ))}
+            </svg>
             <h3 className="c-walk-gate__thanks">Thank you. You are on the list.</h3>
             <p>We will send your invitation when a place opens.</p>
           </div>

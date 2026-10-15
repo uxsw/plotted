@@ -6,6 +6,7 @@ import { WeatherIcon } from "@/components/weather/WeatherIcon";
 import { PLANT_MARKS } from "@/components/shopping/borderMarks";
 import Horizon from "./Horizon";
 import PhoneDemo from "./PhoneDemo";
+import Birds from "./Birds";
 
 /**
  * The stops on the evening round, in walking order. Each is one band of flat
@@ -15,6 +16,35 @@ import PhoneDemo from "./PhoneDemo";
  *
  * Styles: styles/pages/_home.scss.
  */
+
+/** The hero headline, word by word, so it can rise out of the ground line on load. */
+function Rising({ text }: { text: string }) {
+  const words = text.split(" ");
+  return words.map((word, i) => (
+    <span key={i}>
+      <span className="c-walk__word" style={{ "--_i": i } as CSSProperties}>
+        <span>{word}</span>
+      </span>
+      {i < words.length - 1 ? " " : null}
+    </span>
+  ));
+}
+
+/** Text that is typed out on arrival. Read whole by assistive tech; typed for the eye. */
+function Typed({ text }: { text: string }) {
+  return (
+    <span className="c-walk__typed">
+      <span className="u-visually-hidden">{text}</span>
+      <span aria-hidden="true">
+        {Array.from(text).map((char, i) => (
+          <span key={i} style={{ "--_i": i } as CSSProperties}>
+            {char}
+          </span>
+        ))}
+      </span>
+    </span>
+  );
+}
 
 /* ── 4 pm · the garden ───────────────────────────────────────────────── */
 
@@ -36,7 +66,7 @@ export function Garden() {
       <div className="c-walk__wrap c-walk-garden__body">
         <div className="c-walk-garden__copy">
           <h1 className="c-walk__display">
-            Every plant you grow, and what this week holds for it.
+            <Rising text="Every plant you grow, and what this week holds for it." />
           </h1>
           <p className="c-walk__lead">
             Plotted is a companion for your own garden. Tell it what you grow
@@ -94,6 +124,14 @@ const THUMBS = [
   ["/home-plants/plant-strip-cola-plant.webp", "Cola plant"],
 ] as const;
 
+const TRAITS = [
+  ["", "Foxglove"],
+  ["is-partial-shade", "Part shade"],
+  ["is-flowering-summer", "Flowers Jun to Sep"],
+  ["is-british-native", "British native"],
+  ["is-wildlife-friendly", "Good for bees"],
+] as const;
+
 export function Catalogue() {
   return (
     <section id="catalogue" className="c-walk__band is-sky c-walk-catalogue">
@@ -112,22 +150,25 @@ export function Catalogue() {
           <div
             className="c-walk-label"
             aria-label="Example of a looked-up plant"
+            data-reveal
           >
             <p className="c-walk-label__typed">
               <span className="c-walk__mono">You type</span>
-              digitalis
+              <Typed text="digitalis" />
             </p>
             <p className="c-walk-label__name">
               <i>Digitalis purpurea</i>
             </p>
             <ul className="c-walk-label__traits">
-              <li className="o-badge">Foxglove</li>
-              <li className="o-badge is-partial-shade">Part shade</li>
-              <li className="o-badge is-flowering-summer">
-                Flowers Jun to Sep
-              </li>
-              <li className="o-badge is-british-native">British native</li>
-              <li className="o-badge is-wildlife-friendly">Good for bees</li>
+              {TRAITS.map(([badge, text], i) => (
+                <li
+                  key={text}
+                  className={`o-badge${badge ? ` ${badge}` : ""}`}
+                  style={{ "--_i": i } as CSSProperties}
+                >
+                  {text}
+                </li>
+              ))}
             </ul>
           </div>
         </div>
@@ -138,6 +179,7 @@ export function Catalogue() {
       <ul
         className="c-walk-catalogue__thumbs"
         aria-label="Plants from one garden"
+        data-reveal
       >
         {THUMBS.map(([src, name], i) => (
           <li key={src} style={{ "--_i": i } as CSSProperties}>
@@ -204,12 +246,12 @@ export function Week() {
           </figcaption>
         </figure>
 
-        <div className="c-walk__sheet c-walk-week__sheet">
+        <div className="c-walk__sheet c-walk-week__sheet" data-reveal>
           <div className="c-walk-week__forecast">
             <h3 className="c-walk__sheet-title">The week ahead</h3>
             <ol className="c-walk-week__days">
-              {WEEK.map(([day, code, hi, lo]) => (
-                <li key={day}>
+              {WEEK.map(([day, code, hi, lo], i) => (
+                <li key={day} style={{ "--_i": i } as CSSProperties}>
                   <span className="c-walk__mono">{day}</span>
                   <WeatherIcon code={code} size={28} />
                   <span className="c-walk-week__hi">{hi}°</span>
@@ -221,8 +263,8 @@ export function Week() {
           <div className="c-walk-week__flower">
             <h3 className="c-walk__sheet-title">In flower in your garden</h3>
             <ul>
-              {IN_FLOWER.map(([latin, common, season, colour]) => (
-                <li key={latin}>
+              {IN_FLOWER.map(([latin, common, season, colour], i) => (
+                <li key={latin} style={{ "--_i": i } as CSSProperties}>
                   <span
                     className="c-walk__dot"
                     style={{ "--_bloom": colour } as CSSProperties}
@@ -297,9 +339,15 @@ export function Schemes() {
           <div
             className="c-walk-schemes__talk"
             aria-label="Example conversation"
+            data-reveal
           >
             <p className="is-you">
               A dry, sunny strip by the path. I already have the salvia.
+            </p>
+            <p className="is-typing" aria-hidden="true">
+              <span />
+              <span />
+              <span />
             </p>
             <p className="is-plotted">
               Then build on its violet. Alliums before it, achillea beside it,
@@ -311,6 +359,7 @@ export function Schemes() {
         <article
           className="c-walk__sheet c-walk-schemes__sheet"
           aria-label="Example planting scheme"
+          data-reveal
         >
           <h3 className="c-walk-schemes__title">A dry, sunny border</h3>
           <p className="c-walk-schemes__summary">
@@ -318,18 +367,19 @@ export function Schemes() {
           </p>
 
           <svg
-            className="c-walk-schemes__border"
+            className="c-walk__drawing c-walk-schemes__border"
             viewBox="0 14 280 66"
             aria-hidden="true"
           >
-            <path d="M0 78 H280" />
+            <path d="M0 78 H280" pathLength={1} />
             {SCHEME_BORDER.map(([mark, x, scale], i) => (
               <g
                 key={i}
                 transform={`translate(${x} ${78 - 78 * scale}) scale(${scale})`}
+                style={{ "--_i": i } as CSSProperties}
               >
                 {PLANT_MARKS[mark].paths.map((d, j) => (
-                  <path key={j} d={d} />
+                  <path key={j} d={d} pathLength={1} />
                 ))}
                 {PLANT_MARKS[mark].dots.map((dot, j) => (
                   <circle
@@ -361,8 +411,12 @@ export function Schemes() {
                 </span>
               ))}
             </div>
-            {SCHEME.map(([name, from, to, colour]) => (
-              <div key={name} className="c-walk-schemes__row">
+            {SCHEME.map(([name, from, to, colour], i) => (
+              <div
+                key={name}
+                className="c-walk-schemes__row"
+                style={{ "--_i": i } as CSSProperties}
+              >
                 <i>{name}</i>
                 <div className="c-walk-schemes__track">
                   <span
@@ -440,7 +494,7 @@ export function List() {
           className="c-walk-list__notes"
           aria-label="Examples of notes and what Plotted makes of them"
         >
-          <li>
+          <li data-reveal>
             <p className="c-walk-list__said">
               “that purple salvia at the show”
             </p>
@@ -457,7 +511,7 @@ export function List() {
               </p>
             </div>
           </li>
-          <li>
+          <li data-reveal>
             <p className="c-walk-list__said">“the little daisy on the steps”</p>
             <div className="c-walk__sheet c-walk-list__entry">
               <h3>
@@ -472,7 +526,7 @@ export function List() {
               </p>
             </div>
           </li>
-          <li>
+          <li data-reveal>
             <p className="c-walk-list__said">“steeper ten you is ima”</p>
             <div className="c-walk__sheet c-walk-list__entry is-unsure">
               <p className="c-walk__mono">It might be</p>
@@ -494,21 +548,6 @@ export function List() {
 }
 
 /* ── 9.45 pm · visitors ──────────────────────────────────────────────── */
-
-const BIRDS = [
-  ["robin", "Robin", true],
-  ["blackbird", "Blackbird", true],
-  ["blue-tit", "Blue tit", true],
-  ["wren", "Wren", false],
-  ["goldfinch", "Goldfinch", true],
-  ["sparrow", "House sparrow", true],
-  ["starling", "Starling", false],
-  ["thrush", "Song thrush", false],
-  ["chaffinch", "Chaffinch", true],
-  ["magpie", "Magpie", true],
-  ["pigeon", "Woodpigeon", false],
-  ["crow", "Crow", false],
-] as const;
 
 export function Visitors() {
   return (
@@ -536,24 +575,7 @@ export function Visitors() {
             first time you see it in your own garden. It is a small collection
             to complete, not a score to keep.
           </p>
-          <ul
-            className="c-walk-visitors__birds"
-            aria-label="Twelve garden birds, seven marked as spotted in this example"
-          >
-            {BIRDS.map(([file, name, spotted]) => (
-              <li key={file} className={spotted ? "is-spotted" : undefined}>
-                <span className="c-walk-visitors__portrait">
-                  <Image
-                    src={`/birds/${file}.webp`}
-                    alt=""
-                    width={120}
-                    height={120}
-                  />
-                </span>
-                {name}
-              </li>
-            ))}
-          </ul>
+          <Birds />
         </div>
       </div>
 

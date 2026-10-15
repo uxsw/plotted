@@ -79,6 +79,7 @@ export default function Horizon({
     const height = (visitor ? 11 : brush ? 21 + rand() * 5 : 18 + rand() * 7) * reach;
     return {
       mark,
+      visitor,
       brush,
       far,
       height,
@@ -116,7 +117,9 @@ export default function Horizon({
           return (
             <svg
               key={i}
-              className={`c-walk__plant${p.far ? " is-far" : ""}${sway}`}
+              className={`c-walk__plant${p.far ? " is-far" : ""}${
+                p.visitor ? ` is-visitor is-${p.visitor}` : ""
+              }${sway}`}
               viewBox={`0 ${FRAME_TOP} 44 ${FRAME_H}`}
               style={style}
               strokeWidth={((FRAME_H * STROKE_PX) / (p.height * 16)).toFixed(3)}

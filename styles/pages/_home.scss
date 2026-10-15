@@ -13,6 +13,7 @@
 //   .c-walk__rail           the time-of-day rail (fixed; a top bar when narrow)
 //   .c-walk__sheet          a white sheet showing the app with example content
 //   .c-walk-<stop>__*       each stop's own layout
+//   [data-reveal]           plays its arrival once reached (.is-in, see Arrivals)
 
 .c-walk {
     --walk-lime: #dbe64a;
@@ -205,10 +206,12 @@ html:has(.c-walk) {
     cursor: pointer;
     transition:
         background-color 0.3s ease,
+        box-shadow 0.5s var(--walk-ease),
         translate 0.5s var(--walk-ease);
 
     &:hover {
         background: var(--color-o-vermillion);
+        box-shadow: 0 0.75rem 1.25rem -0.75rem color-mix(in oklab, var(--walk-ink) 70%, transparent);
         translate: 0 -2px;
     }
 
@@ -231,6 +234,7 @@ html:has(.c-walk) {
 
         &:hover {
             background: var(--_ink);
+            box-shadow: inset 0 0 0 1px var(--_ink);
             color: var(--_bg);
         }
     }
@@ -301,6 +305,9 @@ html:has(.c-walk) {
     stroke-linecap: round;
     stroke-linejoin: round;
     transform-origin: 50% 100%;
+    // Wind.tsx sets --_lean as the pointer brushes through; the overshoot is the spring back.
+    transform: rotate(var(--_lean, 0deg));
+    transition: transform 1.1s cubic-bezier(0.2, 1.6, 0.4, 1);
 
     @media (max-width: 53.75rem) {
         --_scale: 0.72;
@@ -362,6 +369,17 @@ html:has(.c-walk) {
         }
 
         // Engraved plants are drawn; brush plants grow up from the ground.
+        // A butterfly opens and closes its wings; a bird hops now and then.
+        &.is-butterfly {
+            animation: walk-flap 3.4s ease-in-out infinite;
+            animation-delay: calc(var(--_delay) + 1.6s);
+        }
+
+        &.is-bird {
+            animation: walk-hop 6s ease-out infinite;
+            animation-delay: calc(var(--_delay) + 2s);
+        }
+
         &.is-brush {
             animation: walk-grow 1.6s var(--walk-ease) backwards;
             animation-delay: calc(var(--_delay) + 0.25s);
@@ -414,6 +432,54 @@ html:has(.c-walk) {
     }
 }
 
+@keyframes walk-flap {
+    0%,
+    56%,
+    100% {
+        scale: 1 1;
+    }
+
+    62% {
+        scale: 0.3 1;
+    }
+
+    68% {
+        scale: 1 1;
+    }
+
+    74% {
+        scale: 0.4 1;
+    }
+
+    80% {
+        scale: 1 1;
+    }
+}
+
+@keyframes walk-hop {
+    0%,
+    84%,
+    100% {
+        translate: 0 0;
+    }
+
+    88% {
+        translate: 0 -0.4rem;
+    }
+
+    92% {
+        translate: 0 0;
+    }
+
+    95% {
+        translate: 0 -0.2rem;
+    }
+
+    98% {
+        translate: 0 0;
+    }
+}
+
 @keyframes walk-sway {
     0%,
     100% {
@@ -457,21 +523,37 @@ html:has(.c-walk) {
     content: "";
 }
 
+// The sun, until the walk reaches the dark bands, where it wanes to a
+// crescent moon. Both states carry the same three shadows so the change is a
+// phase, not a swap: the inset one is the moon's lit edge.
 .c-walk__sun {
+    --_s: 0.7rem;
+
     position: absolute;
     inset-block-start: 1.5px;
     inset-inline-start: calc(var(--walk-p) * 100%);
-    inline-size: 0.7rem;
-    block-size: 0.7rem;
+    inline-size: var(--_s);
+    block-size: var(--_s);
     border-radius: 50%;
-    background: var(--_sun);
+    background-color: var(--_sun);
     box-shadow:
+        inset 0 0 0 0 transparent,
         0 0 0 2px var(--_ink),
         0 0.25rem 1rem 0 color-mix(in oklab, var(--_sun) 70%, transparent);
     translate: -50% -50%;
     transition:
-        background-color 0.6s ease,
-        box-shadow 0.6s ease;
+        background-color 1.2s ease,
+        box-shadow 1.2s var(--walk-ease),
+        rotate 1.2s var(--walk-ease);
+
+    .is-dark & {
+        background-color: transparent;
+        box-shadow:
+            inset calc(var(--_s) * -0.3) calc(var(--_s) * -0.08) 0 0 var(--_sun),
+            0 0 0 0 transparent,
+            0 0 1.1rem 0 color-mix(in oklab, var(--_sun) 45%, transparent);
+        rotate: -20deg;
+    }
 }
 
 .c-walk__stops {
@@ -493,8 +575,7 @@ html:has(.c-walk) {
     .c-walk__sun {
         inset-block-start: calc(6.5rem + var(--walk-p) * (100% - 9.5rem));
         inset-inline-start: 1.75rem;
-        inline-size: 1.125rem;
-        block-size: 1.125rem;
+        --_s: 1.125rem;
     }
 
     .c-walk .c-walk__stops {
@@ -1326,15 +1407,45 @@ html:has(.c-walk) {
         grid-template-columns: repeat(4, minmax(0, 1fr));
         gap: 1.5rem 0.75rem;
         margin-block-start: clamp(2rem, 4vw, 3rem);
+    }
+
+    // Each bird is a button: ticking one off is the feature, so it can be tried here.
+    &__bird {
+        display: grid;
+        justify-items: center;
+        gap: 0.5rem;
+        inline-size: 100%;
+        border: 0;
+        border-radius: 4px;
+        padding: 0.25rem 0;
+        background: none;
         color: var(--_soft);
+        font: inherit;
         font-size: 0.8rem;
         line-height: 1.25;
         text-align: center;
+        cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
 
-        li {
-            display: grid;
-            justify-items: center;
-            gap: 0.5rem;
+        .is-spotted & {
+            color: var(--_ink);
+        }
+    }
+
+    &__count {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.4rem 1rem;
+        margin-block-start: 1.75rem;
+        border-block-start: 1px solid var(--_line);
+        padding-block-start: 1rem;
+        color: var(--_soft);
+        font-size: 0.85rem;
+
+        .c-walk__mono {
+            color: var(--_ink);
+            font-variant-numeric: tabular-nums;
         }
     }
 
@@ -1345,6 +1456,8 @@ html:has(.c-walk) {
         border-radius: 50%;
         box-shadow: 0 0 0 1px color-mix(in oklab, var(--_ink) 45%, transparent);
 
+        transition: box-shadow 0.4s ease, scale 0.5s var(--walk-ease);
+
         img {
             inline-size: 100%;
             block-size: 100%;
@@ -1352,6 +1465,24 @@ html:has(.c-walk) {
             object-fit: cover;
             opacity: 0.5;
             filter: saturate(0.4);
+            transition:
+                opacity 0.5s ease,
+                filter 0.5s ease;
+        }
+
+        @media (hover: hover) {
+            .c-walk-visitors__bird:hover & {
+                scale: 1.06;
+
+                img {
+                    opacity: 0.85;
+                    filter: saturate(0.85);
+                }
+            }
+        }
+
+        .c-walk-visitors__bird:active & {
+            scale: 0.96;
         }
 
         .is-spotted & {
@@ -1538,5 +1669,476 @@ html:has(.c-walk) {
         &__promises {
             grid-template-columns: minmax(0, 1fr);
         }
+    }
+}
+
+// ── Arrivals ───────────────────────────────────────────────────────────
+//
+// One moment per stop, played the first time the stop is reached
+// (WalkRail adds .is-in to [data-reveal]), each built from the app's own
+// motion: the border drawing itself, the lookup resolving, a plant joining a
+// list. Before then every animation sits paused on its first frame. Without
+// scripting nothing pauses, so each plays once on load; under reduced motion
+// none of this exists and everything is simply in its finished state.
+
+@media (prefers-reduced-motion: no-preference) {
+    @media (scripting: enabled) {
+        [data-reveal]:not(.is-in),
+        [data-reveal]:not(.is-in)::before,
+        [data-reveal]:not(.is-in) *,
+        [data-reveal]:not(.is-in) *::before,
+        [data-reveal]:not(.is-in) *::after {
+            animation-play-state: paused !important;
+        }
+    }
+
+    // 4 pm: the headline rises out of the ground, word by word, and the
+    // photograph opens upward behind the planting.
+    .c-walk__word > span {
+        animation: walk-rise 1.1s var(--walk-ease) backwards;
+        animation-delay: calc(0.12s + var(--_i) * 0.055s);
+    }
+
+    .c-walk-garden__copy .c-walk__lead {
+        animation: walk-settle 1s var(--walk-ease) 0.7s backwards;
+    }
+
+    .c-walk-garden__action {
+        animation: walk-settle 1s var(--walk-ease) 0.85s backwards;
+    }
+
+    .c-walk-garden__photo .c-walk__window {
+        animation: walk-unveil 1.7s var(--walk-ease) 0.2s backwards;
+    }
+
+    // 5 pm: the name is typed, the lookup resolves it, the traits arrive
+    // one after another. The photographs are dealt onto the table.
+    .c-walk__typed > [aria-hidden] > span {
+        animation: walk-key 1ms steps(1) backwards;
+        animation-delay: calc(0.35s + var(--_i) * 0.085s);
+    }
+
+    .c-walk__typed::after {
+        animation: walk-caret 0.9s steps(1) 5 forwards;
+    }
+
+    .c-walk-label__name {
+        animation: walk-resolve 0.9s var(--walk-ease) 1.45s backwards;
+    }
+
+    .c-walk-label__traits li {
+        animation: walk-settle 0.6s var(--walk-ease) backwards;
+        animation-delay: calc(1.75s + var(--_i) * 0.08s);
+    }
+
+    .c-walk-catalogue__thumbs li {
+        animation: walk-deal 1.1s var(--walk-ease) backwards;
+        animation-delay: calc(var(--_i) * 0.07s);
+    }
+
+    // 7 pm: the sheet is laid over the photograph, the week fills in day by
+    // day, and what is in flower opens.
+    .c-walk-week__sheet {
+        animation: walk-lay 1s var(--walk-ease) backwards;
+    }
+
+    .c-walk-week__days li {
+        animation: walk-settle 0.7s var(--walk-ease) backwards;
+        animation-delay: calc(0.35s + var(--_i) * 0.07s);
+    }
+
+    .c-walk-week__flower li {
+        animation: walk-settle 0.7s var(--walk-ease) backwards;
+        animation-delay: calc(0.7s + var(--_i) * 0.12s);
+
+        .c-walk__dot {
+            animation: walk-pop 0.6s var(--walk-ease) backwards;
+            animation-delay: calc(0.95s + var(--_i) * 0.12s);
+        }
+    }
+
+    // 8.30: the gardener speaks, Plotted thinks, Plotted answers. The border
+    // draws itself and the year in flower runs out month by month.
+    .c-walk-schemes__talk {
+        .is-you {
+            transform-origin: 100% 100%;
+            animation: walk-bubble 0.6s var(--walk-ease) 0.1s backwards;
+        }
+
+        // p. to outrank the still page's display: none, which comes later.
+        p.is-typing {
+            display: flex;
+            animation: walk-thinking 1.5s linear 0.6s both;
+        }
+
+        .is-plotted {
+            transform-origin: 0 100%;
+            animation: walk-bubble 0.7s var(--walk-ease) 2.05s backwards;
+        }
+    }
+
+    .c-walk__drawing {
+        path {
+            animation: walk-draw 1.4s var(--walk-ease) backwards;
+            animation-delay: calc(0.25s + var(--_i, 0) * 0.09s);
+        }
+
+        circle {
+            animation: walk-bud 0.6s ease backwards;
+            animation-delay: calc(1.05s + var(--_i, 0) * 0.09s);
+        }
+    }
+
+    .c-walk-schemes__track span {
+        animation: walk-run 0.9s var(--walk-ease) backwards;
+        animation-delay: calc(1.3s + var(--_i) * 0.1s);
+    }
+
+    // 9.15: what was said, a line drawn from it, and the plant it turned out
+    // to be resolving at the end of the line.
+    // Notes reached together still resolve one after another.
+    .c-walk-list__notes > li {
+        &:nth-child(2) {
+            --_at: 0.25s;
+        }
+
+        &:nth-child(3) {
+            --_at: 0.5s;
+        }
+
+        .c-walk-list__said {
+            animation: walk-settle 0.8s var(--walk-ease) backwards;
+            animation-delay: calc(var(--_at, 0s) + 0.05s);
+        }
+
+        &::before {
+            animation: walk-wipe 0.7s var(--walk-ease) backwards;
+            animation-delay: calc(var(--_at, 0s) + 0.45s);
+        }
+
+        .c-walk-list__entry {
+            animation: walk-resolve 0.9s var(--walk-ease) backwards;
+            animation-delay: calc(var(--_at, 0s) + 0.85s);
+        }
+
+        .is-likely::after {
+            animation: walk-pop 0.5s var(--walk-ease) backwards;
+            animation-delay: calc(var(--_at, 0s) + 1.6s);
+        }
+    }
+
+    // 9.45: the birds this garden has seen are ticked off in turn; one the
+    // visitor ticks answers at once (no --_n, so no delay).
+    .c-walk-visitors__birds .is-spotted {
+        .c-walk-visitors__portrait {
+            animation: walk-spot 0.6s ease backwards;
+            animation-delay: calc(0.35s + var(--_n) * 0.14s);
+
+            img {
+                animation: walk-colour 0.6s ease backwards;
+                animation-delay: inherit;
+            }
+
+            &::after {
+                animation: walk-pop 0.5s var(--walk-ease) backwards;
+                animation-delay: calc(0.5s + var(--_n) * 0.14s);
+            }
+        }
+    }
+
+    // 10 pm: the thank-you sheet arrives with a small planting drawn on it.
+    .c-walk-gate__form[role="status"] {
+        animation: walk-resolve 0.8s var(--walk-ease) backwards;
+    }
+
+    // The photographs drift a little against their windows as you walk past.
+    @supports (animation-timeline: view()) {
+        .c-walk__window img {
+            scale: 1.08;
+            animation: walk-drift linear both;
+            animation-timeline: view();
+        }
+
+        .c-walk-garden__photo .c-walk__window img {
+            scale: 1;
+            animation: none;
+        }
+    }
+}
+
+// Things that only exist to move: never shown in a still page.
+.c-walk-schemes__talk .is-typing {
+    display: none;
+    grid-area: reply;
+    align-items: center;
+    align-self: start;
+    justify-self: start;
+    gap: 0.3rem;
+    max-inline-size: none;
+    padding-block: 1rem;
+    border-end-start-radius: 2px;
+    background: #fff;
+
+    span {
+        inline-size: 0.4rem;
+        block-size: 0.4rem;
+        border-radius: 50%;
+        background: var(--color-n-dark-grey);
+        animation: walk-dots 0.9s ease-in-out infinite;
+
+        &:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        &:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+    }
+}
+
+.c-walk-schemes__talk {
+    grid-template-areas: "you" "reply";
+
+    .is-you {
+        grid-area: you;
+    }
+
+    .is-plotted {
+        grid-area: reply;
+    }
+}
+
+.c-walk__typed {
+    display: inline-flex;
+    align-items: center;
+
+    &::after {
+        inline-size: 2px;
+        block-size: 1.1em;
+        margin-inline-start: 2px;
+        background: currentColor;
+        content: "";
+        opacity: 0;
+    }
+}
+
+.c-walk__word {
+    display: inline-block;
+    padding-block-end: 0.18em;
+    margin-block-end: -0.18em;
+    clip-path: inset(-0.3em -0.5em 0 -0.5em);
+    vertical-align: top;
+
+    > span {
+        display: inline-block;
+    }
+}
+
+.c-walk-gate__planting {
+    inline-size: 8.5rem;
+    block-size: auto;
+    margin-block-end: 0.5rem;
+    fill: none;
+    stroke: var(--color-damson);
+    stroke-width: 0.9;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+
+    path {
+        stroke-dasharray: 1;
+    }
+
+    circle {
+        fill: var(--_bloom);
+        stroke-width: 0.35;
+    }
+}
+
+.c-walk-schemes__border path {
+    stroke-dasharray: 1;
+}
+
+// Hovering a plant's row in the year in flower quietens the others.
+@media (hover: hover) {
+    .c-walk-schemes__row {
+        transition: opacity 0.3s ease;
+    }
+
+    .c-walk-schemes__chart:has(.c-walk-schemes__row:hover) .c-walk-schemes__row:not(:hover) {
+        opacity: 0.35;
+    }
+
+    // A photograph on the table is picked up and straightened.
+    .c-walk-catalogue__thumbs li {
+        transition:
+            rotate 0.6s var(--walk-ease),
+            translate 0.6s var(--walk-ease),
+            scale 0.6s var(--walk-ease);
+
+        img {
+            transition: box-shadow 0.6s var(--walk-ease);
+        }
+
+        &:hover {
+            z-index: 1;
+            rotate: 0deg;
+            scale: 1.06;
+            translate: 0 -0.6rem;
+
+            img {
+                box-shadow: 0 1.75rem 2rem -1.25rem color-mix(in oklab, var(--walk-ink) 75%, transparent);
+            }
+        }
+    }
+}
+
+@keyframes walk-rise {
+    from {
+        translate: 0 110%;
+    }
+}
+
+@keyframes walk-settle {
+    from {
+        opacity: 0;
+        translate: 0 0.6rem;
+    }
+}
+
+@keyframes walk-unveil {
+    from {
+        clip-path: inset(38% 0 0 0 round 4px 4px 0 0);
+    }
+
+    to {
+        clip-path: inset(0 0 0 0 round 4px 4px 0 0);
+    }
+}
+
+@keyframes walk-key {
+    from {
+        opacity: 0;
+    }
+}
+
+@keyframes walk-caret {
+    0% {
+        opacity: 1;
+    }
+
+    50% {
+        opacity: 0;
+    }
+}
+
+@keyframes walk-resolve {
+    from {
+        opacity: 0;
+        filter: blur(8px);
+        translate: 0 0.5rem;
+    }
+}
+
+@keyframes walk-deal {
+    from {
+        opacity: 0;
+        translate: 0 -2.5rem;
+        rotate: calc((var(--_i) - 3) * 3deg + 6deg);
+    }
+}
+
+@keyframes walk-lay {
+    from {
+        opacity: 0;
+        translate: 0 2.5rem;
+    }
+}
+
+@keyframes walk-pop {
+    from {
+        opacity: 0;
+        scale: 0.3;
+    }
+}
+
+@keyframes walk-bubble {
+    from {
+        opacity: 0;
+        scale: 0.9;
+        translate: 0 0.5rem;
+    }
+}
+
+@keyframes walk-thinking {
+    0% {
+        opacity: 0;
+        translate: 0 0.4rem;
+    }
+
+    15%,
+    85% {
+        opacity: 1;
+        translate: 0 0;
+    }
+
+    100% {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+@keyframes walk-dots {
+    0%,
+    100% {
+        opacity: 0.35;
+        translate: 0 0;
+    }
+
+    50% {
+        opacity: 1;
+        translate: 0 -0.15rem;
+    }
+}
+
+@keyframes walk-run {
+    from {
+        clip-path: inset(0 100% 0 0 round 2rem);
+    }
+
+    to {
+        clip-path: inset(0 0 0 0 round 2rem);
+    }
+}
+
+@keyframes walk-wipe {
+    from {
+        clip-path: inset(0 100% 0 0);
+    }
+
+    to {
+        clip-path: inset(0 0 0 0);
+    }
+}
+
+@keyframes walk-spot {
+    from {
+        box-shadow: 0 0 0 1px color-mix(in oklab, var(--_ink) 45%, transparent);
+    }
+}
+
+@keyframes walk-colour {
+    from {
+        opacity: 0.5;
+        filter: saturate(0.4);
+    }
+}
+
+@keyframes walk-drift {
+    from {
+        translate: 0 -3.5%;
+    }
+
+    to {
+        translate: 0 3.5%;
     }
 }
